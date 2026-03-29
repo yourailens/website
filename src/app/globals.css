@@ -1,0 +1,85 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap");
+@import "tailwindcss";
+
+/* Acherus Grotesque - loaded from CDN */
+@font-face {
+  font-family: "Acherus Grotesque";
+  src: url("https://db.onlinewebfonts.com/t/0377684184c063b601fb3dcc49b3f7dd.woff2")
+      format("woff2"),
+    url("https://db.onlinewebfonts.com/t/0377684184c063b601fb3dcc49b3f7dd.woff")
+      format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --black: #000000;
+  --blue-accent: #2563eb;
+  --fg: #fafafa;
+  --fg-muted: #94a3b8;
+}
+
+@theme inline {
+  --color-background: var(--black);
+  --color-foreground: var(--fg);
+  --font-sans: "Acherus Grotesque", system-ui, sans-serif;
+  --font-display: "Acherus Grotesque", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--black);
+  color: var(--fg);
+  font-family: "Acherus Grotesque", system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: "Acherus Grotesque", system-ui, sans-serif;
+}
+
+.font-heading {
+  font-family: "Outfit", sans-serif;
+}
+
+.font-studio {
+  font-family: "Outfit", sans-serif;
+}
+
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}
+
+@keyframes marquee-reverse {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-marquee-reverse {
+  animation: marquee-reverse 30s linear infinite;
+}
