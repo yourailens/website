@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import CopyUrlButton from "@/components/CopyUrlButton";
 import { categoryLabel } from "@/data/gallery";
@@ -11,6 +12,41 @@ function remoteImage(src: string) {
 }
 
 export const dynamic = "force-dynamic";
+
+function siteUrl() {
+  return (process.env.PUBLIC_SITE_URL?.trim() || "https://yourailens.studio").replace(/\/+$/, "");
+}
+
+export async function generateMetadata(props: { params: Promise<{ item: string }> }): Promise<Metadata> {
+  const { item } = await props.params;
+  const images = await getGalleryImages();
+  const open = findGalleryIndexByRouteId(images, decodeURIComponent(item));
+  if (open < 0) return {};
+
+  const current = images[open]!;
+  const pageUrl = `${siteUrl()}/images/${encodeURIComponent(galleryRouteId(current, open))}`;
+  const title = `${current.title} | YourAILens Images`;
+  const description = `Explore ${current.title} from YourAILens Studio's AI image gallery.`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: pageUrl },
+    openGraph: {
+      title,
+      description,
+      url: pageUrl,
+      type: "article",
+      images: [{ url: current.src, alt: current.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [current.src],
+    },
+  };
+}
 
 export default async function ImageDetailPage(props: { params: Promise<{ item: string }> }) {
   const { item } = await props.params;

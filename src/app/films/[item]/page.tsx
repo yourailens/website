@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import CopyUrlButton from "@/components/CopyUrlButton";
 import { categoryLabel } from "@/data/gallery";
@@ -15,6 +16,47 @@ const noDownloadVideoProps = {
 };
 
 export const dynamic = "force-dynamic";
+
+function siteUrl() {
+  return (process.env.PUBLIC_SITE_URL?.trim() || "https://yourailens.studio").replace(/\/+$/, "");
+}
+
+function videoTypeForMeta(src: string) {
+  return src.endsWith(".mov") ? "video/quicktime" : "video/mp4";
+}
+
+export async function generateMetadata(props: { params: Promise<{ item: string }> }): Promise<Metadata> {
+  const { item } = await props.params;
+  const films = await getGalleryFilms();
+  const open = findGalleryIndexByRouteId(films, decodeURIComponent(item));
+  if (open < 0) return {};
+
+  const current = films[open]!;
+  const pageUrl = `${siteUrl()}/films/${encodeURIComponent(galleryRouteId(current, open))}`;
+  const title = `${current.title} | YourAILens Films`;
+  const description = `Watch ${current.title} from YourAILens Studio's AI film gallery.`;
+  const fallbackImage = `${siteUrl()}/images/hr1.png`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: pageUrl },
+    openGraph: {
+      title,
+      description,
+      url: pageUrl,
+      type: "video.other",
+      images: [{ url: fallbackImage, alt: `${current.title} preview` }],
+      videos: [{ url: current.src, type: videoTypeForMeta(current.src) }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [fallbackImage],
+    },
+  };
+}
 
 export default async function FilmDetailPage(props: { params: Promise<{ item: string }> }) {
   const { item } = await props.params;
