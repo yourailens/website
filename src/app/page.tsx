@@ -262,7 +262,7 @@ function SliderCTA() {
           className="absolute text-[13px] font-semibold text-white transition-opacity duration-300"
           style={{ opacity: completed ? 1 : Math.max(0, progress * 2 - 0.9) }}
         >
-          {completed ? "Connecting…" : "Release to confirm"}
+          {completed ? "Connecting…" : "Slide to the end"}
         </span>
       </div>
 
