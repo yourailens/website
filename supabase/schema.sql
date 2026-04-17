@@ -4,7 +4,7 @@
 create table if not exists public.gallery_images (
   id uuid primary key default gen_random_uuid(),
   title text not null,
-  category text not null check (category in ('photorealistic','product','animations','celebrities')),
+  category text not null check (category in ('photorealistic','product','animations')),
   aspect text check (aspect in ('square','portrait','landscape')),
   people_tags text[] not null default '{}'::text[],
   constraint gallery_images_people_tags_allowed
@@ -17,7 +17,7 @@ create table if not exists public.gallery_images (
 create table if not exists public.gallery_films (
   id uuid primary key default gen_random_uuid(),
   title text not null,
-  category text not null check (category in ('photorealistic','product','animations','celebrities')),
+  category text not null check (category in ('photorealistic','product','animations')),
   orientation text check (orientation in ('landscape','portrait')),
   people_tags text[] not null default '{}'::text[],
   constraint gallery_films_people_tags_allowed
