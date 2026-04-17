@@ -1,0 +1,311 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { createBrowserSupabase } from "@/lib/supabase/client";
+
+type Row = { id: string; title: string; public_url: string; sort_order: number };
+type SocialRow = { id: string; title: string; url: string; thumbnail_url?: string; tag?: string; sort_order: number };
+
+export default function AdminManageGallery() {
+  const [sessionOk, setSessionOk] = useState<boolean | null>(null);
+  const [images, setImages] = useState<Row[]>([]);
+  const [films, setFilms] = useState<Row[]>([]);
+  const [instagramLinks, setInstagramLinks] = useState<SocialRow[]>([]);
+  const [youtubeLinks, setYoutubeLinks] = useState<SocialRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [msg, setMsg] = useState("");
+  const [busyDeleteId, setBusyDeleteId] = useState<string | null>(null);
+
+  const loadLists = useCallback(async () => {
+    setLoading(true);
+    try {
+      const supabase = createBrowserSupabase();
+      const [imgRes, filmRes, igRes, ytRes] = await Promise.all([
+        supabase.from("gallery_images").select("id,title,public_url,sort_order").order("sort_order", { ascending: true }),
+        supabase.from("gallery_films").select("id,title,public_url,sort_order").order("sort_order", { ascending: true }),
+        supabase.from("instagram_links").select("id,title,url,thumbnail_url,tag,sort_order").order("sort_order", { ascending: true }),
+        supabase.from("youtube_links").select("id,title,url,thumbnail_url,tag,sort_order").order("sort_order", { ascending: true }),
+      ]);
+      if (imgRes.error) throw imgRes.error;
+      if (filmRes.error) throw filmRes.error;
+      if (igRes.error) throw igRes.error;
+      if (ytRes.error) throw ytRes.error;
+      setImages((imgRes.data ?? []) as Row[]);
+      setFilms((filmRes.data ?? []) as Row[]);
+      setInstagramLinks((igRes.data ?? []) as SocialRow[]);
+      setYoutubeLinks((ytRes.data ?? []) as SocialRow[]);
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Failed to load gallery rows.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const res = await fetch("/api/admin/session", { method: "GET" });
+      if (cancelled) return;
+      if (!res.ok) {
+        setSessionOk(false);
+        setLoading(false);
+        return;
+      }
+      setSessionOk(true);
+      await loadLists();
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [loadLists]);
+
+  async function signOut() {
+    await fetch("/api/admin/logout", { method: "POST" });
+    window.location.href = "/admin/login";
+  }
+
+  async function deleteImage(id: string) {
+    if (!confirm("Delete this image from the gallery?")) return;
+    setBusyDeleteId(id);
+    const res = await fetch("/api/admin/delete-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    const j = (await res.json().catch(() => ({}))) as { error?: string };
+    setBusyDeleteId(null);
+    if (!res.ok) {
+      setMsg(j.error || "Delete failed");
+      return;
+    }
+    setMsg("Image deleted.");
+    await loadLists();
+  }
+
+  async function deleteFilm(id: string) {
+    if (!confirm("Delete this film from the gallery?")) return;
+    setBusyDeleteId(id);
+    const res = await fetch("/api/admin/delete-film", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    const j = (await res.json().catch(() => ({}))) as { error?: string };
+    setBusyDeleteId(null);
+    if (!res.ok) {
+      setMsg(j.error || "Delete failed");
+      return;
+    }
+    setMsg("Film deleted.");
+    await loadLists();
+  }
+
+  async function deleteInstagramLink(id: string) {
+    if (!confirm("Delete this Instagram link?")) return;
+    setBusyDeleteId(id);
+    const res = await fetch("/api/admin/delete-instagram-link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    const j = (await res.json().catch(() => ({}))) as { error?: string };
+    setBusyDeleteId(null);
+    if (!res.ok) {
+      setMsg(j.error || "Delete failed");
+      return;
+    }
+    setMsg("Instagram link deleted.");
+    await loadLists();
+  }
+
+  async function deleteYoutubeLink(id: string) {
+    if (!confirm("Delete this YouTube link?")) return;
+    setBusyDeleteId(id);
+    const res = await fetch("/api/admin/delete-youtube-link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    const j = (await res.json().catch(() => ({}))) as { error?: string };
+    setBusyDeleteId(null);
+    if (!res.ok) {
+      setMsg(j.error || "Delete failed");
+      return;
+    }
+    setMsg("YouTube link deleted.");
+    await loadLists();
+  }
+
+  if (sessionOk === false) {
+    return (
+      <main className="relative min-h-screen bg-[#f6f2ea] px-6 py-24 text-slate-900">
+        <div className="mx-auto max-w-lg text-center">
+          <h1 className="font-heading text-2xl font-bold">Not authorized</h1>
+          <p className="mt-3 text-sm text-slate-600">Sign in with the admin password to manage uploads.</p>
+          <Link href="/admin/login" className="mt-6 inline-block rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white">
+            Go to admin login
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  if (sessionOk === null) {
+    return (
+      <main className="relative min-h-screen bg-[#f6f2ea] px-6 py-24 text-slate-900">
+        <div className="mx-auto max-w-lg text-center text-sm text-slate-600">Loading...</div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="relative min-h-screen bg-[#f6f2ea] px-6 py-16 text-slate-900">
+      <div className="mx-auto max-w-6xl space-y-10">
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-slate-500">Admin</p>
+            <h1 className="mt-2 font-heading text-3xl font-bold">Manage uploaded items</h1>
+            <p className="mt-1 text-sm text-slate-600">Delete existing images and films</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/admin" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
+              Back to upload page
+            </Link>
+            <Link href="/" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
+              View site
+            </Link>
+            <button type="button" onClick={signOut} className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
+              Sign out
+            </button>
+          </div>
+        </header>
+
+        {msg ? <p className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800">{msg}</p> : null}
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="font-heading text-xl font-bold">Images</h2>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {loading ? (
+              <p className="text-sm text-slate-500">Loading...</p>
+            ) : images.length === 0 ? (
+              <p className="text-sm text-slate-500">No images found.</p>
+            ) : (
+              images.map((row) => (
+                <article key={row.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <div className="relative h-44 overflow-hidden rounded-lg bg-white">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={row.public_url} alt={row.title} className="h-full w-full object-cover" />
+                  </div>
+                  <p className="mt-3 truncate font-semibold text-slate-900">{row.title}</p>
+                  <p className="mt-1 break-all font-mono text-[11px] text-slate-500">{row.public_url}</p>
+                  <button
+                    type="button"
+                    onClick={() => deleteImage(row.id)}
+                    disabled={busyDeleteId === row.id}
+                    className="mt-3 rounded-full border border-red-300 bg-white px-4 py-1.5 text-xs font-semibold text-red-800 disabled:opacity-50"
+                  >
+                    {busyDeleteId === row.id ? "Deleting..." : "Delete"}
+                  </button>
+                </article>
+              ))
+            )}
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="font-heading text-xl font-bold">Films</h2>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {loading ? (
+              <p className="text-sm text-slate-500">Loading...</p>
+            ) : films.length === 0 ? (
+              <p className="text-sm text-slate-500">No films found.</p>
+            ) : (
+              films.map((row) => (
+                <article key={row.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <video src={row.public_url} className="h-44 w-full rounded-lg bg-black object-cover" controls playsInline />
+                  <p className="mt-3 truncate font-semibold text-slate-900">{row.title}</p>
+                  <p className="mt-1 break-all font-mono text-[11px] text-slate-500">{row.public_url}</p>
+                  <button
+                    type="button"
+                    onClick={() => deleteFilm(row.id)}
+                    disabled={busyDeleteId === row.id}
+                    className="mt-3 rounded-full border border-red-300 bg-white px-4 py-1.5 text-xs font-semibold text-red-800 disabled:opacity-50"
+                  >
+                    {busyDeleteId === row.id ? "Deleting..." : "Delete"}
+                  </button>
+                </article>
+              ))
+            )}
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="font-heading text-xl font-bold">Instagram links</h2>
+          <div className="mt-4 space-y-3">
+            {loading ? (
+              <p className="text-sm text-slate-500">Loading...</p>
+            ) : instagramLinks.length === 0 ? (
+              <p className="text-sm text-slate-500">No Instagram links found.</p>
+            ) : (
+              instagramLinks.map((row) => (
+                <div key={row.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  {row.thumbnail_url ? (
+                    <div className="mb-3 relative h-36 w-full overflow-hidden rounded-lg bg-white sm:w-56">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={row.thumbnail_url} alt={row.title} className="h-full w-full object-cover" />
+                    </div>
+                  ) : null}
+                  <p className="font-semibold text-slate-900">{row.title}</p>
+                  {row.tag ? <p className="mt-1 text-xs font-medium uppercase tracking-wide text-blue-700">Tag: {row.tag}</p> : null}
+                  <p className="mt-1 break-all font-mono text-[11px] text-slate-500">{row.url}</p>
+                  <button
+                    type="button"
+                    onClick={() => deleteInstagramLink(row.id)}
+                    disabled={busyDeleteId === row.id}
+                    className="mt-3 rounded-full border border-red-300 bg-white px-4 py-1.5 text-xs font-semibold text-red-800 disabled:opacity-50"
+                  >
+                    {busyDeleteId === row.id ? "Deleting..." : "Delete"}
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="font-heading text-xl font-bold">YouTube links</h2>
+          <div className="mt-4 space-y-3">
+            {loading ? (
+              <p className="text-sm text-slate-500">Loading...</p>
+            ) : youtubeLinks.length === 0 ? (
+              <p className="text-sm text-slate-500">No YouTube links found.</p>
+            ) : (
+              youtubeLinks.map((row) => (
+                <div key={row.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  {row.thumbnail_url ? (
+                    <div className="mb-3 relative h-36 w-full overflow-hidden rounded-lg bg-white sm:w-56">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={row.thumbnail_url} alt={row.title} className="h-full w-full object-cover" />
+                    </div>
+                  ) : null}
+                  <p className="font-semibold text-slate-900">{row.title}</p>
+                  {row.tag ? <p className="mt-1 text-xs font-medium uppercase tracking-wide text-blue-700">Tag: {row.tag}</p> : null}
+                  <p className="mt-1 break-all font-mono text-[11px] text-slate-500">{row.url}</p>
+                  <button
+                    type="button"
+                    onClick={() => deleteYoutubeLink(row.id)}
+                    disabled={busyDeleteId === row.id}
+                    className="mt-3 rounded-full border border-red-300 bg-white px-4 py-1.5 text-xs font-semibold text-red-800 disabled:opacity-50"
+                  >
+                    {busyDeleteId === row.id ? "Deleting..." : "Delete"}
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
