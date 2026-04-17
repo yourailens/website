@@ -112,7 +112,7 @@ export default function FilmGalleryExperience({ films }: { films: GalleryFilm[] 
 
   const heroLoopSrc = useMemo(() => {
     const mp4 = films.find((f) => /\.mp4$/i.test(f.src));
-    return mp4?.src ?? "/videos/v5.mp4";
+    return mp4?.src ?? null;
   }, [films]);
 
   const visibleFilms = useMemo(() => {
@@ -214,18 +214,20 @@ export default function FilmGalleryExperience({ films }: { films: GalleryFilm[] 
             className="relative mx-4 mb-12 min-h-[min(58vh,640px)] overflow-hidden rounded-3xl bg-slate-900 shadow-2xl shadow-blue-900/25 ring-1 ring-blue-300/40 sm:mx-6 lg:mx-10 lg:mb-16 lg:min-h-[min(62vh,720px)] xl:mx-14 2xl:mx-20"
             aria-labelledby="films-hero-heading"
           >
-            <video
-              ref={heroVideoRef}
-              src={heroLoopSrc}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              className="absolute inset-0 z-0 h-full min-h-full w-full object-cover"
-              aria-hidden
-              {...noDownloadVideoProps}
-            />
+            {heroLoopSrc ? (
+              <video
+                ref={heroVideoRef}
+                src={heroLoopSrc}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                className="absolute inset-0 z-0 h-full min-h-full w-full object-cover"
+                aria-hidden
+                {...noDownloadVideoProps}
+              />
+            ) : null}
             {/* Keep most of the frame clear so you actually see motion */}
             <div
               className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-slate-950/35 via-transparent to-slate-950/75"
@@ -245,7 +247,7 @@ export default function FilmGalleryExperience({ films }: { films: GalleryFilm[] 
                   ← Home
                 </Link>
                 <span className="rounded-full bg-black/35 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/80 ring-1 ring-white/15 backdrop-blur-sm">
-                  {total} films · muted loop
+                  {total} films{heroLoopSrc ? " · muted loop" : ""}
                 </span>
               </div>
 

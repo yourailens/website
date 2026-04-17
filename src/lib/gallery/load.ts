@@ -1,8 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import {
   CHARACTER_TAGS,
-  GALLERY_FILMS as FALLBACK_FILMS,
-  GALLERY_IMAGES as FALLBACK_IMAGES,
   type CharacterTag,
   type FilmCategory,
   type GalleryFilm,
@@ -58,22 +56,22 @@ function rowToFilm(row: {
 
 export async function getGalleryImages(): Promise<GalleryImage[]> {
   const supabase = anonClient();
-  if (!supabase) return FALLBACK_IMAGES;
+  if (!supabase) return [];
   const { data, error } = await supabase
     .from("gallery_images")
     .select("id,title,category,aspect,public_url,people_tags,sort_order")
     .order("sort_order", { ascending: true });
-  if (error || !data?.length) return FALLBACK_IMAGES;
+  if (error || !data?.length) return [];
   return data.map(rowToImage);
 }
 
 export async function getGalleryFilms(): Promise<GalleryFilm[]> {
   const supabase = anonClient();
-  if (!supabase) return FALLBACK_FILMS;
+  if (!supabase) return [];
   const { data, error } = await supabase
     .from("gallery_films")
     .select("id,title,category,orientation,public_url,people_tags,sort_order")
     .order("sort_order", { ascending: true });
-  if (error || !data?.length) return FALLBACK_FILMS;
+  if (error || !data?.length) return [];
   return data.map(rowToFilm);
 }

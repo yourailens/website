@@ -7,16 +7,8 @@ import Navbar from "@/components/Navbar";
 import { categoryLabel, GALLERY_CATEGORY_TABS, type FilmCategory, type GalleryImage } from "@/data/gallery";
 import { galleryRouteId } from "@/lib/gallery/route-id";
 
-const HERO_PAD = ["/images/hr1.png", "/images/img6.png", "/images/ws1.png"] as const;
-
 function heroStripSources(images: GalleryImage[]): string[] {
-  const got = images.slice(0, 3).map((i) => i.src);
-  let p = 0;
-  while (got.length < 3) {
-    got.push(HERO_PAD[p % HERO_PAD.length]!);
-    p += 1;
-  }
-  return got.slice(0, 3);
+  return images.slice(0, 3).map((i) => i.src);
 }
 
 function aspectClass(aspect?: string) {
@@ -72,27 +64,33 @@ export default function ImageGalleryExperience({ images }: { images: GalleryImag
             </h1>
 
             <div className="relative z-10 mx-auto flex max-w-[1200px] flex-row flex-nowrap items-end justify-center gap-3 overflow-x-auto px-4 pb-12 pt-2 [scrollbar-width:none] sm:gap-5 md:gap-8 md:px-8 md:pb-16 lg:px-12 [&::-webkit-scrollbar]:hidden">
-              {heroStrip.map((src, i) => (
-                <div
-                  key={`${src}-${i}`}
-                  className={`shrink-0 bg-white p-2 shadow-[0_22px_55px_-14px_rgba(30,58,138,0.22)] ring-1 ring-slate-200/90 ${
-                    i === 0 ? "-rotate-[2.5deg]" : i === 1 ? "rotate-0 translate-y-1" : "rotate-[2.5deg]"
-                  } w-[min(32vw,180px)] sm:w-[min(26vw,220px)] md:w-[min(22vw,260px)]`}
-                  style={{ borderRadius: "2px" }}
-                >
-                  <div className="relative aspect-[3/4] w-full overflow-hidden bg-slate-100">
-                    <Image
-                      src={src}
-                      alt=""
-                      fill
-                      priority={i === 0}
-                      className="object-cover"
-                      sizes="(max-width:768px) 32vw, 260px"
-                      unoptimized={remoteImage(src)}
-                    />
+              {heroStrip.length > 0 ? (
+                heroStrip.map((src, i) => (
+                  <div
+                    key={`${src}-${i}`}
+                    className={`shrink-0 bg-white p-2 shadow-[0_22px_55px_-14px_rgba(30,58,138,0.22)] ring-1 ring-slate-200/90 ${
+                      i === 0 ? "-rotate-[2.5deg]" : i === 1 ? "rotate-0 translate-y-1" : "rotate-[2.5deg]"
+                    } w-[min(32vw,180px)] sm:w-[min(26vw,220px)] md:w-[min(22vw,260px)]`}
+                    style={{ borderRadius: "2px" }}
+                  >
+                    <div className="relative aspect-[3/4] w-full overflow-hidden bg-slate-100">
+                      <Image
+                        src={src}
+                        alt=""
+                        fill
+                        priority={i === 0}
+                        className="object-cover"
+                        sizes="(max-width:768px) 32vw, 260px"
+                        unoptimized={remoteImage(src)}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="py-6 text-center font-mono text-xs uppercase tracking-[0.18em] text-slate-500">
+                  No admin uploads yet
+                </p>
+              )}
             </div>
           </section>
 
