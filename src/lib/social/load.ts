@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { createServiceRoleClient } from "@/lib/supabase/admin";
 
 export type SocialLink = {
   id: string;
@@ -16,12 +17,20 @@ function anonClient() {
   return createClient(url, anon);
 }
 
+function readClient() {
+  try {
+    return createServiceRoleClient();
+  } catch {
+    return anonClient();
+  }
+}
+
 function normalizeTag(value: string | undefined | null): string {
   return (value ?? "").trim().toLowerCase();
 }
 
 export async function getInstagramLinks(tag?: string): Promise<SocialLink[]> {
-  const supabase = anonClient();
+  const supabase = readClient();
   if (!supabase) return [];
   const { data, error } = await supabase
     .from("instagram_links")
@@ -42,7 +51,7 @@ export async function getInstagramLinks(tag?: string): Promise<SocialLink[]> {
 }
 
 export async function getYoutubeLinks(): Promise<SocialLink[]> {
-  const supabase = anonClient();
+  const supabase = readClient();
   if (!supabase) return [];
   const { data, error } = await supabase
     .from("youtube_links")

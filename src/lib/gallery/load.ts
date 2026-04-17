@@ -6,12 +6,21 @@ import {
   type GalleryFilm,
   type GalleryImage,
 } from "@/data/gallery";
+import { createServiceRoleClient } from "@/lib/supabase/admin";
 
 function anonClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !anon) return null;
   return createClient(url, anon);
+}
+
+function readClient() {
+  try {
+    return createServiceRoleClient();
+  } catch {
+    return anonClient();
+  }
 }
 
 function rowToImage(row: {
@@ -55,7 +64,7 @@ function rowToFilm(row: {
 }
 
 export async function getGalleryImages(): Promise<GalleryImage[]> {
-  const supabase = anonClient();
+  const supabase = readClient();
   if (!supabase) return [];
   const { data, error } = await supabase
     .from("gallery_images")
@@ -66,7 +75,7 @@ export async function getGalleryImages(): Promise<GalleryImage[]> {
 }
 
 export async function getGalleryFilms(): Promise<GalleryFilm[]> {
-  const supabase = anonClient();
+  const supabase = readClient();
   if (!supabase) return [];
   const { data, error } = await supabase
     .from("gallery_films")
