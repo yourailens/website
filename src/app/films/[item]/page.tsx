@@ -5,6 +5,7 @@ import CopyUrlButton from "@/components/CopyUrlButton";
 import { categoryLabel } from "@/data/gallery";
 import { findGalleryIndexByRouteId, galleryRouteId } from "@/lib/gallery/route-id";
 import { getGalleryFilms } from "@/lib/gallery/load";
+import { absoluteUrl, OG_FALLBACK_IMAGE_PATH } from "@/lib/seo/og-image";
 
 function videoType(src: string) {
   return src.endsWith(".mov") ? "video/quicktime" : "video/mp4";
@@ -35,7 +36,9 @@ export async function generateMetadata(props: { params: Promise<{ item: string }
   const pageUrl = `${siteUrl()}/films/${encodeURIComponent(galleryRouteId(current, open))}`;
   const title = `${current.title} | YourAILens Films`;
   const description = `Watch ${current.title} from YourAILens Studio's AI film gallery.`;
-  const fallbackImage = `${siteUrl()}/images/hr1.png`;
+  // Chat apps need a raster image for the link card; the video URL is separate (og:video).
+  const previewImageUrl = absoluteUrl(siteUrl(), OG_FALLBACK_IMAGE_PATH);
+  const videoAbs = absoluteUrl(siteUrl(), current.src);
 
   return {
     title,
@@ -46,14 +49,19 @@ export async function generateMetadata(props: { params: Promise<{ item: string }
       description,
       url: pageUrl,
       type: "video.other",
-      images: [{ url: fallbackImage, alt: `${current.title} preview` }],
+      images: [{ url: OG_FALLBACK_IMAGE_PATH, alt: `${current.title} — YourAILens Films` }],
       videos: [{ url: current.src, type: videoTypeForMeta(current.src) }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [fallbackImage],
+      images: [OG_FALLBACK_IMAGE_PATH],
+    },
+    other: {
+      "og:image:secure_url": previewImageUrl,
+      "og:image:type": "image/jpeg",
+      "og:video:secure_url": videoAbs,
     },
   };
 }

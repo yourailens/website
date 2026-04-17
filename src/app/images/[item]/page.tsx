@@ -6,6 +6,7 @@ import CopyUrlButton from "@/components/CopyUrlButton";
 import { categoryLabel } from "@/data/gallery";
 import { findGalleryIndexByRouteId, galleryRouteId } from "@/lib/gallery/route-id";
 import { getGalleryImages } from "@/lib/gallery/load";
+import { absoluteUrl, guessImageMimeType } from "@/lib/seo/og-image";
 
 function remoteImage(src: string) {
   return /^https?:\/\//i.test(src);
@@ -27,6 +28,7 @@ export async function generateMetadata(props: { params: Promise<{ item: string }
   const pageUrl = `${siteUrl()}/images/${encodeURIComponent(galleryRouteId(current, open))}`;
   const title = `${current.title} | YourAILens Images`;
   const description = `Explore ${current.title} from YourAILens Studio's AI image gallery.`;
+  const imageAbs = absoluteUrl(siteUrl(), current.src);
 
   return {
     title,
@@ -44,6 +46,11 @@ export async function generateMetadata(props: { params: Promise<{ item: string }
       title,
       description,
       images: [current.src],
+    },
+    // WhatsApp / Facebook crawlers often read these explicit OG image tags.
+    other: {
+      "og:image:secure_url": imageAbs,
+      "og:image:type": guessImageMimeType(current.src),
     },
   };
 }

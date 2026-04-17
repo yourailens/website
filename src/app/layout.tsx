@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import { Unica_One, Comfortaa } from "next/font/google";
+import {
+  OG_FALLBACK_IMAGE_HEIGHT,
+  OG_FALLBACK_IMAGE_PATH,
+  OG_FALLBACK_IMAGE_WIDTH,
+} from "@/lib/seo/og-image";
 import "./globals.css";
 
 const unicaOne = Unica_One({
@@ -20,17 +25,11 @@ const DEFAULT_TITLE = "Yourailens Studios | AI-Powered Ad, Media & Marketing Age
 const DEFAULT_DESCRIPTION =
   "Premium AI-based creative agency specializing in advertising, media production, and brand marketing. Where creativity meets intelligence.";
 
-/** Dedicated social preview asset (smaller JPEG than hero PNG — better for WhatsApp / OG crawlers). */
-const OG_HOME_IMAGE_PATH = "/images/og-home.jpeg";
-/** Actual dimensions of `public/images/og-home.jpeg` */
-const OG_HOME_WIDTH = 1179;
-const OG_HOME_HEIGHT = 1372;
-
 function siteOrigin(): string {
   return (process.env.PUBLIC_SITE_URL?.trim() || "https://yourailens.studio").replace(/\/+$/, "");
 }
 
-const ogHomeImageAbsolute = `${siteOrigin()}${OG_HOME_IMAGE_PATH}`;
+const ogHomeImageAbsolute = `${siteOrigin()}${OG_FALLBACK_IMAGE_PATH}`;
 
 export const metadata: Metadata = {
   metadataBase: process.env.PUBLIC_SITE_URL
@@ -47,9 +46,9 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: OG_HOME_IMAGE_PATH,
-        width: OG_HOME_WIDTH,
-        height: OG_HOME_HEIGHT,
+        url: OG_FALLBACK_IMAGE_PATH,
+        width: OG_FALLBACK_IMAGE_WIDTH,
+        height: OG_FALLBACK_IMAGE_HEIGHT,
         alt: "YourAILens Studio",
         type: "image/jpeg",
       },
@@ -61,7 +60,7 @@ export const metadata: Metadata = {
     description: DEFAULT_DESCRIPTION,
     images: [
       {
-        url: OG_HOME_IMAGE_PATH,
+        url: OG_FALLBACK_IMAGE_PATH,
         alt: "YourAILens Studio",
       },
     ],
@@ -69,8 +68,8 @@ export const metadata: Metadata = {
   other: {
     "og:image:secure_url": ogHomeImageAbsolute,
     "og:image:type": "image/jpeg",
-    "og:image:width": String(OG_HOME_WIDTH),
-    "og:image:height": String(OG_HOME_HEIGHT),
+    "og:image:width": String(OG_FALLBACK_IMAGE_WIDTH),
+    "og:image:height": String(OG_FALLBACK_IMAGE_HEIGHT),
   },
 };
 
