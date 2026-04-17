@@ -203,22 +203,17 @@ export default function PricingPage() {
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
             <Link href="/" className="font-heading text-xl font-bold text-slate-900">
               YourAI<span className="text-blue-600">Lens</span>
-              <span className="ml-2 text-xs font-normal text-slate-700">Studio</span>
+              <span className="ml-2 text-xs font-normal text-slate-700">Studios</span>
             </Link>
-            <div className="flex items-center gap-6 text-sm text-slate-700">
-              <a href="mailto:hello@yourailens.studio" className="transition-colors hover:text-slate-900">
-                hello@yourailens.studio
-              </a>
-              <a
-                href="https://instagram.com/yourailens"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition-colors hover:text-slate-900"
-              >
-                @yourailens
-              </a>
-            </div>
-            <p className="text-xs text-slate-700">© 2026 YourAILens Studio</p>
+            <a
+              href="https://instagram.com/yourailens"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-slate-700 transition-colors hover:text-slate-900"
+            >
+              @yourailens
+            </a>
+            <p className="text-xs text-slate-700">© 2026 YourAILens Studios</p>
           </div>
         </div>
       </footer>

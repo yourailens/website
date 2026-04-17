@@ -354,9 +354,14 @@ export default function ContactPage() {
 
         <footer className="mt-10 border-t border-slate-200 pt-6 text-xs text-slate-500">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p>© 2026 YourAILens Studio</p>
-            <a href="mailto:hello@yourailens.studio" className="font-medium text-slate-600 hover:text-blue-700">
-              hello@yourailens.studio
+            <p>© 2026 YourAILens Studios</p>
+            <a
+              href="https://instagram.com/yourailens"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-slate-600 hover:text-blue-700"
+            >
+              @yourailens
             </a>
           </div>
         </footer>

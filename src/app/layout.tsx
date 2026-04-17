@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     title: DEFAULT_TITLE,
     description: DEFAULT_DESCRIPTION,
     url: "/",
-    siteName: "YourAILens Studio",
+    siteName: "YourAILens Studios",
     type: "website",
     locale: "en_US",
     images: [
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
         url: OG_FALLBACK_IMAGE_PATH,
         width: OG_FALLBACK_IMAGE_WIDTH,
         height: OG_FALLBACK_IMAGE_HEIGHT,
-        alt: "YourAILens Studio",
+        alt: "YourAILens Studios",
         type: "image/jpeg",
       },
     ],
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
     images: [
       {
         url: OG_FALLBACK_IMAGE_PATH,
-        alt: "YourAILens Studio",
+        alt: "YourAILens Studios",
       },
     ],
   },

@@ -35,7 +35,7 @@ export async function generateMetadata(props: { params: Promise<{ item: string }
   const current = films[open]!;
   const pageUrl = `${siteUrl()}/films/${encodeURIComponent(galleryRouteId(current, open))}`;
   const title = `${current.title} | YourAILens Films`;
-  const description = `Watch ${current.title} from YourAILens Studio's AI film gallery.`;
+  const description = `Watch ${current.title} from the YourAILens Studios AI film gallery.`;
   // Poster = first-frame JPEG from upload (`poster_url`) or site fallback; og:video is the file.
   const og = pickFilmOgImage(siteUrl(), current.posterUrl);
   const videoAbs = absoluteUrl(siteUrl(), current.src);

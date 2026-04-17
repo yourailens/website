@@ -27,7 +27,7 @@ export async function generateMetadata(props: { params: Promise<{ item: string }
   const current = images[open]!;
   const pageUrl = `${siteUrl()}/images/${encodeURIComponent(galleryRouteId(current, open))}`;
   const title = `${current.title} | YourAILens Images`;
-  const description = `Explore ${current.title} from YourAILens Studio's AI image gallery.`;
+  const description = `Explore ${current.title} from the YourAILens Studios AI image gallery.`;
   const og = pickOgImageForShare(siteUrl(), current.src);
 
   return {

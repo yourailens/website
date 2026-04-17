@@ -126,9 +126,11 @@ function SliderCTA() {
   const containerRef = useRef<HTMLDivElement>(null);
   const startClientX = useRef(0);
   const startDragX = useRef(0);
+  const dragActiveRef = useRef(false);
 
   useEffect(() => {
     const resetSlider = () => {
+      dragActiveRef.current = false;
       setCompleted(false);
       setIsDragging(false);
       setDragX(0);
@@ -154,30 +156,50 @@ function SliderCTA() {
   const maxTravel = () => (containerRef.current?.offsetWidth ?? 320) - THUMB - PAD * 2;
   const progress = Math.min(dragX / Math.max(maxTravel(), 1), 1);
 
-  const onPointerDown = (e: React.PointerEvent) => {
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (completed) return;
     e.preventDefault();
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const max = maxTravel();
+    const thumbLeft = PAD + dragX;
+    const thumbRight = thumbLeft + THUMB;
+    let baseDragX = dragX;
+    if (x < thumbLeft || x > thumbRight) {
+      baseDragX = Math.max(0, Math.min(x - PAD - THUMB / 2, max));
+    }
+    dragActiveRef.current = true;
     setIsDragging(true);
     startClientX.current = e.clientX;
-    startDragX.current = dragX;
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    startDragX.current = baseDragX;
+    if (baseDragX !== dragX) setDragX(baseDragX);
+    el.setPointerCapture(e.pointerId);
   };
 
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return;
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragActiveRef.current) return;
     const max = maxTravel();
     const newX = Math.max(0, Math.min(startDragX.current + e.clientX - startClientX.current, max));
     setDragX(newX);
     if (newX >= max * 0.92) {
+      dragActiveRef.current = false;
       setCompleted(true);
       setIsDragging(false);
       setTimeout(() => { window.location.href = "/contact"; }, 600);
     }
   };
 
-  const onPointerUp = () => {
-    if (!isDragging) return;
+  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragActiveRef.current) return;
+    dragActiveRef.current = false;
     setIsDragging(false);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      /* already released */
+    }
     if (!completed) setDragX(0);
   };
 
@@ -189,11 +211,24 @@ function SliderCTA() {
         background: "rgba(255,255,255,0.06)",
         border: "1px solid rgba(255,255,255,0.14)",
         backdropFilter: "blur(12px)",
+        touchAction: "none",
+        cursor: completed ? "default" : isDragging ? "grabbing" : "grab",
+      }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
+      onLostPointerCapture={() => {
+        if (dragActiveRef.current && !completed) {
+          dragActiveRef.current = false;
+          setIsDragging(false);
+          setDragX(0);
+        }
       }}
     >
-      {/* Fill track */}
+      {/* Fill track — let presses pass through to the container */}
       <div
-        className="absolute inset-y-0 left-0 rounded-full"
+        className="pointer-events-none absolute inset-y-0 left-0 rounded-full"
         style={{
           width: dragX + THUMB + PAD * 2,
           background: "linear-gradient(90deg, #1e3a8a 0%, #2563eb 60%, #3b82f6 100%)",
@@ -233,17 +268,11 @@ function SliderCTA() {
 
       {/* Thumb */}
       <div
-        className="absolute inset-y-0 flex items-center"
+        className="pointer-events-none absolute inset-y-0 flex items-center"
         style={{
           left: PAD + dragX,
           transition: isDragging ? "none" : "left 0.45s cubic-bezier(0.23,1,0.32,1)",
-          cursor: isDragging ? "grabbing" : "grab",
-          touchAction: "none",
         }}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
       >
         <div
           className="flex h-[56px] w-[56px] items-center justify-center rounded-full bg-white transition-transform duration-150"
@@ -1363,13 +1392,17 @@ export default function Home() {
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
             <Link href="/" className="font-heading text-xl font-bold text-slate-900">
               YourAI<span className="text-blue-600">Lens</span>
-              <span className="ml-2 text-xs font-normal text-slate-700">Studio</span>
+              <span className="ml-2 text-xs font-normal text-slate-700">Studios</span>
             </Link>
-            <div className="flex items-center gap-6 text-sm text-slate-700">
-              <Link href="mailto:hello@yourailens.studio" className="transition-colors hover:text-slate-700">hello@yourailens.studio</Link>
-              <a href="https://instagram.com/yourailens" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-slate-700">@yourailens</a>
-            </div>
-            <p className="text-xs text-slate-700">© 2026 YourAILens Studio</p>
+            <a
+              href="https://instagram.com/yourailens"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-slate-700 transition-colors hover:text-slate-900"
+            >
+              @yourailens
+            </a>
+            <p className="text-xs text-slate-700">© 2026 YourAILens Studios</p>
           </div>
         </div>
       </footer>
