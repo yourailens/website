@@ -24,7 +24,7 @@ export default async function YoutubePage() {
         </section>
 
         {links.length === 0 ? (
-          <p className="mt-10 text-sm text-slate-500">No YouTube links yet. Add them in admin.</p>
+          <p className="mt-10 text-sm text-slate-500">No YouTube links yet.</p>
         ) : (
           <ul className="mt-9 space-y-5">
             {links.map((item, index) => (

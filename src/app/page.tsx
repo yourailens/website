@@ -843,7 +843,7 @@ export default function Home() {
         {/* CTA */}
         <div className="mt-10 flex justify-center">
           <Link
-            href="/contact"
+            href="/images"
             className="group inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-7 py-3 text-sm font-bold text-slate-700 shadow-sm transition-all hover:border-blue-300 hover:text-blue-600 hover:shadow-blue-100"
           >
             <span>View full gallery</span>
