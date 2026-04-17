@@ -196,7 +196,12 @@ export default function AdminDashboard() {
       if (filmOrientation) fd.append("orientation", filmOrientation);
       if (filmPeopleTags.length) fd.append("peopleTags", filmPeopleTags.join(","));
       const res = await fetch("/api/admin/upload-film", { method: "POST", body: fd });
-      const j = (await res.json().catch(() => ({}))) as { error?: string; hint?: string; publicUrl?: string };
+      const j = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        hint?: string;
+        publicUrl?: string;
+        posterError?: string;
+      };
       setBusyFilm(false);
       if (!res.ok) {
         setUploadErr({ message: j.error || "Could not upload video to S3", hint: j.hint });
@@ -207,7 +212,11 @@ export default function AdminDashboard() {
       setFilmUrl("");
       setFilmFile(null);
       setFilmPeopleTags([]);
-      setMsg("Saved to gallery. Preview below.");
+      setMsg(
+        j.posterError
+          ? `Saved to gallery. Preview below. Open Graph poster was not set: ${j.posterError}`
+          : "Saved to gallery. Preview below."
+      );
       return;
     }
     if (!url) {

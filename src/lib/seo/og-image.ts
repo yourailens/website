@@ -82,3 +82,30 @@ export function pickOgImageForShare(
     type: guessImageMimeType(src),
   };
 }
+
+/**
+ * Film detail pages: `posterUrl` is always an image (first-frame JPEG on S3).
+ * Do not pass it through `looksLikeVideoFile` — keys like `...-clip.mov-....jpg` or querystrings
+ * could wrongly trigger the video branch and force `og-home`.
+ */
+export function pickFilmOgImage(
+  siteOrigin: string,
+  posterUrl: string | undefined | null
+): {
+  url: string;
+  type: string;
+  width?: number;
+  height?: number;
+} {
+  const trimmed = posterUrl?.trim();
+  if (trimmed) {
+    const abs = absoluteUrl(siteOrigin, trimmed);
+    return {
+      url: abs,
+      type: "image/jpeg",
+      width: OG_THUMB_WIDTH,
+      height: OG_THUMB_HEIGHT,
+    };
+  }
+  return pickOgImageForShare(siteOrigin, OG_FALLBACK_IMAGE_PATH);
+}

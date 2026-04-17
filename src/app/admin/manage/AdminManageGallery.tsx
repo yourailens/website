@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase/client";
 
-type Row = { id: string; title: string; public_url: string; sort_order: number };
+type Row = { id: string; title: string; public_url: string; poster_url?: string | null; sort_order: number };
 type SocialRow = { id: string; title: string; url: string; thumbnail_url?: string; tag?: string; sort_order: number };
 
 export default function AdminManageGallery() {
@@ -16,6 +16,7 @@ export default function AdminManageGallery() {
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
   const [busyDeleteId, setBusyDeleteId] = useState<string | null>(null);
+  const [busyPosterId, setBusyPosterId] = useState<string | null>(null);
 
   const loadLists = useCallback(async () => {
     setLoading(true);
@@ -80,6 +81,28 @@ export default function AdminManageGallery() {
       return;
     }
     setMsg("Image deleted.");
+    await loadLists();
+  }
+
+  async function regenerateFilmPoster(id: string) {
+    setMsg("");
+    setBusyPosterId(id);
+    const res = await fetch("/api/admin/regenerate-film-poster", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    const j = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; posterError?: string; posterUrl?: string };
+    setBusyPosterId(null);
+    if (!res.ok) {
+      setMsg(j.posterError || j.error || "Could not regenerate poster");
+      return;
+    }
+    if (j.posterUrl) {
+      setMsg(`Poster updated. ${j.posterUrl}`);
+    } else {
+      setMsg("Poster updated.");
+    }
     await loadLists();
   }
 
@@ -226,14 +249,31 @@ export default function AdminManageGallery() {
                   <video src={row.public_url} className="h-44 w-full rounded-lg bg-black object-cover" controls playsInline />
                   <p className="mt-3 truncate font-semibold text-slate-900">{row.title}</p>
                   <p className="mt-1 break-all font-mono text-[11px] text-slate-500">{row.public_url}</p>
-                  <button
-                    type="button"
-                    onClick={() => deleteFilm(row.id)}
-                    disabled={busyDeleteId === row.id}
-                    className="mt-3 rounded-full border border-red-300 bg-white px-4 py-1.5 text-xs font-semibold text-red-800 disabled:opacity-50"
-                  >
-                    {busyDeleteId === row.id ? "Deleting..." : "Delete"}
-                  </button>
+                  {row.poster_url ? (
+                    <p className="mt-2 truncate font-mono text-[10px] text-slate-400" title={row.poster_url}>
+                      Poster: {row.poster_url}
+                    </p>
+                  ) : (
+                    <p className="mt-2 text-[11px] text-amber-800">No poster URL yet — regenerate after deploy, or check video URL is a direct file.</p>
+                  )}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => regenerateFilmPoster(row.id)}
+                      disabled={busyPosterId === row.id || busyDeleteId === row.id}
+                      className="rounded-full border border-slate-300 bg-white px-4 py-1.5 text-xs font-semibold text-slate-800 disabled:opacity-50"
+                    >
+                      {busyPosterId === row.id ? "Regenerating…" : "Regenerate poster"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteFilm(row.id)}
+                      disabled={busyDeleteId === row.id || busyPosterId === row.id}
+                      className="rounded-full border border-red-300 bg-white px-4 py-1.5 text-xs font-semibold text-red-800 disabled:opacity-50"
+                    >
+                      {busyDeleteId === row.id ? "Deleting..." : "Delete"}
+                    </button>
+                  </div>
                 </article>
               ))
             )}

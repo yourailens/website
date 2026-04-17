@@ -35,6 +35,8 @@ if (supabaseUrl) {
 }
 
 const nextConfig: NextConfig = {
+  // Native binaries (ffmpeg) must resolve from node_modules at runtime on Vercel.
+  serverExternalPackages: ["ffmpeg-static", "sharp"],
   images: {
     remotePatterns,
   },

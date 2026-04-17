@@ -9,6 +9,8 @@ import { parsePublicHttpUrl } from "@/lib/validate-public-url";
 import { extractFilmPosterJpeg } from "@/lib/video/extract-poster";
 
 export const runtime = "nodejs";
+/** Poster extraction + S3 can exceed default 10s on Vercel. */
+export const maxDuration = 60;
 
 async function insertFilmRow(
   svc: ReturnType<typeof createServiceRoleClient>,
@@ -130,19 +132,26 @@ export async function POST(request: Request) {
   }
 
   let posterUrl: string | null = null;
+  let posterError: string | undefined;
   if (contentType.includes("multipart/form-data") && videoBuffer && row?.id) {
-    const jpeg = await extractFilmPosterJpeg(videoBuffer, uploadedFileName);
-    if (jpeg) {
+    const extracted = await extractFilmPosterJpeg(videoBuffer, uploadedFileName);
+    if (!extracted.ok) {
+      posterError = extracted.reason;
+    } else {
       try {
         const key = `gallery/posters/${row.id}.jpg`;
-        const { publicUrl: p } = await uploadObjectToS3(key, jpeg, "image/jpeg");
+        const { publicUrl: p } = await uploadObjectToS3(key, extracted.jpeg, "image/jpeg");
         posterUrl = p;
-        await svc.from("gallery_films").update({ poster_url: p }).eq("id", row.id);
-      } catch {
-        /* poster is optional */
+        const { error: updErr } = await svc.from("gallery_films").update({ poster_url: p }).eq("id", row.id);
+        if (updErr) {
+          posterError = `Saved poster to storage but DB update failed: ${updErr.message}`;
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        posterError = `Poster upload/update failed: ${msg.slice(0, 400)}`;
       }
     }
   }
 
-  return NextResponse.json({ ok: true, id: row?.id, publicUrl, posterUrl });
+  return NextResponse.json({ ok: true, id: row?.id, publicUrl, posterUrl, posterError });
 }
