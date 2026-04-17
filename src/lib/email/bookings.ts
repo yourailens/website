@@ -70,9 +70,10 @@ function customerTemplate(input: BookingEmailInput): { subject: string; html: st
   const html = `
   <div style="margin:0;background:#f6f9ff;font-family:Verdana,Geneva,Tahoma,sans-serif;color:#0f172a">
     <img src="${heroImage}" alt="YourAILens Header" style="display:block;width:100%;height:auto" />
-    <div style="padding:18px 34px;background:linear-gradient(130deg,#1e40af,#0ea5e9);color:#ffffff">
-      <p style="margin:0;font-size:12px;letter-spacing:.22em;text-transform:uppercase;opacity:.85">YourAILens Studio</p>
-      <h1 style="margin:8px 0 0;font-size:32px;line-height:1.15;letter-spacing:-0.01em">Booking confirmed</h1>
+    <div style="padding:22px 34px 10px;background:transparent;color:#0f172a">
+      <p style="margin:0;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#475569">YourAILens Studio</p>
+      <h1 style="margin:8px 0 0;font-size:34px;line-height:1.1;letter-spacing:-0.02em;font-weight:700">Booking confirmed</h1>
+      <div style="margin-top:12px;height:1px;width:100%;background:linear-gradient(90deg,rgba(37,99,235,0.6),rgba(37,99,235,0.1) 45%,rgba(15,23,42,0.06) 100%)"></div>
     </div>
     <div style="padding:28px 34px 34px">
       <p style="margin:0 0 14px;font-size:16px">Hi ${safeName},</p>
@@ -135,9 +136,10 @@ function ownerTemplate(input: BookingEmailInput): { subject: string; html: strin
   const html = `
   <div style="margin:0;background:#f6f9ff;font-family:Verdana,Geneva,Tahoma,sans-serif;color:#0f172a">
     <img src="${heroImage}" alt="YourAILens Header" style="display:block;width:100%;height:auto" />
-    <div style="padding:18px 28px;background:linear-gradient(130deg,#1e40af,#0ea5e9);color:#ffffff">
-      <p style="margin:0;font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.84">YourAILens Studio</p>
-      <h2 style="margin:8px 0 0;font-size:30px;line-height:1.15">New booking received</h2>
+    <div style="padding:22px 28px 10px;background:transparent;color:#0f172a">
+      <p style="margin:0;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#475569">YourAILens Studio</p>
+      <h2 style="margin:8px 0 0;font-size:32px;line-height:1.1;letter-spacing:-0.02em;font-weight:700">New booking received</h2>
+      <div style="margin-top:12px;height:1px;width:100%;background:linear-gradient(90deg,rgba(37,99,235,0.6),rgba(37,99,235,0.1) 45%,rgba(15,23,42,0.06) 100%)"></div>
     </div>
     <div style="padding:24px 28px 30px">
       <div style="margin-top:6px;border-top:1px solid #d6e4ff;border-bottom:1px solid #d6e4ff;padding:14px 0 8px">

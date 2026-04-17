@@ -127,6 +127,30 @@ function SliderCTA() {
   const startClientX = useRef(0);
   const startDragX = useRef(0);
 
+  useEffect(() => {
+    const resetSlider = () => {
+      setCompleted(false);
+      setIsDragging(false);
+      setDragX(0);
+    };
+
+    const onPageShow = () => resetSlider();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") resetSlider();
+    };
+    const onFocus = () => resetSlider();
+
+    window.addEventListener("pageshow", onPageShow);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      window.removeEventListener("pageshow", onPageShow);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, []);
+
   const maxTravel = () => (containerRef.current?.offsetWidth ?? 320) - THUMB - PAD * 2;
   const progress = Math.min(dragX / Math.max(maxTravel(), 1), 1);
 
