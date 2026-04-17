@@ -23,7 +23,7 @@ export default function AdminManageGallery() {
       const supabase = createBrowserSupabase();
       const [imgRes, filmRes, igRes, ytRes] = await Promise.all([
         supabase.from("gallery_images").select("id,title,public_url,sort_order").order("sort_order", { ascending: true }),
-        supabase.from("gallery_films").select("id,title,public_url,sort_order").order("sort_order", { ascending: true }),
+        supabase.from("gallery_films").select("id,title,public_url,poster_url,sort_order").order("sort_order", { ascending: true }),
         supabase.from("instagram_links").select("id,title,url,thumbnail_url,tag,sort_order").order("sort_order", { ascending: true }),
         supabase.from("youtube_links").select("id,title,url,thumbnail_url,tag,sort_order").order("sort_order", { ascending: true }),
       ]);

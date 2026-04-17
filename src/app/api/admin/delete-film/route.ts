@@ -23,7 +23,7 @@ export async function POST(request: Request) {
 
   const { data: row, error: fetchErr } = await svc
     .from("gallery_films")
-    .select("id,public_url")
+    .select("id,public_url,poster_url")
     .eq("id", id)
     .maybeSingle();
   if (fetchErr || !row) {
@@ -39,6 +39,13 @@ export async function POST(request: Request) {
     await deleteS3ObjectIfOurs(row.public_url);
   } catch {
     /* row already removed from DB */
+  }
+  if (row.poster_url) {
+    try {
+      await deleteS3ObjectIfOurs(row.poster_url);
+    } catch {
+      /* ignore */
+    }
   }
 
   return NextResponse.json({ ok: true });

@@ -58,6 +58,16 @@ export function pickOgImageForShare(
     };
   }
 
+  // Film posters are already 1200×630 JPEG on S3 — no second resize pass.
+  if (isS3ImageUrlAllowedForOgProxy(abs) && abs.includes("/gallery/posters/")) {
+    return {
+      url: abs,
+      type: "image/jpeg",
+      width: OG_THUMB_WIDTH,
+      height: OG_THUMB_HEIGHT,
+    };
+  }
+
   if (isS3ImageUrlAllowedForOgProxy(abs)) {
     return {
       url: buildOgThumbnailProxyUrl(siteOrigin, abs),

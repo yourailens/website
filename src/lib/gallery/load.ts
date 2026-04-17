@@ -49,11 +49,13 @@ function rowToFilm(row: {
   category: string;
   orientation: string | null;
   public_url: string;
+  poster_url: string | null;
   people_tags: string[] | null;
 }): GalleryFilm {
   return {
     id: row.id,
     src: row.public_url,
+    posterUrl: row.poster_url ?? undefined,
     title: row.title,
     category: row.category as FilmCategory,
     orientation: (row.orientation as GalleryFilm["orientation"]) ?? undefined,
@@ -79,7 +81,7 @@ export async function getGalleryFilms(): Promise<GalleryFilm[]> {
   if (!supabase) return [];
   const { data, error } = await supabase
     .from("gallery_films")
-    .select("id,title,category,orientation,public_url,people_tags,sort_order")
+    .select("id,title,category,orientation,public_url,poster_url,people_tags,sort_order")
     .order("sort_order", { ascending: true });
   if (error || !data?.length) return [];
   return data.map(rowToFilm);

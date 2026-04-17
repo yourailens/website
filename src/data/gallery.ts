@@ -54,6 +54,8 @@ export const GALLERY_IMAGES: GalleryImage[] = [
 export type GalleryFilm = {
   id?: string;
   src: string;
+  /** First-frame JPEG on S3, generated on admin upload — used for OG / WhatsApp previews. */
+  posterUrl?: string;
   title: string;
   category: FilmCategory;
   /** Portrait / vertical masters — layout uses a taller tile. Omit for 16×9 landscape. */

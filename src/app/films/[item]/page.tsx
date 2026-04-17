@@ -5,7 +5,7 @@ import CopyUrlButton from "@/components/CopyUrlButton";
 import { categoryLabel } from "@/data/gallery";
 import { findGalleryIndexByRouteId, galleryRouteId } from "@/lib/gallery/route-id";
 import { getGalleryFilms } from "@/lib/gallery/load";
-import { absoluteUrl, OG_FALLBACK_IMAGE_PATH } from "@/lib/seo/og-image";
+import { absoluteUrl, OG_FALLBACK_IMAGE_PATH, pickOgImageForShare } from "@/lib/seo/og-image";
 
 function videoType(src: string) {
   return src.endsWith(".mov") ? "video/quicktime" : "video/mp4";
@@ -36,8 +36,8 @@ export async function generateMetadata(props: { params: Promise<{ item: string }
   const pageUrl = `${siteUrl()}/films/${encodeURIComponent(galleryRouteId(current, open))}`;
   const title = `${current.title} | YourAILens Films`;
   const description = `Watch ${current.title} from YourAILens Studio's AI film gallery.`;
-  // Chat apps need a raster image for the link card; the video URL is separate (og:video).
-  const previewImageUrl = absoluteUrl(siteUrl(), OG_FALLBACK_IMAGE_PATH);
+  // Poster = first frame (upload) or site fallback; og:video is the actual file.
+  const og = pickOgImageForShare(siteUrl(), current.posterUrl || OG_FALLBACK_IMAGE_PATH);
   const videoAbs = absoluteUrl(siteUrl(), current.src);
 
   return {
@@ -49,18 +49,29 @@ export async function generateMetadata(props: { params: Promise<{ item: string }
       description,
       url: pageUrl,
       type: "video.other",
-      images: [{ url: OG_FALLBACK_IMAGE_PATH, alt: `${current.title} — YourAILens Films` }],
+      images: [
+        {
+          url: og.url,
+          secureUrl: og.url.startsWith("https://") ? og.url : undefined,
+          alt: `${current.title} — YourAILens Films`,
+          type: og.type,
+          ...(og.width != null && og.height != null ? { width: og.width, height: og.height } : {}),
+        },
+      ],
       videos: [{ url: current.src, type: videoTypeForMeta(current.src) }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [OG_FALLBACK_IMAGE_PATH],
+      images: [{ url: og.url, alt: `${current.title} — YourAILens Films` }],
     },
     other: {
-      "og:image:secure_url": previewImageUrl,
-      "og:image:type": "image/jpeg",
+      "og:image:secure_url": og.url,
+      "og:image:type": og.type,
+      ...(og.width != null && og.height != null
+        ? { "og:image:width": String(og.width), "og:image:height": String(og.height) }
+        : {}),
       "og:video:secure_url": videoAbs,
     },
   };
