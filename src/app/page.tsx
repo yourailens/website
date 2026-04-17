@@ -682,7 +682,7 @@ export default function Home() {
 
             {/* Value proposition */}
             <p className="mt-4 max-w-md text-[15px] leading-relaxed text-white/65 lg:text-base">
-              Production-level AI creatives built for every brand, delivered with human precision.
+              Production level AI creatives built for every brand, delivered with human precision.
             </p>
 
             {/* Price + time */}
