@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { SITE_CONTACT_EMAIL, SITE_LOCATION_LINE } from "@/lib/site-contact";
 
 type Slot = {
   iso: string;
@@ -157,6 +158,20 @@ export default function ContactPage() {
       <Navbar />
 
       <main className="relative mx-auto max-w-7xl px-6 py-14 lg:px-10 lg:py-20">
+        <section className="mb-10 rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-sm sm:p-8">
+          <h2 className="font-heading text-2xl font-bold text-slate-900">Contact</h2>
+          <p className="mt-3 text-sm text-slate-600">
+            Email us at{" "}
+            <a href={`mailto:${SITE_CONTACT_EMAIL}`} className="font-semibold text-blue-600 hover:underline">
+              {SITE_CONTACT_EMAIL}
+            </a>
+            . We&apos;re based in {SITE_LOCATION_LINE}.
+          </p>
+          <p className="mt-4 text-sm text-slate-600">
+            Want to talk live? Use the booking form below to grab a free 15-minute call.
+          </p>
+        </section>
+
         <section className="overflow-hidden rounded-3xl border border-blue-200/80 bg-white/90 p-7 shadow-xl shadow-blue-100/70 backdrop-blur-sm sm:p-10">
           <p className="font-mono text-[10px] uppercase tracking-[0.34em] text-blue-700/70">Booking Console</p>
           <h1 className="mt-3 font-heading text-4xl font-black tracking-tight text-slate-900 sm:text-6xl">Book a call</h1>
@@ -352,19 +367,6 @@ export default function ContactPage() {
           </section>
         )}
 
-        <footer className="mt-10 border-t border-slate-200 pt-6 text-xs text-slate-500">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p>© 2026 YourAILens Studios</p>
-            <a
-              href="https://instagram.com/yourailens"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-slate-600 hover:text-blue-700"
-            >
-              @yourailens
-            </a>
-          </div>
-        </footer>
       </main>
     </div>
   );

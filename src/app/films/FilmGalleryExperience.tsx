@@ -15,34 +15,6 @@ function videoType(src: string) {
   return src.endsWith(".mov") ? "video/quicktime" : "video/mp4";
 }
 
-const previewPlayPromises = new WeakMap<HTMLVideoElement, Promise<void>>();
-
-function safePlay(video: HTMLVideoElement | null | undefined) {
-  if (!video) return;
-  const p = video.play();
-  if (p !== undefined) {
-    previewPlayPromises.set(video, p);
-    void p.catch(() => {});
-  }
-}
-
-function safePausePreview(video: HTMLVideoElement | null | undefined) {
-  if (!video) return;
-  const p = previewPlayPromises.get(video);
-  if (p) {
-    void p
-      .then(() => {
-        video.pause();
-        video.currentTime = 0;
-      })
-      .catch(() => {})
-      .finally(() => previewPlayPromises.delete(video));
-  } else {
-    video.pause();
-    video.currentTime = 0;
-  }
-}
-
 const noDownloadVideoProps = {
   controlsList: "nodownload noplaybackrate" as const,
   disablePictureInPicture: true,
@@ -308,14 +280,6 @@ export default function FilmGalleryExperience({ films }: { films: GalleryFilm[] 
                       href={`/films/${encodeURIComponent(galleryRouteId(film, i))}`}
                       className="gallery-card-enter group relative block w-full overflow-hidden rounded-2xl bg-white text-left shadow-lg transition-shadow duration-300 hover:shadow-xl hover:shadow-slate-300/95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
                       style={{ animationDelay: `${Math.min(rowPos, 12) * 30}ms` }}
-                      onMouseEnter={(e) => {
-                        const v = e.currentTarget.querySelector("video");
-                        if (v instanceof HTMLVideoElement) safePlay(v);
-                      }}
-                      onMouseLeave={(e) => {
-                        const v = e.currentTarget.querySelector("video");
-                        if (v instanceof HTMLVideoElement) safePausePreview(v);
-                      }}
                     >
                       <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
                         <video

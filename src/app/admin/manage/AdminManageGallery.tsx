@@ -17,6 +17,7 @@ export default function AdminManageGallery() {
   const [msg, setMsg] = useState("");
   const [busyDeleteId, setBusyDeleteId] = useState<string | null>(null);
   const [busyPosterId, setBusyPosterId] = useState<string | null>(null);
+  const [busyReorder, setBusyReorder] = useState<"images" | "films" | null>(null);
 
   const loadLists = useCallback(async () => {
     setLoading(true);
@@ -64,6 +65,33 @@ export default function AdminManageGallery() {
   async function signOut() {
     await fetch("/api/admin/logout", { method: "POST" });
     window.location.href = "/admin/login";
+  }
+
+  async function saveGalleryOrder(gallery: "images" | "films", orderedIds: string[]) {
+    setBusyReorder(gallery);
+    setMsg("");
+    const res = await fetch("/api/admin/reorder-gallery", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ gallery, orderedIds }),
+    });
+    const j = (await res.json().catch(() => ({}))) as { error?: string };
+    setBusyReorder(null);
+    if (!res.ok) {
+      setMsg(j.error || "Could not save order");
+      return;
+    }
+    setMsg(gallery === "images" ? "Image order saved." : "Film order saved.");
+    await loadLists();
+  }
+
+  function moveGalleryRow(kind: "images" | "films", index: number, dir: -1 | 1) {
+    const list = kind === "images" ? images : films;
+    const j = index + dir;
+    if (j < 0 || j >= list.length) return;
+    const next = [...list];
+    [next[index], next[j]] = [next[j], next[index]];
+    void saveGalleryOrder(kind, next.map((r) => r.id));
   }
 
   async function deleteImage(id: string) {
@@ -189,7 +217,7 @@ export default function AdminManageGallery() {
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-slate-500">Admin</p>
             <h1 className="mt-2 font-heading text-3xl font-bold">Manage uploaded items</h1>
-            <p className="mt-1 text-sm text-slate-600">Delete existing images and films</p>
+            <p className="mt-1 text-sm text-slate-600">Reorder, delete, and manage gallery items</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link href="/admin" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
@@ -208,13 +236,14 @@ export default function AdminManageGallery() {
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="font-heading text-xl font-bold">Images</h2>
+          <p className="mt-1 text-xs text-slate-500">Order on the site: top / left = first. Use ↑ ↓ to change.</p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {loading ? (
               <p className="text-sm text-slate-500">Loading...</p>
             ) : images.length === 0 ? (
               <p className="text-sm text-slate-500">No images found.</p>
             ) : (
-              images.map((row) => (
+              images.map((row, index) => (
                 <article key={row.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                   <div className="relative h-44 overflow-hidden rounded-lg bg-white">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -222,11 +251,31 @@ export default function AdminManageGallery() {
                   </div>
                   <p className="mt-3 truncate font-semibold text-slate-900">{row.title}</p>
                   <p className="mt-1 break-all font-mono text-[11px] text-slate-500">{row.public_url}</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => moveGalleryRow("images", index, -1)}
+                      disabled={busyReorder === "images" || index === 0}
+                      className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-800 disabled:opacity-40"
+                      aria-label="Move up"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveGalleryRow("images", index, 1)}
+                      disabled={busyReorder === "images" || index >= images.length - 1}
+                      className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-800 disabled:opacity-40"
+                      aria-label="Move down"
+                    >
+                      ↓
+                    </button>
+                  </div>
                   <button
                     type="button"
                     onClick={() => deleteImage(row.id)}
-                    disabled={busyDeleteId === row.id}
-                    className="mt-3 rounded-full border border-red-300 bg-white px-4 py-1.5 text-xs font-semibold text-red-800 disabled:opacity-50"
+                    disabled={busyDeleteId === row.id || busyReorder === "images"}
+                    className="mt-2 rounded-full border border-red-300 bg-white px-4 py-1.5 text-xs font-semibold text-red-800 disabled:opacity-50"
                   >
                     {busyDeleteId === row.id ? "Deleting..." : "Delete"}
                   </button>
@@ -238,13 +287,14 @@ export default function AdminManageGallery() {
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="font-heading text-xl font-bold">Films</h2>
+          <p className="mt-1 text-xs text-slate-500">Order on the site: top / left = first. Use ↑ ↓ to change.</p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {loading ? (
               <p className="text-sm text-slate-500">Loading...</p>
             ) : films.length === 0 ? (
               <p className="text-sm text-slate-500">No films found.</p>
             ) : (
-              films.map((row) => (
+              films.map((row, index) => (
                 <article key={row.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                   <video src={row.public_url} className="h-44 w-full rounded-lg bg-black object-cover" controls playsInline />
                   <p className="mt-3 truncate font-semibold text-slate-900">{row.title}</p>
@@ -256,11 +306,31 @@ export default function AdminManageGallery() {
                   ) : (
                     <p className="mt-2 text-[11px] text-amber-800">No poster URL yet — regenerate after deploy, or check video URL is a direct file.</p>
                   )}
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => moveGalleryRow("films", index, -1)}
+                      disabled={busyReorder === "films" || index === 0}
+                      className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-800 disabled:opacity-40"
+                      aria-label="Move up"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveGalleryRow("films", index, 1)}
+                      disabled={busyReorder === "films" || index >= films.length - 1}
+                      className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-800 disabled:opacity-40"
+                      aria-label="Move down"
+                    >
+                      ↓
+                    </button>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={() => regenerateFilmPoster(row.id)}
-                      disabled={busyPosterId === row.id || busyDeleteId === row.id}
+                      disabled={busyPosterId === row.id || busyDeleteId === row.id || busyReorder === "films"}
                       className="rounded-full border border-slate-300 bg-white px-4 py-1.5 text-xs font-semibold text-slate-800 disabled:opacity-50"
                     >
                       {busyPosterId === row.id ? "Regenerating…" : "Regenerate poster"}
@@ -268,7 +338,7 @@ export default function AdminManageGallery() {
                     <button
                       type="button"
                       onClick={() => deleteFilm(row.id)}
-                      disabled={busyDeleteId === row.id || busyPosterId === row.id}
+                      disabled={busyDeleteId === row.id || busyPosterId === row.id || busyReorder === "films"}
                       className="rounded-full border border-red-300 bg-white px-4 py-1.5 text-xs font-semibold text-red-800 disabled:opacity-50"
                     >
                       {busyDeleteId === row.id ? "Deleting..." : "Delete"}

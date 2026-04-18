@@ -354,6 +354,9 @@ export default function AdminDashboard() {
             <p className="mt-1 text-sm text-slate-600">Signed in</p>
           </div>
           <div className="flex flex-wrap gap-3">
+            <Link href="/admin/workshops" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
+              Workshop bookings
+            </Link>
             <Link href="/admin/manage" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
               Manage uploaded items
             </Link>

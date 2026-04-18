@@ -64,6 +64,30 @@ create table if not exists public.call_bookings (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.workshop_registrations (
+  id uuid primary key default gen_random_uuid(),
+  event_slug text not null,
+  name text not null,
+  email text not null,
+  phone text,
+  company text,
+  notes text,
+  payment_phone text,
+  payment_screenshot_url text,
+  payment_verified_at timestamptz,
+  status text not null default 'pending_payment'
+    check (
+      status in ('pending_payment', 'pending_verification', 'registered', 'cancelled')
+    ),
+  created_at timestamptz not null default now()
+);
+
+create unique index if not exists workshop_registrations_event_email_lower
+  on public.workshop_registrations (event_slug, lower(email));
+
+create index if not exists workshop_registrations_event_idx on public.workshop_registrations (event_slug);
+create index if not exists workshop_registrations_created_idx on public.workshop_registrations (created_at desc);
+
 create index if not exists gallery_images_sort on public.gallery_images (sort_order);
 create index if not exists gallery_films_sort on public.gallery_films (sort_order);
 create index if not exists instagram_links_sort on public.instagram_links (sort_order);
@@ -76,6 +100,7 @@ alter table public.gallery_films enable row level security;
 alter table public.instagram_links enable row level security;
 alter table public.youtube_links enable row level security;
 alter table public.call_bookings enable row level security;
+alter table public.workshop_registrations enable row level security;
 
 -- Public read (site + Next.js anon client)
 drop policy if exists "Public read gallery_images" on public.gallery_images;

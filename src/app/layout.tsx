@@ -6,6 +6,7 @@ import {
   OG_FALLBACK_IMAGE_WIDTH,
 } from "@/lib/seo/og-image";
 import "./globals.css";
+import SiteFooter from "@/components/SiteFooter";
 
 const unicaOne = Unica_One({
   weight: "400",
@@ -81,7 +82,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`scroll-smooth ${unicaOne.variable} ${comfortaa.variable}`}>
       <head />
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        {children}
+        <SiteFooter />
+      </body>
     </html>
   );
 }

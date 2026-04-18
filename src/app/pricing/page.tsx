@@ -197,26 +197,6 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-100 bg-white py-10">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
-          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <Link href="/" className="font-heading text-xl font-bold text-slate-900">
-              YourAI<span className="text-blue-600">Lens</span>
-              <span className="ml-2 text-xs font-normal text-slate-700">Studios</span>
-            </Link>
-            <a
-              href="https://instagram.com/yourailens"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-slate-700 transition-colors hover:text-slate-900"
-            >
-              @yourailens
-            </a>
-            <p className="text-xs text-slate-700">© 2026 YourAILens Studios</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
