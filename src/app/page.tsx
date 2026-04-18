@@ -718,7 +718,7 @@ export default function Home() {
             <div className="mt-6 inline-flex items-center gap-0 overflow-hidden rounded-2xl border border-white/15 backdrop-blur-md">
               <div className="flex flex-col items-center px-7 py-4">
                 <span className="font-heading font-black leading-none text-white" style={{ fontSize: "clamp(1.8rem,3.5vw,2.6rem)" }}>
-                  ₹10,000
+                  ₹30,000
                 </span>
                 <span className="mt-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-white/45">Starting from</span>
               </div>

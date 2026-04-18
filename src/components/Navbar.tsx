@@ -1,7 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { useState, useEffect } from "react";
+import Link, { useLinkStatus } from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { NavLinkPendingSpinner } from "@/components/NavLinkWithPending";
 
 const NAV_LINKS = [
   { label: "Images", href: "/images" },
@@ -11,7 +13,275 @@ const NAV_LINKS = [
   { label: "Youtube", href: "/youtube" },
 ];
 
+function DesktopNavLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      prefetch
+      className="group relative rounded-lg px-5 py-2 text-sm font-semibold text-slate-800 transition-colors hover:text-blue-600"
+    >
+      <DesktopNavLinkInner label={label} />
+    </Link>
+  );
+}
+
+function DesktopNavLinkInner({ label }: { label: string }) {
+  const { pending } = useLinkStatus();
+  return (
+    <>
+      {pending ? (
+        <span className="absolute inset-0 z-[1] cursor-wait rounded-lg" aria-hidden />
+      ) : null}
+      <span className="relative z-[2] inline-flex items-center gap-2">
+        <NavLinkPendingSpinner borderClassName="border-blue-600" />
+        {label}
+      </span>
+      <span className="absolute inset-x-4 bottom-1 z-[2] h-[2px] origin-left scale-x-0 rounded-full bg-blue-500 transition-transform duration-200 group-hover:scale-x-100" />
+    </>
+  );
+}
+
+function DesktopLogoLink() {
+  return (
+    <Link href="/" prefetch className="relative flex shrink-0 items-center gap-3">
+      <DesktopLogoInner />
+    </Link>
+  );
+}
+
+function DesktopLogoInner() {
+  const { pending } = useLinkStatus();
+  return (
+    <>
+      {pending ? <span className="absolute inset-0 z-[1] cursor-wait rounded-xl" aria-hidden /> : null}
+      <span className="relative z-[2] flex items-center gap-3">
+        <NavLinkPendingSpinner borderClassName="border-blue-600" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-200">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M9 1L16 5V13L9 17L2 13V5L9 1Z" fill="white" fillOpacity="0.15" stroke="white" strokeWidth="1.5" />
+            <circle cx="9" cy="9" r="3" fill="white" />
+          </svg>
+        </div>
+        <div>
+          <span className="font-heading text-xl font-bold tracking-[-0.02em] text-slate-900">
+            YourAI<span className="text-blue-600">Lens</span>
+          </span>
+          <span className="ml-2 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-blue-600">
+            Studios
+          </span>
+        </div>
+      </span>
+    </>
+  );
+}
+
+function DesktopContactCta() {
+  return (
+    <Link
+      href="/contact"
+      prefetch
+      className="relative inline-flex rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-blue-700 hover:shadow-blue-300 active:scale-95"
+    >
+      <DesktopContactCtaInner />
+    </Link>
+  );
+}
+
+function DesktopContactCtaInner() {
+  const { pending } = useLinkStatus();
+  return (
+    <>
+      {pending ? <span className="absolute inset-0 z-[1] cursor-wait rounded-full" aria-hidden /> : null}
+      <span className="relative z-[2] inline-flex items-center gap-2">
+        <NavLinkPendingSpinner borderClassName="border-white" />
+        Book a free call
+        <span className="ml-2">→</span>
+      </span>
+    </>
+  );
+}
+
+function AnnouncementContactLink() {
+  return (
+    <Link href="/contact" prefetch className="underline underline-offset-2 transition-colors hover:text-blue-100">
+      <AnnouncementContactInner />
+    </Link>
+  );
+}
+
+function AnnouncementContactInner() {
+  const { pending } = useLinkStatus();
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <NavLinkPendingSpinner borderClassName="border-white" />
+      <span className={pending ? "opacity-90" : undefined}>Book a free call →</span>
+    </span>
+  );
+}
+
+function MobileNavLink({
+  href,
+  label,
+  pathname,
+  onSamePathClose,
+}: {
+  href: string;
+  label: string;
+  pathname: string;
+  onSamePathClose: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      prefetch
+      onClick={() => {
+        if (pathname === href) {
+          onSamePathClose();
+        }
+      }}
+      className="relative block rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4 text-2xl font-black tracking-tight text-white backdrop-blur-sm transition-colors hover:bg-white/[0.12]"
+    >
+      <MobileNavLinkInner label={label} />
+    </Link>
+  );
+}
+
+function MobileNavLinkInner({ label }: { label: string }) {
+  const { pending } = useLinkStatus();
+  return (
+    <>
+      {pending ? (
+        <span className="absolute inset-0 z-[1] cursor-wait rounded-2xl bg-black/10" aria-hidden />
+      ) : null}
+      <span className="relative z-[2] flex items-center gap-3">
+        <NavLinkPendingSpinner borderClassName="border-white" />
+        {label}
+      </span>
+    </>
+  );
+}
+
+function MobileLogoLink({
+  pathname,
+  onSamePathClose,
+}: {
+  pathname: string;
+  onSamePathClose: () => void;
+}) {
+  return (
+    <Link
+      href="/"
+      prefetch
+      onClick={() => {
+        if (pathname === "/") {
+          onSamePathClose();
+        }
+      }}
+      className="relative flex items-center gap-3 overflow-visible"
+    >
+      <MobileLogoInner />
+    </Link>
+  );
+}
+
+function MobileLogoInner() {
+  const { pending } = useLinkStatus();
+  return (
+    <>
+      {pending ? <span className="absolute inset-0 z-[1] -m-2 cursor-wait rounded-xl" aria-hidden /> : null}
+      <span className="relative z-[2] flex items-center gap-3">
+        <NavLinkPendingSpinner borderClassName="border-white" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25 backdrop-blur-sm">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M9 1L16 5V13L9 17L2 13V5L9 1Z" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="1.5" />
+            <circle cx="9" cy="9" r="3" fill="white" />
+          </svg>
+        </div>
+        <div>
+          <p className="font-heading text-base font-black tracking-tight text-white">YourAILens</p>
+          <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/45">Studios</p>
+        </div>
+      </span>
+    </>
+  );
+}
+
+function MobileContactCta({
+  pathname,
+  onSamePathClose,
+}: {
+  pathname: string;
+  onSamePathClose: () => void;
+}) {
+  return (
+    <Link
+      href="/contact"
+      prefetch
+      onClick={() => {
+        if (pathname === "/contact") {
+          onSamePathClose();
+        }
+      }}
+      className="relative block w-full rounded-full bg-white py-4 text-center text-base font-bold text-blue-700 shadow-xl shadow-black/20 transition-transform active:scale-[0.98]"
+    >
+      <MobileContactCtaInner />
+    </Link>
+  );
+}
+
+function MobileContactCtaInner() {
+  const { pending } = useLinkStatus();
+  return (
+    <>
+      {pending ? <span className="absolute inset-0 z-[1] cursor-wait rounded-full" aria-hidden /> : null}
+      <span className="relative z-[2] inline-flex items-center justify-center gap-2">
+        <NavLinkPendingSpinner borderClassName="border-blue-600" />
+        Book a free call →
+      </span>
+    </>
+  );
+}
+
+function MobilePricingLink({
+  pathname,
+  onSamePathClose,
+}: {
+  pathname: string;
+  onSamePathClose: () => void;
+}) {
+  return (
+    <Link
+      href="/pricing"
+      prefetch
+      onClick={() => {
+        if (pathname === "/pricing") {
+          onSamePathClose();
+        }
+      }}
+      className="relative block text-center text-sm font-semibold text-white/50 underline underline-offset-4 transition-colors hover:text-white/80"
+    >
+      <MobilePricingLinkInner />
+    </Link>
+  );
+}
+
+function MobilePricingLinkInner() {
+  const { pending } = useLinkStatus();
+  return (
+    <>
+      {pending ? (
+        <span className="absolute inset-0 z-[1] cursor-wait rounded-lg" aria-hidden />
+      ) : null}
+      <span className="relative z-[2] inline-flex items-center justify-center gap-2">
+        <NavLinkPendingSpinner borderClassName="border-white/70" />
+        Pricing
+      </span>
+    </>
+  );
+}
+
 export default function Navbar() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -23,17 +293,24 @@ export default function Navbar() {
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [menuOpen]);
+
+  /** Close drawer after navigation completes (don’t hide immediately on tap). */
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  const closeIfSamePath = () => setMenuOpen(false);
 
   return (
     <>
       {/* Announcement bar */}
       <div className="relative z-50 bg-blue-600 py-2.5 text-center text-xs font-semibold text-white">
         ✦ &nbsp;AI video campaigns delivered in 48 hours. &nbsp;
-        <Link href="/contact" className="underline underline-offset-2 hover:text-blue-100 transition-colors">
-          Book a free call →
-        </Link>
+        <AnnouncementContactLink />
       </div>
 
       {/* Main navbar */}
@@ -42,45 +319,16 @@ export default function Navbar() {
 
         <div className="mx-auto max-w-7xl px-6 lg:px-10">
           <div className="flex h-20 items-center justify-between gap-8">
-
-            <Link href="/" className="flex shrink-0 items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-200">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M9 1L16 5V13L9 17L2 13V5L9 1Z" fill="white" fillOpacity="0.15" stroke="white" strokeWidth="1.5"/>
-                  <circle cx="9" cy="9" r="3" fill="white"/>
-                </svg>
-              </div>
-              <div>
-                <span className="font-heading text-xl font-bold tracking-[-0.02em] text-slate-900">
-                  YourAI<span className="text-blue-600">Lens</span>
-                </span>
-                <span className="ml-2 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-blue-600">
-                  Studios
-                </span>
-              </div>
-            </Link>
+            <DesktopLogoLink />
 
             <div className="hidden flex-1 items-center justify-center gap-1 lg:flex">
               {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className="group relative rounded-lg px-5 py-2 text-sm font-semibold text-slate-800 transition-colors hover:text-blue-600"
-                >
-                  {link.label}
-                  <span className="absolute inset-x-4 bottom-1 h-[2px] origin-left scale-x-0 rounded-full bg-blue-500 transition-transform duration-200 group-hover:scale-x-100" />
-                </Link>
+                <DesktopNavLink key={link.label} href={link.href} label={link.label} />
               ))}
             </div>
 
             <div className="hidden shrink-0 items-center gap-3 lg:flex">
-              <Link
-                href="/contact"
-                className="relative rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-blue-700 hover:shadow-blue-300 active:scale-95"
-              >
-                Book a free call
-                <span className="ml-2">→</span>
-              </Link>
+              <DesktopContactCta />
             </div>
 
             <button
@@ -101,27 +349,12 @@ export default function Navbar() {
       <div
         className={`fixed inset-0 z-[100] flex min-h-[100dvh] flex-col bg-[#1e3a8a] transition-opacity duration-300 lg:hidden ${menuOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
       >
-        {/* Solid base + static gradient only — no background-position animation (avoids “shimmer line”) */}
-        <div
-          className="absolute inset-0 bg-gradient-to-b from-[#172554] via-[#1d4ed8] to-[#1e3a8a]"
-          aria-hidden
-        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#172554] via-[#1d4ed8] to-[#1e3a8a]" aria-hidden />
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30" aria-hidden />
 
         <div className="relative flex min-h-0 flex-1 flex-col px-6 pb-10 pt-[max(1rem,env(safe-area-inset-top))]">
           <div className="mb-8 flex items-center justify-between gap-4">
-            <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25 backdrop-blur-sm">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M9 1L16 5V13L9 17L2 13V5L9 1Z" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="1.5"/>
-                  <circle cx="9" cy="9" r="3" fill="white"/>
-                </svg>
-              </div>
-              <div>
-                <p className="font-heading text-base font-black tracking-tight text-white">YourAILens</p>
-                <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/45">Studios</p>
-              </div>
-            </Link>
+            <MobileLogoLink pathname={pathname} onSamePathClose={closeIfSamePath} />
             <button
               type="button"
               onClick={() => setMenuOpen(false)}
@@ -136,32 +369,19 @@ export default function Navbar() {
 
           <nav className="flex flex-col gap-1">
             {NAV_LINKS.map((link) => (
-              <Link
+              <MobileNavLink
                 key={link.label}
                 href={link.href}
-                onClick={() => setMenuOpen(false)}
-                className="rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4 text-2xl font-black tracking-tight text-white backdrop-blur-sm transition-colors hover:bg-white/[0.12]"
-              >
-                {link.label}
-              </Link>
+                label={link.label}
+                pathname={pathname}
+                onSamePathClose={closeIfSamePath}
+              />
             ))}
           </nav>
 
           <div className="mt-auto flex flex-col gap-4 pt-10">
-            <Link
-              href="/contact"
-              onClick={() => setMenuOpen(false)}
-              className="block w-full rounded-full bg-white py-4 text-center text-base font-bold text-blue-700 shadow-xl shadow-black/20 transition-transform active:scale-[0.98]"
-            >
-              Book a free call →
-            </Link>
-            <Link
-              href="/pricing"
-              onClick={() => setMenuOpen(false)}
-              className="text-center text-sm font-semibold text-white/50 underline underline-offset-4 transition-colors hover:text-white/80"
-            >
-              Pricing
-            </Link>
+            <MobileContactCta pathname={pathname} onSamePathClose={closeIfSamePath} />
+            <MobilePricingLink pathname={pathname} onSamePathClose={closeIfSamePath} />
           </div>
         </div>
       </div>
