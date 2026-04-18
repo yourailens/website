@@ -2,16 +2,30 @@
 
 import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { NavLinkPendingSpinner } from "@/components/NavLinkWithPending";
+import { WORKSHOP_TITLE } from "@/lib/events/workshop-config";
 
-const NAV_LINKS = [
+const PRIMARY_NAV_LINKS = [
   { label: "Images", href: "/images" },
   { label: "Films", href: "/films" },
   { label: "Events", href: "/events" },
-  { label: "Instagram", href: "/instagram" },
-  { label: "Youtube", href: "/youtube" },
-];
+] as const;
+
+const SOCIAL_DESTINATIONS = [
+  {
+    label: "Instagram",
+    href: "/instagram",
+    blurb: "Reels, stills, and behind the scenes from the studio.",
+    icon: "instagram" as const,
+  },
+  {
+    label: "YouTube",
+    href: "/youtube",
+    blurb: "Longer films, breakdowns, and channel first edits.",
+    icon: "youtube" as const,
+  },
+] as const;
 
 function DesktopNavLink({ href, label }: { href: string; label: string }) {
   return (
@@ -101,20 +115,24 @@ function DesktopContactCtaInner() {
   );
 }
 
-function AnnouncementContactLink() {
+function AnnouncementWorkshopLink() {
   return (
-    <Link href="/contact" prefetch className="underline underline-offset-2 transition-colors hover:text-blue-100">
-      <AnnouncementContactInner />
+    <Link
+      href="/events/ai-creator-workshop"
+      prefetch
+      className="whitespace-nowrap underline underline-offset-2 transition-colors hover:text-blue-100"
+    >
+      <AnnouncementWorkshopLinkInner />
     </Link>
   );
 }
 
-function AnnouncementContactInner() {
+function AnnouncementWorkshopLinkInner() {
   const { pending } = useLinkStatus();
   return (
     <span className="inline-flex items-center gap-1.5">
       <NavLinkPendingSpinner borderClassName="border-white" />
-      <span className={pending ? "opacity-90" : undefined}>Book a free call →</span>
+      <span className={pending ? "opacity-90" : undefined}>Register now →</span>
     </span>
   );
 }
@@ -280,10 +298,201 @@ function MobilePricingLinkInner() {
   );
 }
 
+function SocialBrandIcon({ name }: { name: "instagram" | "youtube" }) {
+  if (name === "instagram") {
+    return (
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="text-blue-700" aria-hidden>
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.5" cy="6.5" r="1.1" fill="currentColor" stroke="none" />
+      </svg>
+    );
+  }
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" className="text-blue-700" aria-hidden>
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+    </svg>
+  );
+}
+
+function useSocialsMega(pathname: string) {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const leaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelClose = useCallback(() => {
+    if (leaveTimerRef.current) {
+      clearTimeout(leaveTimerRef.current);
+      leaveTimerRef.current = null;
+    }
+  }, []);
+
+  const openMenu = useCallback(() => {
+    cancelClose();
+    setOpen(true);
+  }, [cancelClose]);
+
+  const scheduleClose = useCallback(() => {
+    cancelClose();
+    leaveTimerRef.current = setTimeout(() => setOpen(false), 220);
+  }, [cancelClose]);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (triggerRef.current?.contains(t) || panelRef.current?.contains(t)) return;
+      setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+
+  return { open, setOpen, cancelClose, scheduleClose, openMenu, triggerRef, panelRef };
+}
+
+function DesktopSocialsTrigger({
+  open,
+  onToggle,
+  pathname,
+}: {
+  open: boolean;
+  onToggle: () => void;
+  pathname: string;
+}) {
+  const socialActive = pathname.startsWith("/instagram") || pathname.startsWith("/youtube");
+  return (
+    <button
+      type="button"
+      aria-expanded={open}
+      aria-haspopup="true"
+      aria-controls="nav-socials-mega"
+      id="nav-socials-trigger"
+      onClick={onToggle}
+      className={`group relative flex items-center gap-1.5 rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
+        socialActive || open ? "text-blue-600" : "text-slate-800 hover:text-blue-600"
+      }`}
+    >
+      <span className="relative z-[2]">Socials</span>
+      <svg
+        width="12"
+        height="12"
+        viewBox="0 0 12 12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        aria-hidden
+      >
+        <path d="M2.5 4.5L6 8l3.5-3.5" />
+      </svg>
+      <span
+        className={`absolute inset-x-3 bottom-1 z-[2] h-[2px] origin-left rounded-full bg-blue-500 transition-transform duration-200 ${
+          socialActive || open ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+        }`}
+      />
+    </button>
+  );
+}
+
+function DesktopSocialsMegaPanel({ onLinkClick }: { onLinkClick: () => void }) {
+  return (
+    <div className="relative w-full overflow-hidden rounded-t-none rounded-b-2xl border-x-0 border-b border-t border-blue-100/90 bg-gradient-to-b from-white via-slate-50/95 to-blue-50/50 shadow-[0_24px_48px_-12px_rgba(30,58,138,0.18)]">
+      <div className="pointer-events-none absolute -left-20 top-0 h-72 w-72 rounded-full bg-blue-400/20 blur-3xl" aria-hidden />
+      <div className="pointer-events-none absolute -right-24 bottom-0 h-64 w-64 rounded-full bg-sky-300/15 blur-3xl" aria-hidden />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.4]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%2393c5fd' stroke-opacity='0.18'%3E%3Cpath d='M0 40h80M40 0v80'/%3E%3C/g%3E%3C/svg%3E")`,
+        }}
+        aria-hidden
+      />
+
+      <div className="relative mx-auto max-w-7xl px-6 py-8 sm:py-10 lg:px-10">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-stretch lg:gap-12">
+          <div className="max-w-md shrink-0 lg:w-[32%] lg:border-r lg:border-blue-100/90 lg:pr-10">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-blue-600">Socials</p>
+            <p className="mt-3 font-heading text-2xl font-black leading-tight tracking-tight text-slate-900 sm:text-3xl">
+              Where the work
+              <span className="block bg-gradient-to-r from-blue-800 via-blue-600 to-sky-600 bg-clip-text text-transparent">
+                lives in public.
+              </span>
+            </p>
+            <p className="mt-4 text-sm leading-relaxed text-slate-600">
+              Clips, films, and experiments from YourAILens. Pick a channel and dive in.
+            </p>
+            <div className="mt-6 hidden h-px w-full bg-gradient-to-r from-blue-200/80 via-transparent to-sky-200/60 sm:block lg:hidden" />
+          </div>
+
+          <div className="grid min-w-0 flex-1 gap-4 sm:grid-cols-2">
+            {SOCIAL_DESTINATIONS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                prefetch
+                onClick={onLinkClick}
+                className="group relative flex flex-col overflow-hidden rounded-2xl border border-blue-100/90 bg-white/90 p-5 shadow-sm shadow-blue-950/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-white hover:shadow-lg hover:shadow-blue-900/10"
+              >
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-50/80 via-white to-sky-50/50 opacity-90 transition-opacity group-hover:opacity-100" aria-hidden />
+                <div className="relative flex items-start justify-between gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-blue-100/90 bg-gradient-to-br from-slate-50 to-blue-100/90 text-blue-700 shadow-inner shadow-white/80">
+                    <SocialBrandIcon name={item.icon} />
+                  </div>
+                  <span className="rounded-full border border-blue-100/90 bg-blue-50/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-blue-700/80 transition-colors group-hover:border-blue-200 group-hover:bg-blue-100/80">
+                    Open
+                  </span>
+                </div>
+                <h3 className="relative mt-5 font-heading text-lg font-black text-slate-900">{item.label}</h3>
+                <p className="relative mt-2 text-sm leading-relaxed text-slate-600">{item.blurb}</p>
+                <span className="relative mt-4 inline-flex items-center gap-1 text-sm font-bold text-blue-600">
+                  Visit
+                  <span className="transition-transform group-hover:translate-x-0.5" aria-hidden>
+                    →
+                  </span>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Fallback before measure; real height set via ResizeObserver (fixed header needs a document-flow spacer). */
+const NAV_HEADER_FALLBACK_PX = 132;
+
 export default function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const [headerOffsetPx, setHeaderOffsetPx] = useState(NAV_HEADER_FALLBACK_PX);
+
+  useLayoutEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const update = () => setHeaderOffsetPx(el.getBoundingClientRect().height);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [pathname]);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 10);
@@ -305,45 +514,86 @@ export default function Navbar() {
 
   const closeIfSamePath = () => setMenuOpen(false);
 
+  const socialsMega = useSocialsMega(pathname);
+
   return (
     <>
-      {/* Announcement bar */}
-      <div className="relative z-50 bg-blue-600 py-2.5 text-center text-xs font-semibold text-white">
-        ✦ &nbsp;AI video campaigns delivered in 48 hours. &nbsp;
-        <AnnouncementContactLink />
-      </div>
-
-      {/* Main navbar */}
-      <nav className={`sticky top-0 z-50 bg-white transition-shadow duration-300 ${scrolled ? "shadow-md" : "shadow-sm"}`}>
-        <div className="h-[3px] w-full bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400" />
-
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
-          <div className="flex h-20 items-center justify-between gap-8">
-            <DesktopLogoLink />
-
-            <div className="hidden flex-1 items-center justify-center gap-1 lg:flex">
-              {NAV_LINKS.map((link) => (
-                <DesktopNavLink key={link.label} href={link.href} label={link.label} />
-              ))}
-            </div>
-
-            <div className="hidden shrink-0 items-center gap-3 lg:flex">
-              <DesktopContactCta />
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-xl border border-slate-200 lg:hidden"
-              aria-label="Toggle menu"
-            >
-              <span className={`h-[2px] w-5 rounded-full bg-slate-700 transition-all duration-300 ${menuOpen ? "translate-y-[7px] rotate-45" : ""}`} />
-              <span className={`h-[2px] w-5 rounded-full bg-slate-700 transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`} />
-              <span className={`h-[2px] w-5 rounded-full bg-slate-700 transition-all duration-300 ${menuOpen ? "-translate-y-[7px] -rotate-45" : ""}`} />
-            </button>
-          </div>
+      {/* fixed: sticky fails site-wide because html/body use overflow-x hidden */}
+      <header
+        ref={headerRef}
+        className={`fixed top-0 left-0 right-0 z-50 w-full transition-shadow duration-300 ${scrolled ? "shadow-md" : "shadow-sm"}`}
+      >
+        {/* Workshop teaser */}
+        <div className="bg-blue-600 py-2.5 text-center text-xs font-semibold text-white">
+          <span className="inline-flex flex-wrap items-center justify-center gap-x-1.5 px-2">
+            <span>✦ {WORKSHOP_TITLE}</span>
+            <AnnouncementWorkshopLink />
+          </span>
         </div>
-      </nav>
+
+        {/* Main navbar */}
+        <nav className="relative overflow-visible bg-white">
+          <div className="h-[3px] w-full bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400" />
+
+          <div className="mx-auto max-w-7xl px-6 lg:px-10">
+            <div className="flex h-20 items-center justify-between gap-8">
+              <DesktopLogoLink />
+
+              <div className="hidden flex-1 items-center justify-center gap-1 lg:flex">
+                {PRIMARY_NAV_LINKS.map((link) => (
+                  <DesktopNavLink key={link.label} href={link.href} label={link.label} />
+                ))}
+                <div
+                  ref={socialsMega.triggerRef}
+                  className="relative"
+                  onMouseEnter={socialsMega.openMenu}
+                  onMouseLeave={socialsMega.scheduleClose}
+                >
+                  <DesktopSocialsTrigger
+                    open={socialsMega.open}
+                    onToggle={() => socialsMega.setOpen((v) => !v)}
+                    pathname={pathname}
+                  />
+                </div>
+              </div>
+
+              <div className="hidden shrink-0 items-center gap-3 lg:flex">
+                <DesktopContactCta />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-xl border border-slate-200 lg:hidden"
+                aria-label="Toggle menu"
+              >
+                <span className={`h-[2px] w-5 rounded-full bg-slate-700 transition-all duration-300 ${menuOpen ? "translate-y-[7px] rotate-45" : ""}`} />
+                <span className={`h-[2px] w-5 rounded-full bg-slate-700 transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`} />
+                <span className={`h-[2px] w-5 rounded-full bg-slate-700 transition-all duration-300 ${menuOpen ? "-translate-y-[7px] -rotate-45" : ""}`} />
+              </button>
+            </div>
+          </div>
+
+          {/* Full viewport width, flush under the white bar (top-full = bottom of nav; no pt gap) */}
+          <div
+            ref={socialsMega.panelRef}
+            id="nav-socials-mega"
+            role="region"
+            aria-labelledby="nav-socials-trigger"
+            onMouseEnter={socialsMega.cancelClose}
+            onMouseLeave={socialsMega.scheduleClose}
+            aria-hidden={!socialsMega.open}
+            className={`absolute left-0 right-0 top-full z-[80] w-full min-w-0 transition-all duration-200 ease-out max-lg:hidden ${
+              socialsMega.open
+                ? "pointer-events-auto visible translate-y-0 opacity-100"
+                : "pointer-events-none invisible -translate-y-1 opacity-0"
+            }`}
+          >
+            <DesktopSocialsMegaPanel onLinkClick={() => socialsMega.setOpen(false)} />
+          </div>
+        </nav>
+      </header>
+      <div aria-hidden className="shrink-0" style={{ height: headerOffsetPx }} />
 
       {/* Mobile menu — above nav (z-50) so nothing stacks on top */}
       <div
@@ -368,9 +618,18 @@ export default function Navbar() {
           </div>
 
           <nav className="flex flex-col gap-1">
-            {NAV_LINKS.map((link) => (
+            {PRIMARY_NAV_LINKS.map((link) => (
               <MobileNavLink
                 key={link.label}
+                href={link.href}
+                label={link.label}
+                pathname={pathname}
+                onSamePathClose={closeIfSamePath}
+              />
+            ))}
+            {SOCIAL_DESTINATIONS.map((link) => (
+              <MobileNavLink
+                key={link.href}
                 href={link.href}
                 label={link.label}
                 pathname={pathname}
