@@ -5,6 +5,7 @@ import {
   workshopEarlyBirdDeadlineLabel,
   WORKSHOP_LIST_PRICE_INR,
   WORKSHOP_PRICE_INR,
+  WORKSHOP_SEATS_TOTAL,
 } from "@/lib/events/workshop-config";
 import type { WorkshopPublicSnapshot } from "@/lib/events/workshop-snapshot";
 import WorkshopEarlyBirdTimer from "./WorkshopEarlyBirdTimer";
@@ -21,7 +22,7 @@ export default function WorkshopPromoStrip({ snapshot }: { snapshot: WorkshopPub
             {snapshot.soldOut ? "Sold out" : `${snapshot.seatsLeft} seats left`}
           </span>
           <span className="text-blue-100/80">·</span>
-          <span className="font-semibold text-white/95">20 seats only</span>
+          <span className="font-semibold text-white/95">{WORKSHOP_SEATS_TOTAL} seats only</span>
         </div>
 
         <div className="hidden h-8 w-px bg-white/15 sm:block" aria-hidden />

@@ -8,18 +8,61 @@ import {
   workshopUpiId,
   workshopUpiPayeeName,
 } from "@/lib/events/workshop-config";
+import { getWorkshopVisualAssets } from "@/lib/events/load-workshop-assets";
 import { getWorkshopPublicSnapshot } from "@/lib/events/workshop-snapshot";
+import { pickFilmOgImage } from "@/lib/seo/og-image";
 
-export const metadata: Metadata = {
-  title: "AI Creator Workshop | YourAILens Studios",
-  description:
-    "Two day intensive: AI film workflows, prompts, tools, audio, shot lists, lip sync, plus YourAILens prompts and stock assets. Early bird ₹5,000 (list ₹9,000). April 29 and 30, 2026 · 7 to 11 PM IST.",
-  openGraph: {
-    title: "AI Creator Workshop | YourAILens Studios",
-    description: WORKSHOP_SUBTITLE,
-    url: "/events/ai-creator-workshop",
-  },
-};
+function siteUrl() {
+  return (process.env.PUBLIC_SITE_URL?.trim() || "https://yourailens.studio").replace(/\/+$/, "");
+}
+
+const WORKSHOP_PAGE_TITLE = "AI Creator Workshop | YourAILens Studios";
+const WORKSHOP_PAGE_DESCRIPTION =
+  "Two day intensive: AI film workflows, prompts, tools, audio, shot lists, lip sync, plus YourAILens prompts and stock assets. Early bird ₹5,000 (list ₹9,000). April 29 and 30, 2026 · 7 to 11 PM IST.";
+
+/** Same poster as hero video (first gallery film) — matches film page `pickFilmOgImage` behavior. */
+export async function generateMetadata(): Promise<Metadata> {
+  const assets = await getWorkshopVisualAssets();
+  const heroFilm = assets.films[0] ?? null;
+  const og = pickFilmOgImage(siteUrl(), heroFilm?.posterUrl);
+  const pageUrl = `${siteUrl()}/events/ai-creator-workshop`;
+
+  return {
+    metadataBase: process.env.PUBLIC_SITE_URL ? new URL(process.env.PUBLIC_SITE_URL) : undefined,
+    title: WORKSHOP_PAGE_TITLE,
+    description: WORKSHOP_PAGE_DESCRIPTION,
+    alternates: { canonical: pageUrl },
+    openGraph: {
+      title: WORKSHOP_PAGE_TITLE,
+      description: WORKSHOP_SUBTITLE,
+      url: pageUrl,
+      siteName: "YourAILens Studios",
+      type: "website",
+      locale: "en_US",
+      images: [
+        {
+          url: og.url,
+          alt: `${WORKSHOP_PAGE_TITLE} — preview`,
+          type: og.type,
+          ...(og.width != null && og.height != null ? { width: og.width, height: og.height } : {}),
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: WORKSHOP_PAGE_TITLE,
+      description: WORKSHOP_SUBTITLE,
+      images: [{ url: og.url, alt: WORKSHOP_PAGE_TITLE }],
+    },
+    other: {
+      "og:image:secure_url": og.url,
+      "og:image:type": og.type,
+      ...(og.width != null && og.height != null
+        ? { "og:image:width": String(og.width), "og:image:height": String(og.height) }
+        : {}),
+    },
+  };
+}
 
 export default async function AiCreatorWorkshopPage() {
   const snapshot = await getWorkshopPublicSnapshot();

@@ -31,8 +31,8 @@ export function isWorkshopEarlyBirdActive(now: Date = new Date()): boolean {
   return now <= end;
 }
 
-/** Capped in-person / online seats */
-export const WORKSHOP_SEATS_TOTAL = 20;
+/** Cohort size (seat cap) */
+export const WORKSHOP_SEATS_TOTAL = 10;
 
 /** Counts toward seat cap until cancelled (includes awaiting payment verification). */
 export const WORKSHOP_SEAT_HOLDING_STATUSES = [

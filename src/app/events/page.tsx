@@ -3,9 +3,6 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 import Navbar from "@/components/Navbar";
-import WorkshopInstagramRow from "@/components/events/WorkshopInstagramRow";
-import WorkshopMediaBento from "@/components/events/WorkshopMediaBento";
-import { getWorkshopVisualAssets } from "@/lib/events/load-workshop-assets";
 import {
   WORKSHOP_SUBTITLE,
   WORKSHOP_TITLE,
@@ -23,7 +20,6 @@ export const metadata: Metadata = {
 };
 
 export default async function EventsPage() {
-  const assets = await getWorkshopVisualAssets();
   const early = isWorkshopEarlyBirdActive();
   const pct = workshopDiscountPercentOff();
 
@@ -44,9 +40,6 @@ export default async function EventsPage() {
           </p>
         </div>
       </section>
-
-      <WorkshopMediaBento images={assets.images} films={assets.films} />
-      <WorkshopInstagramRow links={assets.instagram} />
 
       <section className="mx-auto max-w-4xl px-6 py-14 lg:px-10">
         <h2 className="font-heading text-sm font-bold uppercase tracking-[0.2em] text-slate-500">Upcoming</h2>

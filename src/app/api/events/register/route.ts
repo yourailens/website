@@ -98,7 +98,7 @@ export async function POST(request: Request) {
   const taken = await countTakenSeats(svc);
   if (taken >= WORKSHOP_SEATS_TOTAL) {
     return NextResponse.json(
-      { error: "This workshop is full (20 seats). Email us to join the waitlist." },
+      { error: `This workshop is full (${WORKSHOP_SEATS_TOTAL} seats). Email us to join the waitlist.` },
       { status: 409 }
     );
   }

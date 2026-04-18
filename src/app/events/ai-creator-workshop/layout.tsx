@@ -1,4 +1,5 @@
 import Link from "next/link";
+import CopyUrlButton from "@/components/CopyUrlButton";
 import Navbar from "@/components/Navbar";
 
 /** Fresh seat counts + gallery assets from Supabase */
@@ -43,14 +44,22 @@ export default async function AiCreatorWorkshopLayout({ children }: { children: 
               {workshopSessionTimeLabel()}
             </span>
           </p>
-          <p className="mt-6">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/events"
               className="text-[12px] font-semibold text-blue-200 underline-offset-4 transition hover:text-white hover:underline"
             >
               ← All events
             </Link>
-          </p>
+            <span className="text-blue-300/50" aria-hidden>
+              ·
+            </span>
+            <CopyUrlButton
+              idleLabel="Share event link"
+              copiedLabel="Link copied"
+              className="rounded-full border border-white/25 bg-white/10 px-4 py-2 text-[12px] font-semibold text-white backdrop-blur-sm transition hover:bg-white/20"
+            />
+          </div>
         </div>
       </section>
 

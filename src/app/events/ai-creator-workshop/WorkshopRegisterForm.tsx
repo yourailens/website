@@ -5,6 +5,7 @@ import {
   WORKSHOP_EVENT_SLUG,
   WORKSHOP_LIST_PRICE_INR,
   WORKSHOP_PRICE_INR,
+  WORKSHOP_SEATS_TOTAL,
   formatInr,
   workshopDiscountPercentOff,
   workshopEarlyBirdDeadlineLabel,
@@ -134,7 +135,7 @@ export default function WorkshopRegisterForm({
   if (soldOut) {
     return (
       <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center">
-        <p className="font-heading text-lg font-bold text-slate-900">All 20 seats are reserved.</p>
+        <p className="font-heading text-lg font-bold text-slate-900">All {WORKSHOP_SEATS_TOTAL} seats are reserved.</p>
         <p className="mt-2 text-sm text-slate-600">
           Follow{" "}
           <a href="https://instagram.com/yourailens" className="font-semibold text-blue-600 hover:underline" target="_blank" rel="noreferrer">
