@@ -93,10 +93,10 @@ export default function FilmDetailExperience({
       </div>
 
       {/* Frosted header — low-opacity tint + blur: video shows through, text stays readable */}
-      <header className="relative z-20 flex shrink-0 flex-wrap items-start justify-between gap-4 border-b border-white/10 bg-black/25 px-4 py-4 shadow-[0_4px_24px_rgba(0,0,0,0.18)] backdrop-blur-md sm:px-8 lg:px-12">
+      <header className="relative z-20 flex shrink-0 flex-wrap items-start justify-between gap-4 border-b border-white/10 bg-black/25 px-4 py-4 backdrop-blur-md sm:px-8 lg:px-12">
         <Link
           href="/films"
-          className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-black/20 px-4 py-2.5 text-sm font-semibold text-white shadow-sm backdrop-blur-sm transition hover:bg-black/35"
+          className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-black/20 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-black/35"
         >
           <span aria-hidden className="text-lg leading-none">
             ←
@@ -105,34 +105,26 @@ export default function FilmDetailExperience({
         </Link>
 
         <div className="min-w-0 flex-1 text-right sm:max-w-[min(100%,32rem)] sm:flex-none">
-          <h1
-            className="font-heading text-xl font-black leading-tight tracking-tight text-white sm:text-2xl lg:text-3xl"
-            style={{ textShadow: "0 1px 2px rgba(0,0,0,0.75), 0 2px 16px rgba(0,0,0,0.45)" }}
-          >
+          <h1 className="font-heading text-xl font-black leading-tight tracking-tight text-white sm:text-2xl lg:text-3xl">
             {film.title}
           </h1>
-          <p
-            className="mt-1 text-[11px] font-medium text-sky-50/95 sm:text-xs"
-            style={{ textShadow: "0 1px 3px rgba(0,0,0,0.7)" }}
-          >
+          <p className="mt-1 text-[11px] font-medium text-sky-50/95 sm:text-xs">
             {categoryLabel} · Clip {index + 1} of {total}
           </p>
           {film.peopleTags?.length ? (
-            <p className="mt-1.5 text-xs text-white/90" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.65)" }}>
-              {film.peopleTags.join(" · ")}
-            </p>
+            <p className="mt-1.5 text-xs text-white/90">{film.peopleTags.join(" · ")}</p>
           ) : null}
           <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
             <Link
               href={prevHref}
-              className="rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-sm font-semibold text-white shadow-sm backdrop-blur-sm transition hover:bg-black/40"
+              className="rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-black/40"
               aria-label="Previous film"
             >
               ←
             </Link>
             <Link
               href={nextHref}
-              className="rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-sm font-semibold text-white shadow-sm backdrop-blur-sm transition hover:bg-black/40"
+              className="rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-black/40"
               aria-label="Next film"
             >
               →
@@ -140,7 +132,7 @@ export default function FilmDetailExperience({
             <CopyUrlButton
               idleLabel="Copy link"
               copiedLabel="Copied"
-              className="rounded-xl border border-white/20 bg-black/25 px-4 py-2 text-sm font-semibold text-white shadow-sm backdrop-blur-sm transition hover:bg-black/40"
+              className="rounded-xl border border-white/20 bg-black/25 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-black/40"
             />
           </div>
         </div>

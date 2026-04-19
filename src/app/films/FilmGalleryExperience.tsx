@@ -271,7 +271,7 @@ export default function FilmGalleryExperience({ films }: { films: GalleryFilm[] 
                   ← Home
                 </Link>
                 <span className="rounded-full bg-black/35 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/80 ring-1 ring-white/15 backdrop-blur-sm">
-                  {total} films{heroLoopSrc ? " · muted loop" : ""}
+                  {total} films
                 </span>
               </div>
 
@@ -282,7 +282,6 @@ export default function FilmGalleryExperience({ films }: { films: GalleryFilm[] 
                 >
                   Films
                 </h1>
-                <p className="mt-3 text-base text-white/75 sm:text-lg">Hover to preview · Tap to open</p>
               </div>
             </div>
           </section>
