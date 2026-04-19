@@ -63,8 +63,17 @@ export default async function AiCreatorWorkshopLayout({ children }: { children: 
         </div>
       </section>
 
-      <WorkshopPromoStrip snapshot={snapshot} />
-      <WorkshopNav seatsLeft={snapshot.seatsLeft} soldOut={snapshot.soldOut} />
+      <section
+        aria-labelledby="workshop-event-deck-heading"
+        className="relative z-0 shadow-[0_20px_50px_-15px_rgba(15,23,42,0.45)]"
+      >
+        <h2 id="workshop-event-deck-heading" className="sr-only">
+          Workshop pricing, availability, and page navigation
+        </h2>
+        <WorkshopPromoStrip snapshot={snapshot} />
+        <WorkshopNav soldOut={snapshot.soldOut} />
+      </section>
+
       <WorkshopMediaBento images={assets.images} films={assets.films} />
       <WorkshopInstagramRow links={assets.instagram} />
 

@@ -3,10 +3,13 @@ import Link from "next/link";
 import WorkshopRegisterForm from "./WorkshopRegisterForm";
 import {
   WORKSHOP_SUBTITLE,
+  formatInr,
   workshopDateRangeLabel,
   workshopSessionTimeLabel,
   workshopUpiId,
   workshopUpiPayeeName,
+  WORKSHOP_LIST_PRICE_INR,
+  WORKSHOP_PRICE_INR,
 } from "@/lib/events/workshop-config";
 import { getWorkshopVisualAssets } from "@/lib/events/load-workshop-assets";
 import { getWorkshopPublicSnapshot } from "@/lib/events/workshop-snapshot";
@@ -17,8 +20,7 @@ function siteUrl() {
 }
 
 const WORKSHOP_PAGE_TITLE = "AI Creator Workshop | YourAILens Studios";
-const WORKSHOP_PAGE_DESCRIPTION =
-  "Two day intensive: AI film workflows, prompts, tools, audio, shot lists, lip sync, plus YourAILens prompts and stock assets. Early bird ₹5,000 (list ₹9,000). April 29 and 30, 2026 · 7 to 11 PM IST.";
+const WORKSHOP_PAGE_DESCRIPTION = `Two day intensive: AI film workflows, prompts, tools, audio, shot lists, lip sync, plus YourAILens prompts and stock assets. Early bird ${formatInr(WORKSHOP_PRICE_INR)} (list ${formatInr(WORKSHOP_LIST_PRICE_INR)}). April 29 and 30, 2026 · 7 to 11 PM IST.`;
 
 /** Same poster as hero video (first gallery film) — matches film page `pickFilmOgImage` behavior. */
 export async function generateMetadata(): Promise<Metadata> {
@@ -435,7 +437,8 @@ export default async function AiCreatorWorkshopPage() {
           <div>
             <dt className="font-bold text-slate-900">Pricing?</dt>
             <dd className="mt-1">
-              Early bird is <strong>₹5,000</strong> (list <span className="line-through">₹9,000</span>) for a limited window: see the banner
+              Early bird is <strong>{formatInr(WORKSHOP_PRICE_INR)}</strong> (list{" "}
+              <span className="line-through">{formatInr(WORKSHOP_LIST_PRICE_INR)}</span>) for a limited window: see the banner
               above. After that, standard list pricing applies.
             </dd>
           </div>
@@ -452,7 +455,6 @@ export default async function AiCreatorWorkshopPage() {
           <WorkshopRegisterForm
             soldOut={snapshot.soldOut}
             earlyBirdActive={snapshot.earlyBirdActive}
-            seatsLeft={snapshot.seatsLeft}
             upiId={workshopUpiId()}
             upiPayeeName={workshopUpiPayeeName()}
           />

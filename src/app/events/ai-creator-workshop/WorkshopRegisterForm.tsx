@@ -5,6 +5,7 @@ import {
   WORKSHOP_EVENT_SLUG,
   WORKSHOP_LIST_PRICE_INR,
   WORKSHOP_PRICE_INR,
+  WORKSHOP_SEATS_LEFT_DISPLAY,
   WORKSHOP_SEATS_TOTAL,
   formatInr,
   workshopDiscountPercentOff,
@@ -14,13 +15,11 @@ import {
 export default function WorkshopRegisterForm({
   soldOut,
   earlyBirdActive,
-  seatsLeft,
   upiId,
   upiPayeeName,
 }: {
   soldOut: boolean;
   earlyBirdActive: boolean;
-  seatsLeft: number;
   upiId: string;
   upiPayeeName: string;
 }) {
@@ -124,7 +123,7 @@ export default function WorkshopRegisterForm({
       <div className="rounded-2xl border border-blue-200 bg-blue-50/90 p-8 text-center shadow-inner shadow-blue-100">
         <p className="font-heading text-xl font-bold text-slate-900">Payment proof received</p>
         <p className="mt-3 text-sm leading-relaxed text-slate-800">
-          We’re verifying your payment. You’ll get an email shortly—this holds your spot while we confirm. After verification, we’ll send your
+          We’re verifying your payment. You’ll get an email shortly. This holds your spot while we confirm. After verification, we’ll send your
           full confirmation with workshop details.
         </p>
         {infoNote ? <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">{infoNote}</p> : null}
@@ -236,13 +235,21 @@ export default function WorkshopRegisterForm({
               </span>{" "}
               <span className="text-emerald-600">{formatInr(WORKSHOP_PRICE_INR)}</span>
             </p>
-            <p className="mt-1 text-[11px] text-slate-500">Ends {workshopEarlyBirdDeadlineLabel()} · {seatsLeft} seats left</p>
+            <p className="mt-1 text-[11px] text-slate-500">Ends {workshopEarlyBirdDeadlineLabel()}</p>
+            <p className="mt-2 inline-flex flex-wrap items-center justify-center gap-x-1.5 rounded-lg border border-emerald-200/70 bg-emerald-50/90 px-2.5 py-1.5 text-[11px] font-semibold text-emerald-950">
+              <span className="font-medium text-emerald-800/90">Availability</span>
+              <span>about {WORKSHOP_SEATS_LEFT_DISPLAY} spots left</span>
+            </p>
           </>
         ) : (
           <>
             <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">Standard rate</p>
             <p className="mt-1 font-heading text-2xl font-black text-slate-900">{formatInr(WORKSHOP_LIST_PRICE_INR)}</p>
-            <p className="mt-1 text-[11px] text-slate-500">per seat · {seatsLeft} left</p>
+            <p className="mt-1 text-[11px] text-slate-500">per seat</p>
+            <p className="mt-2 inline-flex flex-wrap items-center justify-center gap-x-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-[11px] font-semibold text-slate-800">
+              <span className="font-medium text-slate-600">Availability</span>
+              <span>about {WORKSHOP_SEATS_LEFT_DISPLAY} spots left</span>
+            </p>
           </>
         )}
       </div>

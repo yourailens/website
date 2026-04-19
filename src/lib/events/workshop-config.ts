@@ -13,9 +13,11 @@ export const WORKSHOP_END_ISO = "2026-04-30";
 /** Early bird ends end of day IST before the first session */
 export const WORKSHOP_EARLY_BIRD_END_ISO = "2026-04-27T23:59:59+05:30";
 
-export const WORKSHOP_PRICE_INR = 5000;
+/** Early bird (discounted) fee */
+export const WORKSHOP_PRICE_INR = 3000;
 
-export const WORKSHOP_LIST_PRICE_INR = 9000;
+/** Standard / list price after early bird ends */
+export const WORKSHOP_LIST_PRICE_INR = 5000;
 
 /** Whole-number discount vs list price */
 export function workshopDiscountPercentOff(): number {
@@ -31,8 +33,11 @@ export function isWorkshopEarlyBirdActive(now: Date = new Date()): boolean {
   return now <= end;
 }
 
-/** Cohort size (seat cap) */
-export const WORKSHOP_SEATS_TOTAL = 10;
+/** Cohort size (seat cap) — used for registration limits and “sold out” logic */
+export const WORKSHOP_SEATS_TOTAL = 20;
+
+/** Shown in UI as “seats left” (marketing); real availability still uses WORKSHOP_SEATS_TOTAL */
+export const WORKSHOP_SEATS_LEFT_DISPLAY = 10;
 
 /** Counts toward seat cap until cancelled (includes awaiting payment verification). */
 export const WORKSHOP_SEAT_HOLDING_STATUSES = [
