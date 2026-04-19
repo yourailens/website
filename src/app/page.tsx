@@ -480,18 +480,45 @@ export default function Home() {
     return startCanvasRenderer(vid, canvas);
   }, []);
 
+  // Canvas copy of video frames fails on many mobile browsers (black tile). Only run on lg+.
   useEffect(() => {
-    const vid = showcaseVideoRef.current;
-    const canvas = showcaseCanvasRef.current;
-    if (!vid || !canvas) return;
-    return startCanvasRenderer(vid, canvas);
+    const mq = window.matchMedia("(min-width: 1024px)");
+    let teardown: (() => void) | undefined;
+    const attach = () => {
+      teardown?.();
+      teardown = undefined;
+      if (!mq.matches) return;
+      const vid = showcaseVideoRef.current;
+      const canvas = showcaseCanvasRef.current;
+      if (!vid || !canvas) return;
+      teardown = startCanvasRenderer(vid, canvas);
+    };
+    attach();
+    mq.addEventListener("change", attach);
+    return () => {
+      mq.removeEventListener("change", attach);
+      teardown?.();
+    };
   }, []);
 
   useEffect(() => {
-    const vid = cs2VideoRef.current;
-    const canvas = cs2CanvasRef.current;
-    if (!vid || !canvas) return;
-    return startCanvasRenderer(vid, canvas);
+    const mq = window.matchMedia("(min-width: 1024px)");
+    let teardown: (() => void) | undefined;
+    const attach = () => {
+      teardown?.();
+      teardown = undefined;
+      if (!mq.matches) return;
+      const vid = cs2VideoRef.current;
+      const canvas = cs2CanvasRef.current;
+      if (!vid || !canvas) return;
+      teardown = startCanvasRenderer(vid, canvas);
+    };
+    attach();
+    mq.addEventListener("change", attach);
+    return () => {
+      mq.removeEventListener("change", attach);
+      teardown?.();
+    };
   }, []);
 
   // Why AI section — Card 1 blurred background
@@ -834,13 +861,17 @@ export default function Home() {
             {/* Hidden video feeds the canvas */}
             <video
               ref={showcaseVideoRef}
-              autoPlay muted loop playsInline preload="auto"
-              style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              className="pointer-events-none absolute z-[1] h-full w-full object-cover opacity-100 max-lg:inset-0 lg:left-0 lg:top-0 lg:z-0 lg:h-px lg:w-px lg:opacity-0"
             >
               <source src="/videos/v04.mp4" type="video/mp4" />
             </video>
-            {/* Canvas draws from CPU memory — zero flash */}
-            <canvas ref={showcaseCanvasRef} className="absolute inset-0 h-full w-full" style={{ display: "block" }} />
+            {/* Desktop only: canvas avoids macOS GPU layer flash; mobile uses full native video above */}
+            <canvas ref={showcaseCanvasRef} className="absolute inset-0 z-[1] hidden h-full w-full lg:block" />
           </div>
           {/* 2nd item — cologne.png, right next to first video */}
           <div className="relative h-56 w-80 shrink-0 overflow-hidden rounded-2xl shadow-lg lg:h-64 lg:w-[420px]">
@@ -851,11 +882,18 @@ export default function Home() {
           <div className="relative h-56 w-80 shrink-0 overflow-hidden rounded-2xl shadow-lg lg:h-64 lg:w-[420px]">
             <Image src="/images/shoe.png" alt="" fill className="object-cover"
               style={{ filter: "blur(12px) brightness(0.6)", transform: "scale(1.08)" }} />
-            <video ref={cs2VideoRef} autoPlay muted loop playsInline preload="auto"
-              style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }}>
+            <video
+              ref={cs2VideoRef}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              className="pointer-events-none absolute z-[1] h-full w-full object-cover opacity-100 max-lg:inset-0 lg:left-0 lg:top-0 lg:z-0 lg:h-px lg:w-px lg:opacity-0"
+            >
               <source src="/videos/cs2.mp4" type="video/mp4" />
             </video>
-            <canvas ref={cs2CanvasRef} className="absolute inset-0 h-full w-full" style={{ display: "block" }} />
+            <canvas ref={cs2CanvasRef} className="absolute inset-0 z-[1] hidden h-full w-full lg:block" />
           </div>
 
           {/* Remaining image cards */}

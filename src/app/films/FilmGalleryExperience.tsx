@@ -21,6 +21,58 @@ const noDownloadVideoProps = {
   onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
 };
 
+/** Muted inline preview: iOS often shows a black frame until play(); IO avoids decoding every card at once. */
+function FilmCardPreviewVideo({
+  src,
+  type,
+  posterUrl,
+}: {
+  src: string;
+  type: string;
+  posterUrl?: string;
+}) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const root = wrapRef.current;
+    const v = videoRef.current;
+    if (!root || !v) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const ent of entries) {
+          if (ent.isIntersecting) {
+            void v.play().catch(() => {});
+          } else {
+            v.pause();
+          }
+        }
+      },
+      { threshold: 0.12, rootMargin: "80px 0px" }
+    );
+    io.observe(root);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <div ref={wrapRef} className="absolute inset-0">
+      <video
+        ref={videoRef}
+        className="absolute inset-0 h-full w-full object-cover object-center transition duration-500 ease-out will-change-transform group-hover:scale-[1.03]"
+        muted
+        loop
+        playsInline
+        preload="auto"
+        poster={posterUrl || undefined}
+        {...noDownloadVideoProps}
+      >
+        <source src={src} type={type} />
+      </video>
+    </div>
+  );
+}
+
 function useTheaterAmbientMirror(
   open: number | null,
   theaterRef: RefObject<HTMLVideoElement | null>,
@@ -282,16 +334,11 @@ export default function FilmGalleryExperience({ films }: { films: GalleryFilm[] 
                       style={{ animationDelay: `${Math.min(rowPos, 12) * 30}ms` }}
                     >
                       <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
-                        <video
-                          className="absolute inset-0 h-full w-full object-cover object-center transition duration-500 ease-out will-change-transform group-hover:scale-[1.03]"
-                          muted
-                          loop
-                          playsInline
-                          preload="metadata"
-                          {...noDownloadVideoProps}
-                        >
-                          <source src={film.src} type={videoType(film.src)} />
-                        </video>
+                        <FilmCardPreviewVideo
+                          src={film.src}
+                          type={videoType(film.src)}
+                          posterUrl={film.posterUrl}
+                        />
                         <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
                         {portrait ? (
                           <span className="absolute left-3 top-3 z-[2] rounded border border-white/25 bg-black/55 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white/95 backdrop-blur-sm">
