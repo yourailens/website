@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type RefObject } from "react";
 import FAQAccordion from "@/components/FAQAccordion";
 import Navbar from "@/components/Navbar";
 
@@ -116,6 +116,100 @@ const TESTIMONIALS = [
 ];
 
 const BANNER_WORDS = ["Marketing", "Branding", "Campaigns", "Films", "Ads"];
+
+/** Hidden 1×1 feeder + canvas draws black on mobile Safari; full-bleed video below lg fixes it. */
+const LG_VIDEO_FEEDER =
+  "pointer-events-none absolute z-[1] h-full w-full object-cover opacity-100 max-lg:inset-0 lg:left-0 lg:top-0 lg:z-0 lg:h-px lg:w-px lg:opacity-0";
+
+const LG_CANVAS_LAYER = "absolute inset-0 z-[1] hidden h-full w-full lg:block";
+
+function startCanvasRenderer(vid: HTMLVideoElement, canvas: HTMLCanvasElement) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return () => {};
+
+  let rafId: number;
+
+  const syncSize = () => {
+    const p = canvas.parentElement;
+    if (p) {
+      canvas.width = p.clientWidth;
+      canvas.height = p.clientHeight;
+    }
+  };
+
+  const draw = () => {
+    if (vid.readyState >= 2 && canvas.width && canvas.height) {
+      const vw = vid.videoWidth;
+      const vh = vid.videoHeight;
+      const cw = canvas.width;
+      const ch = canvas.height;
+      if (vw && vh) {
+        const vR = vw / vh;
+        const cR = cw / ch;
+        let sx = 0;
+        let sy = 0;
+        let sw = vw;
+        let sh = vh;
+        if (vR > cR) {
+          sw = vh * cR;
+          sx = (vw - sw) / 2;
+        } else {
+          sh = vw / cR;
+          sy = (vh - sh) / 2;
+        }
+        ctx.drawImage(vid, sx, sy, sw, sh, 0, 0, cw, ch);
+      }
+    }
+    rafId = requestAnimationFrame(draw);
+  };
+
+  const ensurePlaying = () => {
+    if (vid.paused) void vid.play().catch(() => {});
+  };
+  const onVisibility = () => {
+    if (document.visibilityState === "visible") ensurePlaying();
+  };
+
+  syncSize();
+  window.addEventListener("resize", syncSize);
+  vid.addEventListener("pause", ensurePlaying);
+  document.addEventListener("visibilitychange", onVisibility);
+  window.addEventListener("focus", ensurePlaying);
+  rafId = requestAnimationFrame(draw);
+
+  return () => {
+    cancelAnimationFrame(rafId);
+    window.removeEventListener("resize", syncSize);
+    vid.removeEventListener("pause", ensurePlaying);
+    document.removeEventListener("visibilitychange", onVisibility);
+    window.removeEventListener("focus", ensurePlaying);
+  };
+}
+
+function useLgCanvasLoop(
+  videoRef: RefObject<HTMLVideoElement | null>,
+  canvasRef: RefObject<HTMLCanvasElement | null>
+) {
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    let teardown: (() => void) | undefined;
+    const attach = () => {
+      teardown?.();
+      teardown = undefined;
+      if (!mq.matches) return;
+      const vid = videoRef.current;
+      const canvas = canvasRef.current;
+      if (!vid || !canvas) return;
+      teardown = startCanvasRenderer(vid, canvas);
+    };
+    attach();
+    mq.addEventListener("change", attach);
+    return () => {
+      mq.removeEventListener("change", attach);
+      teardown?.();
+    };
+  }, [videoRef, canvasRef]);
+}
 
 function SliderCTA() {
   const THUMB = 56;
@@ -413,161 +507,16 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-
-  // Canvas renderer — draws video frames into a canvas element.
-  // Canvas keeps its pixel buffer in CPU memory, so it NEVER flashes
-  // white when macOS discards the GPU compositing layer on window switch.
-  const startCanvasRenderer = (
-    vid: HTMLVideoElement,
-    canvas: HTMLCanvasElement
-  ) => {
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return () => {};
-
-    let rafId: number;
-
-    const syncSize = () => {
-      const p = canvas.parentElement;
-      if (p) { canvas.width = p.clientWidth; canvas.height = p.clientHeight; }
-    };
-
-    const draw = () => {
-      if (vid.readyState >= 2 && canvas.width && canvas.height) {
-        const vw = vid.videoWidth, vh = vid.videoHeight;
-        const cw = canvas.width, ch = canvas.height;
-        if (vw && vh) {
-          // Replicate object-fit: cover
-          const vR = vw / vh, cR = cw / ch;
-          let sx = 0, sy = 0, sw = vw, sh = vh;
-          if (vR > cR) { sw = vh * cR; sx = (vw - sw) / 2; }
-          else         { sh = vw / cR; sy = (vh - sh) / 2; }
-          ctx.drawImage(vid, sx, sy, sw, sh, 0, 0, cw, ch);
-        }
-      }
-      rafId = requestAnimationFrame(draw);
-    };
-
-    const ensurePlaying = () => { if (vid.paused) vid.play().catch(() => {}); };
-    const onVisibility = () => { if (document.visibilityState === "visible") ensurePlaying(); };
-
-    syncSize();
-    window.addEventListener("resize", syncSize);
-    vid.addEventListener("pause", ensurePlaying);
-    document.addEventListener("visibilitychange", onVisibility);
-    window.addEventListener("focus", ensurePlaying);
-    rafId = requestAnimationFrame(draw);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener("resize", syncSize);
-      vid.removeEventListener("pause", ensurePlaying);
-      document.removeEventListener("visibilitychange", onVisibility);
-      window.removeEventListener("focus", ensurePlaying);
-    };
-  };
-
-  useEffect(() => {
-    const vid = heroBgVideoRef.current;
-    const canvas = heroBgCanvasRef.current;
-    if (!vid || !canvas) return;
-    return startCanvasRenderer(vid, canvas);
-  }, []);
-
-  useEffect(() => {
-    const vid = heroVideoRef.current;
-    const canvas = heroCanvasRef.current;
-    if (!vid || !canvas) return;
-    return startCanvasRenderer(vid, canvas);
-  }, []);
-
-  // Canvas copy of video frames fails on many mobile browsers (black tile). Only run on lg+.
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    let teardown: (() => void) | undefined;
-    const attach = () => {
-      teardown?.();
-      teardown = undefined;
-      if (!mq.matches) return;
-      const vid = showcaseVideoRef.current;
-      const canvas = showcaseCanvasRef.current;
-      if (!vid || !canvas) return;
-      teardown = startCanvasRenderer(vid, canvas);
-    };
-    attach();
-    mq.addEventListener("change", attach);
-    return () => {
-      mq.removeEventListener("change", attach);
-      teardown?.();
-    };
-  }, []);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    let teardown: (() => void) | undefined;
-    const attach = () => {
-      teardown?.();
-      teardown = undefined;
-      if (!mq.matches) return;
-      const vid = cs2VideoRef.current;
-      const canvas = cs2CanvasRef.current;
-      if (!vid || !canvas) return;
-      teardown = startCanvasRenderer(vid, canvas);
-    };
-    attach();
-    mq.addEventListener("change", attach);
-    return () => {
-      mq.removeEventListener("change", attach);
-      teardown?.();
-    };
-  }, []);
-
-  // Why AI section — Card 1 blurred background
-  useEffect(() => {
-    const vid = whyBgVideoRef.current;
-    const canvas = whyBgCanvasRef.current;
-    if (!vid || !canvas) return;
-    return startCanvasRenderer(vid, canvas);
-  }, []);
-
-  // Why AI section — Card 1 sharp foreground
-  useEffect(() => {
-    const vid = whyFgVideoRef.current;
-    const canvas = whyFgCanvasRef.current;
-    if (!vid || !canvas) return;
-    return startCanvasRenderer(vid, canvas);
-  }, []);
-
-  // Why AI section — Card 2 blurred background
-  useEffect(() => {
-    const vid = whyC2BgVideoRef.current;
-    const canvas = whyC2BgCanvasRef.current;
-    if (!vid || !canvas) return;
-    return startCanvasRenderer(vid, canvas);
-  }, []);
-
-  // Why AI section — Card 2 sharp foreground
-  useEffect(() => {
-    const vid = whyC2FgVideoRef.current;
-    const canvas = whyC2FgCanvasRef.current;
-    if (!vid || !canvas) return;
-    return startCanvasRenderer(vid, canvas);
-  }, []);
-
-  // Why AI section — Card 3 audio (visual only; audio comes from hidden video)
-  useEffect(() => {
-    const vid = audioCardVideoRef.current;
-    const canvas = audioCardCanvasRef.current;
-    if (!vid || !canvas) return;
-    return startCanvasRenderer(vid, canvas);
-  }, []);
-
-  // Why AI — "next frontier" card (sync1.mov)
-  useEffect(() => {
-    const vid = syncVideoRef.current;
-    const canvas = syncCanvasRef.current;
-    if (!vid || !canvas) return;
-    return startCanvasRenderer(vid, canvas);
-  }, []);
+  useLgCanvasLoop(heroBgVideoRef, heroBgCanvasRef);
+  useLgCanvasLoop(heroVideoRef, heroCanvasRef);
+  useLgCanvasLoop(showcaseVideoRef, showcaseCanvasRef);
+  useLgCanvasLoop(cs2VideoRef, cs2CanvasRef);
+  useLgCanvasLoop(whyBgVideoRef, whyBgCanvasRef);
+  useLgCanvasLoop(whyFgVideoRef, whyFgCanvasRef);
+  useLgCanvasLoop(whyC2BgVideoRef, whyC2BgCanvasRef);
+  useLgCanvasLoop(whyC2FgVideoRef, whyC2FgCanvasRef);
+  useLgCanvasLoop(audioCardVideoRef, audioCardCanvasRef);
+  useLgCanvasLoop(syncVideoRef, syncCanvasRef);
 
   return (
     <div className="min-h-screen bg-white">
@@ -690,13 +639,23 @@ export default function Home() {
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section className="relative flex min-h-[94vh] flex-col overflow-hidden lg:min-h-screen">
 
-        {/* Background canvas — visible but softened */}
-        <video ref={heroBgVideoRef} autoPlay muted loop playsInline preload="auto"
-          style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }}>
+        {/* Background: desktop = canvas (macOS GPU); mobile = native video (Safari black-tile fix) */}
+        <video
+          ref={heroBgVideoRef}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          className={`${LG_VIDEO_FEEDER} max-lg:blur-xl max-lg:brightness-[0.6] max-lg:saturate-[1.4] max-lg:scale-[1.08]`}
+        >
           <source src="/videos/sd1.mp4" type="video/mp4" />
         </video>
-        <canvas ref={heroBgCanvasRef} className="absolute inset-0 h-full w-full"
-          style={{ display: "block", filter: "blur(10px) brightness(0.6) saturate(1.4)", transform: "scale(1.08)" }} />
+        <canvas
+          ref={heroBgCanvasRef}
+          className={LG_CANVAS_LAYER}
+          style={{ filter: "blur(10px) brightness(0.6) saturate(1.4)", transform: "scale(1.08)" }}
+        />
 
         {/* Overlays */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/15 to-black/70" />
@@ -780,17 +739,27 @@ export default function Home() {
 
           {/* ── RIGHT column — video ── */}
           <div className="w-full lg:w-[48%]">
-            <div className="relative overflow-hidden rounded-[1.5rem] shadow-2xl shadow-black/60 ring-1 ring-white/10 lg:rounded-[2rem]"
-              style={{ backgroundColor: "#0f172a" }}>
-              <video ref={heroVideoRef} autoPlay muted loop playsInline preload="auto"
-                style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }}>
-              <source src="/videos/sd1.mp4" type="video/mp4" />
-            </video>
-              <canvas ref={heroCanvasRef} className="aspect-[4/3] w-full lg:aspect-[4/5]"
-                style={{ display: "block" }} />
-              <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black/50 to-transparent" />
+            <div
+              className="relative overflow-hidden rounded-[1.5rem] shadow-2xl shadow-black/60 ring-1 ring-white/10 lg:rounded-[2rem]"
+              style={{ backgroundColor: "#0f172a" }}
+            >
+              <div className="relative aspect-[4/3] w-full lg:aspect-[4/5]">
+                <video
+                  ref={heroVideoRef}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  className={LG_VIDEO_FEEDER}
+                >
+                  <source src="/videos/sd1.mp4" type="video/mp4" />
+                </video>
+                <canvas ref={heroCanvasRef} className={LG_CANVAS_LAYER} />
+              </div>
+              <div className="absolute inset-x-0 top-0 z-[2] h-12 bg-gradient-to-b from-black/50 to-transparent" />
+            </div>
           </div>
-        </div>
 
         </div>
 
@@ -859,19 +828,10 @@ export default function Home() {
             <Image src="/images/ai_avatar1.jpeg" alt="" fill className="object-cover"
               style={{ filter: "blur(12px) brightness(0.6) saturate(1.2)", transform: "scale(1.08)" }} />
             {/* Hidden video feeds the canvas */}
-            <video
-              ref={showcaseVideoRef}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              className="pointer-events-none absolute z-[1] h-full w-full object-cover opacity-100 max-lg:inset-0 lg:left-0 lg:top-0 lg:z-0 lg:h-px lg:w-px lg:opacity-0"
-            >
+            <video ref={showcaseVideoRef} autoPlay muted loop playsInline preload="auto" className={LG_VIDEO_FEEDER}>
               <source src="/videos/v04.mp4" type="video/mp4" />
             </video>
-            {/* Desktop only: canvas avoids macOS GPU layer flash; mobile uses full native video above */}
-            <canvas ref={showcaseCanvasRef} className="absolute inset-0 z-[1] hidden h-full w-full lg:block" />
+            <canvas ref={showcaseCanvasRef} className={LG_CANVAS_LAYER} />
           </div>
           {/* 2nd item — cologne.png, right next to first video */}
           <div className="relative h-56 w-80 shrink-0 overflow-hidden rounded-2xl shadow-lg lg:h-64 lg:w-[420px]">
@@ -882,18 +842,10 @@ export default function Home() {
           <div className="relative h-56 w-80 shrink-0 overflow-hidden rounded-2xl shadow-lg lg:h-64 lg:w-[420px]">
             <Image src="/images/shoe.png" alt="" fill className="object-cover"
               style={{ filter: "blur(12px) brightness(0.6)", transform: "scale(1.08)" }} />
-            <video
-              ref={cs2VideoRef}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              className="pointer-events-none absolute z-[1] h-full w-full object-cover opacity-100 max-lg:inset-0 lg:left-0 lg:top-0 lg:z-0 lg:h-px lg:w-px lg:opacity-0"
-            >
+            <video ref={cs2VideoRef} autoPlay muted loop playsInline preload="auto" className={LG_VIDEO_FEEDER}>
               <source src="/videos/cs2.mp4" type="video/mp4" />
             </video>
-            <canvas ref={cs2CanvasRef} className="absolute inset-0 z-[1] hidden h-full w-full lg:block" />
+            <canvas ref={cs2CanvasRef} className={LG_CANVAS_LAYER} />
           </div>
 
           {/* Remaining image cards */}
@@ -1133,27 +1085,31 @@ export default function Home() {
 
             {/* Card 1 — Cinematic Video */}
             <div className="relative overflow-hidden rounded-3xl shadow-2xl shadow-blue-200">
-              {/* Hidden source video — blurred bg */}
-              <video ref={whyBgVideoRef} autoPlay muted loop playsInline preload="auto"
-                style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }}>
+              {/* Blurred bg: canvas on lg+, full video on mobile */}
+              <video
+                ref={whyBgVideoRef}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                className={`${LG_VIDEO_FEEDER} max-lg:blur-[14px] max-lg:brightness-[0.4] max-lg:saturate-[1.3] max-lg:scale-[1.07]`}
+              >
                 <source src="/videos/v2.mov" type="video/mp4" />
               </video>
-              {/* Canvas renders frames — never flashes on window switch */}
               <canvas
                 ref={whyBgCanvasRef}
-                className="absolute inset-0 h-full w-full"
-                style={{ filter: "blur(14px) brightness(0.4) saturate(1.3)", transform: "scale(1.07)", display: "block" }}
+                className={LG_CANVAS_LAYER}
+                style={{ filter: "blur(14px) brightness(0.4) saturate(1.3)", transform: "scale(1.07)" }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
               <div className="relative flex flex-col px-6 pb-0 pt-7 lg:px-8">
                 <div className="w-full overflow-hidden rounded-2xl shadow-2xl shadow-black/50">
-                  {/* Hidden source video — sharp foreground */}
-                  <video ref={whyFgVideoRef} autoPlay muted loop playsInline preload="auto"
-                    style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }}>
-                    <source src="/videos/v2.mov" type="video/mp4" />
-                  </video>
                   <div className="relative aspect-video w-full">
-                    <canvas ref={whyFgCanvasRef} className="absolute inset-0 h-full w-full" style={{ display: "block" }} />
+                    <video ref={whyFgVideoRef} autoPlay muted loop playsInline preload="auto" className={LG_VIDEO_FEEDER}>
+                      <source src="/videos/v2.mov" type="video/mp4" />
+                    </video>
+                    <canvas ref={whyFgCanvasRef} className={LG_CANVAS_LAYER} />
                   </div>
                 </div>
               </div>
@@ -1174,26 +1130,30 @@ export default function Home() {
 
             {/* Card 2 — Visuals (ws3.mp4) */}
             <div className="relative overflow-hidden rounded-3xl shadow-2xl shadow-blue-100">
-              {/* Hidden source — blurred bg */}
-              <video ref={whyC2BgVideoRef} autoPlay muted loop playsInline preload="auto"
-                style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }}>
+              <video
+                ref={whyC2BgVideoRef}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                className={`${LG_VIDEO_FEEDER} max-lg:blur-[14px] max-lg:brightness-[0.4] max-lg:saturate-[1.2] max-lg:scale-[1.07]`}
+              >
                 <source src="/videos/ws3.mp4" type="video/mp4" />
               </video>
               <canvas
                 ref={whyC2BgCanvasRef}
-                className="absolute inset-0 h-full w-full"
-                style={{ filter: "blur(14px) brightness(0.4) saturate(1.2)", transform: "scale(1.07)", display: "block" }}
+                className={LG_CANVAS_LAYER}
+                style={{ filter: "blur(14px) brightness(0.4) saturate(1.2)", transform: "scale(1.07)" }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
               <div className="relative flex flex-col px-6 pb-0 pt-7 lg:px-8">
                 <div className="w-full overflow-hidden rounded-2xl shadow-2xl shadow-black/50">
-                  {/* Hidden source — sharp foreground */}
-                  <video ref={whyC2FgVideoRef} autoPlay muted loop playsInline preload="auto"
-                    style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }}>
-                    <source src="/videos/ws3.mp4" type="video/mp4" />
-                  </video>
                   <div className="relative aspect-video w-full">
-                    <canvas ref={whyC2FgCanvasRef} className="absolute inset-0 h-full w-full" style={{ display: "block" }} />
+                    <video ref={whyC2FgVideoRef} autoPlay muted loop playsInline preload="auto" className={LG_VIDEO_FEEDER}>
+                      <source src="/videos/ws3.mp4" type="video/mp4" />
+                    </video>
+                    <canvas ref={whyC2FgCanvasRef} className={LG_CANVAS_LAYER} />
                   </div>
                 </div>
               </div>
@@ -1213,7 +1173,6 @@ export default function Home() {
             {/* Card 3 — Audio */}
             {/* Card 3 — Audio (full-cover video) */}
             <div className="relative overflow-hidden rounded-3xl shadow-xl" style={{ minHeight: 420 }}>
-              {/* Hidden video — source of frames AND audio */}
               <video
                 ref={audioCardVideoRef}
                 autoPlay
@@ -1221,16 +1180,11 @@ export default function Home() {
                 loop
                 playsInline
                 preload="auto"
-                style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }}
+                className={LG_VIDEO_FEEDER}
               >
                 <source src="/videos/cs3.mov" type="video/mp4" />
               </video>
-              {/* Canvas renders frames — never flashes on window switch */}
-              <canvas
-                ref={audioCardCanvasRef}
-                className="absolute inset-0 h-full w-full"
-                style={{ display: "block" }}
-              />
+              <canvas ref={audioCardCanvasRef} className={LG_CANVAS_LAYER} />
 
               {/* Dark gradient behind text */}
               <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
@@ -1299,15 +1253,21 @@ export default function Home() {
 
             {/* Card 4 — Beyond */}
             <div className="relative overflow-hidden rounded-3xl shadow-xl" style={{ backgroundColor: "#0f172a" }}>
-              {/* Blurred video background */}
-              <video ref={syncVideoRef} autoPlay muted loop playsInline preload="auto"
-                style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }}>
+              <video
+                ref={syncVideoRef}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                className={`${LG_VIDEO_FEEDER} max-lg:brightness-[0.45] max-lg:saturate-[1.2]`}
+              >
                 <source src="/videos/sync1.mov" type="video/mp4" />
               </video>
               <canvas
                 ref={syncCanvasRef}
-                className="absolute inset-0 h-full w-full"
-                style={{ display: "block", filter: "brightness(0.45) saturate(1.2)", objectFit: "cover" }}
+                className={LG_CANVAS_LAYER}
+                style={{ filter: "brightness(0.45) saturate(1.2)" }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
 
