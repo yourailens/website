@@ -117,11 +117,11 @@ const TESTIMONIALS = [
 
 const BANNER_WORDS = ["Marketing", "Branding", "Campaigns", "Films", "Ads"];
 
-/** Hidden 1×1 feeder + canvas draws black on mobile Safari; full-bleed video below lg fixes it. */
+/** Hidden 1×1 feeder + canvas (Safari); full-bleed video below lg. Background layers z-0 so copy stacks above. */
 const LG_VIDEO_FEEDER =
-  "pointer-events-none absolute z-[1] h-full w-full object-cover opacity-100 max-lg:inset-0 lg:left-0 lg:top-0 lg:z-0 lg:h-px lg:w-px lg:opacity-0";
+  "pointer-events-none absolute z-0 h-full w-full object-cover opacity-100 max-lg:inset-0 lg:left-0 lg:top-0 lg:z-0 lg:h-px lg:w-px lg:opacity-0";
 
-const LG_CANVAS_LAYER = "absolute inset-0 z-[1] hidden h-full w-full lg:block";
+const LG_CANVAS_LAYER = "absolute inset-0 z-0 hidden h-full w-full lg:block";
 
 function startCanvasRenderer(vid: HTMLVideoElement, canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext("2d");
