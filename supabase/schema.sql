@@ -119,3 +119,41 @@ drop policy if exists "Public insert call_bookings" on public.call_bookings;
 create policy "Public insert call_bookings" on public.call_bookings for insert with check (true);
 
 -- Writes go through Next.js API with service role (bypasses RLS). No insert policies for anon.
+
+-- Avatar character pages (see migration 014_avatar_characters.sql for full seed + indexes)
+create table if not exists public.avatar_characters (
+  slug text primary key check (slug in ('kaira', 'akriti', 'niharika', 'akanksha')),
+  display_name text not null,
+  headline text not null default '',
+  story text not null default '',
+  hero_image_url text,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.avatar_character_images (
+  id uuid primary key default gen_random_uuid(),
+  character_slug text not null references public.avatar_characters (slug) on delete cascade,
+  public_url text not null,
+  sort_order int not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists avatar_character_images_slug_sort
+  on public.avatar_character_images (character_slug, sort_order);
+
+alter table public.avatar_characters enable row level security;
+alter table public.avatar_character_images enable row level security;
+
+drop policy if exists "Public read avatar_characters" on public.avatar_characters;
+create policy "Public read avatar_characters" on public.avatar_characters for select using (true);
+
+drop policy if exists "Public read avatar_character_images" on public.avatar_character_images;
+create policy "Public read avatar_character_images" on public.avatar_character_images for select using (true);
+
+insert into public.avatar_characters (slug, display_name, headline, story)
+values
+  ('kaira', 'Kaira', 'Sweet, soft, and quietly feminine.', 'Kaira shapes how stories look and feel on screen. Update this text in Admin → Avatars.'),
+  ('akriti', 'Akriti', 'Spicy, bold, and a little mischievous.', 'Akriti bridges concept and delivery — from rough cuts to final grade. Edit copy in Admin → Avatars.'),
+  ('niharika', 'Niharika', 'Playful energy and razor-sharp smarts.', 'Niharika keeps campaigns honest to the brand while pushing the craft forward. Edit in Admin → Avatars.'),
+  ('akanksha', 'Akanksha', 'Nerdy curiosity meets fearless adventure.', 'Akanksha tunes tone, audio, and the little details people remember. Edit in Admin → Avatars.')
+on conflict (slug) do nothing;

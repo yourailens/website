@@ -12,6 +12,13 @@ const PRIMARY_NAV_LINKS = [
   { label: "Events", href: "/events" },
 ] as const;
 
+const AVATAR_DESTINATIONS = [
+  { href: "/avatars/kaira", label: "Kaira" },
+  { href: "/avatars/akriti", label: "Akriti" },
+  { href: "/avatars/niharika", label: "Niharika" },
+  { href: "/avatars/akanksha", label: "Akanksha" },
+] as const;
+
 const SOCIAL_DESTINATIONS = [
   {
     label: "Instagram",
@@ -365,6 +372,56 @@ function useSocialsMega(pathname: string) {
   return { open, setOpen, cancelClose, scheduleClose, openMenu, triggerRef, panelRef };
 }
 
+function useAvatarsMega(pathname: string) {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const leaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelClose = useCallback(() => {
+    if (leaveTimerRef.current) {
+      clearTimeout(leaveTimerRef.current);
+      leaveTimerRef.current = null;
+    }
+  }, []);
+
+  const openMenu = useCallback(() => {
+    cancelClose();
+    setOpen(true);
+  }, [cancelClose]);
+
+  const scheduleClose = useCallback(() => {
+    cancelClose();
+    leaveTimerRef.current = setTimeout(() => setOpen(false), 220);
+  }, [cancelClose]);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (triggerRef.current?.contains(t) || panelRef.current?.contains(t)) return;
+      setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+
+  return { open, setOpen, cancelClose, scheduleClose, openMenu, triggerRef, panelRef };
+}
+
 function DesktopSocialsTrigger({
   open,
   onToggle,
@@ -407,6 +464,99 @@ function DesktopSocialsTrigger({
         }`}
       />
     </button>
+  );
+}
+
+function DesktopAvatarsTrigger({
+  open,
+  onToggle,
+  pathname,
+}: {
+  open: boolean;
+  onToggle: () => void;
+  pathname: string;
+}) {
+  const active = pathname.startsWith("/avatars");
+  return (
+    <button
+      type="button"
+      aria-expanded={open}
+      aria-haspopup="true"
+      aria-controls="nav-avatars-mega"
+      id="nav-avatars-trigger"
+      onClick={onToggle}
+      className={`group relative flex items-center gap-1.5 rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
+        active || open ? "text-violet-700" : "text-slate-800 hover:text-violet-700"
+      }`}
+    >
+      <span className="relative z-[2]">Avatars</span>
+      <svg
+        width="12"
+        height="12"
+        viewBox="0 0 12 12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        aria-hidden
+      >
+        <path d="M2.5 4.5L6 8l3.5-3.5" />
+      </svg>
+      <span
+        className={`absolute inset-x-3 bottom-1 z-[2] h-[2px] origin-left rounded-full bg-violet-500 transition-transform duration-200 ${
+          active || open ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+        }`}
+      />
+    </button>
+  );
+}
+
+function DesktopAvatarsMegaPanel({ onLinkClick }: { onLinkClick: () => void }) {
+  return (
+    <div className="relative w-full overflow-hidden rounded-t-none rounded-b-2xl border-x-0 border-b border-t border-slate-200 bg-white shadow-[0_24px_48px_-12px_rgba(15,23,42,0.12)]">
+      <div className="relative mx-auto max-w-7xl px-6 py-8 sm:py-10 lg:px-10">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-10">
+          <div className="max-w-md shrink-0 lg:w-[30%] lg:border-r lg:border-slate-200 lg:pr-10">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-violet-600">Avatars</p>
+            <p className="mt-3 font-heading text-2xl font-black leading-tight tracking-tight text-slate-900 sm:text-3xl">
+              Characters behind the lens.
+            </p>
+            <p className="mt-4 text-sm leading-relaxed text-slate-600">
+              Meet the four voices that shape how we think about story, craft, and brand.
+            </p>
+            <Link
+              href="/avatars"
+              prefetch
+              onClick={onLinkClick}
+              className="mt-6 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-900 shadow-sm transition hover:border-violet-200 hover:bg-violet-50"
+            >
+              All avatars
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
+          <div className="grid min-w-0 flex-1 grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-2">
+            {AVATAR_DESTINATIONS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                prefetch
+                onClick={onLinkClick}
+                className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md"
+              >
+                <span className="font-heading text-lg font-black text-slate-900">{item.label}</span>
+                <span className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-violet-600">
+                  Profile
+                  <span className="transition-transform group-hover:translate-x-0.5" aria-hidden>
+                    →
+                  </span>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -515,6 +665,17 @@ export default function Navbar() {
   const closeIfSamePath = () => setMenuOpen(false);
 
   const socialsMega = useSocialsMega(pathname);
+  const avatarsMega = useAvatarsMega(pathname);
+
+  const openSocialsMenu = useCallback(() => {
+    avatarsMega.setOpen(false);
+    socialsMega.openMenu();
+  }, [avatarsMega, socialsMega]);
+
+  const openAvatarsMenu = useCallback(() => {
+    socialsMega.setOpen(false);
+    avatarsMega.openMenu();
+  }, [avatarsMega, socialsMega]);
 
   return (
     <>
@@ -544,9 +705,21 @@ export default function Navbar() {
                   <DesktopNavLink key={link.label} href={link.href} label={link.label} />
                 ))}
                 <div
+                  ref={avatarsMega.triggerRef}
+                  className="relative"
+                  onMouseEnter={openAvatarsMenu}
+                  onMouseLeave={avatarsMega.scheduleClose}
+                >
+                  <DesktopAvatarsTrigger
+                    open={avatarsMega.open}
+                    onToggle={() => avatarsMega.setOpen((v) => !v)}
+                    pathname={pathname}
+                  />
+                </div>
+                <div
                   ref={socialsMega.triggerRef}
                   className="relative"
-                  onMouseEnter={socialsMega.openMenu}
+                  onMouseEnter={openSocialsMenu}
                   onMouseLeave={socialsMega.scheduleClose}
                 >
                   <DesktopSocialsTrigger
@@ -575,6 +748,22 @@ export default function Navbar() {
           </div>
 
           {/* Full viewport width, flush under the white bar (top-full = bottom of nav; no pt gap) */}
+          <div
+            ref={avatarsMega.panelRef}
+            id="nav-avatars-mega"
+            role="region"
+            aria-labelledby="nav-avatars-trigger"
+            onMouseEnter={avatarsMega.cancelClose}
+            onMouseLeave={avatarsMega.scheduleClose}
+            aria-hidden={!avatarsMega.open}
+            className={`absolute left-0 right-0 top-full z-[80] w-full min-w-0 transition-all duration-200 ease-out max-lg:hidden ${
+              avatarsMega.open
+                ? "pointer-events-auto visible translate-y-0 opacity-100"
+                : "pointer-events-none invisible -translate-y-1 opacity-0"
+            }`}
+          >
+            <DesktopAvatarsMegaPanel onLinkClick={() => avatarsMega.setOpen(false)} />
+          </div>
           <div
             ref={socialsMega.panelRef}
             id="nav-socials-mega"
@@ -627,6 +816,23 @@ export default function Navbar() {
                 onSamePathClose={closeIfSamePath}
               />
             ))}
+            <p className="mt-4 px-1 font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-white/40">Avatars</p>
+            <MobileNavLink
+              href="/avatars"
+              label="All avatars"
+              pathname={pathname}
+              onSamePathClose={closeIfSamePath}
+            />
+            {AVATAR_DESTINATIONS.map((link) => (
+              <MobileNavLink
+                key={link.href}
+                href={link.href}
+                label={link.label}
+                pathname={pathname}
+                onSamePathClose={closeIfSamePath}
+              />
+            ))}
+            <p className="mt-4 px-1 font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-white/40">Socials</p>
             {SOCIAL_DESTINATIONS.map((link) => (
               <MobileNavLink
                 key={link.href}

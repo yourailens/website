@@ -16,6 +16,7 @@ import {
   workshopDateRangeLabel,
   workshopSessionTimeLabel,
 } from "@/lib/events/workshop-config";
+import ScrollToTopOnRoute from "./ScrollToTopOnRoute";
 import WorkshopNav from "./WorkshopNav";
 
 export default async function AiCreatorWorkshopLayout({ children }: { children: React.ReactNode }) {
@@ -24,6 +25,7 @@ export default async function AiCreatorWorkshopLayout({ children }: { children: 
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50/90 via-white to-sky-50/50 text-slate-900 antialiased">
+      <ScrollToTopOnRoute />
       <Navbar />
       <section className="relative min-h-[min(52vh,560px)] overflow-hidden border-b border-blue-900/20">
         <WorkshopVisualHero heroFilm={heroFilm} />

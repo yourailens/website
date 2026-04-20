@@ -7,6 +7,49 @@ import { createBrowserSupabase } from "@/lib/supabase/client";
 type Row = { id: string; title: string; public_url: string; poster_url?: string | null; sort_order: number };
 type SocialRow = { id: string; title: string; url: string; thumbnail_url?: string; tag?: string; sort_order: number };
 
+const GALLERY_DND_MIME = "application/x-yourailens-gallery-id";
+
+function applyReorder<T extends { id: string }>(items: T[], activeId: string, overId: string): T[] {
+  if (activeId === overId) return items;
+  const from = items.findIndex((x) => x.id === activeId);
+  const to = items.findIndex((x) => x.id === overId);
+  if (from === -1 || to === -1) return items;
+  const next = [...items];
+  const [removed] = next.splice(from, 1);
+  next.splice(to, 0, removed);
+  return next;
+}
+
+function GalleryDragHandle({
+  id,
+  gallery,
+  disabled,
+}: {
+  id: string;
+  gallery: "images" | "films";
+  disabled?: boolean;
+}) {
+  return (
+    <div
+      draggable={!disabled}
+      aria-label="Drag to reorder"
+      title="Drag to reorder"
+      onDragStart={(e) => {
+        e.dataTransfer.setData(GALLERY_DND_MIME, JSON.stringify({ gallery, id }));
+        e.dataTransfer.effectAllowed = "move";
+      }}
+      className={`mb-2 flex items-center gap-2 rounded-lg border border-dashed border-slate-300 bg-white/80 px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-600 ${
+        disabled ? "cursor-not-allowed opacity-50" : "cursor-grab active:cursor-grabbing"
+      }`}
+    >
+      <span className="select-none text-slate-400" aria-hidden>
+        ⋮⋮
+      </span>
+      Drag to reorder
+    </div>
+  );
+}
+
 export default function AdminManageGallery() {
   const [sessionOk, setSessionOk] = useState<boolean | null>(null);
   const [images, setImages] = useState<Row[]>([]);
@@ -67,6 +110,27 @@ export default function AdminManageGallery() {
     window.location.href = "/admin/login";
   }
 
+  function onGalleryDrop(
+    e: React.DragEvent,
+    targetGallery: "images" | "films",
+    overId: string,
+  ) {
+    e.preventDefault();
+    const raw = e.dataTransfer.getData(GALLERY_DND_MIME);
+    if (!raw) return;
+    let parsed: { gallery: "images" | "films"; id: string };
+    try {
+      parsed = JSON.parse(raw) as { gallery: "images" | "films"; id: string };
+    } catch {
+      return;
+    }
+    if (parsed.gallery !== targetGallery) return;
+    const list = targetGallery === "images" ? images : films;
+    const next = applyReorder(list, parsed.id, overId);
+    if (next === list) return;
+    void saveGalleryOrder(targetGallery, next.map((r) => r.id));
+  }
+
   async function saveGalleryOrder(gallery: "images" | "films", orderedIds: string[]) {
     setBusyReorder(gallery);
     setMsg("");
@@ -83,15 +147,6 @@ export default function AdminManageGallery() {
     }
     setMsg(gallery === "images" ? "Image order saved." : "Film order saved.");
     await loadLists();
-  }
-
-  function moveGalleryRow(kind: "images" | "films", index: number, dir: -1 | 1) {
-    const list = kind === "images" ? images : films;
-    const j = index + dir;
-    if (j < 0 || j >= list.length) return;
-    const next = [...list];
-    [next[index], next[j]] = [next[j], next[index]];
-    void saveGalleryOrder(kind, next.map((r) => r.id));
   }
 
   async function deleteImage(id: string) {
@@ -223,6 +278,9 @@ export default function AdminManageGallery() {
             <Link href="/admin" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
               Back to upload page
             </Link>
+            <Link href="/admin/avatars" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
+              Avatar images
+            </Link>
             <Link href="/" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
               View site
             </Link>
@@ -236,41 +294,35 @@ export default function AdminManageGallery() {
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="font-heading text-xl font-bold">Images</h2>
-          <p className="mt-1 text-xs text-slate-500">Order on the site: top / left = first. Use ↑ ↓ to change.</p>
+          <p className="mt-1 text-xs text-slate-500">Order on the site: top / left = first. Drag cards by the handle to reorder.</p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {loading ? (
               <p className="text-sm text-slate-500">Loading...</p>
             ) : images.length === 0 ? (
               <p className="text-sm text-slate-500">No images found.</p>
             ) : (
-              images.map((row, index) => (
-                <article key={row.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              images.map((row) => (
+                <article
+                  key={row.id}
+                  className="rounded-xl border border-slate-200 bg-slate-50 p-3"
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "move";
+                  }}
+                  onDrop={(e) => onGalleryDrop(e, "images", row.id)}
+                >
+                  <GalleryDragHandle id={row.id} gallery="images" disabled={busyReorder === "images"} />
                   <div className="relative h-44 overflow-hidden rounded-lg bg-white">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={row.public_url} alt={row.title} className="h-full w-full object-cover" />
+                    <img
+                      src={row.public_url}
+                      alt={row.title}
+                      className="h-full w-full object-cover"
+                      draggable={false}
+                    />
                   </div>
                   <p className="mt-3 truncate font-semibold text-slate-900">{row.title}</p>
                   <p className="mt-1 break-all font-mono text-[11px] text-slate-500">{row.public_url}</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => moveGalleryRow("images", index, -1)}
-                      disabled={busyReorder === "images" || index === 0}
-                      className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-800 disabled:opacity-40"
-                      aria-label="Move up"
-                    >
-                      ↑
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => moveGalleryRow("images", index, 1)}
-                      disabled={busyReorder === "images" || index >= images.length - 1}
-                      className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-800 disabled:opacity-40"
-                      aria-label="Move down"
-                    >
-                      ↓
-                    </button>
-                  </div>
                   <button
                     type="button"
                     onClick={() => deleteImage(row.id)}
@@ -287,16 +339,31 @@ export default function AdminManageGallery() {
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="font-heading text-xl font-bold">Films</h2>
-          <p className="mt-1 text-xs text-slate-500">Order on the site: top / left = first. Use ↑ ↓ to change.</p>
+          <p className="mt-1 text-xs text-slate-500">Order on the site: top / left = first. Drag cards by the handle to reorder (not the video).</p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {loading ? (
               <p className="text-sm text-slate-500">Loading...</p>
             ) : films.length === 0 ? (
               <p className="text-sm text-slate-500">No films found.</p>
             ) : (
-              films.map((row, index) => (
-                <article key={row.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  <video src={row.public_url} className="h-44 w-full rounded-lg bg-black object-cover" controls playsInline />
+              films.map((row) => (
+                <article
+                  key={row.id}
+                  className="rounded-xl border border-slate-200 bg-slate-50 p-3"
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "move";
+                  }}
+                  onDrop={(e) => onGalleryDrop(e, "films", row.id)}
+                >
+                  <GalleryDragHandle id={row.id} gallery="films" disabled={busyReorder === "films"} />
+                  <video
+                    src={row.public_url}
+                    className="h-44 w-full rounded-lg bg-black object-cover"
+                    controls
+                    playsInline
+                    draggable={false}
+                  />
                   <p className="mt-3 truncate font-semibold text-slate-900">{row.title}</p>
                   <p className="mt-1 break-all font-mono text-[11px] text-slate-500">{row.public_url}</p>
                   {row.poster_url ? (
@@ -306,26 +373,6 @@ export default function AdminManageGallery() {
                   ) : (
                     <p className="mt-2 text-[11px] text-amber-800">No poster URL yet — regenerate after deploy, or check video URL is a direct file.</p>
                   )}
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => moveGalleryRow("films", index, -1)}
-                      disabled={busyReorder === "films" || index === 0}
-                      className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-800 disabled:opacity-40"
-                      aria-label="Move up"
-                    >
-                      ↑
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => moveGalleryRow("films", index, 1)}
-                      disabled={busyReorder === "films" || index >= films.length - 1}
-                      className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-800 disabled:opacity-40"
-                      aria-label="Move down"
-                    >
-                      ↓
-                    </button>
-                  </div>
                   <div className="mt-2 flex flex-wrap gap-2">
                     <button
                       type="button"
