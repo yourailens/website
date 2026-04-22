@@ -633,6 +633,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const [headerOffsetPx, setHeaderOffsetPx] = useState(NAV_HEADER_FALLBACK_PX);
+  const bodyScrollYRef = useRef(0);
 
   useLayoutEffect(() => {
     const el = headerRef.current;
@@ -651,9 +652,38 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => {
+    // Prevent background scroll while mobile menu is open (including iOS).
+    if (!menuOpen) {
+      const y = bodyScrollYRef.current;
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
       document.body.style.overflow = "";
+      if (y) window.scrollTo(0, y);
+      bodyScrollYRef.current = 0;
+      return;
+    }
+
+    bodyScrollYRef.current = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${bodyScrollYRef.current}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.width = "100%";
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      const y = bodyScrollYRef.current;
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
+      document.body.style.overflow = "";
+      if (y) window.scrollTo(0, y);
+      bodyScrollYRef.current = 0;
     };
   }, [menuOpen]);
 
@@ -791,62 +821,70 @@ export default function Navbar() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#172554] via-[#1d4ed8] to-[#1e3a8a]" aria-hidden />
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30" aria-hidden />
 
-        <div className="relative flex min-h-0 flex-1 flex-col px-6 pb-10 pt-[max(1rem,env(safe-area-inset-top))]">
-          <div className="mb-8 flex items-center justify-between gap-4">
-            <MobileLogoLink pathname={pathname} onSamePathClose={closeIfSamePath} />
-            <button
-              type="button"
-              onClick={() => setMenuOpen(false)}
-              className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
-              aria-label="Close menu"
-            >
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d="M4 4l10 10M14 4L4 14" />
-              </svg>
-            </button>
-          </div>
+        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+          {/* Scroll container (menu scrolls, page behind does not). */}
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]">
+            <div className="mb-8 flex items-center justify-between gap-4">
+              <MobileLogoLink pathname={pathname} onSamePathClose={closeIfSamePath} />
+              <button
+                type="button"
+                onClick={() => setMenuOpen(false)}
+                className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+                aria-label="Close menu"
+              >
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M4 4l10 10M14 4L4 14" />
+                </svg>
+              </button>
+            </div>
 
-          <nav className="flex flex-col gap-1">
-            {PRIMARY_NAV_LINKS.map((link) => (
-              <MobileNavLink
-                key={link.label}
-                href={link.href}
-                label={link.label}
-                pathname={pathname}
-                onSamePathClose={closeIfSamePath}
-              />
-            ))}
-            <p className="mt-4 px-1 font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-white/40">Avatars</p>
-            <MobileNavLink
-              href="/avatars"
-              label="All avatars"
-              pathname={pathname}
-              onSamePathClose={closeIfSamePath}
-            />
-            {AVATAR_DESTINATIONS.map((link) => (
-              <MobileNavLink
-                key={link.href}
-                href={link.href}
-                label={link.label}
-                pathname={pathname}
-                onSamePathClose={closeIfSamePath}
-              />
-            ))}
-            <p className="mt-4 px-1 font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-white/40">Socials</p>
-            {SOCIAL_DESTINATIONS.map((link) => (
-              <MobileNavLink
-                key={link.href}
-                href={link.href}
-                label={link.label}
-                pathname={pathname}
-                onSamePathClose={closeIfSamePath}
-              />
-            ))}
-          </nav>
+            <div className="flex min-h-[calc(100dvh-6rem)] flex-col">
+              <nav className="flex flex-col gap-1">
+                {PRIMARY_NAV_LINKS.map((link) => (
+                  <MobileNavLink
+                    key={link.label}
+                    href={link.href}
+                    label={link.label}
+                    pathname={pathname}
+                    onSamePathClose={closeIfSamePath}
+                  />
+                ))}
+                <p className="mt-4 px-1 font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-white/40">Avatars</p>
+                <MobileNavLink
+                  href="/avatars"
+                  label="All avatars"
+                  pathname={pathname}
+                  onSamePathClose={closeIfSamePath}
+                />
+                {AVATAR_DESTINATIONS.map((link) => (
+                  <MobileNavLink
+                    key={link.href}
+                    href={link.href}
+                    label={link.label}
+                    pathname={pathname}
+                    onSamePathClose={closeIfSamePath}
+                  />
+                ))}
+                <p className="mt-4 px-1 font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-white/40">Socials</p>
+                {SOCIAL_DESTINATIONS.map((link) => (
+                  <MobileNavLink
+                    key={link.href}
+                    href={link.href}
+                    label={link.label}
+                    pathname={pathname}
+                    onSamePathClose={closeIfSamePath}
+                  />
+                ))}
+              </nav>
 
-          <div className="mt-auto flex flex-col gap-4 pt-10">
-            <MobileContactCta pathname={pathname} onSamePathClose={closeIfSamePath} />
-            <MobilePricingLink pathname={pathname} onSamePathClose={closeIfSamePath} />
+              <div className="mt-10 flex flex-col gap-4">
+                <MobileContactCta pathname={pathname} onSamePathClose={closeIfSamePath} />
+                <MobilePricingLink pathname={pathname} onSamePathClose={closeIfSamePath} />
+              </div>
+
+              {/* Extra empty space so the last item can scroll up into view comfortably. */}
+              <div aria-hidden className="h-[22vh]" />
+            </div>
           </div>
         </div>
       </div>
