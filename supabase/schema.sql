@@ -10,6 +10,7 @@ create table if not exists public.gallery_images (
   constraint gallery_images_people_tags_allowed
     check (people_tags <@ array['Kaira','Akriti','Niharika','Ankanksha']::text[]),
   public_url text not null,
+  prompt text,
   sort_order int not null default 0,
   created_at timestamptz not null default now()
 );
@@ -24,6 +25,7 @@ create table if not exists public.gallery_films (
     check (people_tags <@ array['Kaira','Akriti','Niharika','Ankanksha']::text[]),
   public_url text not null,
   poster_url text,
+  prompt text,
   sort_order int not null default 0,
   created_at timestamptz not null default now()
 );

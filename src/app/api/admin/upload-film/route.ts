@@ -18,7 +18,8 @@ async function insertFilmRow(
   title: string,
   category: string,
   orientation: string,
-  peopleTags: CharacterTag[]
+  peopleTags: CharacterTag[],
+  prompt: string
 ) {
   const { data: rows } = await svc
     .from("gallery_films")
@@ -37,6 +38,7 @@ async function insertFilmRow(
       orientation: orientVal,
       people_tags: peopleTags,
       public_url: publicUrl,
+      ...(prompt ? { prompt } : {}),
       sort_order,
     })
     .select("id")
@@ -77,6 +79,7 @@ export async function POST(request: Request) {
   let category: string;
   let orientation: string;
   let peopleTags: CharacterTag[];
+  let prompt: string;
   let videoBuffer: Buffer | null = null;
   let uploadedFileName = "clip.mp4";
 
@@ -91,6 +94,7 @@ export async function POST(request: Request) {
     category = String(form.get("category") ?? "").trim();
     orientation = String(form.get("orientation") ?? "").trim();
     peopleTags = normalizePeopleTags(form.get("peopleTags"));
+    prompt = String(form.get("prompt") ?? "").trim();
     if (!category) {
       return NextResponse.json({ error: "Category is required" }, { status: 400 });
     }
@@ -106,7 +110,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: message, hint }, { status: httpStatus });
     }
   } else {
-    let body: { url?: string; title?: string; category?: string; orientation?: string; peopleTags?: string[] };
+    let body: { url?: string; title?: string; category?: string; orientation?: string; peopleTags?: string[]; prompt?: string };
     try {
       body = (await request.json()) as typeof body;
     } catch {
@@ -121,12 +125,13 @@ export async function POST(request: Request) {
     category = String(body.category ?? "").trim();
     orientation = String(body.orientation ?? "").trim();
     peopleTags = normalizePeopleTags(body.peopleTags);
+    prompt = String(body.prompt ?? "").trim();
     if (!title || !category) {
       return NextResponse.json({ error: "Title and category are required" }, { status: 400 });
     }
   }
 
-  const { row, insErr } = await insertFilmRow(svc, publicUrl, title, category, orientation, peopleTags);
+  const { row, insErr } = await insertFilmRow(svc, publicUrl, title, category, orientation, peopleTags, prompt);
   if (insErr) {
     return NextResponse.json({ error: insErr.message }, { status: 500 });
   }

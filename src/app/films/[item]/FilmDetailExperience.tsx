@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import CopyUrlButton from "@/components/CopyUrlButton";
 import type { GalleryFilm } from "@/data/gallery";
 
@@ -34,6 +34,8 @@ export default function FilmDetailExperience({
 }: Props) {
   const bgRef = useRef<HTMLVideoElement>(null);
   const mainRef = useRef<HTMLVideoElement>(null);
+  const [promptOpen, setPromptOpen] = useState(false);
+  const promptText = (film.prompt ?? "").trim();
 
   useEffect(() => {
     const kickMain = () => {
@@ -129,6 +131,15 @@ export default function FilmDetailExperience({
             >
               →
             </Link>
+            {promptText ? (
+              <button
+                type="button"
+                onClick={() => setPromptOpen(true)}
+                className="rounded-xl border border-white/20 bg-black/25 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-black/40"
+              >
+                Prompt
+              </button>
+            ) : null}
             <CopyUrlButton
               idleLabel="Copy link"
               copiedLabel="Copied"
@@ -160,6 +171,52 @@ export default function FilmDetailExperience({
           Share this URL to open this film directly
         </p>
       </div>
+
+      {promptOpen ? (
+        <div
+          className="fixed inset-0 z-[260] flex items-stretch justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Prompt"
+          onClick={() => setPromptOpen(false)}
+        >
+          <div
+            className="h-[100dvh] w-full overflow-hidden border border-white/15 bg-zinc-950/90 shadow-2xl shadow-black/60 sm:h-auto sm:max-h-[min(80dvh,56rem)] sm:max-w-2xl sm:rounded-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
+              <p className="font-heading text-lg font-black text-white">Prompt</p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(promptText);
+                    } catch {
+                      /* ignore */
+                    }
+                  }}
+                  className="rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-white/15"
+                >
+                  Copy
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPromptOpen(false)}
+                  className="rounded-xl bg-white px-3 py-2 text-xs font-bold uppercase tracking-wide text-zinc-950 transition hover:bg-white/90"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+            <div className="min-h-0 flex-1 px-5 py-4">
+              <pre className="h-full max-h-[calc(100dvh-5.25rem)] overflow-y-auto whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-white/90 sm:max-h-[55dvh]">
+                {promptText}
+              </pre>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

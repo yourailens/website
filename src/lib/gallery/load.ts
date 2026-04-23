@@ -30,6 +30,7 @@ function rowToImage(row: {
   aspect: string | null;
   public_url: string;
   people_tags: string[] | null;
+  prompt?: string | null;
 }): GalleryImage {
   return {
     id: row.id,
@@ -40,6 +41,7 @@ function rowToImage(row: {
     peopleTags: (row.people_tags ?? []).filter((v): v is CharacterTag =>
       (CHARACTER_TAGS as string[]).includes(v)
     ),
+    prompt: row.prompt ?? undefined,
   };
 }
 
@@ -51,6 +53,7 @@ function rowToFilm(row: {
   public_url: string;
   poster_url: string | null;
   people_tags: string[] | null;
+  prompt?: string | null;
 }): GalleryFilm {
   return {
     id: row.id,
@@ -62,6 +65,7 @@ function rowToFilm(row: {
     peopleTags: (row.people_tags ?? []).filter((v): v is CharacterTag =>
       (CHARACTER_TAGS as string[]).includes(v)
     ),
+    prompt: row.prompt ?? undefined,
   };
 }
 
@@ -70,7 +74,7 @@ export async function getGalleryImages(): Promise<GalleryImage[]> {
   if (!supabase) return [];
   const { data, error } = await supabase
     .from("gallery_images")
-    .select("id,title,category,aspect,public_url,people_tags,sort_order")
+    .select("id,title,category,aspect,public_url,people_tags,prompt,sort_order")
     .order("sort_order", { ascending: true });
   if (error || !data?.length) return [];
   return data.map(rowToImage);
@@ -81,7 +85,7 @@ export async function getGalleryFilms(): Promise<GalleryFilm[]> {
   if (!supabase) return [];
   const { data, error } = await supabase
     .from("gallery_films")
-    .select("id,title,category,orientation,public_url,poster_url,people_tags,sort_order")
+    .select("id,title,category,orientation,public_url,poster_url,people_tags,prompt,sort_order")
     .order("sort_order", { ascending: true });
   if (error || !data?.length) return [];
   return data.map(rowToFilm);

@@ -28,6 +28,8 @@ export type GalleryImage = {
   category: FilmCategory;
   aspect?: "square" | "portrait" | "landscape";
   peopleTags?: CharacterTag[];
+  /** Optional generation prompt (only for admin uploads that set it). */
+  prompt?: string;
 };
 
 export const GALLERY_IMAGES: GalleryImage[] = [
@@ -59,6 +61,8 @@ export type GalleryFilm = {
   /** Portrait / vertical masters — layout uses a taller tile. Omit for 16×9 landscape. */
   orientation?: "landscape" | "portrait";
   peopleTags?: CharacterTag[];
+  /** Optional generation prompt (only for admin uploads that set it). */
+  prompt?: string;
 };
 
 export const GALLERY_FILMS: GalleryFilm[] = [

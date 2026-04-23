@@ -18,12 +18,14 @@ export default function AdminDashboard() {
   const [imgCategory, setImgCategory] = useState<FilmCategory>("photorealistic");
   const [imgAspect, setImgAspect] = useState<"" | "square" | "portrait" | "landscape">("");
   const [imgPeopleTags, setImgPeopleTags] = useState<CharacterTag[]>([]);
+  const [imgPrompt, setImgPrompt] = useState("");
   const [filmTitle, setFilmTitle] = useState("");
   const [filmUrl, setFilmUrl] = useState("");
   const [filmFile, setFilmFile] = useState<File | null>(null);
   const [filmCategory, setFilmCategory] = useState<FilmCategory>("photorealistic");
   const [filmOrientation, setFilmOrientation] = useState<"" | "landscape" | "portrait">("");
   const [filmPeopleTags, setFilmPeopleTags] = useState<CharacterTag[]>([]);
+  const [filmPrompt, setFilmPrompt] = useState("");
   const [igTitle, setIgTitle] = useState("");
   const [igUrl, setIgUrl] = useState("");
   const [igThumbUrl, setIgThumbUrl] = useState("");
@@ -135,6 +137,7 @@ export default function AdminDashboard() {
       fd.append("category", imgCategory);
       if (imgAspect) fd.append("aspect", imgAspect);
       if (imgPeopleTags.length) fd.append("peopleTags", imgPeopleTags.join(","));
+      if (imgPrompt.trim()) fd.append("prompt", imgPrompt.trim());
       const res = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
       const j = (await res.json().catch(() => ({}))) as { error?: string; hint?: string; publicUrl?: string };
       setBusyImage(false);
@@ -147,6 +150,7 @@ export default function AdminDashboard() {
       setImgUrl("");
       setImgFile(null);
       setImgPeopleTags([]);
+      setImgPrompt("");
       setMsg("Saved to gallery. Preview below.");
       return;
     }
@@ -163,6 +167,7 @@ export default function AdminDashboard() {
     };
     if (imgAspect) payload.aspect = imgAspect;
     if (imgPeopleTags.length) payload.peopleTags = imgPeopleTags.join(",");
+    if (imgPrompt.trim()) payload.prompt = imgPrompt.trim();
     const res = await fetch("/api/admin/upload-image", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -178,6 +183,7 @@ export default function AdminDashboard() {
     setImgTitle("");
     setImgUrl("");
     setImgPeopleTags([]);
+    setImgPrompt("");
     setMsg("Saved to gallery. Preview below.");
   }
 
@@ -195,6 +201,7 @@ export default function AdminDashboard() {
       fd.append("category", filmCategory);
       if (filmOrientation) fd.append("orientation", filmOrientation);
       if (filmPeopleTags.length) fd.append("peopleTags", filmPeopleTags.join(","));
+      if (filmPrompt.trim()) fd.append("prompt", filmPrompt.trim());
       const res = await fetch("/api/admin/upload-film", { method: "POST", body: fd });
       const j = (await res.json().catch(() => ({}))) as {
         error?: string;
@@ -212,6 +219,7 @@ export default function AdminDashboard() {
       setFilmUrl("");
       setFilmFile(null);
       setFilmPeopleTags([]);
+      setFilmPrompt("");
       setMsg(
         j.posterError
           ? `Saved to gallery. Preview below. Open Graph poster was not set: ${j.posterError}`
@@ -232,6 +240,7 @@ export default function AdminDashboard() {
     };
     if (filmOrientation) payload.orientation = filmOrientation;
     if (filmPeopleTags.length) payload.peopleTags = filmPeopleTags.join(",");
+    if (filmPrompt.trim()) payload.prompt = filmPrompt.trim();
     const res = await fetch("/api/admin/upload-film", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -247,6 +256,7 @@ export default function AdminDashboard() {
     setFilmTitle("");
     setFilmUrl("");
     setFilmPeopleTags([]);
+    setFilmPrompt("");
     setMsg("Saved to gallery. Preview below.");
   }
 
@@ -466,6 +476,26 @@ export default function AdminDashboard() {
                 {busyImage ? "Saving..." : "Add image"}
               </button>
             </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold text-slate-800">Prompt (optional)</p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Only shows on the site if filled. This will appear under the new “Prompt” button in fullscreen.
+                  </p>
+                </div>
+                <p className="text-[11px] font-semibold text-slate-500">
+                  {imgPrompt.trim() ? `${imgPrompt.trim().length} chars` : "Empty"}
+                </p>
+              </div>
+              <textarea
+                value={imgPrompt}
+                onChange={(e) => setImgPrompt(e.target.value)}
+                className="mt-3 min-h-[180px] w-full resize-y rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-[12px] leading-relaxed text-slate-900 shadow-inner shadow-slate-200/70 outline-none transition focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
+                placeholder="Paste the generation prompt here…"
+              />
+            </div>
           </form>
 
           {pendingImgBlobUrl ? (
@@ -591,6 +621,26 @@ export default function AdminDashboard() {
               >
                 {busyFilm ? "Saving..." : "Add film"}
               </button>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold text-slate-800">Prompt (optional)</p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Only shows on the site if filled. This will appear under the new “Prompt” button in fullscreen.
+                  </p>
+                </div>
+                <p className="text-[11px] font-semibold text-slate-500">
+                  {filmPrompt.trim() ? `${filmPrompt.trim().length} chars` : "Empty"}
+                </p>
+              </div>
+              <textarea
+                value={filmPrompt}
+                onChange={(e) => setFilmPrompt(e.target.value)}
+                className="mt-3 min-h-[180px] w-full resize-y rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-[12px] leading-relaxed text-slate-900 shadow-inner shadow-slate-200/70 outline-none transition focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
+                placeholder="Paste the generation prompt here…"
+              />
             </div>
           </form>
 
