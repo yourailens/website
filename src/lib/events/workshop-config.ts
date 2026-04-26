@@ -1,23 +1,23 @@
 /** Public workshop: AI Creator Workshop (in person and live online hybrid messaging via email) */
 
-export const WORKSHOP_EVENT_SLUG = "ai-creator-workshop-2026-04-29";
+export const WORKSHOP_EVENT_SLUG = "ai-creator-workshop-2026-05-06";
 
 export const WORKSHOP_TITLE = "AI Creator Workshop";
 
 export const WORKSHOP_SUBTITLE = "AI workflow knowledge: from zero to advanced in two days";
 
-/** Wed–Thu cohort · Apr 29–30, 2026 */
-export const WORKSHOP_START_ISO = "2026-04-29";
-export const WORKSHOP_END_ISO = "2026-04-30";
+/** Wed–Thu cohort · May 6–7, 2026 */
+export const WORKSHOP_START_ISO = "2026-05-06";
+export const WORKSHOP_END_ISO = "2026-05-07";
 
 /** Early bird ends end of day IST before the first session */
-export const WORKSHOP_EARLY_BIRD_END_ISO = "2026-04-27T23:59:59+05:30";
+export const WORKSHOP_EARLY_BIRD_END_ISO = "2026-05-05T23:59:59+05:30";
 
 /** Early bird (discounted) fee */
-export const WORKSHOP_PRICE_INR = 3000;
+export const WORKSHOP_PRICE_INR = 500;
 
 /** Standard / list price after early bird ends */
-export const WORKSHOP_LIST_PRICE_INR = 5000;
+export const WORKSHOP_LIST_PRICE_INR = 2000;
 
 /** Whole-number discount vs list price */
 export function workshopDiscountPercentOff(): number {
@@ -50,7 +50,7 @@ export const WORKSHOP_SEAT_HOLDING_STATUSES = [
 export const WORKSHOP_PAYMENT_SUPPORT_PHONE = "9606558600";
 
 export function workshopDateRangeLabel(): string {
-  return "April 29 and 30, 2026 · Wednesday & Thursday";
+  return "May 6 and 7, 2026 · Wednesday & Thursday";
 }
 
 /** Evening sessions in IST — 4 hours per day */
@@ -63,7 +63,7 @@ export function workshopMeetExpectationCopy(): string {
 }
 
 export function workshopEarlyBirdDeadlineLabel(): string {
-  return "11:59 PM IST · 27 April 2026";
+  return "11:59 PM IST · 5 May 2026";
 }
 
 const DEFAULT_WORKSHOP_UPI_ID = "9606558600@ybl";

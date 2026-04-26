@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import WorkshopPipeline, { type WorkshopPipelineStep } from "@/components/events/WorkshopPipeline";
-import { getWorkshopVisualAssets } from "@/lib/events/load-workshop-assets";
 
-const DAY1_PIPELINE_STEPS: [
-  WorkshopPipelineStep,
-  WorkshopPipelineStep,
-  WorkshopPipelineStep,
-] = [
+const DAY1_PIPELINE_STEPS = [
   {
     title: "Story spine",
     blurb: "Lock the arc and what the microfilm must prove in ~3 minutes.",
@@ -20,7 +14,35 @@ const DAY1_PIPELINE_STEPS: [
     title: "Wardrobe & props",
     blurb: "Outfits and objects as controllable variables before you generate.",
   },
-];
+] as const;
+
+function StepIcon({ index }: { index: number }) {
+  const common = "h-5 w-5";
+  if (index === 0) {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" className={common} aria-hidden>
+        <path d="M6 19V7a2 2 0 0 1 2-2h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <path d="M10 5h8a2 2 0 0 1 2 2v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <path d="M8 10h10M8 14h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (index === 1) {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" className={common} aria-hidden>
+        <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" stroke="currentColor" strokeWidth="2" />
+        <path d="M4 20a8 8 0 0 1 16 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={common} aria-hidden>
+      <path d="M9 7h6M10 11h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M7 20h10a2 2 0 0 0 2-2V8l-4-4H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" stroke="currentColor" strokeWidth="2" />
+      <path d="M15 4v4h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export const metadata: Metadata = {
   title: "Day 1 | AI Creator Workshop | YourAILens Studios",
@@ -29,10 +51,6 @@ export const metadata: Metadata = {
 };
 
 export default async function WorkshopDayOnePage() {
-  const assets = await getWorkshopVisualAssets();
-  const imgs = assets.images;
-  const film = assets.films[0] ?? null;
-
   return (
     <article className="max-w-none text-slate-800">
       <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-blue-600">Day 1</p>
@@ -42,14 +60,33 @@ export default async function WorkshopDayOnePage() {
         tools.
       </p>
 
-      <WorkshopPipeline
-        steps={DAY1_PIPELINE_STEPS}
-        images={imgs}
-        film={film}
-        accent="blue"
-        finalBadge="Final outfit"
-        finalLabel="How it reads on camera"
-      />
+      <section className="my-10 rounded-3xl border border-slate-200 bg-gradient-to-b from-blue-50/70 to-white p-6 shadow-sm sm:p-8">
+        <div className="mb-6">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-blue-700/70">Workflow</p>
+          <h2 className="mt-2 font-heading text-xl font-black text-slate-900 sm:text-2xl">How Day 1 flows</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
+            Simple, repeatable steps you can reuse on any microfilm. No arrows. No media. Just the structure that makes the work consistent.
+          </p>
+        </div>
+        <ol className="grid gap-4 md:grid-cols-3">
+          {DAY1_PIPELINE_STEPS.map((step, i) => (
+            <li key={step.title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-md shadow-blue-200">
+                  <StepIcon index={i} />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-heading text-lg font-black text-slate-900">
+                    <span className="mr-2 text-blue-600">{String(i + 1).padStart(2, "0")}</span>
+                    {step.title}
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{step.blurb}</p>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
 
       <h2 className="mt-10 font-heading text-xl font-bold text-slate-900">Microfilm walkthrough (~3 minutes)</h2>
       <p className="text-slate-700">

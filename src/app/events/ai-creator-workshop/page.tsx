@@ -20,7 +20,7 @@ function siteUrl() {
 }
 
 const WORKSHOP_PAGE_TITLE = "AI Creator Workshop | YourAILens Studios";
-const WORKSHOP_PAGE_DESCRIPTION = `Two day intensive: AI film workflows, prompts, tools, audio, shot lists, lip sync, plus YourAILens prompts and stock assets. Early bird ${formatInr(WORKSHOP_PRICE_INR)} (list ${formatInr(WORKSHOP_LIST_PRICE_INR)}). April 29 and 30, 2026 · 7 to 11 PM IST.`;
+const WORKSHOP_PAGE_DESCRIPTION = `Two day intensive: AI film workflows, prompts, tools, audio, shot lists, lip sync, plus YourAILens prompts and stock assets. Early bird ${formatInr(WORKSHOP_PRICE_INR)} (list ${formatInr(WORKSHOP_LIST_PRICE_INR)}). May 6 and 7, 2026 · 7 to 11 PM IST.`;
 
 /** Same poster as hero video (first gallery film) — matches film page `pickFilmOgImage` behavior. */
 export async function generateMetadata(): Promise<Metadata> {
@@ -144,7 +144,7 @@ export default async function AiCreatorWorkshopPage() {
                   Day 1
                 </span>
                 <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-100/80">
-                  Wed · Apr 29
+                  Wed · May 6
                 </span>
               </div>
               <h2 className="mt-5 font-heading text-[clamp(1.35rem,3.5vw,1.65rem)] font-black leading-tight tracking-tight text-white">
@@ -202,7 +202,7 @@ export default async function AiCreatorWorkshopPage() {
                   Day 2
                 </span>
                 <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-100/90">
-                  Thu · Apr 30
+                  Thu · May 7
                 </span>
               </div>
               <h2 className="mt-5 font-heading text-[clamp(1.35rem,3.5vw,1.65rem)] font-black leading-tight tracking-tight text-white">
