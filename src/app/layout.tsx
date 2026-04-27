@@ -7,6 +7,8 @@ import {
 } from "@/lib/seo/og-image";
 import "./globals.css";
 import SiteFooter from "@/components/SiteFooter";
+import { SITE_CONTACT_EMAIL, SITE_LOCATION_LINE } from "@/lib/site-contact";
+import RouteLoadingOverlay from "@/components/RouteLoadingOverlay";
 
 const unicaOne = Unica_One({
   weight: "400",
@@ -79,10 +81,40 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const base = siteOrigin();
+  const ldOrg = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "YourAILens Studios",
+    url: base,
+    email: SITE_CONTACT_EMAIL,
+    address: { "@type": "PostalAddress", addressLocality: SITE_LOCATION_LINE, addressCountry: "IN" },
+    sameAs: ["https://instagram.com/yourailens"],
+  };
+
+  const ldWebsite = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "YourAILens Studios",
+    url: base,
+  };
+
   return (
     <html lang="en" className={`scroll-smooth ${unicaOne.variable} ${comfortaa.variable}`}>
-      <head />
+      <head>
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ldOrg) }}
+        />
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ldWebsite) }}
+        />
+      </head>
       <body className="antialiased">
+        <RouteLoadingOverlay />
         {children}
         <SiteFooter />
       </body>
