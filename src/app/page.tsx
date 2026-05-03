@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef, type RefObject } from "react";
 import FAQAccordion from "@/components/FAQAccordion";
 import Navbar from "@/components/Navbar";
+import HeroFilmCoverFlow from "@/components/home/HeroFilmCoverFlow";
 
 const AI_MODELS = [
   { name: "Higgsfield", version: "Studio 2.0", logo: "/images/logos/higgsfield.png" },
@@ -524,7 +525,7 @@ export default function Home() {
 
       {/* ── LOGO BANNER ──────────────────────────────────────────── */}
       <div
-        className="relative flex items-center justify-center gap-4 overflow-hidden py-5"
+        className="relative z-10 flex items-center justify-center gap-4 overflow-hidden py-5"
         style={{
           background: "linear-gradient(90deg, #1d4ed8 0%, #2563eb 40%, #3b82f6 60%, #2563eb 80%, #1d4ed8 100%)",
           backgroundSize: "300% auto",
@@ -595,9 +596,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── EDITORIAL BANNER ─────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-black">
-        {/* Full-bleed image */}
+      {/* ── Featured films carousel ── */}
+      <HeroFilmCoverFlow />
+
+      {/* ── EDITORIAL BANNER (full-bleed image) ───────────────────── */}
+      <section className="relative z-0 overflow-hidden bg-black">
         <div className="relative h-[70vh] w-full lg:h-[88vh]">
           <Image
             src="/images/hr1.png"
@@ -606,12 +609,9 @@ export default function Home() {
             className="object-cover object-top"
             priority
           />
-          {/* Bottom fade into hero */}
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
-          {/* Subtle side vignette */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
 
-          {/* Editorial text overlay */}
           <div className="absolute inset-0 flex flex-col items-start justify-end px-8 pb-12 lg:px-16 lg:pb-16">
             <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.3em] text-white/50">
               Where creativity meets AI
@@ -630,7 +630,7 @@ export default function Home() {
                 }}
               >
                 AI execution.
-                </span>
+              </span>
             </h2>
           </div>
         </div>
@@ -638,7 +638,6 @@ export default function Home() {
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section className="relative flex min-h-[94vh] flex-col overflow-hidden lg:min-h-screen">
-
         {/* Background: desktop = canvas (macOS GPU); mobile = native video (Safari black-tile fix) */}
         <video
           ref={heroBgVideoRef}
