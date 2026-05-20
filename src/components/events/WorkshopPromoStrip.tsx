@@ -13,7 +13,8 @@ import WorkshopEarlyBirdTimer from "./WorkshopEarlyBirdTimer";
 
 export default function WorkshopPromoStrip({ snapshot }: { snapshot: WorkshopPublicSnapshot }) {
   const pct = workshopDiscountPercentOff();
-  const showDeal = snapshot.earlyBirdActive;
+  const showDeal = snapshot.earlyBirdActive && !snapshot.registrationClosed;
+  const closed = snapshot.registrationClosed;
 
   return (
     <div className="relative overflow-hidden border-b border-white/10 bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950 px-5 py-12 text-white sm:px-8 sm:py-14 lg:px-12 lg:py-16">
@@ -29,7 +30,11 @@ export default function WorkshopPromoStrip({ snapshot }: { snapshot: WorkshopPub
       <div className="relative mx-auto flex min-h-[min(220px,40vh)] max-w-6xl flex-col justify-center gap-10 lg:min-h-0 lg:flex-row lg:items-stretch lg:gap-0 lg:py-2">
         <div className="flex min-w-0 flex-1 flex-col justify-center text-center lg:max-w-md lg:pr-10 lg:text-left">
           <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.35em] text-sky-300/90 sm:text-[11px]">Pricing &amp; cohort</p>
-          {snapshot.soldOut ? (
+          {closed ? (
+            <p className="mt-4 text-base font-medium leading-relaxed text-blue-100/90 sm:text-lg">
+              This workshop has ended. Registration is no longer open — explore the pages below for session content.
+            </p>
+          ) : snapshot.soldOut ? (
             <p className="mt-4 text-base font-medium leading-relaxed text-blue-100/90 sm:text-lg">This cohort is full.</p>
           ) : (
             <>
@@ -83,12 +88,18 @@ export default function WorkshopPromoStrip({ snapshot }: { snapshot: WorkshopPub
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col justify-center border-t border-white/15 pt-10 lg:max-w-[240px] lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0 lg:items-end">
-          <Link
-            href="/events/ai-creator-workshop#register"
-            className="inline-flex w-full items-center justify-center rounded-full bg-white px-8 py-3.5 text-sm font-black uppercase tracking-[0.15em] text-blue-950 shadow-lg shadow-blue-950/30 transition hover:bg-sky-50 hover:shadow-xl lg:w-auto lg:min-w-[11rem]"
-          >
-            {snapshot.soldOut ? "Join waitlist" : "Register"}
-          </Link>
+          {closed ? (
+            <span className="inline-flex w-full items-center justify-center rounded-full border border-white/20 bg-white/10 px-8 py-3.5 text-sm font-bold uppercase tracking-[0.15em] text-white/50 lg:w-auto lg:min-w-[11rem]">
+              Registration closed
+            </span>
+          ) : (
+            <Link
+              href="/events/ai-creator-workshop#register"
+              className="inline-flex w-full items-center justify-center rounded-full bg-white px-8 py-3.5 text-sm font-black uppercase tracking-[0.15em] text-blue-950 shadow-lg shadow-blue-950/30 transition hover:bg-sky-50 hover:shadow-xl lg:w-auto lg:min-w-[11rem]"
+            >
+              {snapshot.soldOut ? "Join waitlist" : "Register"}
+            </Link>
+          )}
         </div>
       </div>
     </div>

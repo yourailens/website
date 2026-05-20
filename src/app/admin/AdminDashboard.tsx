@@ -364,6 +364,18 @@ export default function AdminDashboard() {
             <p className="mt-1 text-sm text-slate-600">Signed in</p>
           </div>
           <div className="flex flex-wrap gap-3">
+            <Link href="/admin/prompts" className="rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-800">
+              Workflows (Prompts)
+            </Link>
+            <Link href="/admin/outfits" className="rounded-full border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-800">
+              Outfit Sheets
+            </Link>
+            <Link href="/admin/scenarios" className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-800">
+              Reference Scenarios
+            </Link>
+            <Link href="/admin/locations" className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800">
+              Locations
+            </Link>
             <Link href="/admin/workshops" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
               Workshop bookings
             </Link>

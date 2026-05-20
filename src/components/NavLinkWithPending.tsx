@@ -11,7 +11,7 @@ export function NavLinkPendingSpinner({
 }) {
   const { pending } = useLinkStatus();
   if (!pending) {
-    return <span className="inline-block w-3.5 shrink-0" aria-hidden />;
+    return null;
   }
   return (
     <span

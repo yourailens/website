@@ -5,6 +5,7 @@ import {
   WORKSHOP_SEAT_HOLDING_STATUSES,
   WORKSHOP_SEATS_TOTAL,
   isWorkshopEarlyBirdActive,
+  isWorkshopRegistrationOpen,
 } from "@/lib/events/workshop-config";
 
 export type WorkshopPublicSnapshot = {
@@ -13,6 +14,7 @@ export type WorkshopPublicSnapshot = {
   seatsLeft: number;
   soldOut: boolean;
   earlyBirdActive: boolean;
+  registrationClosed: boolean;
 };
 
 export const getWorkshopPublicSnapshot = cache(async (): Promise<WorkshopPublicSnapshot> => {
@@ -34,5 +36,6 @@ export const getWorkshopPublicSnapshot = cache(async (): Promise<WorkshopPublicS
     seatsLeft,
     soldOut: taken >= WORKSHOP_SEATS_TOTAL,
     earlyBirdActive: isWorkshopEarlyBirdActive(),
+    registrationClosed: !isWorkshopRegistrationOpen(),
   };
 });

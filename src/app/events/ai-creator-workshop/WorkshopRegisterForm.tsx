@@ -15,11 +15,13 @@ import {
 export default function WorkshopRegisterForm({
   soldOut,
   earlyBirdActive,
+  registrationClosed,
   upiId,
   upiPayeeName,
 }: {
   soldOut: boolean;
   earlyBirdActive: boolean;
+  registrationClosed: boolean;
   upiId: string;
   upiPayeeName: string;
 }) {
@@ -127,6 +129,28 @@ export default function WorkshopRegisterForm({
           full confirmation with workshop details.
         </p>
         {infoNote ? <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">{infoNote}</p> : null}
+      </div>
+    );
+  }
+
+  if (registrationClosed) {
+    return (
+      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center">
+        <p className="font-heading text-lg font-bold text-slate-900">Registration is closed</p>
+        <p className="mt-2 text-sm leading-relaxed text-slate-600">
+          This workshop has ended. You can still browse the overview, Day 1, and Day 2 pages above.
+        </p>
+        <p className="mt-4 text-sm text-slate-600">
+          For the next cohort, follow{" "}
+          <a href="https://instagram.com/yourailens" className="font-semibold text-blue-600 hover:underline" target="_blank" rel="noreferrer">
+            @yourailens
+          </a>{" "}
+          or email us at{" "}
+          <a href="mailto:yourailensstudios@gmail.com" className="font-semibold text-blue-600 hover:underline">
+            yourailensstudios@gmail.com
+          </a>
+          .
+        </p>
       </div>
     );
   }

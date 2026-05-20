@@ -10,6 +10,9 @@ export const WORKSHOP_SUBTITLE = "AI workflow knowledge: from zero to advanced i
 export const WORKSHOP_START_ISO = "2026-05-06";
 export const WORKSHOP_END_ISO = "2026-05-07";
 
+/** Registration closes after the last workshop day (end of day IST). */
+export const WORKSHOP_REGISTRATION_END_ISO = "2026-05-07T23:59:59+05:30";
+
 /** Early bird ends end of day IST before the first session */
 export const WORKSHOP_EARLY_BIRD_END_ISO = "2026-05-05T23:59:59+05:30";
 
@@ -31,6 +34,15 @@ export function formatInr(amount: number): string {
 export function isWorkshopEarlyBirdActive(now: Date = new Date()): boolean {
   const end = new Date(WORKSHOP_EARLY_BIRD_END_ISO);
   return now <= end;
+}
+
+/** False after the workshop dates have passed — pages stay live, registration does not. */
+export function isWorkshopRegistrationOpen(now: Date = new Date()): boolean {
+  return now <= new Date(WORKSHOP_REGISTRATION_END_ISO);
+}
+
+export function isWorkshopEventOver(now: Date = new Date()): boolean {
+  return !isWorkshopRegistrationOpen(now);
 }
 
 /** Cohort size (seat cap) — used for registration limits and “sold out” logic */

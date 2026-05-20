@@ -2,6 +2,10 @@ import type { MetadataRoute } from "next";
 import { getGalleryFilms, getGalleryImages } from "@/lib/gallery/load";
 import { galleryRouteId } from "@/lib/gallery/route-id";
 import { getAvatarSummaries } from "@/lib/avatars/load";
+import { getPublishedPrompts } from "@/lib/prompts/load";
+import { getPublishedOutfits } from "@/lib/outfits/load";
+import { getPublishedScenarios } from "@/lib/scenarios/load";
+import { getPublishedLocations } from "@/lib/locations/load";
 
 function siteOrigin(): string {
   return (process.env.PUBLIC_SITE_URL?.trim() || "https://yourailens.studio").replace(/\/+$/, "");
@@ -21,6 +25,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/avatars`, lastModified: new Date() },
     { url: `${base}/pricing`, lastModified: new Date() },
     { url: `${base}/contact`, lastModified: new Date() },
+    { url: `${base}/prompts`, lastModified: new Date() },
+    { url: `${base}/outfits`, lastModified: new Date() },
+    { url: `${base}/scenarios`, lastModified: new Date() },
+    { url: `${base}/locations`, lastModified: new Date() },
     { url: `${base}/instagram`, lastModified: new Date() },
     { url: `${base}/youtube`, lastModified: new Date() },
   ];
@@ -28,7 +36,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Best-effort dynamic URLs (admin-uploaded gallery + avatar pages).
   // If DB is unavailable at build time, we still return static URLs.
   try {
-    const [images, films, avatars] = await Promise.all([getGalleryImages(), getGalleryFilms(), getAvatarSummaries()]);
+    const [images, films, avatars, { prompts }, outfits, scenarios, locations] = await Promise.all([
+      getGalleryImages(),
+      getGalleryFilms(),
+      getAvatarSummaries(),
+      getPublishedPrompts({ limit: 500 }),
+      getPublishedOutfits({ limit: 500 }),
+      getPublishedScenarios({ limit: 500 }),
+      getPublishedLocations({ limit: 500 }),
+    ]);
 
     const imageUrls: MetadataRoute.Sitemap = images.map((img, i) => ({
       url: `${base}/images/${encodeURIComponent(galleryRouteId(img, i))}`,
@@ -45,7 +61,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
     }));
 
-    return [...staticUrls, ...imageUrls, ...filmUrls, ...avatarUrls];
+    const promptUrls: MetadataRoute.Sitemap = prompts.map((p) => ({
+      url: `${base}/prompts/${encodeURIComponent(p.slug)}`,
+      lastModified: new Date(p.updated_at),
+    }));
+
+    const outfitUrls: MetadataRoute.Sitemap = outfits.map((o) => ({
+      url: `${base}/outfits/${encodeURIComponent(o.slug)}`,
+      lastModified: new Date(o.created_at),
+    }));
+
+    const scenarioUrls: MetadataRoute.Sitemap = scenarios.map((s) => ({ url: `${base}/scenarios/${encodeURIComponent(s.slug)}`, lastModified: new Date(s.created_at) }));
+    const locationUrls: MetadataRoute.Sitemap = locations.map((l) => ({ url: `${base}/locations/${encodeURIComponent(l.slug)}`, lastModified: new Date(l.created_at) }));
+
+    return [...staticUrls, ...imageUrls, ...filmUrls, ...avatarUrls, ...promptUrls, ...outfitUrls, ...scenarioUrls, ...locationUrls];
   } catch {
     return staticUrls;
   }

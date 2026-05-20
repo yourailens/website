@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
-import { WORKSHOP_EVENT_SLUG } from "@/lib/events/workshop-config";
+import { WORKSHOP_EVENT_SLUG, isWorkshopRegistrationOpen } from "@/lib/events/workshop-config";
 import { sendWorkshopPaymentVerificationEmails } from "@/lib/email/workshop-registration";
 import { uploadObjectToS3 } from "@/lib/s3/client";
 
@@ -47,6 +47,13 @@ export async function POST(request: Request) {
 
   if (!registrationId || !validEmail(email)) {
     return NextResponse.json({ error: "Registration ID and a valid email are required" }, { status: 400 });
+  }
+
+  if (!isWorkshopRegistrationOpen()) {
+    return NextResponse.json(
+      { error: "Registration for this workshop has closed. The event has ended." },
+      { status: 403 }
+    );
   }
   if (!paymentPhone || paymentPhone.length < 10) {
     return NextResponse.json({ error: "Enter the phone number you used for UPI (at least 10 digits)" }, { status: 400 });

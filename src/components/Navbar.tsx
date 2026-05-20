@@ -7,9 +7,19 @@ import { NavLinkPendingSpinner } from "@/components/NavLinkWithPending";
 import { WORKSHOP_TITLE } from "@/lib/events/workshop-config";
 
 const PRIMARY_NAV_LINKS = [
-  { label: "Images", href: "/images" },
-  { label: "Films", href: "/films" },
   { label: "Events", href: "/events" },
+] as const;
+
+const RESOURCES_DESTINATIONS = [
+  { href: "/prompts",    label: "Workflows" },
+  { href: "/outfits",   label: "Outfit Sheets" },
+  { href: "/scenarios", label: "Reference Scenarios" },
+  { href: "/locations", label: "Locations" },
+] as const;
+
+const ORIGINALS_DESTINATIONS = [
+  { href: "/images", label: "Images", blurb: "AI-generated still images from every campaign." },
+  { href: "/films", label: "Films", blurb: "Short-form AI video originals from the studio." },
 ] as const;
 
 const AVATAR_DESTINATIONS = [
@@ -560,9 +570,256 @@ function DesktopAvatarsMegaPanel({ onLinkClick }: { onLinkClick: () => void }) {
   );
 }
 
+function DesktopOriginalsTrigger({
+  open,
+  onToggle,
+  pathname,
+}: {
+  open: boolean;
+  onToggle: () => void;
+  pathname: string;
+}) {
+  const active = pathname.startsWith("/images") || pathname.startsWith("/films");
+  return (
+    <button
+      type="button"
+      aria-expanded={open}
+      aria-haspopup="true"
+      aria-controls="nav-originals-mega"
+      id="nav-originals-trigger"
+      onClick={onToggle}
+      className={`group relative flex items-center gap-1.5 rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
+        active || open ? "text-blue-600" : "text-slate-800 hover:text-blue-600"
+      }`}
+    >
+      <span className="relative z-[2]">Originals</span>
+      <svg
+        width="12"
+        height="12"
+        viewBox="0 0 12 12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        aria-hidden
+      >
+        <path d="M2.5 4.5L6 8l3.5-3.5" />
+      </svg>
+      <span
+        className={`absolute inset-x-3 bottom-1 z-[2] h-[2px] origin-left rounded-full bg-blue-500 transition-transform duration-200 ${
+          active || open ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+        }`}
+      />
+    </button>
+  );
+}
+
+function DesktopResourcesTrigger({
+  open,
+  onToggle,
+  pathname,
+}: {
+  open: boolean;
+  onToggle: () => void;
+  pathname: string;
+}) {
+  const active = pathname.startsWith("/prompts") || pathname.startsWith("/outfits") || pathname.startsWith("/scenarios") || pathname.startsWith("/locations");
+  return (
+    <button
+      type="button"
+      aria-expanded={open}
+      aria-haspopup="true"
+      aria-controls="nav-resources-mega"
+      id="nav-resources-trigger"
+      onClick={onToggle}
+      className={`group relative flex items-center gap-1.5 rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
+        active || open ? "text-blue-600" : "text-slate-800 hover:text-blue-600"
+      }`}
+    >
+      <span className="relative z-[2]">Resources</span>
+      <svg
+        width="12"
+        height="12"
+        viewBox="0 0 12 12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        aria-hidden
+      >
+        <path d="M2.5 4.5L6 8l3.5-3.5" />
+      </svg>
+      <span
+        className={`absolute inset-x-3 bottom-1 z-[2] h-[2px] origin-left rounded-full bg-blue-500 transition-transform duration-200 ${
+          active || open ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+        }`}
+      />
+    </button>
+  );
+}
+
+// Tiny icon for each resource type
+function ResourceIcon({ href }: { href: string }) {
+  if (href === "/prompts") return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/>
+    </svg>
+  );
+  if (href === "/outfits") return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>
+    </svg>
+  );
+  if (href === "/scenarios") return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="18" cy="8" r="3"/><path d="M21 20v-2a3 3 0 0 0-2-2.83"/>
+    </svg>
+  );
+  // locations
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+    </svg>
+  );
+}
+
+// Tiny stacked preview cards decoration
+function MiniCardStack({ tint }: { tint: string }) {
+  const cards = [
+    { rotate: "-rotate-6", translate: "-translate-x-2 translate-y-1", z: "z-[1]", opacity: "opacity-60" },
+    { rotate: "rotate-3",  translate: "translate-x-1 -translate-y-0.5", z: "z-[2]", opacity: "opacity-80" },
+    { rotate: "-rotate-1", translate: "translate-x-0 translate-y-0",    z: "z-[3]", opacity: "opacity-100" },
+  ];
+  return (
+    <div className="relative h-10 w-14">
+      {cards.map((c, i) => (
+        <div
+          key={i}
+          className={`absolute inset-0 ${c.rotate} ${c.translate} ${c.z} ${c.opacity} rounded-lg border border-white/60 ${tint} shadow-sm`}
+        />
+      ))}
+    </div>
+  );
+}
+
+const RESOURCES_META: Record<string, { blurb: string; tint: string }> = {
+  "/prompts":    { blurb: "Step-by-step AI workflow guides and prompt blueprints.", tint: "bg-blue-200/60" },
+  "/outfits":    { blurb: "Outfit reference sheets for every style and character type.", tint: "bg-violet-200/60" },
+  "/scenarios":  { blurb: "Scene reference sheets — portraits, action, romance and more.", tint: "bg-rose-200/60" },
+  "/locations":  { blurb: "Location and background references from forest to sci-fi.", tint: "bg-emerald-200/60" },
+};
+
+function DesktopResourcesMegaPanel({ onLinkClick }: { onLinkClick: () => void }) {
+  return (
+    <div className="relative w-full overflow-hidden rounded-t-none rounded-b-2xl border-x-0 border-b border-t border-blue-100/90 bg-gradient-to-b from-white via-slate-50 to-blue-50 shadow-[0_24px_48px_-12px_rgba(30,58,138,0.18)]">
+      {/* Ambient blobs */}
+      <div className="pointer-events-none absolute -left-20 top-0 h-72 w-72 rounded-full bg-blue-400/15 blur-3xl" aria-hidden />
+      <div className="pointer-events-none absolute -right-24 bottom-0 h-64 w-64 rounded-full bg-violet-300/15 blur-3xl" aria-hidden />
+      {/* Grid texture */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.35]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%2393c5fd' stroke-opacity='0.18'%3E%3Cpath d='M0 40h80M40 0v80'/%3E%3C/g%3E%3C/svg%3E")` }} aria-hidden />
+
+      <div className="relative mx-auto max-w-7xl px-6 py-8 sm:py-10 lg:px-10">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-stretch lg:gap-12">
+
+          {/* Left — tagline */}
+          <div className="max-w-xs shrink-0 lg:w-[28%] lg:border-r lg:border-blue-100/90 lg:pr-10">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-blue-600">Resources</p>
+            <p className="mt-3 font-heading text-2xl font-black leading-tight tracking-tight text-slate-900 sm:text-3xl">
+              Build with
+              <span className="block bg-gradient-to-r from-blue-800 via-blue-600 to-violet-600 bg-clip-text text-transparent">
+                references.
+              </span>
+            </p>
+            <p className="mt-4 text-sm leading-relaxed text-slate-600">
+              Outfits, scenes, locations, and workflows — every reference you need to create faster.
+            </p>
+            <div className="mt-6 hidden h-px w-full bg-gradient-to-r from-blue-200/80 via-transparent to-violet-200/60 sm:block lg:hidden" />
+          </div>
+
+          {/* Right — 2×2 grid of cards */}
+          <div className="grid min-w-0 flex-1 gap-3 sm:grid-cols-2 lg:gap-4">
+            {RESOURCES_DESTINATIONS.map((item) => {
+              const meta = RESOURCES_META[item.href];
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  prefetch
+                  onClick={onLinkClick}
+                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-blue-100/90 bg-white/90 p-5 shadow-sm shadow-blue-950/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-white hover:shadow-lg hover:shadow-blue-900/10"
+                >
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-50/60 via-white to-slate-50/80 opacity-90 transition-opacity group-hover:opacity-100" aria-hidden />
+
+                  <div className="relative flex items-start justify-between gap-3">
+                    {/* Icon */}
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-100/90 bg-gradient-to-br from-slate-50 to-blue-100/90 text-blue-700 shadow-inner shadow-white/80">
+                      <ResourceIcon href={item.href} />
+                    </div>
+                    {/* Mini stacked cards */}
+                    <MiniCardStack tint={meta?.tint ?? "bg-blue-200/60"} />
+                  </div>
+
+                  <h3 className="relative mt-4 font-heading text-base font-black text-slate-900">{item.label}</h3>
+                  <p className="relative mt-1.5 text-xs leading-relaxed text-slate-500">{meta?.blurb}</p>
+                  <span className="relative mt-3 inline-flex items-center gap-1 text-xs font-bold text-blue-600">
+                    Browse
+                    <span className="transition-transform group-hover:translate-x-0.5" aria-hidden>→</span>
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DesktopOriginalsMegaPanel({ onLinkClick }: { onLinkClick: () => void }) {
+  return (
+    <div className="relative w-full overflow-hidden rounded-t-none rounded-b-2xl border-x-0 border-b border-t border-slate-200 bg-white shadow-[0_24px_48px_-12px_rgba(15,23,42,0.12)]">
+      <div className="relative mx-auto max-w-7xl px-6 py-8 sm:py-10 lg:px-10">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-10">
+          <div className="max-w-md shrink-0 lg:w-[30%] lg:border-r lg:border-slate-200 lg:pr-10">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-blue-600">Originals</p>
+            <p className="mt-3 font-heading text-2xl font-black leading-tight tracking-tight text-slate-900 sm:text-3xl">
+              AI-first visual originals.
+            </p>
+            <p className="mt-4 text-sm leading-relaxed text-slate-600">
+              Every image and film is built from a prompt — not a camera. Browse the full gallery.
+            </p>
+          </div>
+          <div className="grid min-w-0 flex-1 grid-cols-2 gap-3 sm:gap-4">
+            {ORIGINALS_DESTINATIONS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                prefetch
+                onClick={onLinkClick}
+                className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
+              >
+                <span className="font-heading text-lg font-black text-slate-900">{item.label}</span>
+                <span className="mt-2 text-sm leading-relaxed text-slate-500">{item.blurb}</span>
+                <span className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-blue-600">
+                  Browse
+                  <span className="transition-transform group-hover:translate-x-0.5" aria-hidden>
+                    →
+                  </span>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DesktopSocialsMegaPanel({ onLinkClick }: { onLinkClick: () => void }) {
   return (
-    <div className="relative w-full overflow-hidden rounded-t-none rounded-b-2xl border-x-0 border-b border-t border-blue-100/90 bg-gradient-to-b from-white via-slate-50/95 to-blue-50/50 shadow-[0_24px_48px_-12px_rgba(30,58,138,0.18)]">
+    <div className="relative w-full overflow-hidden rounded-t-none rounded-b-2xl border-x-0 border-b border-t border-blue-100/90 bg-gradient-to-b from-white via-slate-50 to-blue-50 shadow-[0_24px_48px_-12px_rgba(30,58,138,0.18)]">
       <div className="pointer-events-none absolute -left-20 top-0 h-72 w-72 rounded-full bg-blue-400/20 blur-3xl" aria-hidden />
       <div className="pointer-events-none absolute -right-24 bottom-0 h-64 w-64 rounded-full bg-sky-300/15 blur-3xl" aria-hidden />
       <div
@@ -696,16 +953,35 @@ export default function Navbar() {
 
   const socialsMega = useSocialsMega(pathname);
   const avatarsMega = useAvatarsMega(pathname);
+  const originalsMega = useSocialsMega(pathname);
+  const resourcesMega = useSocialsMega(pathname);
+
+  const closeAll = useCallback(() => {
+    socialsMega.setOpen(false);
+    avatarsMega.setOpen(false);
+    originalsMega.setOpen(false);
+    resourcesMega.setOpen(false);
+  }, [socialsMega, avatarsMega, originalsMega, resourcesMega]);
 
   const openSocialsMenu = useCallback(() => {
-    avatarsMega.setOpen(false);
+    closeAll();
     socialsMega.openMenu();
-  }, [avatarsMega, socialsMega]);
+  }, [closeAll, socialsMega]);
 
   const openAvatarsMenu = useCallback(() => {
-    socialsMega.setOpen(false);
+    closeAll();
     avatarsMega.openMenu();
-  }, [avatarsMega, socialsMega]);
+  }, [closeAll, avatarsMega]);
+
+  const openOriginalsMenu = useCallback(() => {
+    closeAll();
+    originalsMega.openMenu();
+  }, [closeAll, originalsMega]);
+
+  const openResourcesMenu = useCallback(() => {
+    closeAll();
+    resourcesMega.openMenu();
+  }, [closeAll, resourcesMega]);
 
   return (
     <>
@@ -731,6 +1007,30 @@ export default function Navbar() {
               <DesktopLogoLink />
 
               <div className="hidden flex-1 items-center justify-center gap-1 lg:flex">
+                <div
+                  ref={originalsMega.triggerRef}
+                  className="relative"
+                  onMouseEnter={openOriginalsMenu}
+                  onMouseLeave={originalsMega.scheduleClose}
+                >
+                  <DesktopOriginalsTrigger
+                    open={originalsMega.open}
+                    onToggle={() => originalsMega.setOpen((v) => !v)}
+                    pathname={pathname}
+                  />
+                </div>
+                <div
+                  ref={resourcesMega.triggerRef}
+                  className="relative"
+                  onMouseEnter={openResourcesMenu}
+                  onMouseLeave={resourcesMega.scheduleClose}
+                >
+                  <DesktopResourcesTrigger
+                    open={resourcesMega.open}
+                    onToggle={() => resourcesMega.setOpen((v) => !v)}
+                    pathname={pathname}
+                  />
+                </div>
                 {PRIMARY_NAV_LINKS.map((link) => (
                   <DesktopNavLink key={link.label} href={link.href} label={link.label} />
                 ))}
@@ -775,6 +1075,42 @@ export default function Navbar() {
                 <span className={`h-[2px] w-5 rounded-full bg-slate-700 transition-all duration-300 ${menuOpen ? "-translate-y-[7px] -rotate-45" : ""}`} />
               </button>
             </div>
+          </div>
+
+          {/* Resources mega panel */}
+          <div
+            ref={resourcesMega.panelRef}
+            id="nav-resources-mega"
+            role="region"
+            aria-labelledby="nav-resources-trigger"
+            onMouseEnter={resourcesMega.cancelClose}
+            onMouseLeave={resourcesMega.scheduleClose}
+            aria-hidden={!resourcesMega.open}
+            className={`absolute left-0 right-0 top-full z-[80] w-full min-w-0 transition-all duration-200 ease-out max-lg:hidden ${
+              resourcesMega.open
+                ? "pointer-events-auto visible translate-y-0 opacity-100"
+                : "pointer-events-none invisible -translate-y-1 opacity-0"
+            }`}
+          >
+            <DesktopResourcesMegaPanel onLinkClick={() => resourcesMega.setOpen(false)} />
+          </div>
+
+          {/* Originals mega panel */}
+          <div
+            ref={originalsMega.panelRef}
+            id="nav-originals-mega"
+            role="region"
+            aria-labelledby="nav-originals-trigger"
+            onMouseEnter={originalsMega.cancelClose}
+            onMouseLeave={originalsMega.scheduleClose}
+            aria-hidden={!originalsMega.open}
+            className={`absolute left-0 right-0 top-full z-[80] w-full min-w-0 transition-all duration-200 ease-out max-lg:hidden ${
+              originalsMega.open
+                ? "pointer-events-auto visible translate-y-0 opacity-100"
+                : "pointer-events-none invisible -translate-y-1 opacity-0"
+            }`}
+          >
+            <DesktopOriginalsMegaPanel onLinkClick={() => originalsMega.setOpen(false)} />
           </div>
 
           {/* Full viewport width, flush under the white bar (top-full = bottom of nav; no pt gap) */}
@@ -840,6 +1176,31 @@ export default function Navbar() {
 
             <div className="flex min-h-[calc(100dvh-6rem)] flex-col">
               <nav className="flex flex-col gap-1">
+                {/* Originals section */}
+                <p className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-white/40">Originals</p>
+                {ORIGINALS_DESTINATIONS.map((link) => (
+                  <MobileNavLink
+                    key={link.href}
+                    href={link.href}
+                    label={link.label}
+                    pathname={pathname}
+                    onSamePathClose={closeIfSamePath}
+                  />
+                ))}
+
+                {/* Resources section */}
+                <p className="mt-4 px-1 font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-white/40">Resources</p>
+                {RESOURCES_DESTINATIONS.map((item) => (
+                  <MobileNavLink
+                    key={item.href}
+                    href={item.href}
+                    label={item.label}
+                    pathname={pathname}
+                    onSamePathClose={closeIfSamePath}
+                  />
+                ))}
+
+                {/* Primary links: Events */}
                 {PRIMARY_NAV_LINKS.map((link) => (
                   <MobileNavLink
                     key={link.label}
@@ -849,6 +1210,7 @@ export default function Navbar() {
                     onSamePathClose={closeIfSamePath}
                   />
                 ))}
+
                 <p className="mt-4 px-1 font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-white/40">Avatars</p>
                 <MobileNavLink
                   href="/avatars"

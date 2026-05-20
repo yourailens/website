@@ -4,6 +4,7 @@ import {
   WORKSHOP_EVENT_SLUG,
   WORKSHOP_SEAT_HOLDING_STATUSES,
   WORKSHOP_SEATS_TOTAL,
+  isWorkshopRegistrationOpen,
 } from "@/lib/events/workshop-config";
 
 export const runtime = "nodejs";
@@ -41,6 +42,13 @@ export async function POST(request: Request) {
   const eventSlug = String(body.eventSlug ?? "").trim();
   if (eventSlug !== WORKSHOP_EVENT_SLUG) {
     return NextResponse.json({ error: "Unknown event" }, { status: 400 });
+  }
+
+  if (!isWorkshopRegistrationOpen()) {
+    return NextResponse.json(
+      { error: "Registration for this workshop has closed. The event has ended." },
+      { status: 403 }
+    );
   }
 
   const name = String(body.name ?? "").trim();

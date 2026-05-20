@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { isWorkshopRegistrationOpen } from "@/lib/events/workshop-config";
 
 const DAY1_PIPELINE_STEPS = [
   {
@@ -51,6 +52,7 @@ export const metadata: Metadata = {
 };
 
 export default async function WorkshopDayOnePage() {
+  const registrationOpen = isWorkshopRegistrationOpen();
   return (
     <article className="max-w-none text-slate-800">
       <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-blue-600">Day 1</p>
@@ -120,9 +122,13 @@ export default async function WorkshopDayOnePage() {
         </Link>
       </p>
       <p className="mt-4">
-        <Link href="/events/ai-creator-workshop#register" className="text-sm font-semibold text-slate-600 hover:text-blue-700">
-          Register for the workshop →
-        </Link>
+        {registrationOpen ? (
+          <Link href="/events/ai-creator-workshop#register" className="text-sm font-semibold text-slate-600 hover:text-blue-700">
+            Register for the workshop →
+          </Link>
+        ) : (
+          <span className="text-sm font-semibold text-slate-400">Registration closed — this event has ended.</span>
+        )}
       </p>
     </article>
   );

@@ -15,6 +15,7 @@ import {
   WORKSHOP_TITLE,
   workshopDateRangeLabel,
   workshopSessionTimeLabel,
+  isWorkshopEventOver,
 } from "@/lib/events/workshop-config";
 import ScrollToTopOnRoute from "./ScrollToTopOnRoute";
 import WorkshopNav from "./WorkshopNav";
@@ -22,6 +23,7 @@ import WorkshopNav from "./WorkshopNav";
 export default async function AiCreatorWorkshopLayout({ children }: { children: React.ReactNode }) {
   const [assets, snapshot] = await Promise.all([getWorkshopVisualAssets(), getWorkshopPublicSnapshot()]);
   const heroFilm = assets.films[0] ?? null;
+  const eventOver = isWorkshopEventOver();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50/90 via-white to-sky-50/50 text-slate-900 antialiased">
@@ -45,6 +47,11 @@ export default async function AiCreatorWorkshopLayout({ children }: { children: 
             <span className="rounded-full bg-emerald-500/25 px-3 py-1.5 text-emerald-100 ring-1 ring-emerald-400/30">
               {workshopSessionTimeLabel()}
             </span>
+            {eventOver ? (
+              <span className="rounded-full bg-slate-500/40 px-3 py-1.5 text-slate-100 ring-1 ring-slate-400/30">
+                Event ended
+              </span>
+            ) : null}
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link
@@ -73,7 +80,7 @@ export default async function AiCreatorWorkshopLayout({ children }: { children: 
           Workshop pricing, availability, and page navigation
         </h2>
         <WorkshopPromoStrip snapshot={snapshot} />
-        <WorkshopNav soldOut={snapshot.soldOut} />
+        <WorkshopNav soldOut={snapshot.soldOut} registrationClosed={snapshot.registrationClosed} />
       </section>
 
       <WorkshopMediaBento images={assets.images} films={assets.films} />

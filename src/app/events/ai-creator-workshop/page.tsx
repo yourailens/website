@@ -446,15 +446,24 @@ export default async function AiCreatorWorkshopPage() {
       </section>
 
       <section id="register" className="mt-16 scroll-mt-28 rounded-3xl border border-blue-200 bg-gradient-to-b from-blue-50/80 to-white p-8 shadow-inner shadow-blue-100 sm:p-10">
-        <h2 className="text-center font-heading text-2xl font-black text-slate-900">Save your seat</h2>
+        <h2 className="text-center font-heading text-2xl font-black text-slate-900">
+          {snapshot.registrationClosed ? "Registration closed" : "Save your seat"}
+        </h2>
         <p className="mx-auto mt-2 max-w-lg text-center text-sm text-slate-600">
-          Add your details, pay via UPI, then upload your payment screenshot. Confirmation is sent after we receive payment proof. Meet link
-          before {workshopDateRangeLabel().split("·")[0]?.trim() ?? "the workshop"}.
+          {snapshot.registrationClosed ? (
+            <>This workshop has ended. Browse the overview and day pages above — we&apos;ll announce the next cohort on Instagram.</>
+          ) : (
+            <>
+              Add your details, pay via UPI, then upload your payment screenshot. Confirmation is sent after we receive payment proof. Meet
+              link before {workshopDateRangeLabel().split("·")[0]?.trim() ?? "the workshop"}.
+            </>
+          )}
         </p>
         <div className="mx-auto mt-8 max-w-lg">
           <WorkshopRegisterForm
             soldOut={snapshot.soldOut}
             earlyBirdActive={snapshot.earlyBirdActive}
+            registrationClosed={snapshot.registrationClosed}
             upiId={workshopUpiId()}
             upiPayeeName={workshopUpiPayeeName()}
           />
