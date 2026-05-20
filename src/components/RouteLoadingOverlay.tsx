@@ -1,39 +1,49 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
-type Variant = "home" | "images" | "films" | "events" | "avatars" | "pricing" | "contact" | "other";
-
-function getVariant(pathname: string): Variant {
-  if (pathname === "/") return "home";
-  if (pathname.startsWith("/images")) return "images";
-  if (pathname.startsWith("/films")) return "films";
-  if (pathname.startsWith("/events")) return "events";
-  if (pathname.startsWith("/avatars")) return "avatars";
-  if (pathname.startsWith("/pricing")) return "pricing";
-  if (pathname.startsWith("/contact")) return "contact";
-  return "other";
-}
-
-function BannerMark({ sizeCss }: { sizeCss: string }) {
-  // Floating logo mark only (no box, no rings).
+/** Compact app icon tile with rotating hex + pulsing core. */
+function LoaderMark() {
   return (
-    <div className="relative flex items-center justify-center" aria-hidden>
+    <div
+      className="loader-app-tile relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-[26px] bg-gradient-to-br from-blue-600 via-blue-500 to-blue-700 shadow-[0_16px_48px_rgba(37,99,235,0.5)] ring-1 ring-white/25"
+      aria-hidden
+    >
       <span
-        className="pointer-events-none absolute -inset-10 rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.22),transparent_60%)] blur-2xl"
+        className="pointer-events-none absolute inset-0 rounded-[26px] bg-gradient-to-b from-white/25 via-white/5 to-transparent"
         aria-hidden
       />
-      <svg style={{ width: sizeCss, height: sizeCss }} viewBox="0 0 18 18" fill="none" className="text-white drop-shadow-[0_20px_70px_rgba(0,0,0,0.55)]">
+      <span
+        className="pointer-events-none absolute -inset-px rounded-[27px] opacity-60"
+        style={{
+          background:
+            "linear-gradient(135deg, rgba(255,255,255,0.35) 0%, transparent 42%, transparent 58%, rgba(255,255,255,0.12) 100%)",
+        }}
+        aria-hidden
+      />
+      <svg width="40" height="40" viewBox="0 0 18 18" fill="none" className="relative z-[1]">
         <path
           d="M9 1L16 5V13L9 17L2 13V5L9 1Z"
           fill="white"
-          fillOpacity="0.15"
+          fillOpacity="0.14"
           stroke="white"
-          strokeWidth="1.5"
-          style={{ transformOrigin: "9px 9px", animation: "hexSpin 2s linear infinite" }}
+          strokeWidth="1.35"
+          style={{
+            transformOrigin: "9px 9px",
+            animation: "hexSpin 2.4s linear infinite",
+          }}
         />
-        <circle cx="9" cy="9" r="3" fill="white" />
+        <circle
+          cx="9"
+          cy="9"
+          r="2.35"
+          fill="white"
+          style={{
+            transformOrigin: "9px 9px",
+            animation: "corePulse 2.2s ease-in-out infinite",
+          }}
+        />
       </svg>
     </div>
   );
@@ -41,31 +51,14 @@ function BannerMark({ sizeCss }: { sizeCss: string }) {
 
 export default function RouteLoadingOverlay() {
   const pathname = usePathname() || "/";
-  const variant = useMemo(() => getVariant(pathname), [pathname]);
 
   const [open, setOpen] = useState(false);
-  const [label, setLabel] = useState<string | null>(null);
 
   const openAtRef = useRef<number>(0);
   const closeTimerRef = useRef<number | null>(null);
   const pollTimerRef = useRef<number | null>(null);
   const activeRef = useRef(false);
   const mountedRef = useRef(false);
-
-  const motionClass = useMemo(() => {
-    switch (variant) {
-      case "films":
-        return "animate-[spin_4.0s_linear_infinite]";
-      case "avatars":
-        return "animate-[spin_4.4s_ease-in-out_infinite]";
-      case "events":
-        return "animate-[spin_4.1s_linear_infinite]";
-      case "images":
-        return "animate-[spin_4.6s_linear_infinite]";
-      default:
-        return "animate-[spin_4.8s_linear_infinite]";
-    }
-  }, [variant]);
 
   function stopCloseTimer() {
     if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
@@ -77,10 +70,9 @@ export default function RouteLoadingOverlay() {
     pollTimerRef.current = null;
   }
 
-  function openOverlay(nextLabel?: string) {
+  function openOverlay() {
     stopCloseTimer();
     stopPollTimer();
-    setLabel(nextLabel ?? null);
     setOpen(true);
     openAtRef.current = performance.now();
     activeRef.current = true;
@@ -88,13 +80,9 @@ export default function RouteLoadingOverlay() {
 
   function closeOverlayNow() {
     activeRef.current = false;
-
     stopCloseTimer();
     stopPollTimer();
-    closeTimerRef.current = window.setTimeout(() => {
-      setOpen(false);
-      setLabel(null);
-    }, 160);
+    closeTimerRef.current = window.setTimeout(() => setOpen(false), 160);
   }
 
   function isInLoadWindow(el: Element): boolean {
@@ -150,25 +138,21 @@ export default function RouteLoadingOverlay() {
   }
 
   useEffect(() => {
-    // Show once on first mount, and on every route change.
-    // Close when visible media is ready.
     if (!mountedRef.current) {
       mountedRef.current = true;
       if (!pathname.startsWith("/admin")) {
-        openOverlay(getVariant(pathname) === "home" ? "Home" : "Getting ready");
+        openOverlay();
         closeWhenMediaReady();
       }
       return;
     }
-
     if (pathname.startsWith("/admin")) return;
-    openOverlay(getVariant(pathname) === "home" ? "Home" : "Getting ready");
+    openOverlay();
     closeWhenMediaReady();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   useEffect(() => {
-    // Ignore admin.
     if (pathname.startsWith("/admin")) return;
 
     const onClick = (e: MouseEvent) => {
@@ -197,30 +181,10 @@ export default function RouteLoadingOverlay() {
       if (url.pathname.startsWith("/admin")) return;
       if (url.pathname === window.location.pathname && url.search === window.location.search) return;
 
-      const nextVar = getVariant(url.pathname);
-      const nextLabel =
-        nextVar === "home"
-          ? "Home"
-          : nextVar === "images"
-            ? "Images"
-            : nextVar === "films"
-              ? "Films"
-              : nextVar === "events"
-                ? "Events"
-                : nextVar === "avatars"
-                  ? "Avatars"
-                  : nextVar === "pricing"
-                    ? "Pricing"
-                    : nextVar === "contact"
-                      ? "Contact"
-                      : "Getting ready";
-
-      openOverlay(nextLabel);
+      openOverlay();
     };
 
-    const onPop = () => {
-      openOverlay("Loading");
-    };
+    const onPop = () => openOverlay();
 
     window.addEventListener("click", onClick, true);
     window.addEventListener("popstate", onPop);
@@ -237,18 +201,17 @@ export default function RouteLoadingOverlay() {
     <div
       className="fixed inset-0 z-[999] flex items-center justify-center overflow-hidden"
       style={{
-        background: "rgba(2,6,23,0.10)",
-        WebkitBackdropFilter: "blur(22px)",
-        backdropFilter: "blur(22px)",
+        background: "rgba(2,6,23,0.07)",
+        WebkitBackdropFilter: "blur(16px)",
+        backdropFilter: "blur(16px)",
       }}
       role="status"
       aria-live="polite"
       aria-label="Loading"
     >
-      <div data-route-loader className="flex w-full flex-col items-center justify-center px-6 py-10">
-        <BannerMark sizeCss="min(30vmin, 220px)" />
+      <div data-route-loader className="flex items-center justify-center">
+        <LoaderMark />
       </div>
     </div>
   );
 }
-

@@ -35,6 +35,9 @@ export default function SiteFooter() {
             </div>
             <div className="flex flex-col gap-2">
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">Company</p>
+              <Link href="/about" className="font-semibold text-slate-900 transition-colors hover:text-blue-600">
+                About
+              </Link>
               <Link href="/pricing" className="font-semibold text-slate-900 transition-colors hover:text-blue-600">
                 Pricing
               </Link>
