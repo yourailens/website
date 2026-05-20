@@ -175,6 +175,22 @@ textarea {
 .loader-app-tile {
   animation: loaderAppFloat 2.6s ease-in-out infinite;
 }
+
+@keyframes heroFilmSkeletonShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.hero-film-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.09) 45%,
+    rgba(59, 130, 246, 0.12) 55%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  background-size: 200% 100%;
+  animation: heroFilmSkeletonShimmer 1.85s ease-in-out infinite;
+}
 @keyframes corePulse {
   0%, 100% { transform: scale(1);   opacity: 1; }
   50%       { transform: scale(1.6); opacity: 0.6; }

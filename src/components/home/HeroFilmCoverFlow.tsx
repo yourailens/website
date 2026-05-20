@@ -66,9 +66,68 @@ function Chevron({ dir }: { dir: "left" | "right" }) {
   );
 }
 
+const SKELETON_OFFSETS = [-2, -1, 0, 1, 2] as const;
+
+function HeroFilmSkeleton() {
+  return (
+    <div className="pointer-events-none select-none" aria-hidden>
+      <div className="relative z-0 mx-auto flex w-full min-h-[min(58vh,620px)] max-w-none items-center justify-center lg:min-h-[min(52vh,600px)]">
+        <div className="absolute left-0 z-40 h-11 w-11 rounded-full border border-white/10 bg-white/[0.04] sm:h-12 sm:w-12 md:left-1 lg:left-2" />
+        <div className="absolute right-0 z-40 h-11 w-11 rounded-full border border-white/10 bg-white/[0.04] sm:h-12 sm:w-12 md:right-1 lg:right-2" />
+
+        <div
+          className="relative h-[min(68vh,680px)] w-full max-w-[min(100%,1580px)] sm:h-[min(66vh,640px)] lg:h-[min(52vh,580px)]"
+          style={{ perspective: "min(2000px, 165vw)" }}
+        >
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ transformStyle: "preserve-3d" }}
+          >
+            {SKELETON_OFFSETS.map((offset) => {
+              const t = cardTransform(offset);
+              return (
+                <div
+                  key={offset}
+                  className="hero-film-skeleton absolute overflow-hidden rounded-[22px] border border-white/10 bg-[#141418] ring-1 ring-white/5 aspect-[9/16] w-[min(72vw,300px)] lg:aspect-video lg:w-[min(900px,94vw)]"
+                  style={{
+                    transform: `translateX(-50%) translateY(-50%) translateX(${t.txPct}%) translateZ(${t.tz}px) rotateY(${t.ry}deg) scale(${t.scale})`,
+                    left: "50%",
+                    top: "50%",
+                    zIndex: t.z,
+                    opacity: Math.min(t.opacity, offset === 0 ? 1 : 0.55),
+                  }}
+                >
+                  <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent" />
+                  {offset === 0 ? (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="h-10 w-10 rounded-2xl bg-white/[0.06] ring-1 ring-white/10" />
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 flex w-full gap-3 overflow-hidden px-1 sm:mt-8 sm:gap-4 sm:px-2">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className={`hero-film-skeleton shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#141418] aspect-video w-[min(188px,32vw)] sm:w-[min(204px,28vw)] ${
+              i === 2 ? "opacity-100 ring-1 ring-white/15" : "opacity-70"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function HeroFilmCoverFlow() {
   const [items, setItems] = useState<FilmItem[]>([]);
   const [ready, setReady] = useState(false);
+  const [mediaReady, setMediaReady] = useState(false);
   const [active, setActive] = useState(0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -80,6 +139,7 @@ export default function HeroFilmCoverFlow() {
   const scrubScrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeFromScrubRef = useRef(false);
   const [highlightSlot, setHighlightSlot] = useState(0);
+  const bootstrappedRef = useRef(false);
 
   useEffect(() => {
     let alive = true;
@@ -157,8 +217,31 @@ export default function HeroFilmCoverFlow() {
     if (!v || n === 0) return;
     v.muted = true;
     v.loop = false;
+    if (v.readyState >= 2) {
+      bootstrappedRef.current = true;
+      setMediaReady(true);
+    }
     void v.play().catch(() => {});
   }, [active, n, items]);
+
+  /** Gate skeleton only on first load; slide changes keep carousel visible. */
+  useEffect(() => {
+    if (!ready || n === 0) {
+      setMediaReady(false);
+      return;
+    }
+    setMediaReady(false);
+    const fallback = window.setTimeout(() => {
+      bootstrappedRef.current = true;
+      setMediaReady(true);
+    }, 8000);
+    return () => window.clearTimeout(fallback);
+  }, [ready, n, items]);
+
+  const onCenterVideoReady = useCallback(() => {
+    bootstrappedRef.current = true;
+    setMediaReady(true);
+  }, []);
 
   /** Horizontal wheel / Shift+vertical wheel only — avoids hijacking normal page scroll. */
   useEffect(() => {
@@ -254,7 +337,9 @@ export default function HeroFilmCoverFlow() {
     };
   }, []);
 
-  if (!ready || n === 0) return null;
+  if (ready && n === 0) return null;
+
+  const showSkeleton = !ready || (n > 0 && !mediaReady && !bootstrappedRef.current);
 
   return (
     <section className="relative z-0 isolate overflow-hidden bg-[#0a0a0c] pb-10 pt-6 sm:pb-14 sm:pt-8">
@@ -269,6 +354,29 @@ export default function HeroFilmCoverFlow() {
           Featured films
         </p>
 
+        <div className="relative">
+          {/* Skeleton — visible until API + center video are ready */}
+          <div
+            className={`transition-opacity duration-500 ease-out ${
+              showSkeleton
+                ? "relative opacity-100"
+                : "pointer-events-none absolute inset-x-0 top-0 opacity-0"
+            }`}
+            aria-busy={showSkeleton}
+            aria-hidden={!showSkeleton}
+          >
+            <HeroFilmSkeleton />
+          </div>
+
+          {/* Real carousel — preloads behind skeleton, fades in when ready */}
+          {ready && n > 0 ? (
+            <div
+              className={`transition-opacity duration-500 ease-out ${
+                mediaReady
+                  ? "relative opacity-100"
+                  : "pointer-events-none absolute inset-x-0 top-0 opacity-0"
+              }`}
+            >
         <div className="relative z-0 mx-auto flex w-full min-h-[min(58vh,620px)] max-w-none items-center justify-center lg:min-h-[min(52vh,600px)]">
           {/* Prev — z within this block only; section isolate keeps nav/banner above */}
           <button
@@ -350,6 +458,8 @@ export default function HeroFilmCoverFlow() {
                           playsInline
                           preload="auto"
                           poster={item.posterUrl || undefined}
+                          onLoadedData={onCenterVideoReady}
+                          onCanPlay={onCenterVideoReady}
                           onEnded={onVideoEnded}
                           {...noDownloadVideoProps}
                         >
@@ -472,6 +582,9 @@ export default function HeroFilmCoverFlow() {
               </div>
             </button>
           ))}
+        </div>
+            </div>
+          ) : null}
         </div>
       </div>
     </section>
