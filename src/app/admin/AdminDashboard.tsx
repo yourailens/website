@@ -370,11 +370,26 @@ export default function AdminDashboard() {
             <Link href="/admin/outfits" className="rounded-full border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-800">
               Outfit Sheets
             </Link>
+            <Link href="/admin/character-sheets" className="rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800">
+              Character Sheets
+            </Link>
             <Link href="/admin/scenarios" className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-800">
               Reference Scenarios
             </Link>
             <Link href="/admin/locations" className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800">
               Locations
+            </Link>
+            <Link href="/admin/props" className="rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800">
+              Props Library
+            </Link>
+            <Link href="/admin/lighting-presets" className="rounded-full border border-yellow-200 bg-yellow-50 px-4 py-2 text-sm font-semibold text-yellow-800">
+              Lighting Presets
+            </Link>
+            <Link href="/admin/color-grades" className="rounded-full border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-800">
+              Color Grades
+            </Link>
+            <Link href="/admin/mood-boards" className="rounded-full border border-pink-200 bg-pink-50 px-4 py-2 text-sm font-semibold text-pink-800">
+              Mood Boards
             </Link>
             <Link href="/admin/workshops" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
               Workshop bookings

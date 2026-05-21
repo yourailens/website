@@ -10,12 +10,44 @@ const PRIMARY_NAV_LINKS = [
   { label: "Events", href: "/events" },
 ] as const;
 
-const RESOURCES_DESTINATIONS = [
-  { href: "/prompts",    label: "Workflows" },
-  { href: "/outfits",   label: "Outfit Sheets" },
-  { href: "/scenarios", label: "Reference Scenarios" },
-  { href: "/locations", label: "Locations" },
+const RESOURCES_CATEGORIES = [
+  {
+    label: "Characters & Style",
+    color: "from-violet-500 to-purple-600",
+    bgLight: "bg-violet-50",
+    border: "border-violet-100",
+    items: [
+      { href: "/character-sheets", label: "Character Sheets",     blurb: "Diverse characters by ethnicity, age & archetype." },
+      { href: "/outfits",          label: "Outfit Sheets",        blurb: "Style references for every character and era." },
+      { href: "/props",            label: "Props Library",        blurb: "Objects, accessories & handheld items." },
+    ],
+  },
+  {
+    label: "Scenes & World",
+    color: "from-emerald-500 to-teal-600",
+    bgLight: "bg-emerald-50",
+    border: "border-emerald-100",
+    items: [
+      { href: "/scenarios",    label: "Reference Scenarios", blurb: "Scene setups — portraits, action, romance." },
+      { href: "/locations",    label: "Locations",           blurb: "Backgrounds from forests to sci-fi cities." },
+      { href: "/mood-boards",  label: "Mood Boards",         blurb: "Aesthetic direction: Y2K, Cyberpunk, Academia." },
+    ],
+  },
+  {
+    label: "Production",
+    color: "from-blue-500 to-indigo-600",
+    bgLight: "bg-blue-50",
+    border: "border-blue-100",
+    items: [
+      { href: "/prompts",           label: "Workflows",              blurb: "Step-by-step AI prompt engineering guides." },
+      { href: "/lighting-presets",  label: "Lighting Presets",       blurb: "Golden hour, neon, studio and cinematic setups." },
+      { href: "/color-grades",      label: "Color Grading Presets",  blurb: "LUT-style visual references for AI video." },
+    ],
+  },
 ] as const;
+
+type ResourceItem = { readonly href: string; readonly label: string; readonly blurb: string };
+const RESOURCES_DESTINATIONS: ResourceItem[] = RESOURCES_CATEGORIES.flatMap((c) => [...c.items]);
 
 const ORIGINALS_DESTINATIONS = [
   { href: "/images", label: "Images", blurb: "AI-generated still images from every campaign." },
@@ -624,7 +656,7 @@ function DesktopResourcesTrigger({
   onToggle: () => void;
   pathname: string;
 }) {
-  const active = pathname.startsWith("/prompts") || pathname.startsWith("/outfits") || pathname.startsWith("/scenarios") || pathname.startsWith("/locations");
+  const active = ["/resources","/prompts","/outfits","/character-sheets","/scenarios","/locations","/props","/lighting-presets","/color-grades","/mood-boards"].some((p) => pathname.startsWith(p));
   return (
     <button
       type="button"
@@ -663,114 +695,114 @@ function DesktopResourcesTrigger({
 // Tiny icon for each resource type
 function ResourceIcon({ href }: { href: string }) {
   if (href === "/prompts") return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
     </svg>
   );
   if (href === "/outfits") return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
       <path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>
     </svg>
   );
-  if (href === "/scenarios") return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-      <circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="18" cy="8" r="3"/><path d="M21 20v-2a3 3 0 0 0-2-2.83"/>
+  if (href === "/character-sheets") return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <circle cx="12" cy="7" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
     </svg>
   );
-  // locations
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+  if (href === "/scenarios") return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <circle cx="9" cy="9" r="3"/><path d="M3 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="18" cy="8" r="3"/><path d="M21 20v-2a3 3 0 0 0-2-2.83"/>
+    </svg>
+  );
+  if (href === "/locations") return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
     </svg>
   );
-}
-
-// Tiny stacked preview cards decoration
-function MiniCardStack({ tint }: { tint: string }) {
-  const cards = [
-    { rotate: "-rotate-6", translate: "-translate-x-2 translate-y-1", z: "z-[1]", opacity: "opacity-60" },
-    { rotate: "rotate-3",  translate: "translate-x-1 -translate-y-0.5", z: "z-[2]", opacity: "opacity-80" },
-    { rotate: "-rotate-1", translate: "translate-x-0 translate-y-0",    z: "z-[3]", opacity: "opacity-100" },
-  ];
+  if (href === "/props") return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27,6.96 12,12.01 20.73,6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+    </svg>
+  );
+  if (href === "/lighting-presets") return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+  );
+  if (href === "/color-grades") return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-4.5 10-10 10z"/>
+    </svg>
+  );
+  // mood-boards
   return (
-    <div className="relative h-10 w-14">
-      {cards.map((c, i) => (
-        <div
-          key={i}
-          className={`absolute inset-0 ${c.rotate} ${c.translate} ${c.z} ${c.opacity} rounded-lg border border-white/60 ${tint} shadow-sm`}
-        />
-      ))}
-    </div>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+    </svg>
   );
 }
 
-const RESOURCES_META: Record<string, { blurb: string; tint: string }> = {
-  "/prompts":    { blurb: "Step-by-step AI workflow guides and prompt blueprints.", tint: "bg-blue-200/60" },
-  "/outfits":    { blurb: "Outfit reference sheets for every style and character type.", tint: "bg-violet-200/60" },
-  "/scenarios":  { blurb: "Scene reference sheets — portraits, action, romance and more.", tint: "bg-rose-200/60" },
-  "/locations":  { blurb: "Location and background references from forest to sci-fi.", tint: "bg-emerald-200/60" },
-};
-
 function DesktopResourcesMegaPanel({ onLinkClick }: { onLinkClick: () => void }) {
   return (
-    <div className="relative w-full overflow-hidden rounded-t-none rounded-b-2xl border-x-0 border-b border-t border-blue-100/90 bg-gradient-to-b from-white via-slate-50 to-blue-50 shadow-[0_24px_48px_-12px_rgba(30,58,138,0.18)]">
-      {/* Ambient blobs */}
-      <div className="pointer-events-none absolute -left-20 top-0 h-72 w-72 rounded-full bg-blue-400/15 blur-3xl" aria-hidden />
-      <div className="pointer-events-none absolute -right-24 bottom-0 h-64 w-64 rounded-full bg-violet-300/15 blur-3xl" aria-hidden />
-      {/* Grid texture */}
-      <div className="pointer-events-none absolute inset-0 opacity-[0.35]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%2393c5fd' stroke-opacity='0.18'%3E%3Cpath d='M0 40h80M40 0v80'/%3E%3C/g%3E%3C/svg%3E")` }} aria-hidden />
+    <div className="relative w-full overflow-hidden rounded-b-2xl border-x-0 border-b border-t border-slate-200 bg-white shadow-[0_20px_50px_-12px_rgba(30,58,138,0.18)]">
+      {/* subtle background texture */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%23475569' stroke-opacity='1'%3E%3Cpath d='M0 30h60M30 0v60'/%3E%3C/g%3E%3C/svg%3E\")" }} aria-hidden />
 
-      <div className="relative mx-auto max-w-7xl px-6 py-8 sm:py-10 lg:px-10">
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-stretch lg:gap-12">
-
-          {/* Left — tagline */}
-          <div className="max-w-xs shrink-0 lg:w-[28%] lg:border-r lg:border-blue-100/90 lg:pr-10">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-blue-600">Resources</p>
-            <p className="mt-3 font-heading text-2xl font-black leading-tight tracking-tight text-slate-900 sm:text-3xl">
-              Build with
-              <span className="block bg-gradient-to-r from-blue-800 via-blue-600 to-violet-600 bg-clip-text text-transparent">
-                references.
-              </span>
-            </p>
-            <p className="mt-4 text-sm leading-relaxed text-slate-600">
-              Outfits, scenes, locations, and workflows — every reference you need to create faster.
-            </p>
-            <div className="mt-6 hidden h-px w-full bg-gradient-to-r from-blue-200/80 via-transparent to-violet-200/60 sm:block lg:hidden" />
+      <div className="relative mx-auto max-w-7xl px-6 py-7 lg:px-10">
+        {/* "All resources" shortcut */}
+        <Link href="/resources" onClick={onLinkClick} className="group mb-5 flex items-center gap-3 rounded-2xl border border-slate-100 bg-gradient-to-r from-slate-50 to-white px-5 py-3.5 shadow-sm transition hover:border-blue-200 hover:shadow-md">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 via-blue-500 to-emerald-500 shadow">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-slate-800 group-hover:text-blue-700">All Resources</p>
+            <p className="text-[10px] text-slate-400">9 libraries · one page</p>
+          </div>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-blue-500"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </Link>
 
-          {/* Right — 2×2 grid of cards */}
-          <div className="grid min-w-0 flex-1 gap-3 sm:grid-cols-2 lg:gap-4">
-            {RESOURCES_DESTINATIONS.map((item) => {
-              const meta = RESOURCES_META[item.href];
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  prefetch
-                  onClick={onLinkClick}
-                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-blue-100/90 bg-white/90 p-5 shadow-sm shadow-blue-950/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-white hover:shadow-lg hover:shadow-blue-900/10"
-                >
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-50/60 via-white to-slate-50/80 opacity-90 transition-opacity group-hover:opacity-100" aria-hidden />
-
-                  <div className="relative flex items-start justify-between gap-3">
-                    {/* Icon */}
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-100/90 bg-gradient-to-br from-slate-50 to-blue-100/90 text-blue-700 shadow-inner shadow-white/80">
+        {/* Category columns */}
+        <div className="grid grid-cols-3 gap-6 lg:gap-8">
+          {RESOURCES_CATEGORIES.map((cat) => (
+            <div key={cat.label}>
+              {/* Category header */}
+              <div className="mb-3 flex items-center gap-2.5">
+                <div className={`h-2.5 w-2.5 rounded-full bg-gradient-to-br ${cat.color}`} />
+                <p className="font-mono text-[9px] font-bold uppercase tracking-[0.35em] text-slate-400">{cat.label}</p>
+              </div>
+              {/* Items */}
+              <div className="space-y-1.5">
+                {cat.items.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    prefetch
+                    onClick={onLinkClick}
+                    className={`group flex items-center gap-3 rounded-xl border ${cat.border} ${cat.bgLight} px-4 py-3 transition-all duration-200 hover:border-opacity-80 hover:shadow-md hover:shadow-slate-900/6 hover:-translate-y-0.5 hover:bg-white`}
+                  >
+                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${cat.color} text-white shadow-sm`}>
                       <ResourceIcon href={item.href} />
                     </div>
-                    {/* Mini stacked cards */}
-                    <MiniCardStack tint={meta?.tint ?? "bg-blue-200/60"} />
-                  </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[13px] font-bold text-slate-800 group-hover:text-slate-900">{item.label}</p>
+                      <p className="mt-0.5 text-[10px] leading-snug text-slate-400 group-hover:text-slate-500">{item.blurb}</p>
+                    </div>
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" className="shrink-0 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-500">
+                      <path d="M3 8h10M9 4l4 4-4 4"/>
+                    </svg>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
 
-                  <h3 className="relative mt-4 font-heading text-base font-black text-slate-900">{item.label}</h3>
-                  <p className="relative mt-1.5 text-xs leading-relaxed text-slate-500">{meta?.blurb}</p>
-                  <span className="relative mt-3 inline-flex items-center gap-1 text-xs font-bold text-blue-600">
-                    Browse
-                    <span className="transition-transform group-hover:translate-x-0.5" aria-hidden>→</span>
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
+        {/* Bottom strip */}
+        <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
+          <p className="text-[11px] text-slate-400">9 reference libraries · growing weekly</p>
+          <Link href="/resources" onClick={onLinkClick} className="flex items-center gap-1.5 text-[11px] font-bold text-blue-600 hover:underline">
+            Browse all resources <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+          </Link>
         </div>
       </div>
     </div>
@@ -1190,6 +1222,7 @@ export default function Navbar() {
 
                 {/* Resources section */}
                 <p className="mt-4 px-1 font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-white/40">Resources</p>
+                <MobileNavLink href="/resources" label="✦ All Resources" pathname={pathname} onSamePathClose={closeIfSamePath} />
                 {RESOURCES_DESTINATIONS.map((item) => (
                   <MobileNavLink
                     key={item.href}
