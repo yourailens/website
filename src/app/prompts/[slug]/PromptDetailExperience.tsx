@@ -352,14 +352,10 @@ export default function PromptDetailExperience({
 
       {/* ── Cover ── */}
       {prompt.cover_image_url && (
-        <div className={`relative w-full overflow-hidden ${
-          prompt.cover_aspect === "portrait" || prompt.cover_aspect === "square"
-            ? "flex justify-center py-8"
-            : "h-[45vh] sm:h-[55vh]"
-        }`}>
-          {/* Blurred background for portrait/square */}
-          {(prompt.cover_aspect === "portrait" || prompt.cover_aspect === "square") && (
-            <>
+        <>
+          {prompt.cover_aspect === "portrait" || prompt.cover_aspect === "square" ? (
+            /* Portrait / square — blurred bg + centred card */
+            <div className="relative w-full overflow-hidden flex justify-center py-8">
               <Image
                 src={prompt.cover_image_url}
                 alt=""
@@ -371,38 +367,32 @@ export default function PromptDetailExperience({
                 unoptimized
               />
               <div className="absolute inset-0 bg-black/30" />
-            </>
-          )}
-
-          {prompt.cover_aspect === "portrait" || prompt.cover_aspect === "square" ? (
-            <div className={`relative z-10 overflow-hidden rounded-2xl shadow-2xl ${
-              prompt.cover_aspect === "portrait" ? "h-[60vh] w-[min(340px,80vw)]" : "h-[min(60vh,500px)] w-[min(60vh,500px)]"
-            }`}>
-              <Image
-                src={prompt.cover_image_url}
-                alt={prompt.title}
-                fill
-                priority
-                sizes="500px"
-                className="object-cover"
-                unoptimized
-              />
+              <div className={`relative z-10 overflow-hidden rounded-2xl shadow-2xl ${
+                prompt.cover_aspect === "portrait" ? "h-[60vh] w-[min(340px,80vw)]" : "h-[min(60vh,500px)] w-[min(60vh,500px)]"
+              }`}>
+                <Image
+                  src={prompt.cover_image_url}
+                  alt={prompt.title}
+                  fill
+                  priority
+                  sizes="500px"
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
             </div>
           ) : (
-            <>
-              <Image
+            /* Landscape — show full image at natural aspect ratio, no crop */
+            <div className="w-full">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={prompt.cover_image_url}
                 alt={prompt.title}
-                fill
-                priority
-                sizes="100vw"
-                className="object-cover opacity-80"
-                unoptimized
+                className="w-full h-auto block"
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/60" />
-            </>
+            </div>
           )}
-        </div>
+        </>
       )}
 
       <main className="mx-auto max-w-7xl overflow-hidden px-6 lg:px-10">
