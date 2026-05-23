@@ -66,29 +66,27 @@ function Chip({
 function PromptCard({ p }: { p: Prompt }) {
   const accent = promptMediaAccent(p.media_type);
   const diff = difficultyAccent(p.difficulty);
+  const imgH = p.cover_aspect === "portrait" ? 560 : p.cover_aspect === "square" ? 400 : 225;
 
   return (
     <Link
       href={`/prompts/${p.slug}`}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200"
+      className="group mb-3 block break-inside-avoid overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200"
     >
       {/* Cover */}
-      <div className={`relative w-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 ${
-        p.cover_aspect === "portrait" ? "aspect-[3/4]"
-        : p.cover_aspect === "square" ? "aspect-square"
-        : "aspect-[16/9]"
-      }`}>
+      <div className="relative w-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
         {p.cover_image_url ? (
           <Image
             src={p.cover_image_url}
             alt={p.title}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            width={400}
+            height={imgH}
+            className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
             unoptimized
+            loading="lazy"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="flex aspect-video items-center justify-center">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="text-slate-400">
               <path d="M12 2L19 6V12C19 15.87 15.87 20.27 12 21C8.13 20.27 5 15.87 5 12V6L12 2Z" />
               <circle cx="12" cy="12" r="2" />
@@ -114,8 +112,8 @@ function PromptCard({ p }: { p: Prompt }) {
       </div>
 
       {/* Body */}
-      <div className="flex flex-1 flex-col p-5">
-        <div className="mb-3 flex flex-wrap items-center gap-2">
+      <div className="flex flex-col p-4">
+        <div className="mb-2.5 flex flex-wrap items-center gap-2">
           <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
             {promptCategoryLabel(p)}
           </span>
@@ -149,7 +147,7 @@ function PromptCard({ p }: { p: Prompt }) {
           </div>
         )}
 
-        <div className="mt-auto flex items-center justify-between pt-4">
+        <div className="mt-3 flex items-center justify-between pt-3 border-t border-slate-100">
           <span className="text-[11px] text-slate-400">
             {p.view_count > 0 && `${p.view_count.toLocaleString()} views`}
           </span>
@@ -352,16 +350,9 @@ export default function PromptsLibraryExperience({ initialPrompts }: { initialPr
         </div>
 
         {loading && prompts.length === 0 ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="animate-pulse rounded-2xl border border-slate-100 bg-white">
-                <div className="aspect-[16/9] w-full rounded-t-2xl bg-slate-100" />
-                <div className="space-y-2 p-5">
-                  <div className="h-3 w-1/3 rounded bg-slate-100" />
-                  <div className="h-5 w-3/4 rounded bg-slate-100" />
-                  <div className="h-3 w-full rounded bg-slate-100" />
-                </div>
-              </div>
+          <div className="columns-2 gap-3 sm:columns-3 lg:columns-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="mb-3 break-inside-avoid animate-pulse rounded-2xl bg-slate-200" style={{ height: [280, 200, 320, 200, 260, 200, 300, 220][i % 8] }} />
             ))}
           </div>
         ) : prompts.length === 0 ? (
@@ -376,7 +367,7 @@ export default function PromptsLibraryExperience({ initialPrompts }: { initialPr
             <p className="mt-2 text-sm text-slate-400">Try adjusting your filters or search.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="columns-2 gap-3 sm:columns-3 lg:columns-4">
             {prompts.map((p) => <PromptCard key={p.id} p={p} />)}
           </div>
         )}
