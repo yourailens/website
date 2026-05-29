@@ -456,7 +456,7 @@ export default function HeroFilmCoverFlow() {
                           className="absolute inset-0 h-full w-full object-cover object-center"
                           muted
                           playsInline
-                          preload="auto"
+                          preload="metadata"
                           poster={item.posterUrl || undefined}
                           onLoadedData={onCenterVideoReady}
                           onCanPlay={onCenterVideoReady}

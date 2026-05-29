@@ -4,7 +4,7 @@ import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { NavLinkPendingSpinner } from "@/components/NavLinkWithPending";
-import { WORKSHOP_TITLE } from "@/lib/events/workshop-config";
+
 
 const PRIMARY_NAV_LINKS = [
   { label: "Events", href: "/events" },
@@ -164,27 +164,7 @@ function DesktopContactCtaInner() {
   );
 }
 
-function AnnouncementWorkshopLink() {
-  return (
-    <Link
-      href="/events/ai-creator-workshop"
-      prefetch
-      className="whitespace-nowrap underline underline-offset-2 transition-colors hover:text-blue-100"
-    >
-      <AnnouncementWorkshopLinkInner />
-    </Link>
-  );
-}
 
-function AnnouncementWorkshopLinkInner() {
-  const { pending } = useLinkStatus();
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <NavLinkPendingSpinner borderClassName="border-white" />
-      <span className={pending ? "opacity-90" : undefined}>Register now →</span>
-    </span>
-  );
-}
 
 function MobileNavLink({
   href,
@@ -1022,13 +1002,16 @@ export default function Navbar() {
         ref={headerRef}
         className={`fixed top-0 left-0 right-0 z-50 w-full transition-shadow duration-300 ${scrolled ? "shadow-md" : "shadow-sm"}`}
       >
-        {/* Workshop teaser */}
-        <div className="bg-blue-600 py-2.5 text-center text-xs font-semibold text-white">
-          <span className="inline-flex flex-wrap items-center justify-center gap-x-1.5 px-2">
-            <span>✦ {WORKSHOP_TITLE}</span>
-            <AnnouncementWorkshopLink />
+        {/* Book a call banner */}
+        <Link
+          href="/contact"
+          prefetch
+          className="group block bg-blue-600 py-2.5 text-center text-xs font-semibold text-white transition-colors hover:bg-blue-700"
+        >
+          <span className="inline-flex items-center gap-x-2 px-2">
+            <span>✦ Let&apos;s build something with AI</span>
           </span>
-        </div>
+        </Link>
 
         {/* Main navbar */}
         <nav className="relative overflow-visible bg-white">
