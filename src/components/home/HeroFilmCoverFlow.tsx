@@ -148,7 +148,7 @@ export default function HeroFilmCoverFlow() {
         const res = await fetch("/api/gallery/films", { method: "GET" });
         const j = (await res.json().catch(() => ({}))) as { films?: FilmItem[] };
         if (!alive) return;
-        setItems(Array.isArray(j.films) ? j.films : []);
+        setItems(Array.isArray(j.films) ? j.films.slice(0, 6) : []);
       } catch {
         if (!alive) return;
         setItems([]);
