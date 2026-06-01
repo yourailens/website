@@ -1013,12 +1013,12 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Main navbar */}
+      {/* Main navbar */}
         <nav className="relative overflow-visible bg-white">
-          <div className="h-[3px] w-full bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400" />
+        <div className="h-[3px] w-full bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400" />
 
-          <div className="mx-auto max-w-7xl px-6 lg:px-10">
-            <div className="flex h-20 items-center justify-between gap-8">
+        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+          <div className="flex h-20 items-center justify-between gap-8">
               <DesktopLogoLink />
 
               <div className="hidden flex-1 items-center justify-center gap-1 lg:flex">
@@ -1033,7 +1033,7 @@ export default function Navbar() {
                     onToggle={() => originalsMega.setOpen((v) => !v)}
                     pathname={pathname}
                   />
-                </div>
+              </div>
                 <div
                   ref={resourcesMega.triggerRef}
                   className="relative"
@@ -1045,7 +1045,7 @@ export default function Navbar() {
                     onToggle={() => resourcesMega.setOpen((v) => !v)}
                     pathname={pathname}
                   />
-                </div>
+              </div>
                 {PRIMARY_NAV_LINKS.map((link) => (
                   <DesktopNavLink key={link.label} href={link.href} label={link.label} />
                 ))}
@@ -1073,24 +1073,24 @@ export default function Navbar() {
                     pathname={pathname}
                   />
                 </div>
-              </div>
+            </div>
 
-              <div className="hidden shrink-0 items-center gap-3 lg:flex">
+            <div className="hidden shrink-0 items-center gap-3 lg:flex">
                 <DesktopContactCta />
               </div>
 
-              <button
-                type="button"
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-xl border border-slate-200 lg:hidden"
-                aria-label="Toggle menu"
-              >
-                <span className={`h-[2px] w-5 rounded-full bg-slate-700 transition-all duration-300 ${menuOpen ? "translate-y-[7px] rotate-45" : ""}`} />
-                <span className={`h-[2px] w-5 rounded-full bg-slate-700 transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`} />
-                <span className={`h-[2px] w-5 rounded-full bg-slate-700 transition-all duration-300 ${menuOpen ? "-translate-y-[7px] -rotate-45" : ""}`} />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-xl border border-slate-200 lg:hidden"
+              aria-label="Toggle menu"
+            >
+              <span className={`h-[2px] w-5 rounded-full bg-slate-700 transition-all duration-300 ${menuOpen ? "translate-y-[7px] rotate-45" : ""}`} />
+              <span className={`h-[2px] w-5 rounded-full bg-slate-700 transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`} />
+              <span className={`h-[2px] w-5 rounded-full bg-slate-700 transition-all duration-300 ${menuOpen ? "-translate-y-[7px] -rotate-45" : ""}`} />
+            </button>
           </div>
+        </div>
 
           {/* Resources mega panel */}
           <div
@@ -1253,7 +1253,7 @@ export default function Navbar() {
                     onSamePathClose={closeIfSamePath}
                   />
                 ))}
-              </nav>
+      </nav>
 
               <div className="mt-10 flex flex-col gap-4">
                 <MobileContactCta pathname={pathname} onSamePathClose={closeIfSamePath} />
