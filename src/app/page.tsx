@@ -332,6 +332,166 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── TRADITIONAL vs AI ─────────────────────────────────────────── */}
+      <section className="bg-white py-16 lg:py-24">
+        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+          <div className="mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-500">The Case for AI</span>
+          </div>
+          <h2 className="mb-12 font-heading text-3xl font-black text-slate-900 lg:text-4xl" style={{ letterSpacing: "-0.025em" }}>
+            Same quality.<br />A fraction of the cost.
+          </h2>
+
+          <div className="grid gap-3 lg:grid-cols-2">
+            {/* Traditional */}
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8">
+              <p className="mb-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">Traditional Agency</p>
+              <ul className="space-y-4">
+                {[
+                  { label: "Cost per campaign", value: "₹2,00,000 – ₹5,00,000" },
+                  { label: "Time to delivery",  value: "3 – 6 weeks" },
+                  { label: "Deliverables",      value: "3 – 5 assets" },
+                  { label: "Revisions",         value: "1 – 2 rounds (charged)" },
+                  { label: "Resizing / edits",  value: "Billed separately" },
+                  { label: "Brand consistency", value: "Manual, variable" },
+                ].map((r) => (
+                  <li key={r.label} className="flex items-center justify-between gap-4 border-b border-slate-200 pb-4 last:border-0 last:pb-0">
+                    <span className="text-sm text-slate-500">{r.label}</span>
+                    <span className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-100">
+                        <svg className="h-2.5 w-2.5 text-red-500" fill="none" viewBox="0 0 10 10">
+                          <path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                        </svg>
+                      </span>
+                      {r.value}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* AI Studio */}
+            <div className="rounded-2xl bg-slate-900 p-8 text-white">
+              <p className="mb-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">YourAILens Studio</p>
+              <ul className="space-y-4">
+                {[
+                  { label: "Cost per campaign", value: "From ₹30,000" },
+                  { label: "Time to delivery",  value: "24 – 48 hours" },
+                  { label: "Deliverables",      value: "50+ assets per campaign" },
+                  { label: "Revisions",         value: "Unlimited, included" },
+                  { label: "Resizing / edits",  value: "All platforms, included" },
+                  { label: "Brand consistency", value: "AI-locked to your identity" },
+                ].map((r) => (
+                  <li key={r.label} className="flex items-center justify-between gap-4 border-b border-white/10 pb-4 last:border-0 last:pb-0">
+                    <span className="text-sm text-slate-400">{r.label}</span>
+                    <span className="flex items-center gap-2 text-sm font-semibold text-white">
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
+                        <svg className="h-2.5 w-2.5 text-emerald-400" fill="none" viewBox="0 0 10 8">
+                          <path d="M1 4l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </span>
+                      {r.value}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── KEY NUMBERS ───────────────────────────────────────────────── */}
+      <section className="border-y border-slate-100 bg-slate-50 py-16 lg:py-20">
+        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 lg:grid-cols-4">
+            {[
+              { num: "10×",  label: "Faster than traditional production",     sub: "Brief to delivery in 48 hours" },
+              { num: "85%",  label: "Average cost reduction vs agency pricing", sub: "Same cinematic output, less spend" },
+              { num: "50+",  label: "Brand assets per campaign package",       sub: "Videos, stills, creatives, copy" },
+              { num: "100%", label: "AI-generated, commercially licensed",     sub: "Fully ownable by your brand" },
+            ].map((s) => (
+              <div key={s.num} className="flex flex-col bg-white px-8 py-10">
+                <span className="font-heading text-5xl font-black text-slate-900 lg:text-6xl" style={{ letterSpacing: "-0.04em" }}>
+                  {s.num}
+                </span>
+                <p className="mt-3 text-sm font-semibold leading-snug text-slate-700">{s.label}</p>
+                <p className="mt-1 text-xs text-slate-400">{s.sub}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── HOW AI PRODUCTION WORKS ───────────────────────────────────── */}
+      <section className="bg-white py-16 lg:py-24">
+        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+          <div className="mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-500">The Technology</span>
+          </div>
+          <div className="mb-12 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <h2 className="font-heading text-3xl font-black text-slate-900 lg:text-4xl" style={{ letterSpacing: "-0.025em" }}>
+              What used to take a crew<br />now takes a prompt.
+            </h2>
+            <p className="max-w-xs text-sm text-slate-500 lg:text-right">
+              We use the world&apos;s leading generative AI models to produce ad-grade creative at a fraction of traditional cost — without sacrificing an inch of quality.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                title: "AI Cinematography",
+                body: "State-of-the-art video generation models produce cinematic footage — lighting, movement, depth — indistinguishable from on-set production. No crew. No location. No waiting.",
+                stat: "60s film in under 2 hours",
+                accent: "#2563eb",
+              },
+              {
+                title: "Instant Asset Scaling",
+                body: "One campaign brief generates dozens of size-optimised variants automatically. Meta, Google, YouTube, LinkedIn, Print — every format, every spec, zero extra cost.",
+                stat: "50+ formats from one brief",
+                accent: "#7c3aed",
+              },
+              {
+                title: "Brand-Locked Output",
+                body: "Your brand colors, fonts, spokesperson, tone of voice — all encoded into the generation pipeline. Every output is on-brand by default, not by chance.",
+                stat: "Zero off-brand outputs",
+                accent: "#0ea5e9",
+              },
+              {
+                title: "Photorealistic Product VFX",
+                body: "Product shots, lifestyle scenes, hero visuals — generated at 4K without a photographer or studio. As realistic as the best commercial photography.",
+                stat: "Studio quality, zero studio cost",
+                accent: "#16a34a",
+              },
+              {
+                title: "AI Voice & Sound",
+                body: "Professional voiceovers, music beds and sound design generated in minutes. Multilingual by default — scale campaigns globally without re-shooting.",
+                stat: "30+ languages supported",
+                accent: "#ea580c",
+              },
+              {
+                title: "Iterate at Zero Cost",
+                body: "Change the colour, the tagline, the setting, the cast — regenerate in minutes, not days. Revisions are included in every package, always.",
+                stat: "Unlimited iterations included",
+                accent: "#0f172a",
+              },
+            ].map((card) => (
+              <div
+                key={card.title}
+                className="group flex flex-col rounded-2xl border border-slate-100 bg-slate-50 p-7 transition hover:border-slate-200 hover:bg-white hover:shadow-md"
+              >
+                <div className="mb-4 h-0.5 w-8 rounded-full" style={{ background: card.accent }} />
+                <h3 className="mb-2 text-base font-black text-slate-900">{card.title}</h3>
+                <p className="flex-1 text-sm leading-relaxed text-slate-500">{card.body}</p>
+                <div className="mt-6 rounded-xl px-3 py-2 text-xs font-bold" style={{ background: card.accent + "14", color: card.accent }}>
+                  {card.stat}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }

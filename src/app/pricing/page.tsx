@@ -176,7 +176,7 @@ export default function PricingPage() {
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [addons, setAddons] = useState<ServiceAddon[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [sort, setSort] = useState<SortKey>("featured");
+  const [sort, setSort] = useState<SortKey>("price-asc");
   const [loading, setLoading] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -208,7 +208,7 @@ export default function PricingPage() {
     sort
   );
 
-  const allCat = { slug: "all", name: "All Services" };
+  const allCat = { slug: "all" as const, name: "All Services" };
 
   return (
     <div className="min-h-screen bg-[#f7f8fc]">
