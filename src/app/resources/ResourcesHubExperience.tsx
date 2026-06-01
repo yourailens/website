@@ -13,7 +13,7 @@ interface AnyResource {
   id: string;
   slug: string;
   title: string;
-  image_url: string;
+  image_url: string | null;
   aspect_ratio: "portrait" | "square" | "landscape";
   tag: string;
 }
@@ -84,18 +84,27 @@ const CATEGORIES: CategoryDef[] = [
 
 // ─── Resource card (horizontal strip item) ───────────────────────────────────
 function ResourceCard({ item, href }: { item: AnyResource; href: string }) {
+  const imageSrc = item.image_url?.trim() || null;
   return (
     <Link
       href={`${href}/${item.slug}`}
-      className="group relative h-52 w-48 shrink-0 overflow-hidden rounded-2xl shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+      className="group relative h-52 w-48 shrink-0 overflow-hidden rounded-2xl bg-slate-200 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={item.image_url}
-        alt={item.title}
-        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-        loading="lazy"
-      />
+      {imageSrc ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={imageSrc}
+          alt={item.title}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+          loading="lazy"
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300">
+          <span className="font-heading text-3xl font-black text-slate-400/80">
+            {(item.title.trim().charAt(0) || "?").toUpperCase()}
+          </span>
+        </div>
+      )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 p-2.5">
         <p className="line-clamp-2 text-[11px] font-bold leading-snug text-white drop-shadow">{item.title}</p>
@@ -171,7 +180,7 @@ export default function ResourcesHubExperience() {
             id: String(item.id ?? ""),
             slug: String(item.slug ?? ""),
             title: String(item.title ?? ""),
-            image_url: String(item.image_url ?? ""),
+            image_url: item.image_url ? String(item.image_url).trim() || null : null,
             aspect_ratio: (item.aspect_ratio as AnyResource["aspect_ratio"]) ?? "square",
             tag: col.tagLabels(String((item as Record<string, unknown>)[col.tagField] ?? "")),
           }));
