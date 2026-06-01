@@ -217,6 +217,12 @@ export default function PricingPage() {
       {/* ── Page header ────────────────────────────────────────────────────── */}
       <div className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+          <Link href="/" className="mb-5 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-slate-900">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Back
+          </Link>
           <p className="mb-2 text-xs font-bold uppercase tracking-widest text-blue-500">
             AI Creative Studio
           </p>
@@ -306,7 +312,6 @@ export default function PricingPage() {
                 onChange={(e) => setSort(e.target.value as SortKey)}
                 className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm focus:outline-none"
               >
-                <option value="featured">Sort: Featured</option>
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
                 <option value="delivery">Fastest Delivery</option>

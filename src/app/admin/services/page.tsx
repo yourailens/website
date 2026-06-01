@@ -99,13 +99,19 @@ export default function AdminServicesPage() {
                       </button>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
+                        <Link
+                          href={`/admin/services/${s.id}`}
+                          className="text-xs font-semibold text-blue-600 hover:underline"
+                        >
+                          Edit
+                        </Link>
                         <Link
                           href={`/pricing/${s.slug}`}
                           target="_blank"
-                          className="text-xs text-blue-500 hover:underline"
+                          className="text-xs text-slate-400 hover:text-slate-700"
                         >
-                          View
+                          Preview
                         </Link>
                         <button
                           onClick={() => deleteService(s)}
@@ -122,9 +128,6 @@ export default function AdminServicesPage() {
           </div>
         )}
 
-        <p className="mt-6 text-center text-xs text-slate-400">
-          To add or edit services, update the database via Supabase or the API.
-        </p>
       </div>
     </div>
   );

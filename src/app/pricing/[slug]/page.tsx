@@ -160,12 +160,17 @@ export default function ServiceDetailPage() {
 
       {/* ── Breadcrumb ─────────────────────────────────────────────────────── */}
       <div className="shrink-0 border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-3 text-xs text-slate-500 sm:px-6">
-          <Link href="/pricing" className="hover:text-blue-600">Services</Link>
-          {" / "}
-          <span className="capitalize">{service.category_slug.replace("-", " ")}</span>
-          {" / "}
-          <span className="font-medium text-slate-800">{service.name}</span>
+        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6">
+          <Link href="/pricing" className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 transition hover:text-slate-900">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Back
+          </Link>
+          <span className="text-slate-300">/</span>
+          <span className="text-xs text-slate-400 capitalize">{service.category_slug.replace("-", " ")}</span>
+          <span className="text-slate-300">/</span>
+          <span className="text-xs font-medium text-slate-700">{service.name}</span>
         </div>
       </div>
 

@@ -30,54 +30,93 @@ const STATS = [
 
 
 
-// ─── Service Card (homepage teaser) ──────────────────────────────────────────
+// ─── Service Card ─────────────────────────────────────────────────────────────
 
-function ServiceCard({ s }: { s: Service }) {
-  const badge = s.badge_label && BADGE_COLORS[s.badge_color ?? "blue"];
+const CARD_IMG: Record<string, string> = {
+  "campaign-sprint":        "/images/img1.jpeg",
+  "brand-film":             "/images/img2.jpeg",
+  "full-launch-pack":       "/images/img3.jpeg",
+  "monthly-content-engine": "/images/img4.jpeg",
+  "product-stills-pack":    "/images/shoe.png",
+  "social-creatives-pack":  "/images/otshirt1.png",
+  "ai-brand-avatar":        "/images/ai_avatar1.jpeg",
+  "product-demo-video":     "/images/cologne.png",
+  "performance-ad-pack":    "/images/img5.jpeg",
+  "print-creatives-pack":   "/images/otshirt2.png",
+  "brand-style-guide":      "/images/ws1.png",
+  "brand-kit":              "/images/ws3.png",
+};
+const FALLBACK_IMGS = ["/images/img1.jpeg","/images/img2.jpeg","/images/img3.jpeg","/images/ai_avatar1.jpeg"];
+
+function ServiceCard({ s, idx }: { s: Service; idx: number }) {
+  const img  = CARD_IMG[s.slug] ?? FALLBACK_IMGS[idx % 4];
+  const accent = s.accent_color ?? "#2563eb";
   return (
-    <div className="flex">
-      <Link
-        href={`/pricing/${s.slug}`}
-        className="group relative flex w-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
-      >
-        <div className="h-1 w-full" style={{ background: s.accent_color ?? "#2563eb" }} />
-        <div className="flex flex-1 flex-col p-7">
-          {badge && (
-            <span className={`mb-4 inline-block w-fit rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${badge.bg} ${badge.text}`}>
-              {s.badge_label}
+    <Link
+      href={`/pricing/${s.slug}`}
+      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+    >
+      {/* Image */}
+      <div className="relative h-44 overflow-hidden bg-slate-100">
+        <img
+          src={img} alt={s.name} loading="lazy"
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+        />
+      </div>
+
+      {/* Body */}
+      <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
+        {/* Category */}
+        <p className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400">
+          {s.category_slug?.replace(/-/g, " ")}
+        </p>
+
+        {/* Name + tagline — clamped so all cards have identical text height */}
+        <h3
+          className="line-clamp-1 font-heading text-lg font-black leading-snug text-slate-900 transition-colors group-hover:text-blue-700"
+          style={{ letterSpacing: "-0.02em" }}
+        >
+          {s.name}
+        </h3>
+        <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-slate-500" style={{ minHeight: "2.8em" }}>{s.tagline}</p>
+
+        {/* Price */}
+        <div className="mt-4 flex items-baseline gap-1.5 border-t border-slate-100 pt-4">
+          <span className="font-heading text-2xl font-black text-slate-900" style={{ letterSpacing: "-0.03em" }}>
+            {formatPrice(s.price)}
+          </span>
+          {s.unit && <span className="text-[11px] text-slate-400">{s.unit}</span>}
+          {s.traditional_value && (
+            <span className="ml-auto text-[11px] text-slate-400 line-through">
+              {formatPrice(s.traditional_value)}
             </span>
           )}
-          <h3 className="font-heading text-2xl font-black leading-tight text-slate-900 group-hover:text-blue-600 transition-colors">
-            {s.name}
-          </h3>
-          <p className="mt-1 text-[13px] text-slate-500">{s.tagline}</p>
-          <div className="mt-5 border-t border-slate-100 pb-5 pt-5">
-            <span className="font-heading text-4xl font-black leading-none text-slate-900">
-              {formatPrice(s.price)}
-            </span>
-            <span className="ml-2 text-[12px] text-slate-400">{s.unit}</span>
-          </div>
-          <ul className="mb-8 space-y-2.5">
-            {s.includes.slice(0, 4).map((f) => (
-              <li key={f} className="flex items-center gap-2.5 text-sm">
-                <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-blue-50">
-                  <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
-                    <path d="M1 3L3 5L7 1" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </span>
-                <span className="text-slate-600">{f}</span>
-              </li>
-            ))}
-          </ul>
-          <div
-            className="mt-auto block rounded-2xl py-3.5 text-center text-sm font-black text-white transition active:scale-95"
-            style={{ background: s.accent_color ?? "#2563eb" }}
-          >
-            View details →
-          </div>
         </div>
-      </Link>
-    </div>
+
+        {/* Includes */}
+        <ul className="mt-3 space-y-1.5">
+          {s.includes.slice(0, 3).map((f) => (
+            <li key={f} className="flex items-center gap-2 text-[12px] text-slate-600">
+              <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-blue-50">
+                <svg width="7" height="5" viewBox="0 0 8 6" fill="none">
+                  <path d="M1 3L3 5L7 1" stroke={accent} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+              <span className="line-clamp-1">{f}</span>
+            </li>
+          ))}
+        </ul>
+
+        {/* CTA */}
+        <div
+          className="mt-5 flex items-center justify-between rounded-xl px-4 py-3 text-[12px] font-bold text-white transition group-hover:brightness-110"
+          style={{ background: accent }}
+        >
+          <span>View package</span>
+          <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+        </div>
+      </div>
+    </Link>
   );
 }
 
@@ -146,21 +185,47 @@ function HeroTile({ src, poster, cls }: { src: string; poster: string; cls: stri
   );
 }
 
+function DeepDiveVideo({ src, poster, title }: { src: string; poster: string; title: string }) {
+  const [ready, setReady] = useState(false);
+  return (
+    <>
+      <img src={poster} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
+      <video
+        autoPlay muted loop playsInline preload="metadata"
+        poster={poster}
+        aria-label={title}
+        onCanPlay={() => setReady(true)}
+        className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
+        style={{ opacity: ready ? 1 : 0 }}
+      >
+        <source src={src} type="video/mp4" />
+      </video>
+    </>
+  );
+}
+
+type WallImage = { id: string; src: string; title: string; aspect: string };
+
 export default function Home() {
   const [featuredServices, setFeaturedServices] = useState<Service[]>([]);
+  const [wallImages, setWallImages] = useState<WallImage[]>([]);
 
   useEffect(() => {
     fetch("/api/services")
       .then((r) => r.ok ? r.json() : Promise.resolve({}))
       .then((j: { services?: Service[] }) => {
         if (Array.isArray(j.services)) {
-          // show up to 4: prioritise is_featured then is_popular
-          const sorted = [...j.services].sort((a, b) => {
-            if (a.is_featured !== b.is_featured) return a.is_featured ? -1 : 1;
-            if (a.is_popular !== b.is_popular) return a.is_popular ? -1 : 1;
-            return a.sort_order - b.sort_order;
-          });
+          const sorted = [...j.services].sort((a, b) => a.price - b.price);
           setFeaturedServices(sorted.slice(0, 4));
+        }
+      })
+      .catch(() => {});
+
+    fetch("/api/gallery/images")
+      .then((r) => r.ok ? r.json() : Promise.resolve({}))
+      .then((j: { images?: WallImage[] }) => {
+        if (Array.isArray(j.images) && j.images.length > 0) {
+          setWallImages(j.images.slice(0, 8));
         }
       })
       .catch(() => {});
@@ -207,8 +272,8 @@ export default function Home() {
       </section>
 
       {/* ── AI MODELS ─────────────────────────────────────────────────── */}
-      <section className="overflow-hidden border-y border-slate-100 bg-slate-50 py-6">
-        <p className="mb-4 text-center text-[9px] font-bold uppercase tracking-[0.35em] text-slate-300">
+      <section className="overflow-hidden border-t border-slate-100 bg-slate-50 py-6">
+        <p className="mb-4 text-center text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500">
           Powered by
         </p>
         <div className="flex animate-marquee gap-5 pr-5">
@@ -223,155 +288,207 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── SERVICE CATALOGUE ─────────────────────────────────────────── */}
-      <section id="services" className="bg-white py-16 lg:py-20 scroll-mt-20">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
-          <div className="mb-3">
-            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-500">Services</span>
-          </div>
-          <div className="mb-10 flex items-end justify-between">
-            <h2 className="font-heading text-3xl font-black text-slate-900 lg:text-4xl" style={{ letterSpacing: "-0.025em" }}>
-              Not just videos. Everything.
-            </h2>
-            <Link href="/pricing" className="hidden text-sm font-semibold text-blue-600 hover:underline sm:block">
-              Browse all services →
-            </Link>
-          </div>
+      {/* ── HOW AI PRODUCTION WORKS ───────────────────────────────────── */}
+      <section className="bg-white pb-0">
 
-          {featuredServices.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {featuredServices.map((s) => (
-                <ServiceCard key={s.id} s={s} />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-80 animate-pulse rounded-3xl bg-slate-100" />
-              ))}
-            </div>
-          )}
-
-          <div className="mt-8 text-center">
-            <Link
-              href="/pricing"
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:border-blue-300 hover:text-blue-600"
-            >
-              View all {featuredServices.length > 0 ? "services & pricing" : "services"} →
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── WORK GALLERY ──────────────────────────────────────────────── */}
-      <section className="bg-slate-50 py-16 lg:py-20">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
-          <div className="mb-2">
-            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-500">Our Work</span>
-          </div>
-          <div className="mb-8 flex items-end justify-between">
-            <h2 className="font-heading text-3xl font-black text-slate-900 lg:text-4xl" style={{ letterSpacing: "-0.025em" }}>
-              Real brands. Real results.
-            </h2>
-            <Link href="/images" className="hidden text-sm font-semibold text-blue-600 hover:underline sm:block">
-              Full gallery →
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-12 lg:grid-rows-2">
-            <div className="relative col-span-2 row-span-2 overflow-hidden rounded-2xl bg-slate-200 lg:col-span-5 lg:row-span-2" style={{ minHeight: 260 }}>
-              <Image src="/images/ai_avatar1.jpeg" alt="" fill className="object-cover transition duration-500 hover:scale-[1.03]" sizes="40vw" loading="lazy" />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-5">
-                <span className="rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold text-white backdrop-blur-sm">AI Avatar</span>
+        {/* Image carousel — live from The Wall, horizontally scrollable */}
+        <div className="mb-12 flex h-[260px] gap-3 overflow-x-auto scroll-smooth px-6 [&::-webkit-scrollbar]:hidden lg:h-[420px] lg:px-10">
+          {wallImages.map((img, i) => {
+            const wide = img.aspect === "landscape" || i % 3 === 1;
+            return (
+              <div
+                key={img.id}
+                className={`relative shrink-0 overflow-hidden rounded-2xl bg-slate-100 ${wide ? "w-[75vw] lg:w-[520px]" : "w-[56vw] lg:w-[320px]"}`}
+              >
+                <Image src={img.src} alt={img.title} fill className="object-cover" loading="lazy" unoptimized={/^https?:\/\//.test(img.src)} />
               </div>
-            </div>
+            );
+          })}
+        </div>
+
+        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+
+          {/* Eyebrow + heading */}
+          <div className="mb-3 flex items-center gap-2">
+            <div className="h-px w-6 bg-blue-500" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">What We Do</span>
+          </div>
+          <h2
+            className="mb-4 font-heading text-4xl font-black text-slate-900 lg:text-5xl"
+            style={{ letterSpacing: "-0.03em", lineHeight: 1.02 }}
+          >
+            One workflow.<br />
+            <span className="text-blue-600">Every asset you need.</span>
+          </h2>
+          <p className="mb-10 max-w-xl text-sm font-medium leading-relaxed text-slate-600">
+            We take your brief and run it through a full AI production pipeline, delivering videos, stills, ads, and brand content at a fraction of the traditional cost and time.
+          </p>
+
+          {/* Capability rows */}
+          <div className="divide-y divide-slate-100 border-t border-slate-100">
             {[
-              { src: "/images/otshirt1.png", label: "Fashion",  cls: "lg:col-span-4" },
-              { src: "/images/ws3.png",       label: "Lifestyle", cls: "lg:col-span-3" },
-              { src: "/images/cologne.png",   label: "Product",   cls: "lg:col-span-3" },
-              { src: "/images/shoe.png",      label: "D2C Brand", cls: "lg:col-span-4" },
-            ].map((item, i) => (
-              <div key={i} className={`relative overflow-hidden rounded-2xl bg-slate-200 ${item.cls}`} style={{ minHeight: 170 }}>
-                <Image src={item.src} alt="" fill className="object-cover transition duration-500 hover:scale-[1.03]" sizes="25vw" loading="lazy" />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 to-transparent p-4">
-                  <span className="rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold text-white backdrop-blur-sm">{item.label}</span>
+              { n: "01", title: "AI Visuals and Ad Films",  stat: "60-second films in under 2 hrs" },
+              { n: "02", title: "Product VFX",              stat: "4K stills, no studio needed" },
+              { n: "03", title: "Brand Consistent Output",  stat: "Every asset locked to your brand" },
+              { n: "04", title: "Social and Ad Creatives",  stat: "50+ formats from one brief" },
+              { n: "05", title: "AI Voiceover and Audio",   stat: "30+ languages, delivered instantly" },
+              { n: "06", title: "Unlimited Revisions",      stat: "Iterate in minutes, not days" },
+            ].map((item) => (
+              <div key={item.n} className="flex items-start gap-4 py-4 lg:items-center lg:gap-6 lg:py-5">
+                <span className="mt-0.5 w-7 shrink-0 font-mono text-xs font-bold text-slate-400 lg:mt-0 lg:w-8">{item.n}</span>
+                <div className="flex flex-1 flex-col lg:flex-row lg:items-center">
+                  <span className="flex-1 text-[14px] font-bold text-slate-900 lg:text-[15px]">{item.title}</span>
+                  <span className="mt-0.5 text-[12px] font-medium text-slate-400 lg:mt-0 lg:text-[13px] lg:text-slate-500">{item.stat}</span>
                 </div>
               </div>
             ))}
           </div>
+
         </div>
       </section>
 
-      {/* ── TRADITIONAL vs AI ─────────────────────────────────────────── */}
-      <section className="bg-white py-16 lg:py-24">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
-          <div className="mb-2">
-            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-500">The Case for AI</span>
-          </div>
-          <h2 className="mb-12 font-heading text-3xl font-black text-slate-900 lg:text-4xl" style={{ letterSpacing: "-0.025em" }}>
-            Same quality.<br />A fraction of the cost.
-          </h2>
 
-          <div className="grid gap-3 lg:grid-cols-2">
-            {/* Traditional */}
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8">
-              <p className="mb-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">Traditional Agency</p>
-              <ul className="space-y-4">
+      {/* ── SERVICE CATALOGUE ─────────────────────────────────────────── */}
+      <section id="services" className="bg-white pt-10 pb-16 scroll-mt-20 lg:pt-12 lg:pb-24">
+        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+
+          {/* Header */}
+          <div className="mb-2 flex items-center gap-2">
+            <div className="h-px w-6 bg-blue-500" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">What we offer</span>
+          </div>
+          <div className="mb-12 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            {/* Left: heading */}
+            <h2
+              className="font-heading text-4xl font-black text-slate-900 lg:text-5xl"
+              style={{ letterSpacing: "-0.03em", lineHeight: 1.02 }}
+            >
+              Production-grade creatives.<br className="hidden sm:block" />
+              <span className="text-blue-600">Built by AI.</span>
+            </h2>
+
+            {/* Right: description + CTA stacked */}
+            <div className="flex shrink-0 flex-col items-start gap-4 sm:items-end">
+              <p className="max-w-xs text-sm leading-relaxed text-slate-500 sm:text-right">
+                Every package includes unlimited revisions, all formats, and full rights to every asset delivered.
+              </p>
+              <Link
+                href="/pricing"
+                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-black text-white shadow-md transition hover:bg-blue-700 active:scale-95"
+              >
+                Browse all packages & pricing
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Link>
+            </div>
+          </div>
+
+          {/* Grid */}
+          {featuredServices.length > 0 ? (
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+              {featuredServices.map((s, i) => (
+                <ServiceCard key={s.id} s={s} idx={i} />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-[440px] animate-pulse rounded-2xl bg-slate-100" />
+              ))}
+            </div>
+          )}
+
+        </div>
+      </section>
+
+      {/* ── THE CASE FOR AI ───────────────────────────────────────────── */}
+      <section className="bg-slate-50 pt-16 pb-8 lg:pt-24 lg:pb-10">
+        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+
+          {/* Eyebrow + headline */}
+          <div className="mb-10 flex flex-col gap-2 lg:mb-12">
+            <div className="flex items-center gap-2">
+              <div className="h-px w-6 bg-blue-500" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">The Case for AI</span>
+            </div>
+            <h2 className="font-heading text-4xl font-black text-slate-900 lg:text-5xl" style={{ letterSpacing: "-0.03em", lineHeight: 1.02 }}>
+              Same quality.<br />
+              <span className="text-blue-600">85% less cost.</span>
+            </h2>
+          </div>
+
+          {/* Portrait strip — 4 tall verticals, full height on desktop */}
+          <div className="mb-12 grid grid-cols-2 gap-3 lg:mb-14 lg:grid-cols-4">
+            {[
+              { src: "/images/ai_avatar1.jpeg", label: "AI Avatar" },
+              { src: "/images/otshirt1.png",    label: "Fashion"   },
+              { src: "/images/cologne.png",     label: "Product"   },
+              { src: "/images/ws3.png",         label: "Lifestyle" },
+            ].map((item) => (
+              <div
+                key={item.src}
+                className="group relative h-[320px] overflow-hidden rounded-2xl bg-slate-200 sm:h-[400px] lg:h-[560px]"
+              >
+                <Image src={item.src} alt={item.label} fill className="object-cover transition duration-700 group-hover:scale-105" sizes="(max-width: 1024px) 50vw, 25vw" loading="lazy" />
+                <div className="absolute inset-x-0 bottom-0 flex items-end bg-gradient-to-t from-black/50 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                  <span className="rounded-full border border-white/30 bg-black/30 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white backdrop-blur-sm">{item.label}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Comparison table */}
+          <div>
+            {/* Column headers */}
+            <div className="mb-3 grid grid-cols-3 gap-2 px-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">What you get</span>
+                <span className="text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">Traditional</span>
+                <span className="text-center text-[10px] font-bold uppercase tracking-wider text-blue-500">YourAILens</span>
+              </div>
+
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
                 {[
-                  { label: "Cost per campaign", value: "₹2,00,000 – ₹5,00,000" },
-                  { label: "Time to delivery",  value: "3 – 6 weeks" },
-                  { label: "Deliverables",      value: "3 – 5 assets" },
-                  { label: "Revisions",         value: "1 – 2 rounds (charged)" },
-                  { label: "Resizing / edits",  value: "Billed separately" },
-                  { label: "Brand consistency", value: "Manual, variable" },
-                ].map((r) => (
-                  <li key={r.label} className="flex items-center justify-between gap-4 border-b border-slate-200 pb-4 last:border-0 last:pb-0">
-                    <span className="text-sm text-slate-500">{r.label}</span>
-                    <span className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-100">
-                        <svg className="h-2.5 w-2.5 text-red-500" fill="none" viewBox="0 0 10 10">
+                  { label: "Cost",             bad: "₹2L – ₹5L",          good: "From ₹30K" },
+                  { label: "Delivery",         bad: "3 – 6 weeks",         good: "24 – 48 hrs" },
+                  { label: "Assets delivered", bad: "3 – 5 files",         good: "50+ assets" },
+                  { label: "Revisions",        bad: "1–2 (extra charge)",  good: "Unlimited" },
+                  { label: "Platform resizing",bad: "Billed separately",   good: "All included" },
+                  { label: "Brand consistency",bad: "Manual, inconsistent",good: "AI-locked identity" },
+                ].map((row, i) => (
+                  <div key={row.label} className={`grid grid-cols-3 gap-2 px-5 py-4 ${i !== 5 ? "border-b border-slate-100" : ""}`}>
+                    <span className="text-sm font-medium text-slate-700">{row.label}</span>
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-50">
+                        <svg className="h-2.5 w-2.5 text-red-400" fill="none" viewBox="0 0 10 10">
                           <path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
                         </svg>
                       </span>
-                      {r.value}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* AI Studio */}
-            <div className="rounded-2xl bg-slate-900 p-8 text-white">
-              <p className="mb-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">YourAILens Studio</p>
-              <ul className="space-y-4">
-                {[
-                  { label: "Cost per campaign", value: "From ₹30,000" },
-                  { label: "Time to delivery",  value: "24 – 48 hours" },
-                  { label: "Deliverables",      value: "50+ assets per campaign" },
-                  { label: "Revisions",         value: "Unlimited, included" },
-                  { label: "Resizing / edits",  value: "All platforms, included" },
-                  { label: "Brand consistency", value: "AI-locked to your identity" },
-                ].map((r) => (
-                  <li key={r.label} className="flex items-center justify-between gap-4 border-b border-white/10 pb-4 last:border-0 last:pb-0">
-                    <span className="text-sm text-slate-400">{r.label}</span>
-                    <span className="flex items-center gap-2 text-sm font-semibold text-white">
-                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
-                        <svg className="h-2.5 w-2.5 text-emerald-400" fill="none" viewBox="0 0 10 8">
+                      <span className="text-center text-xs text-slate-500">{row.bad}</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-50">
+                        <svg className="h-2.5 w-2.5 text-emerald-500" fill="none" viewBox="0 0 10 8">
                           <path d="M1 4l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </span>
-                      {r.value}
-                    </span>
-                  </li>
+                      <span className="text-center text-xs font-semibold text-slate-800">{row.good}</span>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
+
+            <div className="mt-5">
+              <Link href="/pricing" className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-black text-white shadow-sm transition hover:bg-blue-700">
+                See our packages →
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
       {/* ── KEY NUMBERS ───────────────────────────────────────────────── */}
-      <section className="border-y border-slate-100 bg-slate-50 py-16 lg:py-20">
+      <section className="border-y border-slate-100 bg-slate-50 py-6 lg:py-8">
         <div className="mx-auto max-w-7xl px-6 lg:px-10">
           <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 lg:grid-cols-4">
             {[
@@ -380,7 +497,7 @@ export default function Home() {
               { num: "50+",  label: "Brand assets per campaign package",       sub: "Videos, stills, creatives, copy" },
               { num: "100%", label: "AI-generated, commercially licensed",     sub: "Fully ownable by your brand" },
             ].map((s) => (
-              <div key={s.num} className="flex flex-col bg-white px-8 py-10">
+              <div key={s.num} className="flex flex-col bg-white px-6 py-7 lg:px-8 lg:py-8">
                 <span className="font-heading text-5xl font-black text-slate-900 lg:text-6xl" style={{ letterSpacing: "-0.04em" }}>
                   {s.num}
                 </span>
@@ -392,69 +509,77 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── HOW AI PRODUCTION WORKS ───────────────────────────────────── */}
-      <section className="bg-white py-16 lg:py-24">
+      {/* ── DEEP DIVE ───────────────────────────────────────────────────── */}
+      <section className="bg-white pt-8 pb-16 lg:pt-10 lg:pb-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-10">
-          <div className="mb-2">
-            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-500">The Technology</span>
+          <div className="mb-2 flex items-center gap-2">
+            <div className="h-px w-6 bg-blue-500" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">Deep Dive</span>
           </div>
-          <div className="mb-12 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <h2 className="font-heading text-3xl font-black text-slate-900 lg:text-4xl" style={{ letterSpacing: "-0.025em" }}>
-              What used to take a crew<br />now takes a prompt.
-            </h2>
-            <p className="max-w-xs text-sm text-slate-500 lg:text-right">
-              We use the world&apos;s leading generative AI models to produce ad-grade creative at a fraction of traditional cost — without sacrificing an inch of quality.
-            </p>
-          </div>
+          <h2
+            className="mb-10 font-heading text-4xl font-black text-slate-900 lg:mb-12 lg:text-5xl"
+            style={{ letterSpacing: "-0.03em", lineHeight: 1.02 }}
+          >
+            Where AI<br />
+            <span className="text-blue-600">wins hardest.</span>
+          </h2>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-4">
             {[
               {
-                title: "AI Cinematography",
-                body: "State-of-the-art video generation models produce cinematic footage — lighting, movement, depth — indistinguishable from on-set production. No crew. No location. No waiting.",
-                stat: "60s film in under 2 hours",
-                accent: "#2563eb",
+                n: "01",
+                cat: "Storytelling",
+                title: "Brand films",
+                stat: "4 days",
+                video: "/videos/hero2.mp4",
+                poster: "/videos/hero2-poster.jpg",
+                border: "border-blue-500",
+                tags: ["Hero film", "Cut downs", "VO"],
               },
               {
-                title: "Instant Asset Scaling",
-                body: "One campaign brief generates dozens of size-optimised variants automatically. Meta, Google, YouTube, LinkedIn, Print — every format, every spec, zero extra cost.",
-                stat: "50+ formats from one brief",
-                accent: "#7c3aed",
+                n: "02",
+                cat: "Product VFX",
+                title: "Product magic",
+                stat: "No studio",
+                video: "/videos/hero3.mp4",
+                poster: "/videos/hero3-poster.jpg",
+                border: "border-violet-500",
+                tags: ["4K", "Liquid FX", "Lifestyle"],
               },
               {
-                title: "Brand-Locked Output",
-                body: "Your brand colors, fonts, spokesperson, tone of voice — all encoded into the generation pipeline. Every output is on-brand by default, not by chance.",
-                stat: "Zero off-brand outputs",
-                accent: "#0ea5e9",
+                n: "03",
+                cat: "Educational",
+                title: "Explainers",
+                stat: "24 hrs",
+                video: "/videos/hero4.mp4",
+                poster: "/videos/hero4-poster.jpg",
+                border: "border-emerald-500",
+                tags: ["How to", "FAQ", "Subtitles"],
               },
-              {
-                title: "Photorealistic Product VFX",
-                body: "Product shots, lifestyle scenes, hero visuals — generated at 4K without a photographer or studio. As realistic as the best commercial photography.",
-                stat: "Studio quality, zero studio cost",
-                accent: "#16a34a",
-              },
-              {
-                title: "AI Voice & Sound",
-                body: "Professional voiceovers, music beds and sound design generated in minutes. Multilingual by default — scale campaigns globally without re-shooting.",
-                stat: "30+ languages supported",
-                accent: "#ea580c",
-              },
-              {
-                title: "Iterate at Zero Cost",
-                body: "Change the colour, the tagline, the setting, the cast — regenerate in minutes, not days. Revisions are included in every package, always.",
-                stat: "Unlimited iterations included",
-                accent: "#0f172a",
-              },
-            ].map((card) => (
+            ].map((d, i) => (
               <div
-                key={card.title}
-                className="group flex flex-col rounded-2xl border border-slate-100 bg-slate-50 p-7 transition hover:border-slate-200 hover:bg-white hover:shadow-md"
+                key={d.n}
+                className={`grid overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 lg:min-h-[300px] ${i % 2 === 1 ? "lg:grid-cols-[1.1fr_1fr]" : "lg:grid-cols-[1fr_1.1fr]"}`}
               >
-                <div className="mb-4 h-0.5 w-8 rounded-full" style={{ background: card.accent }} />
-                <h3 className="mb-2 text-base font-black text-slate-900">{card.title}</h3>
-                <p className="flex-1 text-sm leading-relaxed text-slate-500">{card.body}</p>
-                <div className="mt-6 rounded-xl px-3 py-2 text-xs font-bold" style={{ background: card.accent + "14", color: card.accent }}>
-                  {card.stat}
+                <div className={`relative min-h-[220px] overflow-hidden bg-slate-900 lg:min-h-[300px] ${i % 2 === 1 ? "lg:order-2" : ""}`}>
+                  <DeepDiveVideo src={d.video} poster={d.poster} title={d.title} />
+                </div>
+                <div className={`flex flex-col justify-center border-l-4 bg-white p-6 lg:p-10 ${d.border} ${i % 2 === 1 ? "lg:order-1 lg:border-l-0 lg:border-r-4" : ""}`}>
+                  <span className="font-mono text-xs font-bold text-slate-300">{d.n}</span>
+                  <span className="mt-2 text-[10px] font-bold uppercase tracking-[0.22em] text-blue-500">{d.cat}</span>
+                  <h3 className="mt-2 font-heading text-3xl font-black text-slate-900 lg:text-4xl" style={{ letterSpacing: "-0.03em" }}>
+                    {d.title}
+                  </h3>
+                  <p className="mt-3 font-heading text-5xl font-black text-blue-600 lg:text-6xl" style={{ letterSpacing: "-0.04em" }}>
+                    {d.stat}
+                  </p>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {d.tags.map((t) => (
+                      <span key={t} className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             ))}
@@ -462,220 +587,49 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── EVERY FORMAT YOUR BRAND NEEDS — bento grid ────────────────── */}
+      {/* ── USE CASES ─────────────────────────────────────────────────── */}
       <section className="bg-slate-50 py-16 lg:py-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-10">
-          <div className="mb-2">
-            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-500">Use Cases</span>
+          <div className="mb-2 flex items-center gap-2">
+            <div className="h-px w-6 bg-blue-500" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">Use Cases</span>
           </div>
-          <div className="mb-10 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <h2 className="font-heading text-3xl font-black text-slate-900 lg:text-4xl" style={{ letterSpacing: "-0.025em" }}>
-              Every marketing channel.<br />AI-ready.
-            </h2>
-            <p className="max-w-sm text-sm text-slate-500">
-              From a 6-second bumper ad to a 3-minute brand documentary — AI handles every format your marketing team needs.
-            </p>
-          </div>
-
-          {/* Bento grid */}
-          <div className="grid auto-rows-[180px] grid-cols-2 gap-3 lg:grid-cols-4 lg:auto-rows-[200px]">
-            {/* Brand Storytelling — wide + tall */}
-            <div className="col-span-2 row-span-2 relative overflow-hidden rounded-2xl bg-slate-900 p-8 flex flex-col justify-between">
-              <div>
-                <span className="mb-3 inline-block rounded-full bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white/60">Storytelling</span>
-                <h3 className="font-heading text-2xl font-black leading-tight text-white lg:text-3xl">
-                  Brand films that make people feel something.
-                </h3>
-                <p className="mt-3 text-sm text-slate-400 max-w-xs">
-                  Narrative-driven AI films that communicate your brand&apos;s values, origin, and mission — at cinematic quality, without the production budget.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2 mt-4">
-                {["Hero films","Origin stories","Culture docs","Founder narratives"].map(t => (
-                  <span key={t} className="rounded-full border border-white/10 px-2.5 py-0.5 text-[10px] font-medium text-white/50">{t}</span>
-                ))}
-              </div>
-            </div>
-
-            {/* Performance Ads */}
-            <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 flex flex-col justify-between">
-              <div>
-                <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-blue-500">Performance Ads</span>
-                <h3 className="text-base font-black text-slate-900">Scroll-stopping ad creatives</h3>
-                <p className="mt-1 text-xs text-slate-500">Meta, Google, YouTube — every spec, every format.</p>
-              </div>
-              <p className="text-2xl font-black text-blue-600 mt-2">10×<span className="text-sm font-semibold text-slate-400"> higher output</span></p>
-            </div>
-
-            {/* Product VFX */}
-            <div className="relative overflow-hidden rounded-2xl bg-violet-600 p-6 flex flex-col justify-between">
-              <div>
-                <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-violet-200">Product VFX</span>
-                <h3 className="text-base font-black text-white">Impossible shots. Real results.</h3>
-                <p className="mt-1 text-xs text-violet-200">CGI-grade product visuals without CGI costs.</p>
-              </div>
-              <div className="mt-2 text-[10px] font-bold text-violet-300 uppercase tracking-wide">4K · Photorealistic · 48hr</div>
-            </div>
-
-            {/* Educational / Explainer */}
-            <div className="col-span-2 relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 flex flex-col justify-between">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-emerald-500">Educational Content</span>
-                  <h3 className="text-lg font-black text-slate-900">Explainers, demos & how-to videos</h3>
-                  <p className="mt-1 text-sm text-slate-500 max-w-xs">
-                    Turn complex products into clear, watchable stories. AI generates step-by-step explainer videos that convert browsers into buyers.
-                  </p>
-                </div>
-                <div className="shrink-0 text-right hidden sm:block">
-                  <p className="text-3xl font-black text-emerald-600">3 min</p>
-                  <p className="text-xs text-slate-400">avg. explainer length</p>
-                  <p className="mt-1 text-3xl font-black text-emerald-600">40%</p>
-                  <p className="text-xs text-slate-400">higher conversion rate</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Social-native */}
-            <div className="relative overflow-hidden rounded-2xl bg-blue-600 p-6 flex flex-col justify-between">
-              <div>
-                <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-blue-200">Social Native</span>
-                <h3 className="text-base font-black text-white">Reels. TikToks. Shorts.</h3>
-                <p className="mt-1 text-xs text-blue-200">Platform-native formats built for the algorithm.</p>
-              </div>
-              <div className="mt-2 text-[10px] font-bold text-blue-300 uppercase tracking-wide">9:16 · Subtitled · Hooked</div>
-            </div>
-
-            {/* Event & Launch */}
-            <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 flex flex-col justify-between">
-              <div>
-                <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-orange-500">Launches & Events</span>
-                <h3 className="text-base font-black text-slate-900">Launch films that build hype</h3>
-                <p className="mt-1 text-xs text-slate-500">Teasers, countdowns, reveal films — all AI.</p>
-              </div>
-              <p className="text-xs font-bold text-orange-500 mt-2">Ready before your launch date</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── DEEP DIVES: Storytelling / VFX / Education ────────────────── */}
-      <section className="bg-white py-16 lg:py-24">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
-          <div className="mb-2">
-            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-500">Deep Dive</span>
-          </div>
-          <h2 className="mb-14 font-heading text-3xl font-black text-slate-900 lg:text-4xl" style={{ letterSpacing: "-0.025em" }}>
-            Three areas that change everything.
+          <h2
+            className="mb-10 font-heading text-4xl font-black text-slate-900 lg:mb-12 lg:text-5xl"
+            style={{ letterSpacing: "-0.03em", lineHeight: 1.02 }}
+          >
+            Every channel.<br />
+            <span className="text-blue-600">One pipeline.</span>
           </h2>
 
-          <div className="space-y-3">
-
-            {/* 1. Storytelling */}
-            <div className="grid gap-0 overflow-hidden rounded-2xl border border-slate-200 lg:grid-cols-[1fr_1px_1fr]">
-              <div className="p-8 lg:p-10">
-                <span className="mb-4 block text-[10px] font-bold uppercase tracking-widest text-blue-500">01 — Brand Storytelling</span>
-                <h3 className="mb-4 font-heading text-2xl font-black text-slate-900">Your story deserves a cinematic voice.</h3>
-                <p className="mb-6 text-sm leading-relaxed text-slate-500">
-                  Every brand has a founding story, a mission, a set of values worth telling. Traditional storytelling required a director, a shoot, months of post-production and a six-figure budget. AI storytelling requires a brief and 48 hours. The emotional impact stays exactly the same.
-                </p>
-                <p className="text-sm leading-relaxed text-slate-500">
-                  Our AI models handle cinematography, pacing, narration and score — producing films that genuinely move people, not just inform them. Used by brands to communicate purpose, drive loyalty and dominate the top of the funnel.
-                </p>
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            {[
+              { img: "/images/img3.jpeg",       cat: "Storytelling", title: "Brand films",   stat: "48 hrs" },
+              { img: "/images/img5.jpeg",       cat: "Performance",  title: "Paid ads",      stat: "10×" },
+              { img: "/images/cologne.png",     cat: "Product VFX",  title: "Hero shots",    stat: "4K" },
+              { img: "/images/img4.jpeg",       cat: "Educational",  title: "Explainers",    stat: "3 min" },
+              { img: "/images/ai_avatar1.jpeg", cat: "Social",       title: "Reels",         stat: "9:16" },
+              { img: "/images/ws3.png",         cat: "Launches",     title: "Launch films",  stat: "Same week" },
+            ].map((item, i) => (
+              <div
+                key={item.title}
+                className={`flex items-center gap-4 px-4 py-4 sm:gap-5 sm:px-6 sm:py-5 ${i < 5 ? "border-b border-slate-100" : ""}`}
+              >
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:h-16 sm:w-16">
+                  <Image src={item.img} alt={item.title} fill className="object-cover" sizes="64px" loading="lazy" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-blue-500">{item.cat}</p>
+                  <h3 className="font-heading text-base font-black text-slate-900 sm:text-lg">{item.title}</h3>
+                </div>
+                <span
+                  className="shrink-0 font-heading text-2xl font-black text-blue-600 sm:text-3xl"
+                  style={{ letterSpacing: "-0.03em" }}
+                >
+                  {item.stat}
+                </span>
               </div>
-              <div className="hidden bg-slate-100 lg:block" />
-              <div className="border-t border-slate-200 bg-slate-50 p-8 lg:border-0 lg:p-10">
-                <p className="mb-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">What you get</p>
-                <ul className="space-y-3">
-                  {[
-                    "Hero brand film (60–90s) with full cinematic grade",
-                    "Cut-downs for every platform (30s, 15s, 9s)",
-                    "AI-generated spokesperson or voiceover",
-                    "Original AI music bed, synced to your story",
-                    "Subtitle-ready, multilingual versions",
-                    "Delivered in 4 days, not 4 months",
-                  ].map(item => (
-                    <li key={item} className="flex items-start gap-2.5 text-sm text-slate-600">
-                      <svg className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" fill="none" viewBox="0 0 16 16">
-                        <path d="M3 8l4 4 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* 2. VFX */}
-            <div className="grid gap-0 overflow-hidden rounded-2xl bg-slate-900 lg:grid-cols-[1fr_1px_1fr]">
-              <div className="p-8 lg:p-10">
-                <span className="mb-4 block text-[10px] font-bold uppercase tracking-widest text-violet-400">02 — AI Visual Effects</span>
-                <h3 className="mb-4 font-heading text-2xl font-black text-white">Hollywood VFX. Startup budget.</h3>
-                <p className="mb-6 text-sm leading-relaxed text-slate-400">
-                  Product floating in zero gravity. A shoe being assembled particle by particle. A perfume dissolving into a forest. Shots that used to require a compositing studio and weeks of rendering now take hours with AI VFX.
-                </p>
-                <p className="text-sm leading-relaxed text-slate-400">
-                  The same generative models powering Hollywood post-production are now accessible to any brand. The result is commercial-grade visual effects that make products look extraordinary — not just photographed, but imagined.
-                </p>
-              </div>
-              <div className="hidden bg-white/5 lg:block" />
-              <div className="border-t border-white/10 p-8 lg:border-0 lg:p-10">
-                <p className="mb-6 text-[10px] font-bold uppercase tracking-widest text-slate-500">What you get</p>
-                <ul className="space-y-3">
-                  {[
-                    "4K photorealistic product visualisations",
-                    "CGI-grade environment and scene generation",
-                    "Physics simulations (liquid, particle, fabric)",
-                    "360° product showcase videos",
-                    "Composited lifestyle scenes — no photoshoot",
-                    "Brand-locked visual style across all outputs",
-                  ].map(item => (
-                    <li key={item} className="flex items-start gap-2.5 text-sm text-slate-300">
-                      <svg className="mt-0.5 h-4 w-4 shrink-0 text-violet-400" fill="none" viewBox="0 0 16 16">
-                        <path d="M3 8l4 4 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* 3. Educational */}
-            <div className="grid gap-0 overflow-hidden rounded-2xl border border-slate-200 lg:grid-cols-[1fr_1px_1fr]">
-              <div className="p-8 lg:p-10">
-                <span className="mb-4 block text-[10px] font-bold uppercase tracking-widest text-emerald-500">03 — Educational Content</span>
-                <h3 className="mb-4 font-heading text-2xl font-black text-slate-900">Educate, then convert.</h3>
-                <p className="mb-6 text-sm leading-relaxed text-slate-500">
-                  The brands that win in 2025 are the ones that teach. How-to videos, product explainers, ingredient breakdowns, comparison guides — educational content builds trust before a customer ever reaches your product page.
-                </p>
-                <p className="text-sm leading-relaxed text-slate-500">
-                  AI generates structured explainer videos with voiceover, animated callouts, step-by-step visuals and branded templates. What used to require a motion designer and a week of revisions now ships in 24 hours.
-                </p>
-              </div>
-              <div className="hidden bg-slate-100 lg:block" />
-              <div className="border-t border-slate-200 bg-slate-50 p-8 lg:border-0 lg:p-10">
-                <p className="mb-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">What you get</p>
-                <ul className="space-y-3">
-                  {[
-                    "Product explainer videos (60–180s)",
-                    "Ingredient or feature breakdown reels",
-                    "How-to and tutorial series",
-                    "FAQ videos that reduce support load",
-                    "Comparison videos vs. alternatives",
-                    "All subtitled and platform-optimised",
-                  ].map(item => (
-                    <li key={item} className="flex items-start gap-2.5 text-sm text-slate-600">
-                      <svg className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="none" viewBox="0 0 16 16">
-                        <path d="M3 8l4 4 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
+            ))}
           </div>
         </div>
       </section>
