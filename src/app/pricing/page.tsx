@@ -1,358 +1,365 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { SITE_CONTACT_EMAIL } from "@/lib/site-contact";
-import PricingFaqAccordion from "./PricingFaqAccordion";
-import PricingTierCompare from "./PricingTierCompare";
+import type { Service, ServiceAddon, ServiceCategory } from "@/data/services";
+import { formatPrice, BADGE_COLORS } from "@/data/services";
 
-const TITLE = "Pricing | YourAILens Studios";
-
-export const metadata: Metadata = {
-  title: TITLE,
-  description:
-    "Premium AI powered creative packages from ₹30,000. Spark, Momentum, and Signature tiers. Transparent scope, human led direction, fast delivery.",
-  openGraph: {
-    title: TITLE,
-    description: "Campaign ready AI creative. Three clear tiers. No guesswork.",
-    url: "/pricing",
-  },
-};
-
-const TIERS = [
-  {
-    id: "spark",
-    name: "Spark",
-    tag: "Enter",
-    price: "₹30,000",
-    from: true,
-    pitch: "Perfect when you need a tight campaign or hero asset set without the overhead of a full studio retainer.",
-    features: [
-      "Discovery + creative brief alignment",
-      "1 primary campaign direction (AI + art direction)",
-      "Up to 3 core deliverables (e.g. hero film, key stills, copy hooks)",
-      "1 structured revision round",
-      "Standard delivery timeline",
-    ],
-    accent: "border-amber-200/80 bg-gradient-to-b from-amber-50/90 to-white shadow-amber-100/40",
-    ring: "ring-amber-200/60",
-    btn: "border border-amber-300/80 bg-amber-500 text-white hover:bg-amber-600",
-    featured: false,
-  },
-  {
-    id: "momentum",
-    name: "Momentum",
-    tag: "Most chosen",
-    price: "₹55,000",
-    from: true,
-    featured: true,
-    pitch: "For brands ready to show up everywhere, with consistent voice, look, and motion across channels.",
-    features: [
-      "Everything in Spark, expanded",
-      "Multi asset pack (video + static + social variants)",
-      "2 revision rounds + channel specific crops",
-      "Priority scheduling in our production queue",
-      "Lightweight brand consistency pass across assets",
-    ],
-    accent: "border-blue-400/90 bg-gradient-to-b from-blue-50/95 via-white to-slate-50/80 shadow-blue-200/50",
-    ring: "ring-2 ring-blue-500/80",
-    btn: "bg-blue-600 text-white shadow-lg shadow-blue-200 hover:bg-blue-700",
-  },
-  {
-    id: "signature",
-    name: "Signature",
-    tag: "Flagship",
-    price: "₹80,000",
-    from: true,
-    pitch: "The full treatment: narrative depth, campaign architecture, and white glove delivery for launches that can’t miss.",
-    features: [
-      "Strategic narrative + campaign architecture",
-      "Full funnel asset suite (awareness through conversion)",
-      "3 revision rounds + senior creative review",
-      "White glove delivery + launch week support window",
-      "Optional stakeholder walkthrough (recorded)",
-    ],
-    accent: "border-violet-200/80 bg-gradient-to-b from-violet-50/90 to-white shadow-violet-100/40",
-    ring: "ring-violet-200/50",
-    btn: "border border-violet-300 bg-violet-700 text-white hover:bg-violet-800",
-    featured: false,
-  },
-] as const;
-
-const PROCESS = [
-  {
-    step: "01",
-    title: "Align",
-    body: "We unpack goals, audience, and success metrics, so creative is not decoration. It is leverage.",
-  },
-  {
-    step: "02",
-    title: "Design",
-    body: "Human led direction meets AI velocity: prompts, pipelines, and polish where it matters.",
-  },
-  {
-    step: "03",
-    title: "Refine",
-    body: "Structured revisions. Clear feedback loops. No endless back and forth.",
-  },
-  {
-    step: "04",
-    title: "Ship",
-    body: "Delivery ready files, named exports, and channel guidance so your team can publish fast.",
-  },
-];
-
-const ADDONS = [
-  { name: "Rush delivery window", detail: "When the calendar won’t wait", price: "from +₹12,000" },
-  { name: "Extra revision sprint", detail: "One focused round, scoped", price: "+₹8,000" },
-  { name: "Brand voice & messaging pass", detail: "Headlines, hooks, CTA set", price: "+₹18,000" },
-  { name: "Extended social cuts", detail: "Platform native ratios and lengths", price: "from +₹15,000" },
-];
-
-export default function PricingPage() {
+// ── Category sidebar item ────────────────────────────────────────────────────
+function CategoryItem({
+  cat,
+  count,
+  active,
+  onClick,
+}: {
+  cat: ServiceCategory | { slug: "all"; name: string };
+  count: number;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
-    <div className="min-h-screen bg-[#faf9f6] text-slate-900">
-      <Navbar />
+    <button
+      onClick={onClick}
+      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition-all ${
+        active
+          ? "bg-slate-900 text-white"
+          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+      }`}
+    >
+      <span className="text-sm font-medium">{cat.name}</span>
+      <span
+        className={`rounded-full px-1.5 py-0.5 text-xs font-semibold ${
+          active ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
+        }`}
+      >
+        {count}
+      </span>
+    </button>
+  );
+}
 
-      {/* Hero: editorial, premium */}
-      <header className="relative overflow-hidden border-b border-slate-200/80">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.45]"
-          style={{
-            background:
-              "radial-gradient(ellipse 90% 70% at 10% 20%, rgba(30,58,138,0.18), transparent 50%), radial-gradient(ellipse 60% 50% at 90% 0%, rgba(180,83,9,0.12), transparent 45%), radial-gradient(ellipse 50% 40% at 50% 100%, rgba(15,23,42,0.08), transparent 55%)",
-          }}
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.035]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-            backgroundSize: "180px 180px",
-          }}
-          aria-hidden
-        />
+// ── Service card ─────────────────────────────────────────────────────────────
+function ServiceCard({ s }: { s: Service }) {
+  const badge = s.badge_label && BADGE_COLORS[s.badge_color ?? "blue"];
+  const savings = s.original_price ? s.original_price - s.price : null;
 
-        <div className="relative mx-auto max-w-6xl px-6 pb-20 pt-16 lg:px-10 lg:pb-28 lg:pt-20">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
-            <div className="max-w-2xl">
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.4em] text-slate-500">Invest in output, not overhead</p>
-              <h1
-                className="mt-4 font-heading text-[clamp(2.25rem,5.5vw,4rem)] font-black leading-[0.95] tracking-tight text-slate-950"
-                style={{ letterSpacing: "-0.04em" }}
-              >
-                Pricing that respects
-                <br />
-                <span className="bg-gradient-to-r from-blue-800 via-blue-600 to-amber-700 bg-clip-text text-transparent">
-                  ambition and clarity.
-                </span>
-              </h1>
-              <p className="mt-6 max-w-xl text-base leading-relaxed text-slate-600 lg:text-lg">
-                Three deliberate tiers: ₹30,000, ₹55,000, and ₹80,000 starting points. You always know what “yes” includes before we
-                touch a timeline.
-              </p>
+  return (
+    <Link
+      href={`/pricing/${s.slug}`}
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/60"
+    >
+      {/* Accent strip */}
+      <div
+        className="h-1 w-full"
+        style={{ background: s.accent_color ?? "#2563eb" }}
+      />
+
+      {/* Thumbnail / placeholder */}
+      <div
+        className="relative flex h-44 w-full items-end overflow-hidden p-4"
+        style={{
+          background: `linear-gradient(135deg, ${s.accent_color ?? "#2563eb"}18 0%, ${s.accent_color ?? "#2563eb"}06 100%)`,
+        }}
+      >
+        {s.thumbnail_url ? (
+          <img
+            src={s.thumbnail_url}
+            alt={s.name}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <svg className="h-12 w-12 opacity-10" fill="none" viewBox="0 0 48 48">
+            <rect x="6" y="10" width="36" height="28" rx="4" stroke="currentColor" strokeWidth="2.5" />
+            <path d="M6 18h36M16 10v8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+          </svg>
+        )}
+
+        {/* Badge */}
+        {badge && (
+          <span
+            className={`relative z-10 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${badge.bg} ${badge.text}`}
+          >
+            {s.badge_label}
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-1 flex-col p-5">
+        {/* Category slug pill */}
+        <span className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          {s.category_slug.replace("-", " ")}
+        </span>
+
+        <h3 className="mb-1 text-[1.05rem] font-bold leading-tight text-slate-900 group-hover:text-blue-600 transition-colors">
+          {s.name}
+        </h3>
+        <p className="mb-4 text-xs text-slate-500 line-clamp-2">{s.tagline}</p>
+
+        {/* Includes preview */}
+        <ul className="mb-5 flex-1 space-y-1">
+          {s.includes.slice(0, 3).map((item, i) => (
+            <li key={i} className="flex items-start gap-1.5 text-[11px] text-slate-600">
+              <svg className="mt-0.5 h-3 w-3 shrink-0 text-emerald-500" fill="none" viewBox="0 0 12 12">
+                <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {item}
+            </li>
+          ))}
+          {s.includes.length > 3 && (
+            <li className="text-[11px] font-medium text-blue-500">
+              +{s.includes.length - 3} more included
+            </li>
+          )}
+        </ul>
+
+        {/* Footer */}
+        <div className="flex items-end justify-between border-t border-slate-100 pt-4">
+          <div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl font-black text-slate-900">{formatPrice(s.price)}</span>
+              {s.original_price && (
+                <span className="text-xs text-slate-400 line-through">{formatPrice(s.original_price)}</span>
+              )}
             </div>
-            <div className="flex shrink-0 flex-col gap-3 rounded-2xl border border-slate-200/90 bg-white/70 p-6 shadow-lg shadow-slate-200/40 backdrop-blur-md lg:max-w-xs">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400">At a glance</p>
-              <ul className="space-y-2.5 text-sm text-slate-700">
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  Fixed package anchors, scope in writing
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  Human creative direction on every tier
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  Kickoff within days, not weeks
-                </li>
-              </ul>
-              <Link
-                href="/contact"
-                className="mt-2 inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-slate-800"
-              >
-                Book a free 15 minute fit call
-              </Link>
+            <span className="text-[10px] text-slate-400">{s.unit}</span>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            {savings && (
+              <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-600">
+                Save {formatPrice(savings)}
+              </span>
+            )}
+            <div className="flex items-center gap-1 text-[10px] text-slate-400">
+              <svg className="h-3 w-3" fill="none" viewBox="0 0 14 14">
+                <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M7 4v3.5l2 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+              {s.delivery_days === 1 ? "24hr" : `${s.delivery_days} days`}
             </div>
           </div>
         </div>
-      </header>
 
-      {/* Tier cards */}
-      <section className="relative z-[1] -mt-8 px-6 lg:px-10">
-        <div className="mx-auto max-w-6xl">
-          <div className="grid gap-6 lg:grid-cols-3 lg:gap-5 lg:items-stretch">
-            {TIERS.map((tier) => (
-              <article
-                key={tier.id}
-                className={`group relative flex flex-col rounded-[1.75rem] border p-8 shadow-xl transition duration-500 hover:-translate-y-1 hover:shadow-2xl lg:p-9 ${
-                  tier.featured ? `${tier.accent} ${tier.ring} scale-[1.02] lg:-mt-2 lg:mb-2` : `${tier.accent}`
-                }`}
-              >
-                {tier.featured ? (
-                  <span className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-blue-600 px-4 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-lg">
-                    {tier.tag}
-                  </span>
-                ) : (
-                  <span className="mb-3 inline-flex w-fit rounded-full border border-slate-200/80 bg-white/80 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                    {tier.tag}
-                  </span>
-                )}
-                <h2 className="font-heading text-2xl font-black text-slate-950">{tier.name}</h2>
-                <div className="mt-5 flex flex-wrap items-baseline gap-1.5">
-                  {tier.from ? (
-                    <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">From</span>
-                  ) : null}
-                  <span className="font-heading text-4xl font-black tracking-tight text-slate-900 lg:text-[2.75rem]">{tier.price}</span>
-                </div>
-                <p className="mt-4 text-sm leading-relaxed text-slate-600">{tier.pitch}</p>
-                <ul className="mt-8 flex-1 space-y-3.5 border-t border-slate-200/60 pt-8">
-                  {tier.features.map((f) => (
-                    <li key={f} className="flex gap-3 text-sm leading-snug text-slate-700">
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-slate-900/5 text-[11px] font-bold text-slate-700">
-                        ✓
+        <div
+          className="mt-3 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold text-white transition-all"
+          style={{ background: s.accent_color ?? "#2563eb" }}
+        >
+          View Details
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 16 16">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+
+// ── Sort options ──────────────────────────────────────────────────────────────
+type SortKey = "featured" | "price-asc" | "price-desc" | "delivery";
+
+function sortServices(list: Service[], key: SortKey) {
+  return [...list].sort((a, b) => {
+    if (key === "price-asc") return a.price - b.price;
+    if (key === "price-desc") return b.price - a.price;
+    if (key === "delivery") return a.delivery_days - b.delivery_days;
+    // featured: is_popular first, then is_featured, then sort_order
+    if (a.is_popular !== b.is_popular) return a.is_popular ? -1 : 1;
+    if (a.is_featured !== b.is_featured) return a.is_featured ? -1 : 1;
+    return a.sort_order - b.sort_order;
+  });
+}
+
+// ── Main page ─────────────────────────────────────────────────────────────────
+export default function PricingPage() {
+  const [services, setServices] = useState<Service[]>([]);
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
+  const [addons, setAddons] = useState<ServiceAddon[]>([]);
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [sort, setSort] = useState<SortKey>("featured");
+  const [loading, setLoading] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const safeJson = (r: Response) => r.ok ? r.json() : Promise.resolve({});
+    Promise.all([
+      fetch("/api/services").then(safeJson).catch(() => ({})),
+      fetch("/api/service-addons").then(safeJson).catch(() => ({})),
+    ]).then(([svData, adData]) => {
+      setServices((svData as { services?: typeof services }).services ?? []);
+      setCategories((svData as { categories?: typeof categories }).categories ?? []);
+      setAddons((adData as { addons?: typeof addons }).addons ?? []);
+      setLoading(false);
+    });
+  }, []);
+
+  const countForCat = useCallback(
+    (slug: string) =>
+      slug === "all"
+        ? services.length
+        : services.filter((s) => s.category_slug === slug).length,
+    [services]
+  );
+
+  const filtered = sortServices(
+    activeCategory === "all"
+      ? services
+      : services.filter((s) => s.category_slug === activeCategory),
+    sort
+  );
+
+  const allCat = { slug: "all", name: "All Services" };
+
+  return (
+    <div className="min-h-screen bg-[#f7f8fc]">
+      <Navbar />
+
+      {/* ── Page header ────────────────────────────────────────────────────── */}
+      <div className="border-b border-slate-200 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-blue-500">
+            AI Creative Studio
+          </p>
+          <h1 className="font-heading text-3xl font-black text-slate-900 sm:text-4xl">
+            Services & Pricing
+          </h1>
+          <p className="mt-2 max-w-xl text-sm text-slate-500">
+            Not just videos — complete brand creative systems. Reusable assets, repurposable content,
+            ad creatives, print, identity and more. Everything a brand actually needs.
+          </p>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+        <div className="flex gap-8">
+
+          {/* ── Desktop Sidebar ─────────────────────────────────────────────── */}
+          <aside className="hidden w-56 shrink-0 lg:block">
+            <div className="sticky top-6 space-y-1 rounded-2xl border border-slate-200 bg-white p-3">
+              <p className="px-3 pb-1 pt-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                Categories
+              </p>
+              <CategoryItem
+                cat={allCat}
+                count={countForCat("all")}
+                active={activeCategory === "all"}
+                onClick={() => setActiveCategory("all")}
+              />
+              {categories.map((c) => (
+                <CategoryItem
+                  key={c.slug}
+                  cat={c}
+                  count={countForCat(c.slug)}
+                  active={activeCategory === c.slug}
+                  onClick={() => setActiveCategory(c.slug)}
+                />
+              ))}
+            </div>
+
+            {/* Add-ons quick list */}
+            {addons.length > 0 && (
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+                <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  Add-ons
+                </p>
+                <ul className="space-y-2.5">
+                  {addons.map((a) => (
+                    <li key={a.slug} className="flex items-center justify-between gap-2">
+                      <span className="text-xs text-slate-600">{a.name}</span>
+                      <span className="whitespace-nowrap text-[11px] font-bold text-slate-800">
+                        +{formatPrice(a.price)}
                       </span>
-                      {f}
                     </li>
                   ))}
                 </ul>
-                <Link
-                  href="/contact"
-                  className={`mt-10 block rounded-2xl py-4 text-center text-sm font-black uppercase tracking-wide transition ${tier.btn}`}
+              </div>
+            )}
+          </aside>
+
+          {/* ── Main content ────────────────────────────────────────────────── */}
+          <main className="flex-1 min-w-0">
+
+            {/* Mobile category scroll */}
+            <div className="mb-4 flex gap-2 overflow-x-auto pb-1 lg:hidden">
+              {[allCat, ...categories].map((c) => (
+                <button
+                  key={c.slug}
+                  onClick={() => setActiveCategory(c.slug)}
+                  className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all ${
+                    activeCategory === c.slug
+                      ? "bg-slate-900 text-white"
+                      : "border border-slate-200 bg-white text-slate-600"
+                  }`}
                 >
-                  Start with {tier.name}
-                </Link>
-              </article>
-            ))}
-          </div>
-          <p className="mt-10 text-center text-sm text-slate-500">
-            Final investment depends on exact scope after your call. Tiers are our shared starting language, not a ceiling.
-          </p>
-        </div>
-      </section>
-
-      {/* Process */}
-      <section className="mt-24 border-y border-slate-200/80 bg-white/50 py-20 lg:mt-28 lg:py-28">
-        <div className="mx-auto max-w-6xl px-6 lg:px-10">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-slate-400">How we work</p>
-            <h2 className="mt-3 font-heading text-[clamp(1.75rem,3.5vw,2.75rem)] font-black text-slate-950">From brief to broadcast ready</h2>
-            <p className="mt-4 text-slate-600">No black boxes, just a rhythm you can plan around.</p>
-          </div>
-          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {PROCESS.map((p, i) => (
-              <div
-                key={p.step}
-                className="group relative overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-b from-white to-slate-50/80 p-6 shadow-md transition hover:border-blue-200 hover:shadow-lg"
-              >
-                <span className="font-mono text-3xl font-black tabular-nums text-slate-200 transition group-hover:text-blue-200">
-                  {p.step}
-                </span>
-                <h3 className="mt-2 font-heading text-lg font-bold text-slate-900">{p.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{p.body}</p>
-                {i < PROCESS.length - 1 ? (
-                  <div
-                    className="pointer-events-none absolute right-0 top-1/2 hidden h-px w-6 -translate-y-1/2 translate-x-full bg-gradient-to-r from-slate-300 to-transparent lg:block"
-                    aria-hidden
-                  />
-                ) : null}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive compare */}
-      <section className="py-20 lg:py-24">
-        <div className="mx-auto max-w-6xl px-6 lg:px-10">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-slate-400">Compare</p>
-            <h2 className="mt-3 font-heading text-[clamp(1.75rem,3.5vw,2.5rem)] font-black text-slate-950">See how tiers stack</h2>
-            <p className="mt-3 text-slate-600">
-              Tap a tier to highlight that column. Useful when you are sharing your screen with your team.
-            </p>
-          </div>
-          <div className="mt-12">
-            <PricingTierCompare />
-          </div>
-        </div>
-      </section>
-
-      {/* Add ons */}
-      <section className="border-t border-slate-200/80 bg-gradient-to-b from-slate-100/50 to-[#faf9f6] py-20 lg:py-24">
-        <div className="mx-auto max-w-6xl px-6 lg:px-10">
-          <div className="flex flex-col gap-4 text-center lg:flex-row lg:items-end lg:justify-between lg:text-left">
-            <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-slate-400">Extensions</p>
-              <h2 className="mt-2 font-heading text-[clamp(1.75rem,3vw,2.5rem)] font-black text-slate-950">Add ons</h2>
-              <p className="mt-2 max-w-md text-slate-600">Bolt on only what your launch needs, quoted before we commit.</p>
+                  {c.name}
+                </button>
+              ))}
             </div>
-          </div>
-          <div className="mt-10 grid gap-4 sm:grid-cols-2">
-            {ADDONS.map((a) => (
-              <div
-                key={a.name}
-                className="flex flex-col justify-between gap-3 rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm transition hover:border-amber-200/80 hover:shadow-md sm:flex-row sm:items-center"
+
+            {/* Sort + count row */}
+            <div className="mb-5 flex items-center justify-between">
+              <span className="text-sm text-slate-500">
+                {loading ? "Loading…" : `${filtered.length} service${filtered.length !== 1 ? "s" : ""}`}
+              </span>
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortKey)}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm focus:outline-none"
               >
-                <div>
-                  <p className="font-heading font-bold text-slate-900">{a.name}</p>
-                  <p className="mt-1 text-sm text-slate-500">{a.detail}</p>
-                </div>
-                <span className="shrink-0 font-mono text-sm font-bold text-amber-800">{a.price}</span>
+                <option value="featured">Sort: Featured</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="delivery">Fastest Delivery</option>
+              </select>
+            </div>
+
+            {/* Grid */}
+            {loading ? (
+              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="h-96 animate-pulse rounded-2xl bg-slate-200" />
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            ) : filtered.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 text-center">
+                <svg className="mb-4 h-10 w-10 text-slate-300" fill="none" viewBox="0 0 40 40">
+                  <circle cx="18" cy="18" r="11" stroke="currentColor" strokeWidth="2.5" />
+                  <path d="M27 27l8 8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+                <p className="text-lg font-semibold text-slate-700">No services in this category yet</p>
+                <p className="mt-1 text-sm text-slate-400">Try selecting a different category</p>
+              </div>
+            ) : (
+              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                {filtered.map((s) => (
+                  <ServiceCard key={s.id} s={s} />
+                ))}
+              </div>
+            )}
 
-      {/* FAQ */}
-      <section className="py-20 lg:py-24">
-        <div className="mx-auto max-w-3xl px-6 lg:px-10">
-          <div className="text-center">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-slate-400">Questions</p>
-            <h2 className="mt-3 font-heading text-[clamp(1.75rem,3vw,2.5rem)] font-black text-slate-950">Straight answers</h2>
-          </div>
-          <div className="mt-10">
-            <PricingFaqAccordion />
-          </div>
+            {/* Value estimator CTA banner */}
+            {!loading && (
+              <div className="mt-10 flex flex-col items-start justify-between gap-5 rounded-2xl bg-slate-900 p-7 sm:flex-row sm:items-center">
+                <div>
+                  <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    Not sure what you need?
+                  </p>
+                  <h2 className="text-xl font-black text-white">Estimate your total value</h2>
+                  <p className="mt-1 text-sm text-slate-400">
+                    Mix & match services + add-ons and see exactly what you get vs. what an agency charges.
+                  </p>
+                </div>
+                <Link
+                  href="/pricing/estimator"
+                  className="shrink-0 rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-blue-700 hover:shadow-lg"
+                >
+                  Open Estimator →
+                </Link>
+              </div>
+            )}
+          </main>
         </div>
-      </section>
-
-      {/* CTA */}
-      <section className="relative overflow-hidden border-t border-slate-200/80 py-20 lg:py-28">
-        <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-950 via-slate-900 to-slate-950"
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute inset-0 opacity-30"
-          style={{
-            background: "radial-gradient(ellipse 80% 60% at 70% 20%, rgba(59,130,246,0.35), transparent 50%)",
-          }}
-          aria-hidden
-        />
-        <div className="relative mx-auto max-w-2xl px-6 text-center lg:px-10">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-blue-200/80">Next step</p>
-          <h2 className="mt-4 font-heading text-[clamp(1.85rem,4vw,3rem)] font-black text-white">Not sure which tier fits?</h2>
-          <p className="mt-4 text-lg text-blue-100/85">
-            Tell us what you&apos;re launching. We&apos;ll map the leanest path. No pitch deck required.
-          </p>
-          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link
-              href="/contact"
-              className="inline-flex rounded-full bg-white px-10 py-4 text-sm font-black uppercase tracking-wide text-slate-900 shadow-xl transition hover:bg-blue-50"
-            >
-              Book a free call
-            </Link>
-            <a
-              href={`mailto:${SITE_CONTACT_EMAIL}`}
-              className="text-sm font-semibold text-blue-200/90 underline-offset-4 transition hover:text-white hover:underline"
-            >
-              {SITE_CONTACT_EMAIL}
-            </a>
-          </div>
-        </div>
-      </section>
+      </div>
     </div>
   );
 }

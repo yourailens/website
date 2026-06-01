@@ -140,13 +140,18 @@ export default function RouteLoadingOverlay() {
   useEffect(() => {
     if (!mountedRef.current) {
       mountedRef.current = true;
-      if (!pathname.startsWith("/admin")) {
+      if (!pathname.startsWith("/admin") && pathname !== "/") {
         openOverlay();
         closeWhenMediaReady();
       }
       return;
     }
     if (pathname.startsWith("/admin")) return;
+    if (pathname === "/") {
+      // arrived at homepage — dismiss any overlay that was triggered by back-nav
+      closeOverlayNow();
+      return;
+    }
     openOverlay();
     closeWhenMediaReady();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -179,12 +184,18 @@ export default function RouteLoadingOverlay() {
       }
       if (url.origin !== window.location.origin) return;
       if (url.pathname.startsWith("/admin")) return;
+      if (url.pathname === "/") return;
       if (url.pathname === window.location.pathname && url.search === window.location.search) return;
 
       openOverlay();
     };
 
-    const onPop = () => openOverlay();
+    const onPop = () => {
+      // Don't open overlay when popping back to the homepage
+      const dest = window.location.pathname;
+      if (dest === "/" || dest.startsWith("/admin")) return;
+      openOverlay();
+    };
 
     window.addEventListener("click", onClick, true);
     window.addEventListener("popstate", onPop);
