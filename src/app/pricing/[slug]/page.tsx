@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import type { Service, ServiceAddon } from "@/data/services";
 import { formatPrice, BADGE_COLORS } from "@/data/services";
@@ -155,7 +156,7 @@ export default function ServiceDetailPage() {
   const mailHref = `mailto:hello@yourailens.studio?subject=Enquiry: ${service.name}&body=Hi, I'm interested in ${service.name} (${formatPrice(service.price)}${addonTotal > 0 ? ` + add-ons worth ${formatPrice(addonTotal)}` : ""}). Please get in touch.`;
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#f7f8fc]">
+    <div className="relative flex h-[100dvh] flex-col overflow-hidden bg-[#f7f8fc]">
       <Navbar />
 
       {/* ── Breadcrumb ─────────────────────────────────────────────────────── */}
@@ -174,12 +175,27 @@ export default function ServiceDetailPage() {
         </div>
       </div>
 
-      {/* ── Two-panel layout — left scrolls, right never moves ───────────────── */}
-      <div className="mx-auto flex w-full max-w-7xl flex-1 overflow-hidden">
+      {/* ── Split view: left scrolls, estimator always visible on the right ─── */}
+      <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 overflow-hidden">
 
-        {/* LEFT: own scroll context */}
-        <div className="min-w-0 flex-1 overflow-y-auto px-4 py-10 pb-28 sm:px-6 lg:pr-10 lg:pb-10">
+        {/* LEFT: only this column scrolls */}
+        <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain px-4 py-10 pb-28 sm:px-6 lg:pr-10 lg:pb-10">
           <div className="space-y-8">
+
+            {/* Package header image */}
+            {service.header_image_url && (
+              <div className="relative aspect-[21/9] min-h-[180px] overflow-hidden rounded-2xl bg-slate-200 sm:min-h-[220px] lg:min-h-[280px]">
+                <Image
+                  src={service.header_image_url}
+                  alt={service.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 65vw"
+                  priority
+                  unoptimized={/^https?:\/\//i.test(service.header_image_url)}
+                />
+              </div>
+            )}
 
             {/* Hero */}
             <div
@@ -281,9 +297,9 @@ export default function ServiceDetailPage() {
           </div>
         </div>
 
-        {/* RIGHT: never scrolls — overflow-hidden locks it in place */}
-        <aside className="hidden w-[340px] shrink-0 overflow-hidden border-l border-slate-200 bg-white lg:block">
-          <div className="px-6 py-8">
+        {/* RIGHT: fixed panel — always on screen (desktop) */}
+        <aside className="hidden h-full min-h-0 w-[340px] shrink-0 flex-col border-l border-slate-200 bg-white lg:flex">
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-8">
             {/* Service name + price */}
             <div className="mb-5 border-b border-slate-100 pb-5">
               <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">
@@ -365,7 +381,7 @@ export default function ServiceDetailPage() {
         </aside>
       </div>
 
-      {/* ── Mobile bottom bar — absolute within h-screen container ─────────── */}
+      {/* ── Mobile bottom bar — pinned inside viewport (no footer below) ──────── */}
       <div className="absolute inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-md lg:hidden">
         <div className="mx-auto flex max-w-lg items-center gap-3">
           <div className="min-w-0 flex-1">

@@ -1,9 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import type { Service } from "@/data/services";
+
+function remoteImage(src: string) {
+  return /^https?:\/\//i.test(src);
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -128,6 +133,8 @@ export default function EditServicePage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [headerUploading, setHeaderUploading] = useState(false);
+  const headerInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch(`/api/admin/services/${id}`)
@@ -140,6 +147,42 @@ export default function EditServicePage() {
 
   const set = (key: keyof Service, value: unknown) =>
     setForm((prev) => ({ ...prev, [key]: value }));
+
+  const uploadHeader = async (file: File) => {
+    if (!id) return;
+    setHeaderUploading(true);
+    setError(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("serviceId", id);
+      const res = await fetch("/api/admin/services/upload-header", { method: "POST", body: fd });
+      const json = (await res.json()) as { url?: string; error?: string };
+      if (!res.ok || !json.url) throw new Error(json.error ?? "Upload failed");
+      set("header_image_url", json.url);
+      setForm((prev) => ({ ...prev, header_image_url: json.url }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setHeaderUploading(false);
+    }
+  };
+
+  const clearHeader = async () => {
+    if (!id || !confirm("Remove package header image?")) return;
+    setHeaderUploading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/services/upload-header?serviceId=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Could not remove image");
+      set("header_image_url", null);
+      setForm((prev) => ({ ...prev, header_image_url: null }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Remove failed");
+    } finally {
+      setHeaderUploading(false);
+    }
+  };
 
   const save = async () => {
     setSaving(true);
@@ -304,6 +347,62 @@ export default function EditServicePage() {
                   </label>
                 ))}
               </div>
+            </div>
+
+            {/* Package header image */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6">
+              <h2 className="mb-2 text-sm font-black uppercase tracking-wider text-slate-900">Package header</h2>
+              <p className="mb-4 text-xs text-slate-500">
+                Wide banner on the package page. Recommended 16:9 or 3:2, at least 1400px wide.
+              </p>
+              <div
+                className="relative cursor-pointer overflow-hidden rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 hover:border-blue-300"
+                onClick={() => !headerUploading && headerInputRef.current?.click()}
+              >
+                {form.header_image_url ? (
+                  <div className="relative aspect-[21/9] min-h-[120px] w-full">
+                    <Image
+                      src={form.header_image_url}
+                      alt="Package header"
+                      fill
+                      className="object-cover"
+                      unoptimized={remoteImage(form.header_image_url)}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition hover:opacity-100">
+                      <span className="text-sm font-bold text-white">
+                        {headerUploading ? "Uploading…" : "Click to replace"}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-10">
+                    <p className="text-sm font-semibold text-slate-500">
+                      {headerUploading ? "Uploading…" : "Click to upload header image"}
+                    </p>
+                  </div>
+                )}
+              </div>
+              <input
+                ref={headerInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) uploadHeader(f);
+                  e.target.value = "";
+                }}
+              />
+              {form.header_image_url && (
+                <button
+                  type="button"
+                  onClick={clearHeader}
+                  disabled={headerUploading}
+                  className="mt-3 w-full rounded-xl border border-slate-200 py-2 text-xs font-semibold text-slate-600 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                >
+                  Remove header image
+                </button>
+              )}
             </div>
 
             {/* Appearance */}

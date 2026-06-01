@@ -31,6 +31,7 @@ export type Service = {
   traditional_value: number | null;
   thumbnail_url: string | null;
   cover_url: string | null;
+  header_image_url: string | null;
   accent_color: string | null;
   sort_order: number;
   created_at: string;

@@ -49,7 +49,8 @@ const CARD_IMG: Record<string, string> = {
 const FALLBACK_IMGS = ["/images/img1.jpeg","/images/img2.jpeg","/images/img3.jpeg","/images/ai_avatar1.jpeg"];
 
 function ServiceCard({ s, idx }: { s: Service; idx: number }) {
-  const img  = CARD_IMG[s.slug] ?? FALLBACK_IMGS[idx % 4];
+  const img  = s.header_image_url ?? s.thumbnail_url ?? CARD_IMG[s.slug] ?? FALLBACK_IMGS[idx % 4];
+  const imgRemote = /^https?:\/\//i.test(img);
   const accent = s.accent_color ?? "#2563eb";
   return (
     <Link
@@ -58,9 +59,10 @@ function ServiceCard({ s, idx }: { s: Service; idx: number }) {
     >
       {/* Image */}
       <div className="relative h-44 overflow-hidden bg-slate-100">
-        <img
-          src={img} alt={s.name} loading="lazy"
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+        <Image
+          src={img} alt={s.name} fill loading="lazy"
+          className="object-cover transition duration-500 group-hover:scale-[1.04]"
+          unoptimized={imgRemote}
         />
       </div>
 
@@ -261,9 +263,9 @@ export default function Home() {
               className="font-heading font-black leading-[0.88] text-white"
               style={{ fontSize: "clamp(2.4rem, 6vw, 6rem)", letterSpacing: "-0.04em" }}
             >
-              AI creatives.<br />
+              Premium content.<br />
               <span style={{ WebkitTextStroke: "1.8px rgba(255,255,255,0.35)", WebkitTextFillColor: "transparent" }}>
-                Delivered fast.
+                Brand consistent.
               </span>
             </h1>
           </div>
@@ -630,6 +632,44 @@ export default function Home() {
                 </span>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CONCLUSION CTA ──────────────────────────────────────────────── */}
+      <section className="bg-white py-16 lg:py-24">
+        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+          <div className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 px-6 py-14 text-center sm:px-10 lg:px-16 lg:py-20">
+            <div className="mb-3 flex items-center justify-center gap-2">
+              <div className="h-px w-8 bg-blue-500" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">Get started</span>
+              <div className="h-px w-8 bg-blue-500" />
+            </div>
+            <h2
+              className="mx-auto max-w-2xl font-heading text-4xl font-black text-slate-900 lg:text-5xl"
+              style={{ letterSpacing: "-0.03em", lineHeight: 1.05 }}
+            >
+              Your brief in.<br />
+              <span className="text-blue-600">A full campaign out.</span>
+            </h2>
+            <p className="mx-auto mt-4 max-w-md text-sm font-medium text-slate-600">
+              Pick a package, add what you need, and we handle production end to end.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link
+                href="/pricing"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 sm:w-auto"
+              >
+                Browse packages
+                <span aria-hidden>→</span>
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-flex w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-8 py-3.5 text-sm font-bold text-slate-700 shadow-sm transition hover:border-blue-400 hover:text-blue-700 sm:w-auto"
+              >
+                Book a call
+              </Link>
+            </div>
           </div>
         </div>
       </section>

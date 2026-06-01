@@ -4,9 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SITE_CONTACT_EMAIL, SITE_LOCATION_LINE } from "@/lib/site-contact";
 
+/** Package detail pages use a full-height estimator layout — no site footer. */
+function hideFooter(pathname: string | null) {
+  if (!pathname) return false;
+  if (pathname.startsWith("/admin")) return true;
+  if (!pathname.startsWith("/pricing/")) return false;
+  if (pathname === "/pricing/estimator") return false;
+  return true;
+}
+
 export default function SiteFooter() {
   const pathname = usePathname();
-  if (pathname?.startsWith("/admin")) return null;
+  if (hideFooter(pathname)) return null;
 
   return (
     <footer className="border-t border-slate-100 bg-white py-10">

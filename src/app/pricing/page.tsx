@@ -62,9 +62,9 @@ function ServiceCard({ s }: { s: Service }) {
           background: `linear-gradient(135deg, ${s.accent_color ?? "#2563eb"}18 0%, ${s.accent_color ?? "#2563eb"}06 100%)`,
         }}
       >
-        {s.thumbnail_url ? (
+        {(s.header_image_url ?? s.thumbnail_url) ? (
           <img
-            src={s.thumbnail_url}
+            src={s.header_image_url ?? s.thumbnail_url ?? ""}
             alt={s.name}
             className="absolute inset-0 h-full w-full object-cover"
           />
