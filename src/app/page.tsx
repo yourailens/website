@@ -91,20 +91,48 @@ function ServiceCard({ s }: { s: Service }) {
   │ (tall)  │ tile 3  │ tile 4 │
   └─────────┴─────────┴────────┘
 */
+/*
+  Mobile  (2 cols × 2 rows, rows 3fr 2fr):
+  ┌──────────────────────┐   ← finesugaredited (full-width top)
+  ├──────────┬───────────┤
+  │   h03    │    fpv    │   ← two portrait tiles
+  └──────────┴───────────┘
+
+  Desktop (3 cols × 2 rows, rows equal):
+  ┌──────────┬──────────────────────┐
+  │          │   d&d (wide top)     │
+  │  finesu  ├──────────┬───────────┤
+  │  (tall)  │   h03    │    fpv    │
+  └──────────┴──────────┴───────────┘
+*/
 const HERO_TILES = [
-  { src: "/videos/hero2.mp4", poster: "/videos/hero2-poster.jpg", style: "col-start-1 row-start-1 row-end-3" },
-  { src: "/videos/hero.mp4",  poster: "/videos/hero-poster.jpg",  style: "col-start-2 col-end-4 row-start-1 row-end-2" },
-  { src: "/videos/hero3.mp4", poster: "/videos/hero3-poster.jpg", style: "col-start-2 row-start-2 row-end-3" },
-  { src: "/videos/hero4.mp4", poster: "/videos/hero4-poster.jpg", style: "col-start-3 row-start-2 row-end-3" },
+  {
+    src: "/videos/hero2.mp4", poster: "/videos/hero2-poster.jpg",
+    // mobile: full-width row 1 | desktop: tall left col spanning both rows
+    cls: "col-start-1 col-end-3 row-start-1 row-end-2 lg:col-end-2 lg:row-end-3",
+  },
+  {
+    src: "/videos/hero.mp4",  poster: "/videos/hero-poster.jpg",
+    // mobile: bottom-left | desktop: wide top-right spanning 2 cols
+    cls: "col-start-1 col-end-2 row-start-2 row-end-3 lg:col-start-2 lg:col-end-4 lg:row-start-1 lg:row-end-2",
+  },
+  {
+    src: "/videos/hero3.mp4", poster: "/videos/hero3-poster.jpg",
+    // mobile: bottom-right | desktop: bottom-middle
+    cls: "col-start-2 col-end-3 row-start-2 row-end-3 lg:col-start-2 lg:col-end-3 lg:row-start-2 lg:row-end-3",
+  },
+  {
+    src: "/videos/hero4.mp4", poster: "/videos/hero4-poster.jpg",
+    // mobile: hidden | desktop: bottom-right
+    cls: "hidden lg:block lg:col-start-3 lg:col-end-4 lg:row-start-2 lg:row-end-3",
+  },
 ];
 
-function HeroTile({ src, poster, style }: { src: string; poster: string; style: string }) {
+function HeroTile({ src, poster, cls }: { src: string; poster: string; cls: string }) {
   const [ready, setReady] = useState(false);
   return (
-    <div className={`relative overflow-hidden bg-[#0a0a10] ${style}`}>
-      {/* Poster — instant */}
+    <div className={`relative overflow-hidden rounded-xl bg-[#0a0a10] ${cls}`}>
       <img src={poster} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
-      {/* Video fades in once buffered */}
       <video
         autoPlay muted loop playsInline preload="auto"
         poster={poster}
@@ -145,10 +173,10 @@ export default function Home() {
       {/* ── HERO — 4-tile video grid ────────────────────────────────────── */}
       <section className="relative h-[100svh] w-full overflow-hidden bg-[#0a0a10]">
 
-        {/* Editorial grid — fills entire viewport */}
-        <div className="absolute inset-0 grid grid-cols-3 grid-rows-2 gap-1">
+        {/* Editorial grid — responsive */}
+        <div className="absolute inset-0 grid grid-cols-2 grid-rows-[3fr_2fr] gap-1 lg:grid-cols-3 lg:grid-rows-2">
           {HERO_TILES.map((t, i) => (
-            <HeroTile key={i} src={t.src} poster={t.poster} style={t.style} />
+            <HeroTile key={i} src={t.src} poster={t.poster} cls={t.cls} />
           ))}
         </div>
 
