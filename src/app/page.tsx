@@ -360,24 +360,22 @@ export default function Home() {
               <span className="text-blue-600">Built by AI.</span>
             </h2>
 
-            {/* Right: description + CTA stacked */}
-            <div className="flex shrink-0 flex-col items-start gap-4 sm:items-end">
+            <div className="flex shrink-0 flex-col items-start sm:items-end">
               <p className="max-w-xs text-sm leading-relaxed text-slate-500 sm:text-right">
                 Every package includes unlimited revisions, all formats, and full rights to every asset delivered.
               </p>
               <Link
                 href="/pricing"
-                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-black text-white shadow-md transition hover:bg-blue-700 active:scale-95"
+                className="mt-4 hidden items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-black text-white shadow-md transition hover:bg-blue-700 active:scale-95 sm:inline-flex"
               >
                 Browse all packages & pricing
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
                   <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </Link>
             </div>
           </div>
 
-          {/* Grid */}
           {featuredServices.length > 0 ? (
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
               {featuredServices.map((s, i) => (
@@ -391,6 +389,16 @@ export default function Home() {
               ))}
             </div>
           )}
+
+          <Link
+            href="/pricing"
+            className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-black text-white shadow-md transition hover:bg-blue-700 active:scale-95 sm:hidden"
+          >
+            Browse all packages & pricing
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
+              <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </Link>
 
         </div>
       </HomeBlueTint>
