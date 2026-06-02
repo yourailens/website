@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Navbar from "@/components/Navbar";
 import HomeHeroBanner from "@/components/home/HomeHeroBanner";
-import HomeHeroBackground from "@/components/home/HomeHeroBackground";
+import HeroFilmCoverFlow from "@/components/home/HeroFilmCoverFlow";
 import type { Service } from "@/data/services";
 import { formatPrice, BADGE_COLORS } from "@/data/services";
 
@@ -174,10 +174,10 @@ export default function Home() {
     <div className="min-h-screen bg-white font-body">
       <Navbar />
 
-      {/* ── HERO — blue banner + Done & Dusted background video ───────── */}
+      {/* ── HERO — blue banner + film cover flow (YouTube test) ─────────── */}
       <div className="bg-[#0a0a0c]">
         <HomeHeroBanner />
-        <HomeHeroBackground />
+        <HeroFilmCoverFlow />
       </div>
 
       {/* ── AI MODELS ─────────────────────────────────────────────────── */}
