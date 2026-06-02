@@ -65,25 +65,23 @@ export default function HomeHero() {
               <span className="font-semibold text-blue-800">₹50,000</span>.
             </p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
               <Link
                 href="/pricing"
-                className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-7 py-3.5 text-sm font-semibold tracking-wide text-white shadow-lg shadow-blue-300/40 transition hover:from-blue-700 hover:to-blue-600"
+                className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-blue-500/20"
               >
                 View packages
+                <span className="text-blue-200" aria-hidden>
+                  →
+                </span>
               </Link>
               <Link
                 href="/contact"
-                className="inline-flex items-center justify-center rounded-xl border border-blue-200/80 bg-white/80 px-7 py-3.5 text-sm font-light italic text-slate-600 shadow-sm backdrop-blur-sm transition hover:border-blue-300 hover:bg-blue-50/90 hover:text-blue-700"
+                className="text-sm font-light italic text-slate-600 underline decoration-blue-300/80 decoration-2 underline-offset-[6px]"
               >
-                Book a free call →
+                Book a free call
               </Link>
             </div>
-
-            <p className="mt-6 text-[11px] font-light tracking-[0.16em] text-slate-400 uppercase">
-              <span className="block font-medium not-italic text-blue-600/80">Now playing</span>
-              <span className="mt-1 block italic text-slate-600">Done &amp; Dusted</span>
-            </p>
           </div>
 
           {/* Video card */}

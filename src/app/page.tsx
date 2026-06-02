@@ -2,11 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import HomeHero from "@/components/home/HomeHero";
+import HomeBlueTint from "@/components/home/HomeBlueTint";
 import type { Service } from "@/data/services";
-import { formatPrice, BADGE_COLORS } from "@/data/services";
+import { formatPrice } from "@/data/services";
+
+const PAGE = "mx-auto max-w-7xl px-6 lg:px-10";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -22,57 +25,38 @@ const AI_MODELS = [
   { name: "Minimax",     logo: "/images/logos/minimax.svg", dark: true },
 ];
 
-const STATS = [
-  { v: "100+", l: "Campaigns delivered" },
-  { v: "48hr", l: "Average delivery"    },
-  { v: "70%",  l: "Cost vs traditional" },
-  { v: "10×",  l: "Faster production"   },
-];
-
 const FEATURED_FILMS = [
   {
-    n: "01",
-    cat: "Brand film",
+    type: "Campaign film",
     title: "Fine Sugar",
-    stat: "48 hrs",
-    blurb: "A full campaign film with cinematic pacing, VO, and grade — delivered in two days, not two weeks.",
+    detail: "48 hour delivery",
+    blurb: "Launch film with VO, grade, and social cuts from one brief.",
     video: "/videos/hero2.mp4",
     poster: "/videos/hero2-poster.jpg",
-    border: "border-blue-500",
-    tags: ["Campaign", "4K master", "Social cuts"],
   },
   {
-    n: "02",
-    cat: "Commercial",
+    type: "Product launch",
     title: "Done & Dusted",
-    stat: "Launch",
-    blurb: "Hero launch film with product storytelling and motion-led scenes built for paid and organic channels.",
+    detail: "Hero + paid social",
+    blurb: "Motion led product story built for organic and paid channels.",
     video: "/videos/hero.mp4",
     poster: "/videos/hero-poster.jpg",
-    border: "border-violet-500",
-    tags: ["Hero film", "Product", "Paid social"],
   },
   {
-    n: "03",
-    cat: "Launch film",
+    type: "Drop teaser",
     title: "The Teaser",
-    stat: "90 sec",
-    blurb: "High-energy teaser cut for drop-day — hook-first editing built to stop the scroll and drive pre-orders.",
+    detail: "90 second cut",
+    blurb: "Hook first edit for drop day, with vertical variants included.",
     video: "/videos/hero3.mp4",
     poster: "/videos/hero3-poster.jpg",
-    border: "border-emerald-500",
-    tags: ["Teaser", "9:16 variants", "Sound design"],
   },
   {
-    n: "04",
-    cat: "Aerial",
+    type: "Aerial motion",
     title: "FPV Drone Shot",
-    stat: "Cinematic",
-    blurb: "FPV-style aerial motion with product hero moments — no location crew, no drone day on set.",
+    detail: "4K export",
+    blurb: "Cinematic aerial passes without a location crew or drone day.",
     video: "/videos/hero4.mp4",
     poster: "/videos/hero4-poster.jpg",
-    border: "border-amber-500",
-    tags: ["FPV", "Motion", "4K export"],
   },
 ] as const;
 
@@ -223,87 +207,86 @@ export default function Home() {
       <HomeHero />
 
       {/* ── AI MODELS ─────────────────────────────────────────────────── */}
-      <section className="overflow-hidden border-t border-slate-100 bg-slate-50 py-6">
-        <p className="mb-4 text-center text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500">
+      <HomeBlueTint className="overflow-hidden border-t border-blue-100/70 py-7">
+        <p className="mb-4 text-center text-[10px] font-light uppercase tracking-[0.3em] text-blue-600/70">
           Powered by
         </p>
         <div className="flex animate-marquee gap-5 pr-5">
           {[...AI_MODELS, ...AI_MODELS].map((m, i) => (
-            <div key={i} className="flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5">
+            <div key={i} className="flex shrink-0 items-center gap-2 rounded-xl border border-blue-100/80 bg-white/90 px-4 py-2.5 shadow-sm shadow-blue-100/30">
               <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md ${m.dark ? "bg-slate-800" : ""}`}>
                 <Image src={m.logo} alt={m.name} width={18} height={18} className="h-4 w-4 object-contain" loading="lazy" />
               </div>
-              <span className="text-[12px] font-bold text-slate-700">{m.name}</span>
+              <span className="text-[12px] font-semibold text-slate-700">{m.name}</span>
             </div>
           ))}
         </div>
-      </section>
+      </HomeBlueTint>
 
       {/* ── FEATURED FILMS ────────────────────────────────────────────── */}
-      <section className="bg-white pt-12 pb-16 lg:pt-16 lg:pb-24">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+      <HomeBlueTint className="border-t border-blue-100/60 pt-12 pb-16 lg:pt-16 lg:pb-24">
+        <div className={PAGE}>
           <div className="mb-2 flex items-center gap-2">
-            <div className="h-px w-6 bg-blue-500" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">Featured work</span>
+            <div className="h-px w-6 bg-blue-400/80" />
+            <span className="text-[10px] font-light uppercase tracking-[0.28em] text-blue-600/80">
+              Selected work
+            </span>
           </div>
           <h2
-            className="mb-10 font-body text-4xl font-black text-slate-900 lg:mb-12 lg:text-5xl"
-            style={{ letterSpacing: "-0.03em", lineHeight: 1.02 }}
+            className="max-w-xl text-[clamp(1.75rem,4vw,2.75rem)] leading-[1.25] font-light text-slate-900"
+            style={{ letterSpacing: "-0.02em" }}
           >
-            Four films.<br />
-            <span className="text-blue-600">One AI pipeline.</span>
+            Films we have{" "}
+            <span className="font-semibold text-blue-700">shipped recently</span>
           </h2>
+          <p className="mt-3 max-w-lg text-sm font-light leading-relaxed text-slate-600">
+            Campaign films, launches, and product stories from a single AI production pipeline.
+          </p>
 
-          <div className="space-y-4">
+          <div className="mt-10 space-y-5 lg:mt-12">
             {FEATURED_FILMS.map((film, i) => (
               <div
-                key={film.n}
-                className={`grid overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 lg:min-h-[300px] ${
+                key={film.title}
+                className={`grid overflow-hidden rounded-2xl border border-blue-100/80 bg-white/80 shadow-sm shadow-blue-100/25 backdrop-blur-sm lg:min-h-[280px] ${
                   i % 2 === 1 ? "lg:grid-cols-[1.1fr_1fr]" : "lg:grid-cols-[1fr_1.1fr]"
                 }`}
               >
                 <div
-                  className={`relative min-h-[220px] overflow-hidden bg-slate-900 lg:min-h-[300px] ${
+                  className={`relative min-h-[220px] overflow-hidden bg-slate-900 lg:min-h-[280px] ${
                     i % 2 === 1 ? "lg:order-2" : ""
                   }`}
                 >
                   <DeepDiveVideo src={film.video} poster={film.poster} title={film.title} />
                 </div>
                 <div
-                  className={`flex flex-col justify-center border-l-4 bg-white p-6 lg:p-10 ${film.border} ${
-                    i % 2 === 1 ? "lg:order-1 lg:border-l-0 lg:border-r-4" : ""
+                  className={`flex flex-col justify-center border-blue-200/70 bg-white/95 p-6 lg:p-9 ${
+                    i % 2 === 1
+                      ? "border-t-4 lg:order-1 lg:border-t-0 lg:border-r-2 lg:border-r-blue-300/60"
+                      : "border-t-4 lg:border-t-0 lg:border-l-2 lg:border-l-blue-300/60"
                   }`}
                 >
-                  <span className="font-mono text-xs font-bold text-slate-300">{film.n}</span>
-                  <span className="mt-2 text-[10px] font-bold uppercase tracking-[0.22em] text-blue-500">
-                    {film.cat}
-                  </span>
+                  <p className="text-[11px] font-light uppercase tracking-[0.22em] text-blue-600/90">
+                    {film.type}
+                  </p>
                   <h3
-                    className="mt-2 font-body text-3xl font-black text-slate-900 lg:text-4xl"
-                    style={{ letterSpacing: "-0.03em" }}
+                    className="mt-2 text-2xl font-light text-slate-900 lg:text-[1.65rem]"
+                    style={{ letterSpacing: "-0.02em" }}
                   >
                     {film.title}
                   </h3>
-                  <p className="mt-3 font-body text-5xl font-black text-blue-600 lg:text-6xl" style={{ letterSpacing: "-0.04em" }}>
-                    {film.stat}
+                  <p className="mt-1 text-sm font-medium text-blue-800/90">{film.detail}</p>
+                  <p className="mt-4 max-w-sm text-sm font-light leading-relaxed text-slate-600">
+                    {film.blurb}
                   </p>
-                  <p className="mt-4 max-w-md text-sm font-medium leading-relaxed text-slate-600">{film.blurb}</p>
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    {film.tags.map((t) => (
-                      <span key={t} className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </section>
+      </HomeBlueTint>
 
       {/* ── HOW AI PRODUCTION WORKS ───────────────────────────────────── */}
-      <section className="bg-white pb-0">
+      <HomeBlueTint className="border-t border-blue-100/60 pb-0">
 
         {/* Image carousel — live from The Wall, horizontally scrollable */}
         <div className="mb-12 flex h-[260px] gap-3 overflow-x-auto scroll-smooth px-6 [&::-webkit-scrollbar]:hidden lg:h-[420px] lg:px-10">
@@ -320,9 +303,7 @@ export default function Home() {
           })}
         </div>
 
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
-
-          {/* Eyebrow + heading */}
+        <div className={PAGE}>
           <div className="mb-3 flex items-center gap-2">
             <div className="h-px w-6 bg-blue-500" />
             <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">What We Do</span>
@@ -359,14 +340,12 @@ export default function Home() {
           </div>
 
         </div>
-      </section>
+      </HomeBlueTint>
 
 
       {/* ── SERVICE CATALOGUE ─────────────────────────────────────────── */}
-      <section id="services" className="bg-white pt-10 pb-16 scroll-mt-20 lg:pt-12 lg:pb-24">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
-
-          {/* Header */}
+      <HomeBlueTint id="services" className="scroll-mt-20 border-t border-blue-100/60 pt-10 pb-16 lg:pt-12 lg:pb-24">
+        <div className={PAGE}>
           <div className="mb-2 flex items-center gap-2">
             <div className="h-px w-6 bg-blue-500" />
             <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">What we offer</span>
@@ -414,13 +393,11 @@ export default function Home() {
           )}
 
         </div>
-      </section>
+      </HomeBlueTint>
 
       {/* ── THE CASE FOR AI ───────────────────────────────────────────── */}
-      <section className="bg-slate-50 pt-16 pb-8 lg:pt-24 lg:pb-10">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
-
-          {/* Eyebrow + headline */}
+      <HomeBlueTint className="border-t border-blue-100/60 pt-16 pb-8 lg:pt-24 lg:pb-10">
+        <div className={PAGE}>
           <div className="mb-10 flex flex-col gap-2 lg:mb-12">
             <div className="flex items-center gap-2">
               <div className="h-px w-6 bg-blue-500" />
@@ -499,11 +476,11 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </HomeBlueTint>
 
       {/* ── KEY NUMBERS ───────────────────────────────────────────────── */}
-      <section className="border-y border-slate-100 bg-slate-50 py-6 lg:py-8">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+      <HomeBlueTint className="border-y border-blue-100/60 py-6 lg:py-8">
+        <div className={PAGE}>
           <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 lg:grid-cols-4">
             {[
               { num: "10×",  label: "Faster than traditional production",     sub: "Brief to delivery in 48 hours" },
@@ -521,11 +498,11 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </HomeBlueTint>
 
       {/* ── USE CASES ─────────────────────────────────────────────────── */}
-      <section className="bg-slate-50 py-16 lg:py-24">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+      <HomeBlueTint className="border-t border-blue-100/60 py-16 lg:py-24">
+        <div className={PAGE}>
           <div className="mb-2 flex items-center gap-2">
             <div className="h-px w-6 bg-blue-500" />
             <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">Use Cases</span>
@@ -568,11 +545,11 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </HomeBlueTint>
 
       {/* ── CONCLUSION CTA ──────────────────────────────────────────────── */}
-      <section className="bg-white py-16 lg:py-24">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+      <HomeBlueTint className="border-t border-blue-100/60 py-16 lg:py-24">
+        <div className={PAGE}>
           <div className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 px-6 py-14 text-center sm:px-10 lg:px-16 lg:py-20">
             <div className="mb-3 flex items-center justify-center gap-2">
               <div className="h-px w-8 bg-blue-500" />
@@ -606,7 +583,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </HomeBlueTint>
 
     </div>
   );
