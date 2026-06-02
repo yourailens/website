@@ -21,7 +21,7 @@ function AddonCard({
   return (
     <button
       onClick={onToggle}
-      className={`flex w-full items-start gap-3 rounded-xl border p-4 text-left transition-all ${
+      className={`flex w-full min-w-0 max-w-full items-start gap-3 rounded-xl border p-4 text-left transition-all ${
         selected
           ? "border-blue-500 bg-blue-50 shadow-sm"
           : "border-slate-200 bg-white hover:border-slate-300"
@@ -117,7 +117,7 @@ export default function ServiceDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f7f8fc]">
+      <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-[#f7f8fc]">
         <Navbar />
         <div className="mx-auto max-w-7xl px-4 py-16">
           <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
@@ -135,7 +135,7 @@ export default function ServiceDetailPage() {
 
   if (notFound || !service) {
     return (
-      <div className="min-h-screen bg-[#f7f8fc]">
+      <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-[#f7f8fc]">
         <Navbar />
         <div className="flex flex-col items-center justify-center py-40 text-center">
           <svg className="mb-4 h-12 w-12 text-slate-300" fill="none" viewBox="0 0 48 48">
@@ -156,31 +156,36 @@ export default function ServiceDetailPage() {
   const mailHref = `mailto:hello@yourailens.studio?subject=Enquiry: ${service.name}&body=Hi, I'm interested in ${service.name} (${formatPrice(service.price)}${addonTotal > 0 ? ` + add-ons worth ${formatPrice(addonTotal)}` : ""}). Please get in touch.`;
 
   return (
-    <div className="relative flex h-[100dvh] flex-col overflow-hidden bg-[#f7f8fc]">
+    <div className="relative flex h-[100dvh] max-h-[100dvh] w-full max-w-[100vw] flex-col overflow-hidden overscroll-none bg-[#f7f8fc]">
       <Navbar />
 
       {/* ── Breadcrumb ─────────────────────────────────────────────────────── */}
-      <div className="shrink-0 border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6">
-          <Link href="/pricing" className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 transition hover:text-slate-900">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <div className="shrink-0 overflow-hidden border-b border-slate-200 bg-white">
+        <div className="mx-auto flex min-w-0 max-w-7xl items-center gap-2 px-4 py-3 sm:gap-3 sm:px-6">
+          <Link
+            href="/pricing"
+            className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-slate-500 transition hover:text-slate-900"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
               <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             Back
           </Link>
-          <span className="text-slate-300">/</span>
-          <span className="text-xs text-slate-400 capitalize">{service.category_slug.replace("-", " ")}</span>
-          <span className="text-slate-300">/</span>
-          <span className="text-xs font-medium text-slate-700">{service.name}</span>
+          <span className="shrink-0 text-slate-300">/</span>
+          <span className="hidden shrink-0 text-xs capitalize text-slate-400 sm:inline">
+            {service.category_slug.replace("-", " ")}
+          </span>
+          <span className="hidden shrink-0 text-slate-300 sm:inline">/</span>
+          <span className="min-w-0 truncate text-xs font-medium text-slate-700">{service.name}</span>
         </div>
       </div>
 
       {/* ── Split view: left scrolls, estimator always visible on the right ─── */}
-      <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 overflow-hidden">
+      <div className="mx-auto flex min-h-0 w-full min-w-0 max-w-7xl flex-1 overflow-hidden">
 
         {/* LEFT: only this column scrolls */}
-        <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain px-4 py-10 pb-28 sm:px-6 lg:pr-10 lg:pb-10">
-          <div className="space-y-8">
+        <div className="package-detail-scroll min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-x-none overscroll-y-contain px-4 py-10 pb-28 sm:px-6 lg:pr-10 lg:pb-10">
+          <div className="mx-auto w-full max-w-full space-y-8">
 
             {/* Package header image */}
             {service.header_image_url && (
@@ -199,7 +204,7 @@ export default function ServiceDetailPage() {
 
             {/* Hero */}
             <div
-              className="relative overflow-hidden rounded-2xl p-8"
+              className="relative overflow-hidden rounded-2xl p-5 sm:p-8"
               style={{
                 background: `linear-gradient(135deg, ${service.accent_color ?? "#2563eb"}22 0%, ${service.accent_color ?? "#2563eb"}08 100%)`,
                 borderLeft: `4px solid ${service.accent_color ?? "#2563eb"}`,
@@ -215,7 +220,7 @@ export default function ServiceDetailPage() {
                   </span>
                 )}
               </div>
-              <h1 className="font-heading text-3xl font-black text-slate-900 sm:text-4xl">
+              <h1 className="break-words font-heading text-3xl font-black text-slate-900 sm:text-4xl">
                 {service.name}
               </h1>
               <p className="mt-2 text-base text-slate-500">{service.tagline}</p>
@@ -381,9 +386,9 @@ export default function ServiceDetailPage() {
         </aside>
       </div>
 
-      {/* ── Mobile bottom bar — pinned inside viewport (no footer below) ──────── */}
-      <div className="absolute inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-md lg:hidden">
-        <div className="mx-auto flex max-w-lg items-center gap-3">
+      {/* ── Mobile bottom bar — fixed to viewport (avoids nested-scroll sideways shift) ─ */}
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md lg:hidden">
+        <div className="mx-auto flex w-full max-w-lg min-w-0 items-center gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-baseline gap-1.5">
               <span className="text-lg font-black text-slate-900">{formatPrice(total)}</span>
@@ -397,7 +402,7 @@ export default function ServiceDetailPage() {
           </div>
           <a
             href={mailHref}
-            className="flex shrink-0 items-center gap-1.5 rounded-xl px-5 py-3 text-sm font-bold text-white transition-all active:scale-95"
+            className="flex shrink-0 items-center gap-1.5 rounded-xl px-5 py-3 text-sm font-bold text-white"
             style={{ background: service.accent_color ?? "#2563eb" }}
           >
             Get Started

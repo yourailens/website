@@ -42,6 +42,13 @@ body {
   overflow-x: hidden;
 }
 
+/* Package detail: prevent iOS horizontal rubber-band while scrolling content */
+.package-detail-scroll {
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  -webkit-overflow-scrolling: touch;
+}
+
 body {
   background: #ffffff !important;
   color: #0F172A !important;
