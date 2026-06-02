@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Navbar from "@/components/Navbar";
+import HomeHeroBanner from "@/components/home/HomeHeroBanner";
+import HeroFilmCoverFlow from "@/components/home/HeroFilmCoverFlow";
 import type { Service } from "@/data/services";
 import { formatPrice, BADGE_COLORS } from "@/data/services";
 
@@ -122,71 +124,6 @@ function ServiceCard({ s, idx }: { s: Service; idx: number }) {
   );
 }
 
-// ─── Hero tile video ─────────────────────────────────────────────────────────
-
-/*
-  Editorial grid layout (3 cols × 2 rows):
-  ┌─────────┬──────────────────┐
-  │         │  tile 2 (wide)   │
-  │ tile 1  ├─────────┬────────┤
-  │ (tall)  │ tile 3  │ tile 4 │
-  └─────────┴─────────┴────────┘
-*/
-/*
-  Mobile  (2 cols × 2 rows, rows 3fr 2fr):
-  ┌──────────────────────┐   ← finesugaredited (full-width top)
-  ├──────────┬───────────┤
-  │   h03    │    fpv    │   ← two portrait tiles
-  └──────────┴───────────┘
-
-  Desktop (3 cols × 2 rows, rows equal):
-  ┌──────────┬──────────────────────┐
-  │          │   d&d (wide top)     │
-  │  finesu  ├──────────┬───────────┤
-  │  (tall)  │   h03    │    fpv    │
-  └──────────┴──────────┴───────────┘
-*/
-const HERO_TILES = [
-  {
-    src: "/videos/hero2.mp4", poster: "/videos/hero2-poster.jpg",
-    // mobile: full-width row 1 | desktop: tall left col spanning both rows
-    cls: "col-start-1 col-end-3 row-start-1 row-end-2 lg:col-end-2 lg:row-end-3",
-  },
-  {
-    src: "/videos/hero.mp4",  poster: "/videos/hero-poster.jpg",
-    // mobile: bottom-left | desktop: wide top-right spanning 2 cols
-    cls: "col-start-1 col-end-2 row-start-2 row-end-3 lg:col-start-2 lg:col-end-4 lg:row-start-1 lg:row-end-2",
-  },
-  {
-    src: "/videos/hero3.mp4", poster: "/videos/hero3-poster.jpg",
-    // mobile: bottom-right | desktop: bottom-middle
-    cls: "col-start-2 col-end-3 row-start-2 row-end-3 lg:col-start-2 lg:col-end-3 lg:row-start-2 lg:row-end-3",
-  },
-  {
-    src: "/videos/hero4.mp4", poster: "/videos/hero4-poster.jpg",
-    // mobile: hidden | desktop: bottom-right
-    cls: "hidden lg:block lg:col-start-3 lg:col-end-4 lg:row-start-2 lg:row-end-3",
-  },
-];
-
-function HeroTile({ src, poster, cls }: { src: string; poster: string; cls: string }) {
-  const [ready, setReady] = useState(false);
-  return (
-    <div className={`relative overflow-hidden rounded-xl bg-[#0a0a10] ${cls}`}>
-      <img src={poster} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
-      <video
-        autoPlay muted loop playsInline preload="auto"
-        poster={poster}
-        onCanPlay={() => setReady(true)}
-        className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
-        style={{ opacity: ready ? 1 : 0 }}
-      >
-        <source src={src} type="video/mp4" />
-      </video>
-    </div>
-  );
-}
-
 function DeepDiveVideo({ src, poster, title }: { src: string; poster: string; title: string }) {
   const [ready, setReady] = useState(false);
   return (
@@ -237,41 +174,11 @@ export default function Home() {
     <div className="min-h-screen bg-white">
       <Navbar />
 
-      {/* ── HERO — 4-tile video grid ────────────────────────────────────── */}
-      <section className="relative h-[100svh] w-full overflow-hidden bg-[#0a0a10]">
-
-        {/* Editorial grid — responsive */}
-        <div className="absolute inset-0 grid grid-cols-2 grid-rows-[3fr_2fr] gap-1 lg:grid-cols-3 lg:grid-rows-2">
-          {HERO_TILES.map((t, i) => (
-            <HeroTile key={i} src={t.src} poster={t.poster} cls={t.cls} />
-          ))}
-        </div>
-
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/35" />
-
-        {/* Text */}
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
-          <div
-            className="rounded-3xl px-10 py-8 backdrop-blur-md"
-            style={{ background: "rgba(0,0,0,0.48)", boxShadow: "0 0 80px 40px rgba(0,0,0,0.4)" }}
-          >
-            <p className="mb-3 text-[9px] font-bold uppercase tracking-[0.35em] text-white/45">
-              AI Creative Studio
-            </p>
-            <h1
-              className="font-heading font-black leading-[0.88] text-white"
-              style={{ fontSize: "clamp(2.4rem, 6vw, 6rem)", letterSpacing: "-0.04em" }}
-            >
-              Premium content.<br />
-              <span style={{ WebkitTextStroke: "1.8px rgba(255,255,255,0.35)", WebkitTextFillColor: "transparent" }}>
-                Brand consistent.
-              </span>
-            </h1>
-          </div>
-        </div>
-
-      </section>
+      {/* ── HERO — blue AI banner + film cover flow ─────────────────────── */}
+      <div className="bg-[#0a0a0c]">
+        <HomeHeroBanner />
+        <HeroFilmCoverFlow />
+      </div>
 
       {/* ── AI MODELS ─────────────────────────────────────────────────── */}
       <section className="overflow-hidden border-t border-slate-100 bg-slate-50 py-6">

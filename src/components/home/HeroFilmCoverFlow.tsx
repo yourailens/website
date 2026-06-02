@@ -1,15 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 
 type FilmItem = {
   id: string;
   src: string;
-  posterUrl: string | null;
+  posterUrl: string;
   title: string;
-  href: string;
 };
+
+/** Four homepage hero clips (compressed in public/videos). */
+const HERO_FILMS: FilmItem[] = [
+  { id: "hero2", src: "/videos/hero2.mp4", posterUrl: "/videos/hero2-poster.jpg", title: "Campaign film" },
+  { id: "hero", src: "/videos/hero.mp4", posterUrl: "/videos/hero-poster.jpg", title: "Brand film" },
+  { id: "hero3", src: "/videos/hero3.mp4", posterUrl: "/videos/hero3-poster.jpg", title: "Product film" },
+  { id: "hero4", src: "/videos/hero4.mp4", posterUrl: "/videos/hero4-poster.jpg", title: "Social film" },
+];
 
 function mime(src: string) {
   return src.endsWith(".mov") ? "video/quicktime" : "video/mp4";
@@ -52,6 +58,9 @@ function cardTransform(offset: number): {
 /** Repeats for infinite horizontal scrub (only when n > 1). */
 const SCRUB_LOOP_COPIES = 3;
 
+/** Compressed hero MP4s only (public/videos/hero*.mp4). */
+const HERO_LOAD_FALLBACK_MS = 6000;
+
 function Chevron({ dir }: { dir: "left" | "right" }) {
   return (
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" className="text-white" aria-hidden>
@@ -66,68 +75,80 @@ function Chevron({ dir }: { dir: "left" | "right" }) {
   );
 }
 
-const SKELETON_OFFSETS = [-2, -1, 0, 1, 2] as const;
+function HeroVideoLoadMeter({
+  progress,
+  filmIndex,
+  total,
+}: {
+  progress: number;
+  filmIndex: number;
+  total: number;
+}) {
+  const pct = Math.min(100, Math.max(0, Math.round(progress)));
+  const filmNo = String(filmIndex + 1).padStart(2, "0");
+  const totalNo = String(total).padStart(2, "0");
 
-function HeroFilmSkeleton() {
   return (
-    <div className="pointer-events-none select-none" aria-hidden>
-      <div className="relative z-0 mx-auto flex w-full min-h-[min(58vh,620px)] max-w-none items-center justify-center lg:min-h-[min(52vh,600px)]">
-        <div className="absolute left-0 z-40 h-11 w-11 rounded-full border border-white/10 bg-white/[0.04] sm:h-12 sm:w-12 md:left-1 lg:left-2" />
-        <div className="absolute right-0 z-40 h-11 w-11 rounded-full border border-white/10 bg-white/[0.04] sm:h-12 sm:w-12 md:right-1 lg:right-2" />
-
+    <div
+      className="absolute inset-0 z-30 flex items-center justify-center rounded-[22px] bg-black/45 backdrop-blur-[3px]"
+      role="status"
+      aria-live="polite"
+      aria-label={`Loading film ${filmIndex + 1} of ${total}, ${pct} percent`}
+    >
+      <div className="flex flex-col items-center">
         <div
-          className="relative h-[min(68vh,680px)] w-full max-w-[min(100%,1580px)] sm:h-[min(66vh,640px)] lg:h-[min(52vh,580px)]"
-          style={{ perspective: "min(2000px, 165vw)" }}
+          className="relative flex h-[min(22vw,7.5rem)] w-[min(22vw,7.5rem)] items-center justify-center rounded-full p-[3px] shadow-[0_0_40px_rgba(59,130,246,0.35)]"
+          style={{
+            background: `conic-gradient(from -90deg, #3b82f6 0%, #22d3ee ${pct * 0.55}%, #a78bfa ${pct}%, rgba(255,255,255,0.07) ${pct}%, rgba(255,255,255,0.07) 100%)`,
+          }}
         >
-          <div
-            className="absolute inset-0 flex items-center justify-center"
-            style={{ transformStyle: "preserve-3d" }}
-          >
-            {SKELETON_OFFSETS.map((offset) => {
-              const t = cardTransform(offset);
-              return (
-                <div
-                  key={offset}
-                  className="hero-film-skeleton absolute overflow-hidden rounded-[22px] border border-white/10 bg-[#141418] ring-1 ring-white/5 aspect-[9/16] w-[min(72vw,300px)] lg:aspect-video lg:w-[min(900px,94vw)]"
-                  style={{
-                    transform: `translateX(-50%) translateY(-50%) translateX(${t.txPct}%) translateZ(${t.tz}px) rotateY(${t.ry}deg) scale(${t.scale})`,
-                    left: "50%",
-                    top: "50%",
-                    zIndex: t.z,
-                    opacity: Math.min(t.opacity, offset === 0 ? 1 : 0.55),
-                  }}
-                >
-                  <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent" />
-                  {offset === 0 ? (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="h-10 w-10 rounded-2xl bg-white/[0.06] ring-1 ring-white/10" />
-                    </div>
-                  ) : null}
-                </div>
-              );
-            })}
+          <div className="flex h-full w-full flex-col items-center justify-center rounded-full bg-[#0a0a10]/90 ring-1 ring-white/15">
+            <span
+              className="font-heading font-black tabular-nums leading-none text-white"
+              style={{ fontSize: "clamp(2rem, 6vw, 3.25rem)" }}
+            >
+              {pct}
+            </span>
+            <span className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.28em] text-white/45">
+              percent
+            </span>
           </div>
         </div>
-      </div>
 
-      <div className="mt-6 flex w-full gap-3 overflow-hidden px-1 sm:mt-8 sm:gap-4 sm:px-2">
-        {Array.from({ length: 6 }).map((_, i) => (
+        <p className="mt-4 font-heading text-[11px] font-bold uppercase tracking-[0.34em] text-white/75">
+          Film {filmNo}
+          <span className="text-white/35"> / </span>
+          {totalNo}
+        </p>
+
+        <div className="mt-3 h-[3px] w-[min(240px,72vw)] overflow-hidden rounded-full bg-white/10">
           <div
-            key={i}
-            className={`hero-film-skeleton shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#141418] aspect-video w-[min(188px,32vw)] sm:w-[min(204px,28vw)] ${
-              i === 2 ? "opacity-100 ring-1 ring-white/15" : "opacity-70"
-            }`}
+            className="h-full rounded-full bg-gradient-to-r from-blue-600 via-cyan-400 to-violet-400 transition-[width] duration-200 ease-out"
+            style={{ width: `${pct}%` }}
           />
-        ))}
+        </div>
+
+        <p className="mt-2.5 text-[9px] font-semibold uppercase tracking-[0.26em] text-white/40">
+          Loading film
+        </p>
       </div>
     </div>
   );
 }
 
+function bufferRatio(v: HTMLVideoElement): number {
+  const d = v.duration;
+  if (!d || !Number.isFinite(d)) return 0;
+  const ranges = v.buffered;
+  if (!ranges.length) return 0;
+  return Math.min(1, ranges.end(ranges.length - 1) / d);
+}
+
 export default function HeroFilmCoverFlow() {
-  const [items, setItems] = useState<FilmItem[]>([]);
-  const [ready, setReady] = useState(false);
-  const [mediaReady, setMediaReady] = useState(false);
+  const items = HERO_FILMS;
+  const [loadPct, setLoadPct] = useState(0);
+  const [centerPlaying, setCenterPlaying] = useState(false);
+  const [hasPlayedOnce, setHasPlayedOnce] = useState(false);
   const [active, setActive] = useState(0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -139,28 +160,27 @@ export default function HeroFilmCoverFlow() {
   const scrubScrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeFromScrubRef = useRef(false);
   const [highlightSlot, setHighlightSlot] = useState(0);
-  const bootstrappedRef = useRef(false);
+  const playAttemptRef = useRef(false);
 
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const res = await fetch("/api/gallery/films", { method: "GET" });
-        const j = (await res.json().catch(() => ({}))) as { films?: FilmItem[] };
-        if (!alive) return;
-        setItems(Array.isArray(j.films) ? j.films.slice(0, 6) : []);
-      } catch {
-        if (!alive) return;
-        setItems([]);
-      } finally {
-        if (!alive) return;
-        setReady(true);
-      }
-    })();
-    return () => {
-      alive = false;
-    };
+  const bumpLoadPct = useCallback((next: number) => {
+    setLoadPct((prev) => Math.min(100, Math.max(prev, Math.round(next))));
   }, []);
+
+  const tryPlayCenter = useCallback(() => {
+    const v = videoRef.current;
+    if (!v || playAttemptRef.current) return;
+    if (v.readyState < HTMLMediaElement.HAVE_FUTURE_DATA) return;
+    playAttemptRef.current = true;
+    void v.play()
+      .catch(() => {
+        playAttemptRef.current = false;
+      })
+      .finally(() => {
+        playAttemptRef.current = false;
+      });
+  }, []);
+
+  const showLoadMeter = !centerPlaying && !hasPlayedOnce;
 
   const n = items.length;
   const offsets = useMemo(() => visibleOffsets(n), [n]);
@@ -213,35 +233,74 @@ export default function HeroFilmCoverFlow() {
   }, [n, go]);
 
   useEffect(() => {
+    setCenterPlaying(false);
+    setLoadPct(0);
+    playAttemptRef.current = false;
+  }, [active]);
+
+  useEffect(() => {
     const v = videoRef.current;
     if (!v || n === 0) return;
     v.muted = true;
     v.loop = false;
-    if (v.readyState >= 2) {
-      bootstrappedRef.current = true;
-      setMediaReady(true);
-    }
-    void v.play().catch(() => {});
-  }, [active, n, items]);
+    tryPlayCenter();
+  }, [active, n, tryPlayCenter]);
 
-  /** Gate skeleton only on first load; slide changes keep carousel visible. */
+  /** Hint the browser to fetch the first compressed clip early (single request, no 4× fight). */
   useEffect(() => {
-    if (!ready || n === 0) {
-      setMediaReady(false);
-      return;
-    }
-    setMediaReady(false);
-    const fallback = window.setTimeout(() => {
-      bootstrappedRef.current = true;
-      setMediaReady(true);
-    }, 8000);
-    return () => window.clearTimeout(fallback);
-  }, [ready, n, items]);
+    const href = items[0]?.src;
+    if (!href) return;
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "video";
+    link.href = href;
+    document.head.appendChild(link);
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, [items]);
 
-  const onCenterVideoReady = useCallback(() => {
-    bootstrappedRef.current = true;
-    setMediaReady(true);
-  }, []);
+  /** After first play, quietly prefetch the next compressed clip for snappy slides. */
+  useEffect(() => {
+    if (!hasPlayedOnce) return;
+    const next = items[(active + 1) % n];
+    if (!next) return;
+    const link = document.createElement("link");
+    link.rel = "prefetch";
+    link.href = next.src;
+    document.head.appendChild(link);
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, [hasPlayedOnce, active, items, n]);
+
+  useEffect(() => {
+    const fallback = window.setTimeout(() => {
+      const v = videoRef.current;
+      if (!v) return;
+      bumpLoadPct(100);
+      setCenterPlaying(true);
+      setHasPlayedOnce(true);
+      void v.play().catch(() => {});
+    }, HERO_LOAD_FALLBACK_MS);
+    return () => window.clearTimeout(fallback);
+  }, [bumpLoadPct]);
+
+  const onCenterVideoProgress = useCallback(() => {
+    const v = videoRef.current;
+    if (!v || centerPlaying) return;
+    bumpLoadPct(Math.max(8, bufferRatio(v) * 100));
+  }, [bumpLoadPct, centerPlaying]);
+
+  const onCenterCanPlay = useCallback(() => {
+    tryPlayCenter();
+  }, [tryPlayCenter]);
+
+  const onCenterPlaying = useCallback(() => {
+    bumpLoadPct(100);
+    setCenterPlaying(true);
+    setHasPlayedOnce(true);
+  }, [bumpLoadPct]);
 
   /** Horizontal wheel / Shift+vertical wheel only — avoids hijacking normal page scroll. */
   useEffect(() => {
@@ -319,7 +378,7 @@ export default function HeroFilmCoverFlow() {
 
   /** First paint after load: land on middle loop (instant). */
   useLayoutEffect(() => {
-    if (!ready || n <= 1) return;
+    if (n <= 1) return;
     const root = scrubRef.current;
     if (!root) return;
     const midSlot = n + active;
@@ -329,7 +388,7 @@ export default function HeroFilmCoverFlow() {
     root.style.scrollBehavior = "auto";
     root.scrollLeft = thumb.offsetLeft - root.clientWidth / 2 + thumb.offsetWidth / 2;
     root.style.removeProperty("scroll-behavior");
-  }, [ready, n, items]);
+  }, [n, active]);
 
   useEffect(() => {
     return () => {
@@ -337,12 +396,8 @@ export default function HeroFilmCoverFlow() {
     };
   }, []);
 
-  if (ready && n === 0) return null;
-
-  const showSkeleton = !ready || (n > 0 && !mediaReady && !bootstrappedRef.current);
-
   return (
-    <section className="relative z-0 isolate overflow-hidden bg-[#0a0a0c] pb-10 pt-6 sm:pb-14 sm:pt-8">
+    <section className="relative z-0 isolate overflow-hidden bg-[#0a0a0c] pb-10 pt-2 sm:pb-14 sm:pt-3">
       {/* Soft top glow */}
       <div
         className="pointer-events-none absolute left-1/2 top-0 h-[300px] w-[min(98vw,1200px)] -translate-x-1/2 rounded-full bg-violet-500/15 blur-[110px]"
@@ -354,29 +409,10 @@ export default function HeroFilmCoverFlow() {
           Featured films
         </p>
 
-        <div className="relative">
-          {/* Skeleton — visible until API + center video are ready */}
-          <div
-            className={`transition-opacity duration-500 ease-out ${
-              showSkeleton
-                ? "relative opacity-100"
-                : "pointer-events-none absolute inset-x-0 top-0 opacity-0"
-            }`}
-            aria-busy={showSkeleton}
-            aria-hidden={!showSkeleton}
-          >
-            <HeroFilmSkeleton />
-          </div>
-
-          {/* Real carousel — preloads behind skeleton, fades in when ready */}
-          {ready && n > 0 ? (
-            <div
-              className={`transition-opacity duration-500 ease-out ${
-                mediaReady
-                  ? "relative opacity-100"
-                  : "pointer-events-none absolute inset-x-0 top-0 opacity-0"
-              }`}
-            >
+        <div
+          className="relative min-h-[min(72vh,720px)]"
+          aria-busy={showLoadMeter}
+        >
         <div className="relative z-0 mx-auto flex w-full min-h-[min(58vh,620px)] max-w-none items-center justify-center lg:min-h-[min(52vh,600px)]">
           {/* Prev — z within this block only; section isolate keeps nav/banner above */}
           <button
@@ -442,56 +478,57 @@ export default function HeroFilmCoverFlow() {
                       opacity: t.opacity,
                       transition:
                         "transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.45s ease, filter 0.45s ease",
-                      pointerEvents: isCenter ? "auto" : "none",
+                      pointerEvents: "none",
                     }}
                   >
-                    <Link
-                      href={item.href}
-                      className="group relative block h-full w-full overflow-hidden rounded-[22px] border border-white/12 bg-black shadow-[0_28px_80px_rgba(0,0,0,0.65)] ring-1 ring-white/10"
-                      aria-label={item.title}
+                    <div
+                      className="relative h-full w-full overflow-hidden rounded-[22px] border border-white/12 bg-black shadow-[0_28px_80px_rgba(0,0,0,0.65)] ring-1 ring-white/10"
+                      aria-hidden
                     >
+                      {/* eslint-disable-next-line @next/next/no-img-element -- local poster frames */}
+                      <img
+                        src={item.posterUrl}
+                        alt=""
+                        className="absolute inset-0 h-full w-full object-cover object-center"
+                        loading={isCenter ? "eager" : "lazy"}
+                        fetchPriority={isCenter ? "high" : "auto"}
+                        decoding="async"
+                      />
                       {isCenter ? (
-                        <video
-                          ref={videoRef}
-                          className="absolute inset-0 h-full w-full object-cover object-center"
-                          muted
-                          playsInline
-                          preload="metadata"
-                          poster={item.posterUrl || undefined}
-                          onLoadedData={onCenterVideoReady}
-                          onCanPlay={onCenterVideoReady}
-                          onEnded={onVideoEnded}
-                          {...noDownloadVideoProps}
-                        >
-                          <source src={item.src} type={mime(item.src)} />
-                        </video>
-                      ) : item.posterUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element -- remote S3 posters; sizes vary
-                        <img
-                          src={item.posterUrl}
-                          alt=""
-                          className="absolute inset-0 h-full w-full object-cover object-center"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      ) : (
-                        <video
-                          className="absolute inset-0 h-full w-full object-cover object-center opacity-95"
-                          muted
-                          playsInline
-                          preload="none"
-                          {...noDownloadVideoProps}
-                        >
-                          <source src={item.src} type={mime(item.src)} />
-                        </video>
-                      )}
+                        <>
+                          <video
+                            ref={videoRef}
+                            className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-300 ${
+                              centerPlaying ? "opacity-100" : "opacity-0"
+                            }`}
+                            muted
+                            playsInline
+                            preload="auto"
+                            poster={item.posterUrl}
+                            onProgress={onCenterVideoProgress}
+                            onCanPlay={onCenterCanPlay}
+                            onPlaying={onCenterPlaying}
+                            onEnded={onVideoEnded}
+                            {...noDownloadVideoProps}
+                          >
+                            <source src={item.src} type={mime(item.src)} />
+                          </video>
+                          {showLoadMeter ? (
+                            <HeroVideoLoadMeter
+                              progress={loadPct}
+                              filmIndex={active}
+                              total={n}
+                            />
+                          ) : null}
+                        </>
+                      ) : null}
                       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
                       <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3 pb-3.5 text-center sm:p-4 sm:pb-4">
                         <p className="font-heading text-[12px] font-black uppercase tracking-[0.12em] text-white drop-shadow-md sm:text-[14px] lg:text-[15px]">
                           {item.title}
                         </p>
                       </div>
-                    </Link>
+                    </div>
                   </div>
                 );
               })}
@@ -563,18 +600,14 @@ export default function HeroFilmCoverFlow() {
               aria-current={slot === highlightSlot ? "true" : undefined}
             >
               <div className="relative aspect-video w-full">
-                {item.posterUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- remote S3 posters
-                  <img
-                    src={item.posterUrl}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-950" />
-                )}
+                {/* eslint-disable-next-line @next/next/no-img-element -- local poster frames */}
+                <img
+                  src={item.posterUrl}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                 <p className="pointer-events-none absolute inset-x-0 bottom-0 truncate px-2 pb-1.5 pt-6 text-center font-heading text-[9px] font-bold uppercase tracking-wider text-white/95 sm:text-[10px]">
                   {item.title}
@@ -583,8 +616,6 @@ export default function HeroFilmCoverFlow() {
             </button>
           ))}
         </div>
-            </div>
-          ) : null}
         </div>
       </div>
     </section>
