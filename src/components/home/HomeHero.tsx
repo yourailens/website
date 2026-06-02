@@ -45,13 +45,15 @@ export default function HomeHero() {
             </div>
 
             <h1
-              className="mt-5 text-[clamp(2rem,5vw,3.25rem)] leading-[1.08] font-light text-slate-900"
+              className="mt-5 text-[clamp(2rem,5vw,3.25rem)] leading-[1.2] font-light text-slate-900"
               style={{ letterSpacing: "-0.02em" }}
             >
               AI creatives that feel{" "}
               <span className="font-semibold not-italic text-slate-800">handcrafted</span>
               <br />
-              <span className="bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-600 bg-clip-text font-medium italic text-transparent">
+              <span
+                className="hero-paper-strip font-body relative z-10 mt-1 inline-block rotate-[-1.2deg] bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-4 py-2 font-medium italic !text-white shadow-lg shadow-blue-600/35"
+              >
                 not machine made.
               </span>
             </h1>

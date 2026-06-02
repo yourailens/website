@@ -78,6 +78,27 @@ textarea {
   font-family: var(--font-comfortaa), system-ui, sans-serif;
 }
 
+/* One-line paper strip highlight (hero, etc.) */
+.hero-paper-strip {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgba(147, 197, 253, 0.5);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.25) inset,
+    0 10px 24px -10px rgba(29, 78, 216, 0.4);
+}
+.hero-paper-strip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  opacity: 0.14;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 .scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;
