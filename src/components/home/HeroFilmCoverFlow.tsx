@@ -11,10 +11,10 @@ type FilmItem = {
 
 /** Four homepage hero clips (compressed in public/videos). */
 const HERO_FILMS: FilmItem[] = [
-  { id: "hero2", src: "/videos/hero2.mp4", posterUrl: "/videos/hero2-poster.jpg", title: "Campaign film" },
-  { id: "hero", src: "/videos/hero.mp4", posterUrl: "/videos/hero-poster.jpg", title: "Brand film" },
-  { id: "hero3", src: "/videos/hero3.mp4", posterUrl: "/videos/hero3-poster.jpg", title: "Product film" },
-  { id: "hero4", src: "/videos/hero4.mp4", posterUrl: "/videos/hero4-poster.jpg", title: "Social film" },
+  { id: "hero2", src: "/videos/hero2.mp4", posterUrl: "/videos/hero2-poster.jpg", title: "Fine Sugar" },
+  { id: "hero", src: "/videos/hero.mp4", posterUrl: "/videos/hero-poster.jpg", title: "Done & Dusted" },
+  { id: "hero3", src: "/videos/hero3.mp4", posterUrl: "/videos/hero3-poster.jpg", title: "The Teaser" },
+  { id: "hero4", src: "/videos/hero4.mp4", posterUrl: "/videos/hero4-poster.jpg", title: "FPV Drone Shot" },
 ];
 
 function mime(src: string) {
@@ -77,10 +77,12 @@ function Chevron({ dir }: { dir: "left" | "right" }) {
 
 function HeroVideoLoadMeter({
   progress,
+  title,
   filmIndex,
   total,
 }: {
   progress: number;
+  title: string;
   filmIndex: number;
   total: number;
 }) {
@@ -115,9 +117,15 @@ function HeroVideoLoadMeter({
           </div>
         </div>
 
-        <p className="mt-4 font-heading text-[11px] font-bold uppercase tracking-[0.34em] text-white/75">
-          Film {filmNo}
-          <span className="text-white/35"> / </span>
+        <p
+          className="mt-4 max-w-[min(280px,80vw)] truncate font-heading text-[12px] font-bold uppercase tracking-[0.2em] text-white/90 sm:text-[13px]"
+          title={title}
+        >
+          {title}
+        </p>
+        <p className="mt-1 font-heading text-[10px] font-bold uppercase tracking-[0.34em] text-white/45">
+          {filmNo}
+          <span className="text-white/25"> / </span>
           {totalNo}
         </p>
 
@@ -138,10 +146,31 @@ function HeroVideoLoadMeter({
 
 function bufferRatio(v: HTMLVideoElement): number {
   const d = v.duration;
-  if (!d || !Number.isFinite(d)) return 0;
-  const ranges = v.buffered;
-  if (!ranges.length) return 0;
-  return Math.min(1, ranges.end(ranges.length - 1) / d);
+  if (d && Number.isFinite(d) && d > 0) {
+    const ranges = v.buffered;
+    if (ranges.length) {
+      return Math.min(1, ranges.end(ranges.length - 1) / d);
+    }
+  }
+  return 0;
+}
+
+/** Progress % from buffer, or readyState when duration is not available yet. */
+function loadEstimatePct(v: HTMLVideoElement): number {
+  const buf = bufferRatio(v);
+  if (buf > 0) return Math.round(buf * 100);
+  switch (v.readyState) {
+    case HTMLMediaElement.HAVE_METADATA:
+      return 22;
+    case HTMLMediaElement.HAVE_CURRENT_DATA:
+      return 48;
+    case HTMLMediaElement.HAVE_FUTURE_DATA:
+      return 74;
+    case HTMLMediaElement.HAVE_ENOUGH_DATA:
+      return 92;
+    default:
+      return 10;
+  }
 }
 
 export default function HeroFilmCoverFlow() {
@@ -180,7 +209,8 @@ export default function HeroFilmCoverFlow() {
       });
   }, []);
 
-  const showLoadMeter = !centerPlaying && !hasPlayedOnce;
+  const showLoadMeter = !centerPlaying;
+  const activeItem = items[active];
 
   const n = items.length;
   const offsets = useMemo(() => visibleOffsets(n), [n]);
@@ -284,23 +314,61 @@ export default function HeroFilmCoverFlow() {
       void v.play().catch(() => {});
     }, HERO_LOAD_FALLBACK_MS);
     return () => window.clearTimeout(fallback);
+  }, [active, bumpLoadPct]);
+
+  /** Keep the % ring moving whenever poster → video is in flight (every slide). */
+  useEffect(() => {
+    if (centerPlaying) return;
+
+    const sync = () => {
+      const v = videoRef.current;
+      if (!v) return;
+      bumpLoadPct(loadEstimatePct(v));
+    };
+
+    sync();
+    const id = window.setInterval(sync, 120);
+    return () => window.clearInterval(id);
+  }, [centerPlaying, active, bumpLoadPct]);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+
+    const onProgress = () => bumpLoadPct(loadEstimatePct(v));
+    const onMeta = () => bumpLoadPct(loadEstimatePct(v));
+
+    v.addEventListener("progress", onProgress);
+    v.addEventListener("loadedmetadata", onMeta);
+    v.addEventListener("loadeddata", onMeta);
+    return () => {
+      v.removeEventListener("progress", onProgress);
+      v.removeEventListener("loadedmetadata", onMeta);
+      v.removeEventListener("loadeddata", onMeta);
+    };
+  }, [active, bumpLoadPct]);
+
+  const syncCenterLoad = useCallback(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    bumpLoadPct(loadEstimatePct(v));
   }, [bumpLoadPct]);
 
-  const onCenterVideoProgress = useCallback(() => {
-    const v = videoRef.current;
-    if (!v || centerPlaying) return;
-    bumpLoadPct(Math.max(8, bufferRatio(v) * 100));
-  }, [bumpLoadPct, centerPlaying]);
-
   const onCenterCanPlay = useCallback(() => {
+    syncCenterLoad();
     tryPlayCenter();
-  }, [tryPlayCenter]);
+  }, [syncCenterLoad, tryPlayCenter]);
 
   const onCenterPlaying = useCallback(() => {
     bumpLoadPct(100);
     setCenterPlaying(true);
     setHasPlayedOnce(true);
   }, [bumpLoadPct]);
+
+  const onCenterWaiting = useCallback(() => {
+    setCenterPlaying(false);
+    syncCenterLoad();
+  }, [syncCenterLoad]);
 
   /** Horizontal wheel / Shift+vertical wheel only — avoids hijacking normal page scroll. */
   useEffect(() => {
@@ -505,17 +573,21 @@ export default function HeroFilmCoverFlow() {
                             playsInline
                             preload="auto"
                             poster={item.posterUrl}
-                            onProgress={onCenterVideoProgress}
+                            onLoadStart={() => bumpLoadPct(8)}
+                            onProgress={syncCenterLoad}
+                            onLoadedMetadata={syncCenterLoad}
                             onCanPlay={onCenterCanPlay}
                             onPlaying={onCenterPlaying}
+                            onWaiting={onCenterWaiting}
                             onEnded={onVideoEnded}
                             {...noDownloadVideoProps}
                           >
                             <source src={item.src} type={mime(item.src)} />
                           </video>
-                          {showLoadMeter ? (
+                          {showLoadMeter && activeItem ? (
                             <HeroVideoLoadMeter
                               progress={loadPct}
+                              title={activeItem.title}
                               filmIndex={active}
                               total={n}
                             />
