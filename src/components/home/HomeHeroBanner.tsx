@@ -118,7 +118,7 @@ export default function HomeHeroBanner() {
       </div>
 
       <div
-        className="flex items-baseline gap-2 font-heading font-black tracking-tight text-white"
+        className="flex items-baseline gap-2 font-black tracking-tight text-white"
         style={{ fontSize: "clamp(1.3rem, 3.2vw, 1.9rem)", letterSpacing: "-0.02em" }}
       >
         <span style={{ color: "rgba(255,255,255,0.55)" }}>AI</span>

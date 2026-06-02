@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Navbar from "@/components/Navbar";
 import HomeHeroBanner from "@/components/home/HomeHeroBanner";
-import HeroFilmCoverFlow from "@/components/home/HeroFilmCoverFlow";
+import HomeHeroBackground from "@/components/home/HomeHeroBackground";
 import type { Service } from "@/data/services";
 import { formatPrice, BADGE_COLORS } from "@/data/services";
 
@@ -77,7 +77,7 @@ function ServiceCard({ s, idx }: { s: Service; idx: number }) {
 
         {/* Name + tagline — clamped so all cards have identical text height */}
         <h3
-          className="line-clamp-1 font-heading text-lg font-black leading-snug text-slate-900 transition-colors group-hover:text-blue-700"
+          className="line-clamp-1 font-body text-lg font-black leading-snug text-slate-900 transition-colors group-hover:text-blue-700"
           style={{ letterSpacing: "-0.02em" }}
         >
           {s.name}
@@ -86,7 +86,7 @@ function ServiceCard({ s, idx }: { s: Service; idx: number }) {
 
         {/* Price */}
         <div className="mt-4 flex items-baseline gap-1.5 border-t border-slate-100 pt-4">
-          <span className="font-heading text-2xl font-black text-slate-900" style={{ letterSpacing: "-0.03em" }}>
+          <span className="font-body text-2xl font-black text-slate-900" style={{ letterSpacing: "-0.03em" }}>
             {formatPrice(s.price)}
           </span>
           {s.unit && <span className="text-[11px] text-slate-400">{s.unit}</span>}
@@ -171,13 +171,13 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white font-body">
       <Navbar />
 
-      {/* ── HERO — blue AI banner + film cover flow ─────────────────────── */}
+      {/* ── HERO — blue banner + Done & Dusted background video ───────── */}
       <div className="bg-[#0a0a0c]">
         <HomeHeroBanner />
-        <HeroFilmCoverFlow />
+        <HomeHeroBackground />
       </div>
 
       {/* ── AI MODELS ─────────────────────────────────────────────────── */}
@@ -223,7 +223,7 @@ export default function Home() {
             <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">What We Do</span>
           </div>
           <h2
-            className="mb-4 font-heading text-4xl font-black text-slate-900 lg:text-5xl"
+            className="mb-4 font-body text-4xl font-black text-slate-900 lg:text-5xl"
             style={{ letterSpacing: "-0.03em", lineHeight: 1.02 }}
           >
             One workflow.<br />
@@ -269,7 +269,7 @@ export default function Home() {
           <div className="mb-12 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             {/* Left: heading */}
             <h2
-              className="font-heading text-4xl font-black text-slate-900 lg:text-5xl"
+              className="font-body text-4xl font-black text-slate-900 lg:text-5xl"
               style={{ letterSpacing: "-0.03em", lineHeight: 1.02 }}
             >
               Production-grade creatives.<br className="hidden sm:block" />
@@ -321,7 +321,7 @@ export default function Home() {
               <div className="h-px w-6 bg-blue-500" />
               <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">The Case for AI</span>
             </div>
-            <h2 className="font-heading text-4xl font-black text-slate-900 lg:text-5xl" style={{ letterSpacing: "-0.03em", lineHeight: 1.02 }}>
+            <h2 className="font-body text-4xl font-black text-slate-900 lg:text-5xl" style={{ letterSpacing: "-0.03em", lineHeight: 1.02 }}>
               Same quality.<br />
               <span className="text-blue-600">85% less cost.</span>
             </h2>
@@ -407,7 +407,7 @@ export default function Home() {
               { num: "100%", label: "AI-generated, commercially licensed",     sub: "Fully ownable by your brand" },
             ].map((s) => (
               <div key={s.num} className="flex flex-col bg-white px-6 py-7 lg:px-8 lg:py-8">
-                <span className="font-heading text-5xl font-black text-slate-900 lg:text-6xl" style={{ letterSpacing: "-0.04em" }}>
+                <span className="font-body text-5xl font-black text-slate-900 lg:text-6xl" style={{ letterSpacing: "-0.04em" }}>
                   {s.num}
                 </span>
                 <p className="mt-3 text-sm font-semibold leading-snug text-slate-700">{s.label}</p>
@@ -426,7 +426,7 @@ export default function Home() {
             <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">Deep Dive</span>
           </div>
           <h2
-            className="mb-10 font-heading text-4xl font-black text-slate-900 lg:mb-12 lg:text-5xl"
+            className="mb-10 font-body text-4xl font-black text-slate-900 lg:mb-12 lg:text-5xl"
             style={{ letterSpacing: "-0.03em", lineHeight: 1.02 }}
           >
             Where AI<br />
@@ -476,10 +476,10 @@ export default function Home() {
                 <div className={`flex flex-col justify-center border-l-4 bg-white p-6 lg:p-10 ${d.border} ${i % 2 === 1 ? "lg:order-1 lg:border-l-0 lg:border-r-4" : ""}`}>
                   <span className="font-mono text-xs font-bold text-slate-300">{d.n}</span>
                   <span className="mt-2 text-[10px] font-bold uppercase tracking-[0.22em] text-blue-500">{d.cat}</span>
-                  <h3 className="mt-2 font-heading text-3xl font-black text-slate-900 lg:text-4xl" style={{ letterSpacing: "-0.03em" }}>
+                  <h3 className="mt-2 font-body text-3xl font-black text-slate-900 lg:text-4xl" style={{ letterSpacing: "-0.03em" }}>
                     {d.title}
                   </h3>
-                  <p className="mt-3 font-heading text-5xl font-black text-blue-600 lg:text-6xl" style={{ letterSpacing: "-0.04em" }}>
+                  <p className="mt-3 font-body text-5xl font-black text-blue-600 lg:text-6xl" style={{ letterSpacing: "-0.04em" }}>
                     {d.stat}
                   </p>
                   <div className="mt-5 flex flex-wrap gap-2">
@@ -504,7 +504,7 @@ export default function Home() {
             <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">Use Cases</span>
           </div>
           <h2
-            className="mb-10 font-heading text-4xl font-black text-slate-900 lg:mb-12 lg:text-5xl"
+            className="mb-10 font-body text-4xl font-black text-slate-900 lg:mb-12 lg:text-5xl"
             style={{ letterSpacing: "-0.03em", lineHeight: 1.02 }}
           >
             Every channel.<br />
@@ -529,10 +529,10 @@ export default function Home() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-blue-500">{item.cat}</p>
-                  <h3 className="font-heading text-base font-black text-slate-900 sm:text-lg">{item.title}</h3>
+                  <h3 className="font-body text-base font-black text-slate-900 sm:text-lg">{item.title}</h3>
                 </div>
                 <span
-                  className="shrink-0 font-heading text-2xl font-black text-blue-600 sm:text-3xl"
+                  className="shrink-0 font-body text-2xl font-black text-blue-600 sm:text-3xl"
                   style={{ letterSpacing: "-0.03em" }}
                 >
                   {item.stat}
@@ -553,7 +553,7 @@ export default function Home() {
               <div className="h-px w-8 bg-blue-500" />
             </div>
             <h2
-              className="mx-auto max-w-2xl font-heading text-4xl font-black text-slate-900 lg:text-5xl"
+              className="mx-auto max-w-2xl font-body text-4xl font-black text-slate-900 lg:text-5xl"
               style={{ letterSpacing: "-0.03em", lineHeight: 1.05 }}
             >
               Your brief in.<br />
