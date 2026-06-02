@@ -80,14 +80,15 @@ export default function HomeHeroBanner() {
 
   return (
     <div
-      className="relative z-10 flex items-center justify-center gap-4 overflow-hidden py-5"
+      className="relative z-10 block w-full shrink-0 overflow-hidden py-5"
       style={{
         background: "linear-gradient(90deg, #1d4ed8 0%, #2563eb 40%, #3b82f6 60%, #2563eb 80%, #1d4ed8 100%)",
         backgroundSize: "300% auto",
         animation: "bannerShimmer 6s linear infinite",
       }}
     >
-      <div className="relative flex items-center justify-center">
+      <div className="flex items-center justify-center gap-4">
+        <div className="relative flex items-center justify-center">
         <span
           className="absolute rounded-full border border-white/40"
           style={{ width: 44, height: 44, animation: "ringExpand 2s ease-out infinite" }}
@@ -115,10 +116,10 @@ export default function HomeHeroBanner() {
             />
           </svg>
         </div>
-      </div>
+        </div>
 
       <div
-        className="flex items-baseline gap-2 font-black tracking-tight text-white"
+        className="font-body flex items-baseline gap-2 font-semibold tracking-tight text-white"
         style={{ fontSize: "clamp(1.3rem, 3.2vw, 1.9rem)", letterSpacing: "-0.02em" }}
       >
         <span style={{ color: "rgba(255,255,255,0.55)" }}>AI</span>
@@ -132,6 +133,7 @@ export default function HomeHeroBanner() {
             />
           ))}
         </span>
+        </div>
       </div>
     </div>
   );

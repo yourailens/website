@@ -4,8 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Navbar from "@/components/Navbar";
-import HomeHeroBanner from "@/components/home/HomeHeroBanner";
-import HomeHeroBackground from "@/components/home/HomeHeroBackground";
+import HomeHero from "@/components/home/HomeHero";
 import type { Service } from "@/data/services";
 import { formatPrice, BADGE_COLORS } from "@/data/services";
 
@@ -29,6 +28,53 @@ const STATS = [
   { v: "70%",  l: "Cost vs traditional" },
   { v: "10×",  l: "Faster production"   },
 ];
+
+const FEATURED_FILMS = [
+  {
+    n: "01",
+    cat: "Brand film",
+    title: "Fine Sugar",
+    stat: "48 hrs",
+    blurb: "A full campaign film with cinematic pacing, VO, and grade — delivered in two days, not two weeks.",
+    video: "/videos/hero2.mp4",
+    poster: "/videos/hero2-poster.jpg",
+    border: "border-blue-500",
+    tags: ["Campaign", "4K master", "Social cuts"],
+  },
+  {
+    n: "02",
+    cat: "Commercial",
+    title: "Done & Dusted",
+    stat: "Launch",
+    blurb: "Hero launch film with product storytelling and motion-led scenes built for paid and organic channels.",
+    video: "/videos/hero.mp4",
+    poster: "/videos/hero-poster.jpg",
+    border: "border-violet-500",
+    tags: ["Hero film", "Product", "Paid social"],
+  },
+  {
+    n: "03",
+    cat: "Launch film",
+    title: "The Teaser",
+    stat: "90 sec",
+    blurb: "High-energy teaser cut for drop-day — hook-first editing built to stop the scroll and drive pre-orders.",
+    video: "/videos/hero3.mp4",
+    poster: "/videos/hero3-poster.jpg",
+    border: "border-emerald-500",
+    tags: ["Teaser", "9:16 variants", "Sound design"],
+  },
+  {
+    n: "04",
+    cat: "Aerial",
+    title: "FPV Drone Shot",
+    stat: "Cinematic",
+    blurb: "FPV-style aerial motion with product hero moments — no location crew, no drone day on set.",
+    video: "/videos/hero4.mp4",
+    poster: "/videos/hero4-poster.jpg",
+    border: "border-amber-500",
+    tags: ["FPV", "Motion", "4K export"],
+  },
+] as const;
 
 
 
@@ -125,21 +171,20 @@ function ServiceCard({ s, idx }: { s: Service; idx: number }) {
 }
 
 function DeepDiveVideo({ src, poster, title }: { src: string; poster: string; title: string }) {
-  const [ready, setReady] = useState(false);
   return (
-    <>
-      <img src={poster} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
-      <video
-        autoPlay muted loop playsInline preload="metadata"
-        poster={poster}
-        aria-label={title}
-        onCanPlay={() => setReady(true)}
-        className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
-        style={{ opacity: ready ? 1 : 0 }}
-      >
-        <source src={src} type="video/mp4" />
-      </video>
-    </>
+    <video
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      poster={poster}
+      aria-label={title}
+      className="absolute inset-0 h-full w-full object-cover"
+      onContextMenu={(e) => e.preventDefault()}
+    >
+      <source src={src} type="video/mp4" />
+    </video>
   );
 }
 
@@ -174,11 +219,8 @@ export default function Home() {
     <div className="min-h-screen bg-white font-body">
       <Navbar />
 
-      {/* ── HERO — blue banner + Done & Dusted background video ───────── */}
-      <div className="bg-[#0a0a0c]">
-        <HomeHeroBanner />
-        <HomeHeroBackground />
-      </div>
+      {/* ── HERO — blue banner, then video (separate blocks) ──────────── */}
+      <HomeHero />
 
       {/* ── AI MODELS ─────────────────────────────────────────────────── */}
       <section className="overflow-hidden border-t border-slate-100 bg-slate-50 py-6">
@@ -194,6 +236,69 @@ export default function Home() {
               <span className="text-[12px] font-bold text-slate-700">{m.name}</span>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ── FEATURED FILMS ────────────────────────────────────────────── */}
+      <section className="bg-white pt-12 pb-16 lg:pt-16 lg:pb-24">
+        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+          <div className="mb-2 flex items-center gap-2">
+            <div className="h-px w-6 bg-blue-500" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">Featured work</span>
+          </div>
+          <h2
+            className="mb-10 font-body text-4xl font-black text-slate-900 lg:mb-12 lg:text-5xl"
+            style={{ letterSpacing: "-0.03em", lineHeight: 1.02 }}
+          >
+            Four films.<br />
+            <span className="text-blue-600">One AI pipeline.</span>
+          </h2>
+
+          <div className="space-y-4">
+            {FEATURED_FILMS.map((film, i) => (
+              <div
+                key={film.n}
+                className={`grid overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 lg:min-h-[300px] ${
+                  i % 2 === 1 ? "lg:grid-cols-[1.1fr_1fr]" : "lg:grid-cols-[1fr_1.1fr]"
+                }`}
+              >
+                <div
+                  className={`relative min-h-[220px] overflow-hidden bg-slate-900 lg:min-h-[300px] ${
+                    i % 2 === 1 ? "lg:order-2" : ""
+                  }`}
+                >
+                  <DeepDiveVideo src={film.video} poster={film.poster} title={film.title} />
+                </div>
+                <div
+                  className={`flex flex-col justify-center border-l-4 bg-white p-6 lg:p-10 ${film.border} ${
+                    i % 2 === 1 ? "lg:order-1 lg:border-l-0 lg:border-r-4" : ""
+                  }`}
+                >
+                  <span className="font-mono text-xs font-bold text-slate-300">{film.n}</span>
+                  <span className="mt-2 text-[10px] font-bold uppercase tracking-[0.22em] text-blue-500">
+                    {film.cat}
+                  </span>
+                  <h3
+                    className="mt-2 font-body text-3xl font-black text-slate-900 lg:text-4xl"
+                    style={{ letterSpacing: "-0.03em" }}
+                  >
+                    {film.title}
+                  </h3>
+                  <p className="mt-3 font-body text-5xl font-black text-blue-600 lg:text-6xl" style={{ letterSpacing: "-0.04em" }}>
+                    {film.stat}
+                  </p>
+                  <p className="mt-4 max-w-md text-sm font-medium leading-relaxed text-slate-600">{film.blurb}</p>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {film.tags.map((t) => (
+                      <span key={t} className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -412,84 +517,6 @@ export default function Home() {
                 </span>
                 <p className="mt-3 text-sm font-semibold leading-snug text-slate-700">{s.label}</p>
                 <p className="mt-1 text-xs text-slate-400">{s.sub}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── DEEP DIVE ───────────────────────────────────────────────────── */}
-      <section className="bg-white pt-8 pb-16 lg:pt-10 lg:pb-24">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
-          <div className="mb-2 flex items-center gap-2">
-            <div className="h-px w-6 bg-blue-500" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">Deep Dive</span>
-          </div>
-          <h2
-            className="mb-10 font-body text-4xl font-black text-slate-900 lg:mb-12 lg:text-5xl"
-            style={{ letterSpacing: "-0.03em", lineHeight: 1.02 }}
-          >
-            Where AI<br />
-            <span className="text-blue-600">wins hardest.</span>
-          </h2>
-
-          <div className="space-y-4">
-            {[
-              {
-                n: "01",
-                cat: "Storytelling",
-                title: "Brand films",
-                stat: "4 days",
-                video: "/videos/hero2.mp4",
-                poster: "/videos/hero2-poster.jpg",
-                border: "border-blue-500",
-                tags: ["Hero film", "Cut downs", "VO"],
-              },
-              {
-                n: "02",
-                cat: "Product VFX",
-                title: "Product magic",
-                stat: "No studio",
-                video: "/videos/hero3.mp4",
-                poster: "/videos/hero3-poster.jpg",
-                border: "border-violet-500",
-                tags: ["4K", "Liquid FX", "Lifestyle"],
-              },
-              {
-                n: "03",
-                cat: "Educational",
-                title: "Explainers",
-                stat: "24 hrs",
-                video: "/videos/hero4.mp4",
-                poster: "/videos/hero4-poster.jpg",
-                border: "border-emerald-500",
-                tags: ["How to", "FAQ", "Subtitles"],
-              },
-            ].map((d, i) => (
-              <div
-                key={d.n}
-                className={`grid overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 lg:min-h-[300px] ${i % 2 === 1 ? "lg:grid-cols-[1.1fr_1fr]" : "lg:grid-cols-[1fr_1.1fr]"}`}
-              >
-                <div className={`relative min-h-[220px] overflow-hidden bg-slate-900 lg:min-h-[300px] ${i % 2 === 1 ? "lg:order-2" : ""}`}>
-                  <DeepDiveVideo src={d.video} poster={d.poster} title={d.title} />
-                </div>
-                <div className={`flex flex-col justify-center border-l-4 bg-white p-6 lg:p-10 ${d.border} ${i % 2 === 1 ? "lg:order-1 lg:border-l-0 lg:border-r-4" : ""}`}>
-                  <span className="font-mono text-xs font-bold text-slate-300">{d.n}</span>
-                  <span className="mt-2 text-[10px] font-bold uppercase tracking-[0.22em] text-blue-500">{d.cat}</span>
-                  <h3 className="mt-2 font-body text-3xl font-black text-slate-900 lg:text-4xl" style={{ letterSpacing: "-0.03em" }}>
-                    {d.title}
-                  </h3>
-                  <p className="mt-3 font-body text-5xl font-black text-blue-600 lg:text-6xl" style={{ letterSpacing: "-0.04em" }}>
-                    {d.stat}
-                  </p>
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    {d.tags.map((t) => (
-                      <span key={t} className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
               </div>
             ))}
           </div>
