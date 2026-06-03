@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import HomeHero from "@/components/home/HomeHero";
 import HomeBlueTint from "@/components/home/HomeBlueTint";
+import HomeIndiaOlympicsStory from "@/components/home/HomeIndiaOlympicsStory";
 import type { Service } from "@/data/services";
 import { formatPrice } from "@/data/services";
 
@@ -403,6 +404,11 @@ export default function Home() {
         </div>
       </HomeBlueTint>
 
+      {/* ── INDIA IN OLYMPICS — special storytelling film ───────────────── */}
+      <HomeBlueTint tone="indigo" className="py-14 lg:py-20">
+        <HomeIndiaOlympicsStory />
+      </HomeBlueTint>
+
       {/* ── THE CASE FOR AI ───────────────────────────────────────────── */}
       <HomeBlueTint className="border-t border-blue-100/60 pt-16 pb-8 lg:pt-24 lg:pb-10">
         <div className={PAGE}>
@@ -502,53 +508,6 @@ export default function Home() {
                 </span>
                 <p className="mt-3 text-sm font-semibold leading-snug text-slate-700">{s.label}</p>
                 <p className="mt-1 text-xs text-slate-400">{s.sub}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </HomeBlueTint>
-
-      {/* ── USE CASES ─────────────────────────────────────────────────── */}
-      <HomeBlueTint className="border-t border-blue-100/60 py-16 lg:py-24">
-        <div className={PAGE}>
-          <div className="mb-2 flex items-center gap-2">
-            <div className="h-px w-6 bg-blue-500" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">Use Cases</span>
-          </div>
-          <h2
-            className="mb-10 font-body text-4xl font-black text-slate-900 lg:mb-12 lg:text-5xl"
-            style={{ letterSpacing: "-0.03em", lineHeight: 1.02 }}
-          >
-            Every channel.<br />
-            <span className="text-blue-600">One pipeline.</span>
-          </h2>
-
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            {[
-              { img: "/images/img3.jpeg",       cat: "Storytelling", title: "Brand films",   stat: "48 hrs" },
-              { img: "/images/img5.jpeg",       cat: "Performance",  title: "Paid ads",      stat: "10×" },
-              { img: "/images/cologne.png",     cat: "Product VFX",  title: "Hero shots",    stat: "4K" },
-              { img: "/images/img4.jpeg",       cat: "Educational",  title: "Explainers",    stat: "3 min" },
-              { img: "/images/ai_avatar1.jpeg", cat: "Social",       title: "Reels",         stat: "9:16" },
-              { img: "/images/ws3.png",         cat: "Launches",     title: "Launch films",  stat: "Same week" },
-            ].map((item, i) => (
-              <div
-                key={item.title}
-                className={`flex items-center gap-4 px-4 py-4 sm:gap-5 sm:px-6 sm:py-5 ${i < 5 ? "border-b border-slate-100" : ""}`}
-              >
-                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:h-16 sm:w-16">
-                  <Image src={item.img} alt={item.title} fill className="object-cover" sizes="64px" loading="lazy" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-blue-500">{item.cat}</p>
-                  <h3 className="font-body text-base font-black text-slate-900 sm:text-lg">{item.title}</h3>
-                </div>
-                <span
-                  className="shrink-0 font-body text-2xl font-black text-blue-600 sm:text-3xl"
-                  style={{ letterSpacing: "-0.03em" }}
-                >
-                  {item.stat}
-                </span>
               </div>
             ))}
           </div>
