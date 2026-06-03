@@ -405,7 +405,7 @@ export default function Home() {
       </HomeBlueTint>
 
       {/* ── INDIA IN OLYMPICS — special storytelling film ───────────────── */}
-      <HomeBlueTint tone="indigo" className="py-14 lg:py-20">
+      <HomeBlueTint className="border-t border-blue-100/60 py-14 lg:py-20">
         <HomeIndiaOlympicsStory />
       </HomeBlueTint>
 
