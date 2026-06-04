@@ -40,6 +40,29 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns,
   },
+  async redirects() {
+    return [
+      { source: "/resources", destination: "/modules", permanent: true },
+      { source: "/prompts", destination: "/modules", permanent: true },
+      { source: "/prompts/:path*", destination: "/modules", permanent: true },
+      { source: "/outfits", destination: "/modules", permanent: true },
+      { source: "/outfits/:path*", destination: "/modules", permanent: true },
+      { source: "/character-sheets", destination: "/modules", permanent: true },
+      { source: "/character-sheets/:path*", destination: "/modules", permanent: true },
+      { source: "/scenarios", destination: "/modules", permanent: true },
+      { source: "/scenarios/:path*", destination: "/modules", permanent: true },
+      { source: "/locations", destination: "/modules", permanent: true },
+      { source: "/locations/:path*", destination: "/modules", permanent: true },
+      { source: "/props", destination: "/modules", permanent: true },
+      { source: "/props/:path*", destination: "/modules", permanent: true },
+      { source: "/lighting-presets", destination: "/modules", permanent: true },
+      { source: "/lighting-presets/:path*", destination: "/modules", permanent: true },
+      { source: "/color-grades", destination: "/modules", permanent: true },
+      { source: "/color-grades/:path*", destination: "/modules", permanent: true },
+      { source: "/mood-boards", destination: "/modules", permanent: true },
+      { source: "/mood-boards/:path*", destination: "/modules", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

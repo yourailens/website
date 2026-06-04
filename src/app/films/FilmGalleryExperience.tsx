@@ -1,36 +1,23 @@
 "use client";
 
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import type { RefObject } from "react";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Navbar from "@/components/Navbar";
-import { categoryLabel, GALLERY_CATEGORY_TABS, type FilmCategory, type GalleryFilm } from "@/data/gallery";
+import FilterChip from "@/components/gallery/FilterChip";
+import {
+  categoryLabel,
+  GALLERY_CATEGORY_TABS,
+  type FilmCategory,
+  type GalleryFilm,
+} from "@/data/gallery";
+import { GALLERY_CATEGORY_ACCENTS } from "@/lib/gallery/category-accents";
 import { galleryRouteId } from "@/lib/gallery/route-id";
-
-function isPortraitFilm(film: GalleryFilm) {
-  return film.orientation === "portrait";
-}
 
 function videoType(src: string) {
   return src.endsWith(".mov") ? "video/quicktime" : "video/mp4";
 }
 
-const noDownloadVideoProps = {
-  controlsList: "nodownload noplaybackrate" as const,
-  disablePictureInPicture: true,
-  onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
-};
-
-/** Muted inline preview: iOS often shows a black frame until play(); IO avoids decoding every card at once. */
-function FilmCardPreviewVideo({
-  src,
-  type,
-  posterUrl,
-}: {
-  src: string;
-  type: string;
-  posterUrl?: string;
-}) {
+function FilmCardPreview({ src, posterUrl }: { src: string; posterUrl?: string }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -42,427 +29,223 @@ function FilmCardPreviewVideo({
     const io = new IntersectionObserver(
       (entries) => {
         for (const ent of entries) {
-          if (ent.isIntersecting) {
-            void v.play().catch(() => {});
-          } else {
-            v.pause();
-          }
+          if (ent.isIntersecting) void v.play().catch(() => {});
+          else v.pause();
         }
       },
-      { threshold: 0.12, rootMargin: "80px 0px" }
+      { threshold: 0.15, rootMargin: "60px 0px" }
     );
     io.observe(root);
     return () => io.disconnect();
-  }, []);
+  }, [src]);
 
   return (
     <div ref={wrapRef} className="absolute inset-0">
       <video
         ref={videoRef}
-        className="absolute inset-0 h-full w-full object-cover object-center transition duration-500 ease-out will-change-transform group-hover:scale-[1.03]"
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         muted
         loop
         playsInline
-        preload="auto"
-        poster={posterUrl || undefined}
-        {...noDownloadVideoProps}
+        preload="metadata"
+        poster={posterUrl}
+        onContextMenu={(e) => e.preventDefault()}
       >
-        <source src={src} type={type} />
+        <source src={src} type={videoType(src)} />
       </video>
     </div>
   );
 }
 
-function useTheaterAmbientMirror(
-  open: number | null,
-  theaterRef: RefObject<HTMLVideoElement | null>,
-  canvasRef: RefObject<HTMLCanvasElement | null>
-) {
-  useEffect(() => {
-    if (open === null) return;
-    const video = theaterRef.current;
-    const canvas = canvasRef.current;
-    if (!video || !canvas) return;
-    const ctx = canvas.getContext("2d", { alpha: false });
-    if (!ctx) return;
+function FilmCard({ film, index }: { film: GalleryFilm; index: number }) {
+  const accent = GALLERY_CATEGORY_ACCENTS[film.category];
+  const portrait = film.orientation === "portrait";
+  const href = `/films/${encodeURIComponent(galleryRouteId(film, index))}`;
 
-    const DPR = Math.min(typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1, 2);
+  return (
+    <Link
+      href={href}
+      className="group mb-5 block break-inside-avoid overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/80 sm:mb-6"
+    >
+      <div
+        className={`relative w-full overflow-hidden bg-slate-900 ${
+          portrait ? "aspect-[9/16]" : "aspect-video"
+        }`}
+      >
+        <FilmCardPreview src={film.src} posterUrl={film.posterUrl} />
+        <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/70 via-black/25 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <div className="w-full p-3">
+            <span className="rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+              Watch
+            </span>
+          </div>
+        </div>
+        {portrait ? (
+          <span className="absolute left-2 top-2 rounded-full bg-black/40 px-2 py-0.5 text-[9px] font-semibold text-white backdrop-blur-sm">
+            Vertical
+          </span>
+        ) : null}
+        <div className="pointer-events-none absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-blue-600 shadow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </div>
+      </div>
+      <div className="p-4">
+        <p className="truncate text-sm font-bold text-slate-900">{film.title}</p>
+        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${accent}`}>
+            {categoryLabel(film.category)}
+          </span>
+        </div>
+        {film.peopleTags?.length ? (
+          <p className="mt-1 truncate text-[10px] text-slate-400">{film.peopleTags.join(" · ")}</p>
+        ) : null}
+      </div>
+    </Link>
+  );
+}
 
-    const resize = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      const bw = Math.max(320, Math.floor(w * 0.42 * DPR));
-      const bh = Math.max(180, Math.floor(h * 0.42 * DPR));
-      canvas.width = bw;
-      canvas.height = bh;
-    };
+function FilmMasonry({ items }: { items: { film: GalleryFilm; index: number }[] }) {
+  if (items.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 text-center">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-slate-400">
+            <path d="M4 8l8-5 8 5v12H4V8z" />
+            <path d="M9 21V12h6v9" />
+          </svg>
+        </div>
+        <p className="font-heading text-lg font-bold text-slate-700">No films found</p>
+        <p className="mt-1 text-sm text-slate-400">Try adjusting your search or filters</p>
+      </div>
+    );
+  }
 
-    resize();
-    window.addEventListener("resize", resize);
-
-    let raf = 0;
-    let alive = true;
-    const tick = () => {
-      if (!alive) return;
-      const vw = video.videoWidth;
-      const vh = video.videoHeight;
-      if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && vw > 0 && vh > 0 && canvas.width > 0) {
-        try {
-          ctx.drawImage(video, 0, 0, vw, vh, 0, 0, canvas.width, canvas.height);
-        } catch {
-          /* ignore */
-        }
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-
-    return () => {
-      alive = false;
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", resize);
-    };
-  }, [open, theaterRef, canvasRef]);
+  return (
+    <div className="columns-1 gap-5 sm:columns-2 sm:gap-6 lg:columns-3 lg:gap-6">
+      {items.map(({ film, index }) => (
+        <FilmCard key={film.id ?? `${film.src}-${index}`} film={film} index={index} />
+      ))}
+    </div>
+  );
 }
 
 export default function FilmGalleryExperience({ films }: { films: GalleryFilm[] }) {
-  const [open, setOpen] = useState<number | null>(null);
-  const [categoryFilter, setCategoryFilter] = useState<FilmCategory | null>(null);
-  const theaterRef = useRef<HTMLVideoElement>(null);
-  const ambientCanvasRef = useRef<HTMLCanvasElement>(null);
-  const heroVideoRef = useRef<HTMLVideoElement>(null);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState<FilmCategory | "">("");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useTheaterAmbientMirror(open, theaterRef, ambientCanvasRef);
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setDebouncedSearch(search), 350);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [search]);
 
-  const heroLoopSrc = useMemo(() => {
-    const mp4 = films.find((f) => /\.mp4$/i.test(f.src));
-    return mp4?.src ?? null;
-  }, [films]);
+  const indexed = useMemo(() => films.map((film, index) => ({ film, index })), [films]);
 
-  const visibleFilms = useMemo(() => {
-    return films.map((f, i) => ({ f, i })).filter(
-      ({ f }) => categoryFilter === null || f.category === categoryFilter
-    );
-  }, [films, categoryFilter]);
-
-  const close = useCallback(() => {
-    const v = theaterRef.current;
-    if (v) {
-      v.pause();
-      v.currentTime = 0;
-    }
-    setOpen(null);
-  }, []);
-
-  const go = useCallback((dir: -1 | 1) => {
-    setOpen((i) => {
-      if (i === null) return null;
-      const n = films.length;
-      return (i + dir + n) % n;
+  const visible = useMemo(() => {
+    const q = debouncedSearch.trim().toLowerCase();
+    return indexed.filter(({ film }) => {
+      if (activeCategory && film.category !== activeCategory) return false;
+      if (!q) return true;
+      const hay = [
+        film.title,
+        categoryLabel(film.category),
+        film.orientation ?? "",
+        ...(film.peopleTags ?? []),
+        film.prompt ?? "",
+      ]
+        .join(" ")
+        .toLowerCase();
+      return hay.includes(q);
     });
-  }, [films.length]);
+  }, [indexed, activeCategory, debouncedSearch]);
 
-  useEffect(() => {
-    if (open === null) {
-      document.body.style.overflow = "";
-      return;
-    }
-    document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-      if (e.key === "ArrowRight") go(1);
-      if (e.key === "ArrowLeft") go(-1);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [open, close, go]);
+  const hasFilter = !!(activeCategory || debouncedSearch);
 
-  useLayoutEffect(() => {
-    if (open === null) return;
-    const main = theaterRef.current;
-    if (!main) return;
-    main.load();
-    const p = main.play();
-    void p?.catch(() => {});
-  }, [open]);
+  function clearAll() {
+    setSearch("");
+    setActiveCategory("");
+  }
 
-  const requestFullscreen = () => {
-    const v = theaterRef.current;
-    if (!v) return;
-    if (v.requestFullscreen) void v.requestFullscreen();
-    else if ((v as unknown as { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen) {
-      (v as unknown as { webkitRequestFullscreen: () => void }).webkitRequestFullscreen();
-    }
-  };
-
-  const total = films.length;
-
-  useEffect(() => {
-    const v = heroVideoRef.current;
-    if (!v) return;
-    v.load();
-    const kick = () => void v.play().catch(() => {});
-    kick();
-    v.addEventListener("loadeddata", kick);
-    v.addEventListener("canplay", kick);
-    const onVis = () => {
-      if (document.visibilityState === "visible") kick();
-    };
-    document.addEventListener("visibilitychange", onVis);
-    window.addEventListener("focus", kick);
-    return () => {
-      v.removeEventListener("loadeddata", kick);
-      v.removeEventListener("canplay", kick);
-      document.removeEventListener("visibilitychange", onVis);
-      window.removeEventListener("focus", kick);
-    };
-  }, [heroLoopSrc]);
+  const categories = GALLERY_CATEGORY_TABS.filter((t): t is { id: FilmCategory; label: string } => t.id !== null);
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-blue-50/90 via-white to-sky-50/40 text-slate-900 antialiased">
-      {/* Blue-forward atmosphere */}
-      <div
-        className="pointer-events-none fixed inset-0 bg-[radial-gradient(1400px_720px_at_100%_0%,rgb(59_130_246/0.18),transparent_55%),radial-gradient(1000px_560px_at_0%_30%,rgb(37_99_235/0.12),transparent_50%),radial-gradient(800px_480px_at_80%_100%,rgb(14_165_233/0.14),transparent_45%)]"
-        aria-hidden
-      />
-
-      <div className="relative">
-        <Navbar />
-
-        <main className="w-full pb-24 pt-6 sm:pt-8 lg:pt-10">
-          {/* Hero — visible MP4 background; light scrim so video reads; minimal copy */}
-          <section
-            className="relative mx-4 mb-12 min-h-[min(58vh,640px)] overflow-hidden rounded-3xl bg-slate-900 shadow-2xl shadow-blue-900/25 ring-1 ring-blue-300/40 sm:mx-6 lg:mx-10 lg:mb-16 lg:min-h-[min(62vh,720px)] xl:mx-14 2xl:mx-20"
-            aria-labelledby="films-hero-heading"
-          >
-            {heroLoopSrc ? (
-              <video
-                ref={heroVideoRef}
-                src={heroLoopSrc}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
-                className="absolute inset-0 z-0 h-full min-h-full w-full object-cover"
-                aria-hidden
-                {...noDownloadVideoProps}
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-slate-50">
+        <div className="border-b border-slate-200 bg-white">
+          <div className="w-full px-4 pt-6 pb-4 sm:px-6 lg:px-8">
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="M21 21l-4.35-4.35" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search films by title, category, talent…"
+                className="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pl-12 pr-12 text-sm font-medium text-slate-800 shadow-sm outline-none placeholder:text-slate-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
               />
-            ) : null}
-            {/* Keep most of the frame clear so you actually see motion */}
-            <div
-              className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-slate-950/35 via-transparent to-slate-950/75"
-              aria-hidden
-            />
-            <div
-              className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[45%] bg-gradient-to-t from-blue-950/85 via-blue-950/40 to-transparent"
-              aria-hidden
-            />
-
-            <div className="relative z-10 flex min-h-[min(58vh,640px)] flex-col justify-between gap-8 px-5 py-8 sm:px-8 sm:py-10 lg:min-h-[min(62vh,720px)] lg:px-12 lg:py-12">
-              <div className="flex items-center justify-between gap-4">
-                <Link
-                  href="/"
-                  className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/75 transition-colors hover:text-white"
+              {search ? (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="absolute inset-y-0 right-4 flex items-center text-slate-400 hover:text-slate-700"
                 >
-                  ← Home
-                </Link>
-                <span className="rounded-full bg-black/35 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/80 ring-1 ring-white/15 backdrop-blur-sm">
-                  {total} films
-                </span>
-              </div>
-
-              <div className="max-w-xl">
-                <h1
-                  id="films-hero-heading"
-                  className="font-heading text-5xl font-black leading-none tracking-tight text-white sm:text-6xl lg:text-7xl"
-                >
-                  Films
-                </h1>
-              </div>
-            </div>
-          </section>
-
-          {/* Filters + grid — max width matches homepage work sections */}
-          <div className="w-full border-t border-blue-100/80 bg-gradient-to-b from-blue-50/50 to-transparent px-4 pb-4 pt-10 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
-            <div className="mx-auto w-full max-w-[min(100%,96rem)]">
-              <div className="mb-8 lg:mb-10">
-                <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-blue-800/60">Category</p>
-                <div
-                  className="inline-flex max-w-full flex-wrap gap-1 rounded-2xl border border-blue-200/70 bg-blue-100/40 p-1.5 shadow-inner shadow-blue-200/30"
-                  role="tablist"
-                  aria-label="Filter by category"
-                >
-                  {GALLERY_CATEGORY_TABS.map((tab) => (
-                    <button
-                      key={tab.label}
-                      type="button"
-                      role="tab"
-                      aria-selected={categoryFilter === tab.id}
-                      onClick={() => setCategoryFilter(tab.id)}
-                      className={`rounded-xl px-5 py-3 text-xs font-bold uppercase tracking-wide transition ${
-                        categoryFilter === tab.id
-                          ? "bg-blue-600 text-white shadow-md shadow-blue-400/30"
-                          : "text-blue-900/70 hover:bg-white/60 hover:text-blue-900"
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              ) : (
+                <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center">
+                  <span className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] text-slate-400">
+                    ⌘K
+                  </span>
                 </div>
-              </div>
-
-              <div className="mb-6">
-                <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.2em] text-blue-500">Library</span>
-                <h2 className="font-heading text-[clamp(1.5rem,3vw,2.25rem)] font-black tracking-tight text-slate-900" style={{ letterSpacing: "-0.03em" }}>
-                  Featured cuts
-                </h2>
-              </div>
-
-            <ul className="grid list-none grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
-              {visibleFilms.map(({ f: film, i }, rowPos) => {
-                const portrait = isPortraitFilm(film);
-                return (
-                  <li key={film.id ?? `${film.src}-${i}`} className="min-h-0">
-                    <Link
-                      href={`/films/${encodeURIComponent(galleryRouteId(film, i))}`}
-                      className="gallery-card-enter group relative block w-full overflow-hidden rounded-2xl bg-white text-left shadow-lg transition-shadow duration-300 hover:shadow-xl hover:shadow-slate-300/95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
-                      style={{ animationDelay: `${Math.min(rowPos, 12) * 30}ms` }}
-                    >
-                      <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
-                        <FilmCardPreviewVideo
-                          src={film.src}
-                          type={videoType(film.src)}
-                          posterUrl={film.posterUrl}
-                        />
-                        <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
-                        {portrait ? (
-                          <span className="absolute left-3 top-3 z-[2] rounded border border-white/25 bg-black/55 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white/95 backdrop-blur-sm">
-                            Vertical
-                          </span>
-                        ) : null}
-                        <div className="absolute right-3 top-3 z-[2] flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-blue-600 shadow-md ring-1 ring-slate-200/80 transition duration-300 group-hover:scale-105 sm:h-12 sm:w-12">
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5 sm:ml-1" aria-hidden>
-                            <path d="M8 5v14l11-7z" />
-                          </svg>
-                        </div>
-                        <div className="absolute inset-x-0 bottom-0 z-[2] p-4 pt-12 sm:p-5 sm:pt-14">
-                          <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.18em] text-blue-200 sm:text-[11px]">
-                            {categoryLabel(film.category)}
-                          </span>
-                          <p className="font-heading text-xl font-bold leading-tight text-white sm:text-2xl lg:text-[1.65rem]">{film.title}</p>
-                          {film.peopleTags?.length ? (
-                            <p className="mt-1 text-[11px] text-blue-100/85">{film.peopleTags.join(" · ")}</p>
-                          ) : null}
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-
-            {visibleFilms.length === 0 && (
-              <p className="py-16 text-center text-sm text-blue-900/50">No films in this category yet.</p>
-            )}
-
+              )}
             </div>
-          </div>
-        </main>
-      </div>
 
-      {open !== null && (
-        <div
-          className="fixed inset-0 z-[200] flex flex-col bg-gradient-to-b from-blue-50/95 via-white/95 to-sky-50/90 backdrop-blur-xl"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Film viewer"
-        >
-          <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-            <canvas
-              ref={ambientCanvasRef}
-              className="h-full w-full scale-[1.12] object-cover opacity-90"
-              style={{
-                filter: "blur(44px) brightness(1.06) saturate(1.12)",
-                transformOrigin: "50% 50%",
-                WebkitBackfaceVisibility: "hidden",
-                backfaceVisibility: "hidden",
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-blue-100/50 via-white/55 to-cyan-50/45" />
-          </div>
-
-          <header className="relative z-10 flex flex-wrap items-center justify-between gap-4 border-b border-blue-200/60 bg-white/85 px-4 py-4 shadow-sm shadow-blue-100/50 sm:px-8 lg:px-12">
-            <div className="min-w-0 pl-1">
-              <p className="truncate font-heading text-lg font-bold text-blue-950 sm:text-xl">{films[open].title}</p>
-              <p className="mt-0.5 text-[11px] font-medium text-blue-700/70">
-                Clip {open + 1} of {total}
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => go(-1)}
-                className="rounded-xl border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-900 transition hover:bg-blue-50"
-                aria-label="Previous film"
-              >
-                ←
-              </button>
-              <button
-                type="button"
-                onClick={() => go(1)}
-                className="rounded-xl border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-900 transition hover:bg-blue-50"
-                aria-label="Next film"
-              >
-                →
-              </button>
-              <button
-                type="button"
-                onClick={requestFullscreen}
-                className="rounded-xl border border-blue-800 bg-blue-900 px-4 py-2 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-blue-800"
-              >
-                Full screen
-              </button>
-              <button
-                type="button"
-                onClick={close}
-                className="rounded-xl bg-blue-600 px-5 py-2 text-sm font-bold text-white shadow-lg shadow-blue-300/40 transition hover:bg-blue-700"
-              >
-                Close
-              </button>
-            </div>
-          </header>
-
-          <div
-            className="relative z-10 flex min-h-0 flex-1 flex-col px-4 pb-8 pt-6 sm:px-8 lg:px-12 xl:px-16"
-            onClick={close}
-          >
-            <div
-              className="mx-auto flex w-full max-w-[min(100%,1600px)] flex-1 flex-col"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* max-h + max-w + w-auto: element tracks clip aspect — no letterboxing inside an oversized box */}
-              <div className="flex min-h-0 flex-1 items-center justify-center">
-                <video
-                  ref={theaterRef}
-                  key={films[open].src}
-                  className="block max-h-[min(78dvh,calc(100dvh-10rem))] max-w-full w-auto rounded-2xl bg-slate-950 object-contain shadow-2xl shadow-blue-200/40 ring-2 ring-blue-200/60"
-                  controls
-                  playsInline
-                  preload="auto"
-                  {...noDownloadVideoProps}
-                >
-                    <source src={films[open].src} type={videoType(films[open].src)} />
-                </video>
-              </div>
-              <p className="mt-4 text-center text-[11px] text-blue-800/50">Click outside the player to close</p>
+            <div className="mt-3 flex flex-wrap items-center gap-1.5">
+              <span className="w-16 shrink-0 font-mono text-[9px] font-bold uppercase tracking-widest text-slate-300">
+                Lane
+              </span>
+              <FilterChip label="All" active={activeCategory === ""} onClick={() => setActiveCategory("")} />
+              {categories.map((tab) => (
+                <FilterChip
+                  key={tab.id}
+                  label={tab.label}
+                  active={activeCategory === tab.id}
+                  accent={activeCategory === tab.id ? GALLERY_CATEGORY_ACCENTS[tab.id] : undefined}
+                  onClick={() => setActiveCategory(activeCategory === tab.id ? "" : tab.id)}
+                />
+              ))}
             </div>
           </div>
         </div>
-      )}
-    </div>
+
+        <div className="w-full px-4 py-2.5 sm:px-6 lg:px-8">
+          <p className="text-xs text-slate-400">
+            {visible.length} result{visible.length !== 1 ? "s" : ""}
+            {hasFilter ? (
+              <button type="button" onClick={clearAll} className="ml-3 font-semibold text-blue-600 hover:underline">
+                Clear all
+              </button>
+            ) : null}
+          </p>
+        </div>
+
+        <div className="w-full px-2 pb-20 sm:px-4 lg:px-5">
+          <FilmMasonry items={visible} />
+        </div>
+      </div>
+    </>
   );
 }

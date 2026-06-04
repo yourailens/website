@@ -17,13 +17,15 @@ type Props = {
   title: string;
   onCancel: () => void;
   onComplete: (blob: Blob, filename: string) => void | Promise<void>;
+  /** When set, crop frame is fixed to this ratio (hides aspect picker). */
+  lockAspect?: number;
 };
 
 /** Drag to pan, scroll wheel to zoom, slider for zoom — output matches the frame (aspect you pick). */
-export default function AvatarCropModal({ imageSrc, title, onCancel, onComplete }: Props) {
+export default function AvatarCropModal({ imageSrc, title, onCancel, onComplete, lockAspect }: Props) {
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [aspect, setAspect] = useState(3 / 4);
+  const [aspect, setAspect] = useState(lockAspect ?? 3 / 4);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<PixelCrop | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -70,25 +72,27 @@ export default function AvatarCropModal({ imageSrc, title, onCancel, onComplete 
           <p className="mt-1 text-sm text-slate-600">
             Drag to move the image. Scroll or pinch on the image to zoom (or use the slider). Pick the output shape, then save.
           </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <span className="mr-1 self-center text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-              Frame
-            </span>
-            {ASPECT_PRESETS.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => setAspect(p.value)}
-                className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
-                  Math.abs(aspect - p.value) < 0.001
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                    : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-blue-200"
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
+          {lockAspect == null ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="mr-1 self-center text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                Frame
+              </span>
+              {ASPECT_PRESETS.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setAspect(p.value)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
+                    Math.abs(aspect - p.value) < 0.001
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                      : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-blue-200"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         <div className="relative h-[min(52vh,420px)] w-full bg-slate-950 sm:h-[min(56vh,480px)]">

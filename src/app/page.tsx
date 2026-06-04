@@ -363,7 +363,7 @@ export default function Home() {
 
             <div className="flex shrink-0 flex-col items-start sm:items-end">
               <p className="max-w-xs text-sm leading-relaxed text-slate-500 sm:text-right">
-                Every package includes unlimited revisions, all formats, and full rights to every asset delivered.
+                Every package includes multiple revisions, various formats, and full rights to every asset delivered.
               </p>
               <Link
                 href="/pricing"

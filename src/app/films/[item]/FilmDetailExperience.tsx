@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import CopyUrlButton from "@/components/CopyUrlButton";
+import Link from "next/link";
+import Navbar from "@/components/Navbar";
 import type { GalleryFilm } from "@/data/gallery";
+import { GALLERY_CATEGORY_ACCENTS } from "@/lib/gallery/category-accents";
 
 function videoMime(src: string) {
   return src.endsWith(".mov") ? "video/quicktime" : "video/mp4";
@@ -15,208 +16,181 @@ const noDownloadVideoProps = {
   onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
 };
 
-type Props = {
-  film: GalleryFilm;
-  index: number;
-  total: number;
-  categoryLabel: string;
-  prevHref: string;
-  nextHref: string;
-};
+function AttrPill({ label, value, accent }: { label: string; value: string; accent?: string }) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-slate-400">{label}</span>
+      <span
+        className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-bold ${
+          accent ?? "border border-slate-200 bg-white text-slate-700"
+        }`}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
 
 export default function FilmDetailExperience({
   film,
-  index,
-  total,
-  categoryLabel,
-  prevHref,
-  nextHref,
-}: Props) {
-  const bgRef = useRef<HTMLVideoElement>(null);
-  const mainRef = useRef<HTMLVideoElement>(null);
+  categoryLabelText,
+}: {
+  film: GalleryFilm;
+  categoryLabelText: string;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [copied, setCopied] = useState(false);
   const [promptOpen, setPromptOpen] = useState(false);
+
+  const accent = GALLERY_CATEGORY_ACCENTS[film.category];
+  const portrait = film.orientation === "portrait";
   const promptText = (film.prompt ?? "").trim();
 
   useEffect(() => {
-    const kickMain = () => {
-      const m = mainRef.current;
-      if (!m) return;
-      m.play().catch(() => {
-        m.muted = true;
-        void m.play().catch(() => {});
-      });
-    };
-    const kick = () => {
-      void bgRef.current?.play().catch(() => {});
-      kickMain();
-    };
-    kick();
-    const m = mainRef.current;
-    const onVis = () => {
-      if (document.visibilityState === "visible") kick();
-    };
-    m?.addEventListener("loadeddata", kick);
-    m?.addEventListener("canplay", kickMain);
-    document.addEventListener("visibilitychange", onVis);
-    return () => {
-      m?.removeEventListener("loadeddata", kick);
-      m?.removeEventListener("canplay", kickMain);
-      document.removeEventListener("visibilitychange", onVis);
-    };
+    const v = videoRef.current;
+    if (!v) return;
+    v.load();
+    const play = () => void v.play().catch(() => {});
+    play();
+    v.addEventListener("loadeddata", play);
+    return () => v.removeEventListener("loadeddata", play);
   }, [film.src]);
 
-  const mime = videoMime(film.src);
+  function handleShare() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
 
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col overflow-hidden bg-zinc-950 text-white">
-      {/*
-        Centered square larger than the viewport (100vmax) so object-cover never leaves side gaps.
-        The old h/w 120% + -translate exposed the page background on one edge (black strip).
-      */}
-      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
-        <video
-          ref={bgRef}
-          key={`bg-${film.src}`}
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 object-cover opacity-100"
-          style={{
-            width: "100vmax",
-            height: "100vmax",
-            filter: "blur(18px) brightness(0.88) saturate(1.15)",
-          }}
-          muted
-          autoPlay
-          loop
-          playsInline
-          preload="auto"
-          poster={film.posterUrl}
-        >
-          <source src={film.src} type={mime} />
-        </video>
-      </div>
-
-      {/* Frosted header — low-opacity tint + blur: video shows through, text stays readable */}
-      <header className="relative z-20 flex shrink-0 flex-wrap items-start justify-between gap-4 border-b border-white/10 bg-black/25 px-4 py-4 backdrop-blur-md sm:px-8 lg:px-12">
-        <Link
-          href="/films"
-          className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-black/20 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-black/35"
-        >
-          <span aria-hidden className="text-lg leading-none">
-            ←
-          </span>
-          <span>Back to films</span>
-        </Link>
-
-        <div className="min-w-0 flex-1 text-right sm:max-w-[min(100%,32rem)] sm:flex-none">
-          <h1 className="font-heading text-xl font-black leading-tight tracking-tight text-white sm:text-2xl lg:text-3xl">
-            {film.title}
-          </h1>
-          <p className="mt-1 text-[11px] font-medium text-sky-50/95 sm:text-xs">
-            {categoryLabel} · Clip {index + 1} of {total}
-          </p>
-          {film.peopleTags?.length ? (
-            <p className="mt-1.5 text-xs text-white/90">{film.peopleTags.join(" · ")}</p>
-          ) : null}
-          <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
-            <Link
-              href={prevHref}
-              className="rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-black/40"
-              aria-label="Previous film"
-            >
-              ←
-            </Link>
-            <Link
-              href={nextHref}
-              className="rounded-xl border border-white/20 bg-black/25 px-3 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-black/40"
-              aria-label="Next film"
-            >
-              →
-            </Link>
-            {promptText ? (
-              <button
-                type="button"
-                onClick={() => setPromptOpen(true)}
-                className="rounded-xl border border-white/20 bg-black/25 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-black/40"
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-slate-50">
+        <div className="border-b border-slate-200 bg-white">
+          <div className="mx-auto w-[95%] py-3">
+            <div className="flex items-center gap-4">
+              <Link
+                href="/films"
+                className="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
               >
-                Prompt
-              </button>
-            ) : null}
-            <CopyUrlButton
-              idleLabel="Copy link"
-              copiedLabel="Copied"
-              className="rounded-xl border border-white/20 bg-black/25 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-black/40"
-            />
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <path d="M19 12H5M12 5l-7 7 7 7" />
+                </svg>
+                Films
+              </Link>
+              <nav className="flex min-w-0 items-center gap-2 text-xs text-slate-400">
+                <span>/</span>
+                <span className="min-w-0 truncate font-semibold text-slate-700">{film.title}</span>
+              </nav>
+            </div>
           </div>
         </div>
-      </header>
 
-      {/* Main player */}
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center px-4 pb-8 pt-4 sm:px-8 lg:px-12">
-        <video
-          ref={mainRef}
-          key={film.src}
-          className="max-h-[min(78dvh,calc(100dvh-12rem))] w-auto max-w-full rounded-2xl bg-black object-contain shadow-2xl shadow-black/60 ring-2 ring-white/15"
-          controls
-          autoPlay
-          playsInline
-          preload="auto"
-          poster={film.posterUrl}
-          {...noDownloadVideoProps}
-        >
-          <source src={film.src} type={mime} />
-        </video>
-        <p
-          className="mt-5 max-w-md text-center text-[11px] text-white/90"
-          style={{ textShadow: "0 1px 3px rgba(0,0,0,0.65)" }}
-        >
-          Share this URL to open this film directly
-        </p>
-      </div>
+        <div className="mx-auto w-[95%] py-10">
+          <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-14">
+            <div
+              className={`w-full shrink-0 lg:sticky lg:top-28 ${
+                portrait ? "lg:max-w-sm" : "lg:max-w-2xl"
+              }`}
+            >
+              <div
+                className={`relative overflow-hidden rounded-3xl border border-slate-200 bg-slate-900 shadow-xl shadow-slate-200/80 ${
+                  portrait ? "aspect-[9/16]" : "aspect-video"
+                }`}
+              >
+                <video
+                  ref={videoRef}
+                  className="h-full w-full object-cover"
+                  controls
+                  playsInline
+                  preload="auto"
+                  poster={film.posterUrl}
+                  {...noDownloadVideoProps}
+                >
+                  <source src={film.src} type={videoMime(film.src)} />
+                </video>
+              </div>
 
-      {promptOpen ? (
-        <div
-          className="fixed inset-0 z-[260] flex items-stretch justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Prompt"
-          onClick={() => setPromptOpen(false)}
-        >
-          <div
-            className="h-[100dvh] w-full overflow-hidden border border-white/15 bg-zinc-950/90 shadow-2xl shadow-black/60 sm:h-auto sm:max-h-[min(80dvh,56rem)] sm:max-w-2xl sm:rounded-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
-              <p className="font-heading text-lg font-black text-white">Prompt</p>
-              <div className="flex items-center gap-2">
+              <div className="mt-4 flex gap-3">
+                <a
+                  href={film.src}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3.5 text-sm font-bold text-white shadow-md shadow-blue-200 transition hover:bg-blue-700 active:scale-95"
+                >
+                  Open video
+                </a>
                 <button
                   type="button"
-                  onClick={async () => {
-                    try {
-                      await navigator.clipboard.writeText(promptText);
-                    } catch {
-                      /* ignore */
-                    }
-                  }}
-                  className="rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-white/15"
+                  onClick={handleShare}
+                  className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 active:scale-95"
                 >
-                  Copy
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPromptOpen(false)}
-                  className="rounded-xl bg-white px-3 py-2 text-xs font-bold uppercase tracking-wide text-zinc-950 transition hover:bg-white/90"
-                >
-                  Close
+                  {copied ? "Copied!" : "Share"}
                 </button>
               </div>
             </div>
-            <div className="min-h-0 flex-1 px-5 py-4">
-              <pre className="h-full max-h-[calc(100dvh-5.25rem)] overflow-y-auto whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-white/90 sm:max-h-[55dvh]">
-                {promptText}
-              </pre>
+
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`rounded-full px-3 py-1 text-xs font-bold ${accent}`}>{categoryLabelText}</span>
+                {portrait ? (
+                  <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
+                    Vertical
+                  </span>
+                ) : (
+                  <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
+                    Landscape
+                  </span>
+                )}
+              </div>
+
+              <h1 className="mt-4 font-heading text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+                {film.title}
+              </h1>
+
+              <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3">
+                <AttrPill label="Category" value={categoryLabelText} accent={accent} />
+                <AttrPill label="Orientation" value={portrait ? "Portrait" : "Landscape"} />
+              </div>
+
+              {film.peopleTags?.length ? (
+                <div className="mt-8">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-slate-400">Talent</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {film.peopleTags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {promptText ? (
+                <div className="mt-8">
+                  <button
+                    type="button"
+                    onClick={() => setPromptOpen((v) => !v)}
+                    className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-bold text-slate-800 transition hover:border-blue-200 hover:bg-blue-50/50"
+                  >
+                    Generation prompt
+                    <span className="text-slate-400">{promptOpen ? "−" : "+"}</span>
+                  </button>
+                  {promptOpen ? (
+                    <pre className="mt-3 max-h-64 overflow-auto rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-relaxed whitespace-pre-wrap text-slate-600">
+                      {promptText}
+                    </pre>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
-      ) : null}
-    </div>
+      </div>
+    </>
   );
 }

@@ -67,19 +67,12 @@ export default async function ImageDetailPage(props: { params: Promise<{ item: s
   const open = findGalleryIndexByRouteId(images, decodeURIComponent(item));
   if (open < 0) notFound();
 
-  const n = images.length;
-  const prevIndex = (open - 1 + n) % n;
-  const nextIndex = (open + 1) % n;
   const current = images[open]!;
 
   return (
     <ImageDetailExperience
-      images={images}
-      openIndex={open}
-      categoryLabel={categoryLabel(current.category)}
-      prevHref={`/images/${encodeURIComponent(galleryRouteId(images[prevIndex]!, prevIndex))}`}
-      nextHref={`/images/${encodeURIComponent(galleryRouteId(images[nextIndex]!, nextIndex))}`}
-      backHref="/images"
+      image={current}
+      categoryLabelText={categoryLabel(current.category)}
     />
   );
 }

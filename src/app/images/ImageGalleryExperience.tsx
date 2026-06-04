@@ -1,183 +1,211 @@
 "use client";
 
-import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { categoryLabel, GALLERY_CATEGORY_TABS, type FilmCategory, type GalleryImage } from "@/data/gallery";
+import FilterChip from "@/components/gallery/FilterChip";
+import {
+  categoryLabel,
+  GALLERY_CATEGORY_TABS,
+  type FilmCategory,
+  type GalleryImage,
+} from "@/data/gallery";
+import { GALLERY_CATEGORY_ACCENTS } from "@/lib/gallery/category-accents";
 import { galleryRouteId } from "@/lib/gallery/route-id";
 
-function heroStripSources(images: GalleryImage[]): string[] {
-  return images.slice(0, 3).map((i) => i.src);
-}
-
-function aspectClass(aspect?: string) {
-  if (aspect === "portrait") return "aspect-[3/4]";
-  if (aspect === "landscape") return "aspect-[16/11]";
-  return "aspect-square";
-}
-
-/** Pasted http(s) URLs skip next/image optimization (unknown hosts). */
 function remoteImage(src: string) {
   return /^https?:\/\//i.test(src);
 }
 
-export default function ImageGalleryExperience({ images }: { images: GalleryImage[] }) {
-  const [categoryFilter, setCategoryFilter] = useState<FilmCategory | null>(null);
+function imageHeight(aspect?: string) {
+  if (aspect === "portrait") return 560;
+  if (aspect === "landscape") return 260;
+  return 400;
+}
 
-  const heroStrip = useMemo(() => heroStripSources(images), [images]);
-
-  const visibleImages = useMemo(() => {
-    return images.map((img, i) => ({ img, i })).filter(
-      ({ img }) => categoryFilter === null || img.category === categoryFilter
-    );
-  }, [images, categoryFilter]);
+function ImageCard({ item, index }: { item: GalleryImage; index: number }) {
+  const accent = GALLERY_CATEGORY_ACCENTS[item.category];
+  const href = `/images/${encodeURIComponent(galleryRouteId(item, index))}`;
 
   return (
-    <div className="relative min-h-screen bg-[#fafbff] text-slate-900 antialiased">
-      {/* Light atmosphere — fine grid + soft washes (white-first, not Films-style blobs) */}
-      <div
-        className="pointer-events-none fixed inset-0 bg-[radial-gradient(#cbd5e1_0.5px,transparent_0.5px)] opacity-[0.35] [background-size:20px_20px]"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none fixed inset-0 bg-[radial-gradient(900px_500px_at_90%_-10%,rgb(59_130_246/0.08),transparent_55%),radial-gradient(700px_420px_at_0%_100%,rgb(14_165_233/0.06),transparent_50%)]"
-        aria-hidden
-      />
+    <Link
+      href={href}
+      className="group mb-3 block break-inside-avoid overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/80"
+    >
+      <div className="relative w-full overflow-hidden bg-slate-100">
+        <Image
+          src={item.src}
+          alt={item.title}
+          width={400}
+          height={imageHeight(item.aspect)}
+          className="w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          loading="lazy"
+          unoptimized={remoteImage(item.src)}
+        />
+        <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <div className="w-full p-3">
+            <span className="rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+              View
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className="p-3">
+        <p className="truncate text-sm font-bold text-slate-900">{item.title}</p>
+        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${accent}`}>
+            {categoryLabel(item.category)}
+          </span>
+        </div>
+        {item.peopleTags?.length ? (
+          <p className="mt-1 truncate text-[10px] text-slate-400">{item.peopleTags.join(" · ")}</p>
+        ) : null}
+      </div>
+    </Link>
+  );
+}
 
-      <div className="relative">
-        <Navbar />
+function MasonryGrid({ items }: { items: { item: GalleryImage; index: number }[] }) {
+  if (items.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 text-center">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-slate-400">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <path d="M21 15l-5-5L5 21" />
+          </svg>
+        </div>
+        <p className="font-heading text-lg font-bold text-slate-700">No images found</p>
+        <p className="mt-1 text-sm text-slate-400">Try adjusting your search or filters</p>
+      </div>
+    );
+  }
 
-        {/* z-0 keeps hero under sticky nav (z-50) when overlap is used */}
-        <main className="relative z-0 w-full pb-28 pt-0">
-          {/* ── Hero: full-bleed blue, horizontal polaroid strip only (no visible copy) ── */}
-          <section
-            className="relative z-0 -mt-[7.5rem] w-full overflow-hidden border-b border-blue-100/70 bg-gradient-to-b from-sky-100/95 via-blue-50/98 to-sky-50/90 pt-[8.5rem] sm:pt-[9rem]"
-            aria-labelledby="images-hero-heading"
-          >
-            <div
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_100%_0%,rgb(191_219_254/0.45),transparent_55%),radial-gradient(ellipse_70%_50%_at_0%_100%,rgb(224_242_254/0.7),transparent_50%)]"
-              aria-hidden
-            />
-            <h1 id="images-hero-heading" className="sr-only">
-              Images
-            </h1>
+  return (
+    <div className="columns-2 gap-3 sm:columns-3 md:columns-4 lg:columns-5">
+      {items.map(({ item, index }) => (
+        <ImageCard key={item.id ?? `${item.src}-${index}`} item={item} index={index} />
+      ))}
+    </div>
+  );
+}
 
-            <div className="relative z-10 mx-auto flex max-w-[1200px] flex-row flex-nowrap items-end justify-center gap-3 overflow-x-auto px-4 pb-12 pt-2 [scrollbar-width:none] sm:gap-5 md:gap-8 md:px-8 md:pb-16 lg:px-12 [&::-webkit-scrollbar]:hidden">
-              {heroStrip.length > 0 ? (
-                heroStrip.map((src, i) => (
-                  <div
-                    key={`${src}-${i}`}
-                    className={`shrink-0 bg-white p-2 shadow-[0_22px_55px_-14px_rgba(30,58,138,0.22)] ring-1 ring-slate-200/90 ${
-                      i === 0 ? "-rotate-[2.5deg]" : i === 1 ? "rotate-0 translate-y-1" : "rotate-[2.5deg]"
-                    } w-[min(32vw,180px)] sm:w-[min(26vw,220px)] md:w-[min(22vw,260px)]`}
-                    style={{ borderRadius: "2px" }}
-                  >
-                    <div className="relative aspect-[3/4] w-full overflow-hidden bg-slate-100">
-                      <Image
-                        src={src}
-                        alt=""
-                        fill
-                        priority={i === 0}
-                        className="object-cover"
-                        sizes="(max-width:768px) 32vw, 260px"
-                        unoptimized={remoteImage(src)}
-                      />
-                    </div>
-                  </div>
-                ))
+export default function ImageGalleryExperience({ images }: { images: GalleryImage[] }) {
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState<FilmCategory | "">("");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setDebouncedSearch(search), 350);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [search]);
+
+  const indexed = useMemo(() => images.map((item, index) => ({ item, index })), [images]);
+
+  const visible = useMemo(() => {
+    const q = debouncedSearch.trim().toLowerCase();
+    return indexed.filter(({ item }) => {
+      if (activeCategory && item.category !== activeCategory) return false;
+      if (!q) return true;
+      const hay = [
+        item.title,
+        categoryLabel(item.category),
+        ...(item.peopleTags ?? []),
+        item.prompt ?? "",
+      ]
+        .join(" ")
+        .toLowerCase();
+      return hay.includes(q);
+    });
+  }, [indexed, activeCategory, debouncedSearch]);
+
+  const hasFilter = !!(activeCategory || debouncedSearch);
+
+  function clearAll() {
+    setSearch("");
+    setActiveCategory("");
+  }
+
+  const categories = GALLERY_CATEGORY_TABS.filter((t): t is { id: FilmCategory; label: string } => t.id !== null);
+
+  return (
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-slate-50">
+        <div className="border-b border-slate-200 bg-white">
+          <div className="mx-auto w-[95%] pt-6 pb-4">
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="M21 21l-4.35-4.35" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search images by title, category, talent, tags…"
+                className="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pl-12 pr-12 text-sm font-medium text-slate-800 shadow-sm outline-none placeholder:text-slate-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+              />
+              {search ? (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="absolute inset-y-0 right-4 flex items-center text-slate-400 hover:text-slate-700"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
               ) : (
-                <p className="py-6 text-center font-mono text-xs uppercase tracking-[0.18em] text-slate-500">
-                  No admin uploads yet
-                </p>
+                <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center">
+                  <span className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] text-slate-400">
+                    ⌘K
+                  </span>
+                </div>
               )}
             </div>
-          </section>
 
-          {/* ── Filters: underline tabs ── */}
-          <div className="border-y border-slate-200/80 bg-white/60 backdrop-blur-sm">
-            <div className="mx-auto max-w-[1400px] px-5 py-6 sm:px-8 lg:px-12">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-8">
-                <div>
-                  <p className="font-mono text-[10px] font-medium uppercase tracking-[0.3em] text-slate-400">Browse by lane</p>
-                  <p className="mt-1 text-sm text-slate-500">Tap a line to filter the wall below.</p>
-                </div>
-                <div
-                  className="flex flex-wrap gap-x-1 gap-y-2 border-b border-slate-200/90 sm:justify-end"
-                  role="tablist"
-                  aria-label="Filter images by category"
-                >
-                  {GALLERY_CATEGORY_TABS.map((tab) => {
-                    const active = categoryFilter === tab.id;
-                    return (
-                      <button
-                        key={tab.label}
-                        type="button"
-                        role="tab"
-                        aria-selected={active}
-                        onClick={() => setCategoryFilter(tab.id)}
-                        className={`-mb-px border-b-2 px-3 py-2 text-left text-[11px] font-bold uppercase tracking-[0.12em] transition sm:px-4 sm:text-xs ${
-                          active
-                            ? "border-blue-600 text-slate-900"
-                            : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-800"
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── Gallery: masonry, captions below (Swiss / print room) ── */}
-          <div className="mx-auto max-w-[1400px] px-5 py-14 sm:px-8 lg:px-12 lg:py-20">
-            <div className="mb-10 flex flex-wrap items-end justify-between gap-4 border-b border-dashed border-slate-200 pb-6">
-              <div>
-                <h2 className="font-heading text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">The wall</h2>
-                <p className="mt-1 font-mono text-xs text-slate-400">Selected frames · {visibleImages.length} visible</p>
-              </div>
-            </div>
-
-            <ul className="columns-1 gap-x-8 gap-y-10 sm:columns-2 lg:columns-3 [&>li]:mb-10">
-              {visibleImages.map(({ img: item, i }, rowPos) => (
-                <li key={item.id ?? `${item.src}-${i}`} className="break-inside-avoid">
-                  <Link
-                    href={`/images/${encodeURIComponent(galleryRouteId(item, i))}`}
-                    className="gallery-card-enter group block w-full text-left transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
-                    style={{ animationDelay: `${Math.min(rowPos, 14) * 35}ms` }}
-                  >
-                    <div
-                      className={`relative w-full overflow-hidden rounded-md bg-slate-100 ring-1 ring-slate-200/90 transition-[box-shadow,ring-color] duration-300 group-hover:shadow-lg group-hover:shadow-blue-900/10 group-hover:ring-blue-200/80 ${aspectClass(item.aspect)}`}
-                    >
-                      <Image
-                        src={item.src}
-                        alt={item.title}
-                        fill
-                        className="object-cover transition duration-500 ease-out group-hover:scale-[1.02]"
-                        sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw"
-                        unoptimized={remoteImage(item.src)}
-                      />
-                    </div>
-                    <div className="mt-3 px-0.5">
-                      <p className="font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-blue-600">{categoryLabel(item.category)}</p>
-                      <p className="font-heading text-base font-bold leading-snug text-slate-900 sm:text-lg">{item.title}</p>
-                      {item.peopleTags?.length ? (
-                        <p className="mt-1 text-[11px] text-slate-500">{item.peopleTags.join(" · ")}</p>
-                      ) : null}
-                    </div>
-                  </Link>
-                </li>
+            <div className="mt-3 flex flex-wrap items-center gap-1.5">
+              <span className="w-16 shrink-0 font-mono text-[9px] font-bold uppercase tracking-widest text-slate-300">
+                Lane
+              </span>
+              <FilterChip label="All" active={activeCategory === ""} onClick={() => setActiveCategory("")} />
+              {categories.map((tab) => (
+                <FilterChip
+                  key={tab.id}
+                  label={tab.label}
+                  active={activeCategory === tab.id}
+                  accent={activeCategory === tab.id ? GALLERY_CATEGORY_ACCENTS[tab.id] : undefined}
+                  onClick={() => setActiveCategory(activeCategory === tab.id ? "" : tab.id)}
+                />
               ))}
-            </ul>
-
-            {visibleImages.length === 0 && (
-              <p className="py-20 text-center font-mono text-sm text-slate-400">Nothing filed under that lane yet.</p>
-            )}
+            </div>
           </div>
-        </main>
+        </div>
+
+        <div className="mx-auto w-[95%] py-2.5">
+          <p className="text-xs text-slate-400">
+            {visible.length} result{visible.length !== 1 ? "s" : ""}
+            {hasFilter ? (
+              <button type="button" onClick={clearAll} className="ml-3 font-semibold text-blue-600 hover:underline">
+                Clear all
+              </button>
+            ) : null}
+          </p>
+        </div>
+
+        <div className="mx-auto w-[95%] pb-20">
+          <MasonryGrid items={visible} />
+        </div>
       </div>
-    </div>
+    </>
   );
 }

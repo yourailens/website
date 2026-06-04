@@ -29,35 +29,17 @@ export default function SiteFooter() {
           <div className="grid grid-cols-2 gap-8 text-center text-sm md:text-left lg:grid-cols-3">
             <div className="flex flex-col gap-2">
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">Explore</p>
-              <Link href="/resources" className="font-semibold text-blue-600 transition-colors hover:text-blue-700">
-                All Resources ↗
+              <Link href="/modules" className="font-semibold text-blue-600 transition-colors hover:text-blue-700">
+                All Modules ↗
               </Link>
-              <Link href="/prompts" className="font-semibold text-slate-900 transition-colors hover:text-blue-600">
-                Workflows
+              <Link href="/modules/product-shoot" className="font-semibold text-slate-900 transition-colors hover:text-blue-600">
+                Product Shoot
               </Link>
-              <Link href="/outfits" className="font-semibold text-slate-900 transition-colors hover:text-blue-600">
-                Outfit Sheets
+              <Link href="/modules/trailer-cut" className="font-semibold text-slate-900 transition-colors hover:text-blue-600">
+                Trailer Cut
               </Link>
-              <Link href="/character-sheets" className="font-semibold text-slate-900 transition-colors hover:text-blue-600">
-                Character Sheets
-              </Link>
-              <Link href="/scenarios" className="font-semibold text-slate-900 transition-colors hover:text-blue-600">
-                Reference Scenarios
-              </Link>
-              <Link href="/locations" className="font-semibold text-slate-900 transition-colors hover:text-blue-600">
-                Locations
-              </Link>
-              <Link href="/props" className="font-semibold text-slate-900 transition-colors hover:text-blue-600">
-                Props Library
-              </Link>
-              <Link href="/lighting-presets" className="font-semibold text-slate-900 transition-colors hover:text-blue-600">
-                Lighting Presets
-              </Link>
-              <Link href="/color-grades" className="font-semibold text-slate-900 transition-colors hover:text-blue-600">
-                Color Grades
-              </Link>
-              <Link href="/mood-boards" className="font-semibold text-slate-900 transition-colors hover:text-blue-600">
-                Mood Boards
+              <Link href="/modules/poster-design" className="font-semibold text-slate-900 transition-colors hover:text-blue-600">
+                Poster Design
               </Link>
               <Link href="/images" className="font-semibold text-slate-900 transition-colors hover:text-blue-600">
                 Images

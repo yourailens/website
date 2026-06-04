@@ -72,19 +72,12 @@ export default async function FilmDetailPage(props: { params: Promise<{ item: st
   const open = findGalleryIndexByRouteId(films, decodeURIComponent(item));
   if (open < 0) notFound();
 
-  const n = films.length;
-  const prevIndex = (open - 1 + n) % n;
-  const nextIndex = (open + 1) % n;
   const current = films[open]!;
 
   return (
     <FilmDetailExperience
       film={current}
-      index={open}
-      total={n}
-      categoryLabel={categoryLabel(current.category)}
-      prevHref={`/films/${encodeURIComponent(galleryRouteId(films[prevIndex]!, prevIndex))}`}
-      nextHref={`/films/${encodeURIComponent(galleryRouteId(films[nextIndex]!, nextIndex))}`}
+      categoryLabelText={categoryLabel(current.category)}
     />
   );
 }
