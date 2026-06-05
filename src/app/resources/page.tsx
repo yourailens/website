@@ -1,5 +1,11 @@
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+import ResourcesHubExperience from "./ResourcesHubExperience";
 
-export default function ResourcesRedirectPage() {
-  redirect("/modules");
+export const metadata: Metadata = {
+  title: "Resources | YourAI Lens Studio",
+  description: "9 AI reference libraries in one place — models, outfits, props, lighting presets, color grades, mood boards, workflows, locations, and scenarios.",
+};
+
+export default function ResourcesPage() {
+  return <ResourcesHubExperience />;
 }

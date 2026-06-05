@@ -16,6 +16,7 @@ export default function AdminSampleBrandsManager() {
   const [newSlug, setNewSlug] = useState("");
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -81,6 +82,29 @@ export default function AdminSampleBrandsManager() {
       body: JSON.stringify({ published: !brand.published }),
     });
     await load();
+  };
+
+  const deleteBrand = async (brand: SampleBrandWithMedia) => {
+    if (
+      !confirm(
+        `Delete "${brand.name}"? All hero, cover, and gallery media for this sample brand will be removed. This cannot be undone.`
+      )
+    ) {
+      return;
+    }
+    setDeletingId(brand.id);
+    setMsg("");
+    try {
+      const res = await fetch(`/api/admin/sample-brands/${brand.id}`, { method: "DELETE" });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Delete failed");
+      setMsg(`Deleted "${brand.name}".`);
+      await load();
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Error");
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -230,6 +254,14 @@ export default function AdminSampleBrandsManager() {
                     >
                       Manage →
                     </Link>
+                    <button
+                      type="button"
+                      disabled={deletingId === brand.id}
+                      onClick={() => deleteBrand(brand)}
+                      className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-red-600 hover:border-red-200 hover:bg-red-50 disabled:opacity-50"
+                    >
+                      {deletingId === brand.id ? "Deleting…" : "Delete"}
+                    </button>
                   </div>
                 </div>
               );

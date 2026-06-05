@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import type {
   SampleBrandAspectRatio,
   SampleBrandMedia,
@@ -43,9 +43,11 @@ const emptySlot = (): SampleBrandSlotValue => ({
 
 export default function AdminSampleBrandEditor() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const [brand, setBrand] = useState<SampleBrandWithMedia | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [msg, setMsg] = useState("");
 
   const [name, setName] = useState("");
@@ -150,6 +152,29 @@ export default function AdminSampleBrandEditor() {
       setMsg(e instanceof Error ? e.message : "Error");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const deleteBrand = async () => {
+    if (!brand) return;
+    if (
+      !confirm(
+        `Delete "${brand.name}"? All hero, cover, and gallery media will be removed. This cannot be undone.`
+      )
+    ) {
+      return;
+    }
+    setDeleting(true);
+    setMsg("");
+    try {
+      const res = await fetch(`/api/admin/sample-brands/${id}`, { method: "DELETE" });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Delete failed");
+      router.push("/admin/sample-brands");
+      router.refresh();
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Error");
+      setDeleting(false);
     }
   };
 
@@ -554,11 +579,19 @@ export default function AdminSampleBrandEditor() {
         </section>
 
         <div className="fixed bottom-0 left-0 right-0 border-t border-slate-200 bg-white/95 px-6 py-4 backdrop-blur">
-          <div className="mx-auto flex max-w-3xl justify-end gap-3">
+          <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={deleteBrand}
+              disabled={deleting || saving}
+              className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 disabled:opacity-50"
+            >
+              {deleting ? "Deleting…" : "Delete brand"}
+            </button>
             <button
               type="button"
               onClick={saveBrand}
-              disabled={saving}
+              disabled={saving || deleting}
               className="rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold text-white hover:bg-slate-800 disabled:opacity-50"
             >
               {saving ? "Saving…" : "Save brand"}

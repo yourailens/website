@@ -1,107 +1,111 @@
 "use client";
 
+import Image from "next/image";
 import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { NavLinkPendingSpinner } from "@/components/NavLinkWithPending";
+import type { IndustryMediaType } from "@/data/industries";
+import { resolveMediaType } from "@/lib/industries/media";
+import {
+  CREATIONS_CHANNEL_LINKS,
+  CREATIONS_FUTURE_LINKS,
+  CREATIONS_MEGA_SIDEBAR,
+  CREATIONS_MOBILE_LINKS,
+  CREATIONS_PORTFOLIO_LINKS,
+  CREATIONS_TALENT_LINKS,
+  MODULES_NAV_CATEGORIES,
+  NAV_LABELS,
+  INDUSTRY_MEGA_LEGACY_SLICE,
+  INDUSTRY_MEGA_SIDEBAR,
+  NAV_MEGA_VISUALS,
+  RESOURCES_NAV_CATEGORIES,
+  STUDIO_MEGA_SIDEBAR,
+  STUDIO_MOBILE_LINKS,
+  type CreationsMegaSection,
+  type IndustryMegaSection,
+  type StudioMegaSection,
+} from "@/data/studio-nav";
 
-const MODULES_CATEGORIES = [
-  {
-    label: "By discipline",
-    items: [
-      { href: "/modules?discipline=photography", label: "Photography" },
-      { href: "/modules?discipline=video", label: "Video" },
-      { href: "/modules?discipline=design", label: "Design" },
-      { href: "/modules?discipline=motion", label: "Motion" },
-      { href: "/modules?discipline=social", label: "Social" },
-    ],
-  },
-  {
-    label: "Playbooks",
-    items: [
-      { href: "/modules/product-shoot", label: "Product Shoot" },
-      { href: "/modules/trailer-cut", label: "Trailer Cut" },
-      { href: "/modules/poster-design", label: "Poster Design" },
-    ],
-  },
-] as const;
-
-type ModuleNavItem = { readonly href: string; readonly label: string };
-const MODULES_DESTINATIONS: ModuleNavItem[] = MODULES_CATEGORIES.flatMap((c) => [...c.items]);
-
-const MEDIA_CATEGORIES = [
-  {
-    label: "Gallery",
-    items: [
-      { href: "/images", label: "Images" },
-      { href: "/films", label: "Films" },
-    ],
-  },
-] as const;
-
-type MediaItem = { readonly href: string; readonly label: string };
-const MEDIA_DESTINATIONS: MediaItem[] = MEDIA_CATEGORIES.flatMap((c) => [...c.items]);
-
-const PRIMARY_NAV_LINKS = [{ label: "Events", href: "/events" }] as const;
-
-const AVATAR_DESTINATIONS = [
-  { href: "/avatars/kaira", label: "Kaira" },
-  { href: "/avatars/akriti", label: "Akriti" },
-  { href: "/avatars/niharika", label: "Niharika" },
-  { href: "/avatars/akanksha", label: "Akanksha" },
-] as const;
-
-const SOCIAL_DESTINATIONS = [
-  {
-    label: "Instagram",
-    href: "/instagram",
-    blurb: "Reels, stills, and behind the scenes from the studio.",
-    icon: "instagram" as const,
-  },
-  {
-    label: "YouTube",
-    href: "/youtube",
-    blurb: "Longer films, breakdowns, and channel first edits.",
-    icon: "youtube" as const,
-  },
-] as const;
-
-const AVATAR_NAV_ITEMS = [
-  { href: "/avatars", label: "All Avatars" },
-  { href: "/avatars/kaira", label: "Kaira" },
-  { href: "/avatars/akriti", label: "Akriti" },
-  { href: "/avatars/niharika", label: "Niharika" },
-  { href: "/avatars/akanksha", label: "Akanksha" },
-] as const;
-
-const EXPLORE_DESTINATIONS = [
-  { href: "/events", label: "Events" },
-  ...AVATAR_NAV_ITEMS.map(({ href, label }) => ({ href, label })),
-  ...SOCIAL_DESTINATIONS.map((s) => ({ href: s.href, label: s.label })),
-] as const;
+const MODULES_CATEGORIES = MODULES_NAV_CATEGORIES;
+const RESOURCES_CATEGORIES = RESOURCES_NAV_CATEGORIES;
 
 type NavIndustry = {
   slug: string;
   name: string;
   tagline: string | null;
   description: string | null;
+  coverUrl: string | null;
 };
+
+type NavIndustryApi = {
+  slug: string;
+  name: string;
+  tagline?: string | null;
+  description?: string | null;
+  cover_image_url?: string | null;
+  cover_media_type?: IndustryMediaType | null;
+  cover_poster_url?: string | null;
+  hero_image_url?: string | null;
+  hero_media_type?: IndustryMediaType | null;
+  hero_poster_url?: string | null;
+};
+
+/** Nav thumbnails need a still image — skip raw video URLs unless a poster exists. */
+function resolveIndustryNavStill(
+  url: string | null | undefined,
+  mediaType: IndustryMediaType | null | undefined,
+  posterUrl: string | null | undefined
+): string | null {
+  const trimmed = url?.trim();
+  if (!trimmed) return null;
+  if (resolveMediaType(mediaType, trimmed) === "video") {
+    return posterUrl?.trim() || null;
+  }
+  return trimmed;
+}
+
+function resolveIndustryNavCover(ind: NavIndustryApi): string | null {
+  return (
+    resolveIndustryNavStill(ind.cover_image_url, ind.cover_media_type, ind.cover_poster_url) ??
+    resolveIndustryNavStill(ind.hero_image_url, ind.hero_media_type, ind.hero_poster_url) ??
+    null
+  );
+}
 
 let navIndustriesCache: NavIndustry[] | null = null;
 let navIndustriesInflight: Promise<NavIndustry[]> | null = null;
+
+/** Navbar-only order tweaks (does not change DB / hub sort_order). */
+function swapNavbarIndustries(list: NavIndustry[], slugA: string, slugB: string) {
+  const a = list.findIndex((i) => i.slug === slugA);
+  const b = list.findIndex((i) => i.slug === slugB);
+  if (a < 0 || b < 0) return;
+  [list[a], list[b]] = [list[b], list[a]];
+}
+
+function applyNavbarIndustryOrder(industries: NavIndustry[]): NavIndustry[] {
+  const list = [...industries];
+  swapNavbarIndustries(list, "d2c-ecommerce", "food-beverage");
+  swapNavbarIndustries(list, "saas-b2b", "healthcare-wellness");
+  return list;
+}
 
 function fetchNavIndustries(): Promise<NavIndustry[]> {
   if (navIndustriesCache) return Promise.resolve(navIndustriesCache);
   if (!navIndustriesInflight) {
     navIndustriesInflight = fetch("/api/industries")
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error("fetch failed"))))
-      .then((data: { industries?: NavIndustry[] }) => {
-        const list = (data.industries ?? []).map((ind) => ({
-          slug: ind.slug,
-          name: ind.name,
-          tagline: ind.tagline ?? null,
-          description: ind.description ?? null,
-        }));
+      .then((data: { industries?: NavIndustryApi[] }) => {
+        const list = applyNavbarIndustryOrder(
+          (data.industries ?? []).map((ind) => ({
+            slug: ind.slug,
+            name: ind.name,
+            tagline: ind.tagline ?? null,
+            description: ind.description ?? null,
+            coverUrl: resolveIndustryNavCover(ind),
+          }))
+        );
         navIndustriesCache = list;
         return list;
       })
@@ -113,24 +117,30 @@ function fetchNavIndustries(): Promise<NavIndustry[]> {
   return navIndustriesInflight;
 }
 
-const INDUSTRY_NAV_COLUMN_LABELS = ["Property & commerce", "Commerce & tech", "Brands & services"] as const;
-
 type IndustryNavColumn = {
+  id: IndustryMegaSection;
   label: string;
-  items: { href: string; label: string; slug: string }[];
+  items: { href: string; label: string; slug: string; coverUrl: string | null; tagline: string | null }[];
 };
 
 function buildIndustryNavColumns(industries: NavIndustry[]): IndustryNavColumn[] {
-  const columnCount = INDUSTRY_NAV_COLUMN_LABELS.length;
+  const columnCount = INDUSTRY_MEGA_SIDEBAR.length;
   const perCol = industries.length === 0 ? 0 : Math.ceil(industries.length / columnCount);
-  return INDUSTRY_NAV_COLUMN_LABELS.map((label, i) => ({
-    label,
-    items: industries.slice(i * perCol, (i + 1) * perCol).map((ind) => ({
-      href: `/industries/${ind.slug}`,
-      label: ind.name,
-      slug: ind.slug,
-    })),
-  }));
+
+  return INDUSTRY_MEGA_SIDEBAR.map((section) => {
+    const sliceIndex = INDUSTRY_MEGA_LEGACY_SLICE[section.id];
+    return {
+      id: section.id,
+      label: section.label,
+      items: industries.slice(sliceIndex * perCol, (sliceIndex + 1) * perCol).map((ind) => ({
+        href: `/industries/${ind.slug}`,
+        label: ind.name,
+        slug: ind.slug,
+        coverUrl: ind.coverUrl,
+        tagline: ind.tagline,
+      })),
+    };
+  });
 }
 
 function SocialBrandIcon({ name }: { name: "instagram" | "youtube" }) {
@@ -184,12 +194,33 @@ function DesktopLogoInner() {
   );
 }
 
+const desktopNavLinkClass = (active: boolean) =>
+  `relative py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-800 transition-colors after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:bg-slate-900 after:transition-transform after:duration-300 after:content-[''] ${
+    active ? "after:scale-x-100" : "after:scale-x-0 hover:after:scale-x-100"
+  }`;
+
+function DesktopNavTextLink({
+  href,
+  label,
+  active,
+}: {
+  href: string;
+  label: string;
+  active: boolean;
+}) {
+  return (
+    <Link href={href} prefetch className={desktopNavLinkClass(active)}>
+      {label}
+    </Link>
+  );
+}
+
 function DesktopContactCta() {
   return (
     <Link
       href="/contact"
       prefetch
-      className="relative inline-flex rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-blue-700 hover:shadow-blue-300 active:scale-95"
+      className="relative inline-flex rounded-full bg-blue-600 px-5 py-2.5 text-[13px] font-semibold text-white shadow-sm shadow-blue-200/50 transition hover:bg-blue-700"
     >
       <DesktopContactCtaInner />
     </Link>
@@ -203,8 +234,10 @@ function DesktopContactCtaInner() {
       {pending ? <span className="absolute inset-0 z-[1] cursor-wait rounded-full" aria-hidden /> : null}
       <span className="relative z-[2] inline-flex items-center gap-2">
         <NavLinkPendingSpinner borderClassName="border-white" />
-        Book a free call
-        <span className="ml-2">→</span>
+        Book a call
+        <span className="ml-1.5 text-white/70" aria-hidden>
+          →
+        </span>
       </span>
     </>
   );
@@ -373,28 +406,10 @@ function MobilePricingLinkInner() {
   );
 }
 
-function useSocialsMega(pathname: string) {
+function useDesktopMegaMenu(pathname: string) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const leaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const cancelClose = useCallback(() => {
-    if (leaveTimerRef.current) {
-      clearTimeout(leaveTimerRef.current);
-      leaveTimerRef.current = null;
-    }
-  }, []);
-
-  const openMenu = useCallback(() => {
-    cancelClose();
-    setOpen(true);
-  }, [cancelClose]);
-
-  const scheduleClose = useCallback(() => {
-    cancelClose();
-    leaveTimerRef.current = setTimeout(() => setOpen(false), 220);
-  }, [cancelClose]);
 
   useEffect(() => {
     setOpen(false);
@@ -420,49 +435,80 @@ function useSocialsMega(pathname: string) {
     return () => document.removeEventListener("mousedown", onDoc);
   }, [open]);
 
-  return { open, setOpen, cancelClose, scheduleClose, openMenu, triggerRef, panelRef };
+  return { open, setOpen, triggerRef, panelRef };
 }
 
-type DesktopMegaMenuId = "explore" | "industries" | "media" | "resources";
+type DesktopMegaMenuId = "creations" | "industries" | "studio";
 
 function isIndustriesNavActive(pathname: string) {
   return pathname.startsWith("/industries");
 }
 
-function isExploreNavActive(pathname: string) {
+function isCreationsNavActive(pathname: string) {
   return (
+    pathname.startsWith("/images") ||
+    pathname.startsWith("/films") ||
     pathname.startsWith("/events") ||
     pathname.startsWith("/avatars") ||
     pathname.startsWith("/instagram") ||
-    pathname.startsWith("/youtube")
+    pathname.startsWith("/youtube") ||
+    pathname.startsWith("/the-future")
   );
 }
 
-function isMediaNavActive(pathname: string) {
-  return pathname.startsWith("/images") || pathname.startsWith("/films");
+function isPricingNavActive(pathname: string) {
+  return pathname.startsWith("/pricing");
 }
 
-function isResourcesNavActive(pathname: string) {
-  return pathname.startsWith("/modules") || pathname.startsWith("/resources");
-}
-
-/** Shared mega-menu building blocks — YourAILens brand (blue / slate / white) */
-function MegaPanelShell({ children }: { children: React.ReactNode }) {
+function isStudioNavActive(pathname: string) {
   return (
-    <div className="relative w-full overflow-hidden border-b border-t border-slate-200 bg-white shadow-[0_20px_50px_-12px_rgba(30,58,138,0.18)]">
-      <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-blue-50/90 via-white to-white"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_75%_55%_at_8%_0%,rgba(59,130,246,0.09),transparent_58%),radial-gradient(ellipse_65%_45%_at_92%_25%,rgba(34,211,238,0.07),transparent_52%)]"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400"
-        aria-hidden
-      />
-      <div className="relative mx-auto max-w-7xl px-6 py-7 lg:px-10">{children}</div>
+    pathname.startsWith("/resources") ||
+    pathname.startsWith("/modules") ||
+    pathname.startsWith("/prompts") ||
+    pathname.startsWith("/outfits") ||
+    pathname.startsWith("/character-sheets") ||
+    pathname.startsWith("/scenarios") ||
+    pathname.startsWith("/locations") ||
+    pathname.startsWith("/props") ||
+    pathname.startsWith("/lighting-presets") ||
+    pathname.startsWith("/color-grades") ||
+    pathname.startsWith("/mood-boards")
+  );
+}
+
+/** Luxury-style mega menu: editorial image column + clean white content */
+function MegaPanelLuxury({
+  bgSrc,
+  bgAlt,
+  caption,
+  children,
+}: {
+  bgSrc: string;
+  bgAlt: string;
+  caption?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="border-b border-slate-200 bg-white shadow-[0_20px_50px_-30px_rgba(0,0,0,0.15)]">
+      <div className="flex min-h-[min(420px,54vh)] w-full">
+        <div className="relative hidden w-[min(46vw,640px)] min-w-[300px] shrink-0 self-stretch lg:block">
+          <Image key={bgSrc} src={bgSrc} alt={bgAlt} fill className="object-cover object-center" sizes="50vw" priority={false} />
+          <div
+            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/5 via-black/0 to-white"
+            aria-hidden
+          />
+          {caption ? (
+            <p className="absolute bottom-8 left-6 font-mono text-[10px] font-medium uppercase tracking-[0.35em] text-white lg:left-10">
+              {caption}
+            </p>
+          ) : null}
+        </div>
+        <div className="flex min-w-0 flex-1 bg-white">
+          <div className="mx-auto flex w-full max-w-3xl flex-col px-6 py-9 sm:px-10 lg:max-w-none lg:px-12 lg:py-11">
+            {children}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -483,14 +529,16 @@ function MegaHorizontalFeaturedLink({
       href={href}
       prefetch
       onClick={onClick}
-      className="group flex w-full items-center justify-between gap-4 rounded-2xl border-2 border-blue-200/90 bg-white/75 px-6 py-4 shadow-sm ring-1 ring-blue-100/80 backdrop-blur-sm transition-colors hover:border-blue-300 hover:bg-white hover:shadow-md hover:shadow-blue-100/40"
+      className="group mb-8 block max-w-lg border-b border-slate-900 pb-5 transition-opacity hover:opacity-80"
     >
-      <div className="min-w-0 text-left">
-        <p className="font-heading text-lg font-bold tracking-tight text-slate-900">{title}</p>
-        {subtitle ? <p className="mt-0.5 text-[11px] font-medium text-slate-500">{subtitle}</p> : null}
-      </div>
-      <span className="shrink-0 rounded-full border-2 border-blue-300/70 bg-blue-50/80 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.22em] text-blue-700 transition-colors group-hover:border-blue-400 group-hover:bg-blue-100/80">
-        View all
+      {subtitle ? (
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-600">{subtitle}</p>
+      ) : null}
+      <span className="mt-2 flex items-end justify-between gap-4">
+        <span className="font-body text-xl font-medium tracking-tight text-slate-900 sm:text-2xl">{title}</span>
+        <span className="pb-0.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-600 group-hover:text-slate-900">
+          View all
+        </span>
       </span>
     </Link>
   );
@@ -498,8 +546,8 @@ function MegaHorizontalFeaturedLink({
 
 function MegaColumnHeading({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-4 border-b border-slate-100 pb-3">
-      <p className="font-mono text-[9px] font-bold uppercase tracking-[0.35em] text-slate-400">{children}</p>
+    <div className="mb-3 border-b border-slate-200/80 pb-2.5">
+      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.26em] text-slate-700">{children}</p>
     </div>
   );
 }
@@ -520,14 +568,16 @@ function MegaNavItem({
       href={href}
       prefetch
       onClick={onClick}
-      className="group flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 hover:border-blue-100 hover:bg-blue-50/70"
+      className="group flex items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-2 hover:border-blue-100/80 hover:bg-blue-50/60"
     >
       {icon ? (
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-blue-600 shadow-sm shadow-blue-100/80">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-blue-100/90 bg-blue-50/80 text-blue-600">
           {icon}
         </span>
       ) : null}
-      <span className="text-[13px] font-semibold text-slate-700 group-hover:text-blue-700">{label}</span>
+      <span className="font-body text-[13px] font-semibold text-slate-900 group-hover:text-blue-700">
+        {label}
+      </span>
     </Link>
   );
 }
@@ -620,93 +670,20 @@ function NavIndustryIcon({ slug }: { slug: string }) {
       </svg>
     );
   }
+  if (slug === "beauty-cosmetics") {
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className={cls}>
+        <path d="M12 3c-1.5 0-2.8 1.2-2.8 2.7v1.1c0 .8.4 1.5 1 2l.8.8v8.4c0 1 .8 1.8 1.8 1.8h.4c1 0 1.8-.8 1.8-1.8v-8.4l.8-.8c.6-.5 1-1.2 1-2V5.7C14.8 4.2 13.5 3 12 3z" />
+        <path d="M9 21h6" />
+      </svg>
+    );
+  }
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className={cls}>
       <rect x="3" y="3" width="18" height="18" rx="2" />
       <path d="M3 9h18" />
       <path d="M9 21V9" />
     </svg>
-  );
-}
-
-function NavModuleIcon({ href }: { href: string }) {
-  const cls = "text-blue-600";
-  const size = 16;
-  if (href.includes("photography") || href.includes("product-shoot")) {
-    return (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className={cls}>
-        <path d="M4 8h4l2-3h4l2 3h4v11H4V8z" />
-        <circle cx="12" cy="13" r="3" />
-      </svg>
-    );
-  }
-  if (href.includes("video") || href.includes("trailer")) {
-    return (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className={cls}>
-        <polygon points="23 7 16 12 23 17 23 7" />
-        <rect x="1" y="5" width="15" height="14" rx="2" />
-      </svg>
-    );
-  }
-  if (href.includes("design") || href.includes("poster")) {
-    return (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className={cls}>
-        <rect x="3" y="3" width="18" height="18" rx="2" />
-        <path d="M8 12h8M12 8v8" />
-      </svg>
-    );
-  }
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className={cls}>
-      <rect x="3" y="3" width="7" height="7" />
-      <rect x="14" y="3" width="7" height="7" />
-      <rect x="14" y="14" width="7" height="7" />
-      <rect x="3" y="14" width="7" height="7" />
-    </svg>
-  );
-}
-
-function AvatarNavChip({
-  href,
-  label,
-  onClick,
-}: {
-  href: string;
-  label: string;
-  onClick: () => void;
-}) {
-  const monogram = label === "All Avatars" ? "All" : label.slice(0, 2);
-  return (
-    <Link href={href} prefetch onClick={onClick} className="group flex w-[80px] flex-col items-center gap-2">
-      <span className="flex h-16 w-16 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 font-heading text-sm uppercase tracking-wide text-blue-700 shadow-sm shadow-blue-100/80 group-hover:border-blue-200 group-hover:bg-white">
-        {monogram}
-      </span>
-      <span className="text-center text-[11px] font-semibold leading-tight text-slate-600 group-hover:text-blue-700">{label}</span>
-    </Link>
-  );
-}
-
-function SocialNavPill({
-  href,
-  label,
-  icon,
-  onClick,
-}: {
-  href: string;
-  label: string;
-  icon: "instagram" | "youtube";
-  onClick: () => void;
-}) {
-  return (
-    <Link
-      href={href}
-      prefetch
-      onClick={onClick}
-      className="group flex items-center gap-3 rounded-full border border-blue-100 bg-white px-5 py-2.5 shadow-sm shadow-blue-100/60 hover:border-blue-200 hover:bg-blue-50/70"
-    >
-      <SocialBrandIcon name={icon} />
-      <span className="text-[13px] font-semibold text-slate-700 group-hover:text-blue-700">{label}</span>
-    </Link>
   );
 }
 
@@ -734,80 +711,133 @@ function DesktopMegaMenuTrigger({
       aria-controls={panelId}
       id={`nav-${menuId}-trigger`}
       onClick={onToggle}
-      className={`flex items-center gap-1.5 rounded-lg px-5 py-2 text-sm font-semibold ${
-        active || open ? "text-blue-600" : "text-slate-800"
-      }`}
+      className={`${desktopNavLinkClass(active || open)} cursor-pointer border-0 bg-transparent p-0`}
     >
       {label}
-      <svg
-        width="10"
-        height="10"
-        viewBox="0 0 12 12"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        className={open ? "rotate-180" : ""}
-        aria-hidden
-      >
-        <path d="M2.5 4.5L6 8l3.5-3.5" />
-      </svg>
     </button>
   );
 }
 
-function DesktopResourcesMegaPanel({ onLinkClick }: { onLinkClick: () => void }) {
+function MegaTextLink({ href, label, onClick }: { href: string; label: string; onClick: () => void }) {
   return (
-    <MegaPanelShell>
-      <div className="flex flex-col gap-6">
-        <MegaHorizontalFeaturedLink
-          href="/modules"
-          title="All Modules"
-          subtitle="Director playbooks — camera, light, workflow, prompts, assets"
-          onClick={onLinkClick}
-        />
-        <div className="grid grid-cols-2 gap-6 lg:gap-0 lg:divide-x lg:divide-slate-100">
-          {MODULES_CATEGORIES.map((cat) => (
-            <nav key={cat.label} aria-label={cat.label} className="lg:px-6 first:lg:pl-0 last:lg:pr-0">
-              <MegaColumnHeading>{cat.label}</MegaColumnHeading>
-              <div className="space-y-0.5">
-                {cat.items.map((item) => (
-                  <MegaNavItem
-                    key={item.href}
-                    href={item.href}
-                    label={item.label}
-                    icon={<NavModuleIcon href={item.href} />}
-                    onClick={onLinkClick}
-                  />
-                ))}
-              </div>
-            </nav>
-          ))}
-        </div>
-      </div>
-    </MegaPanelShell>
+    <Link
+      href={href}
+      prefetch
+      onClick={onClick}
+      className="group block py-1.5 transition-colors"
+    >
+      <span className="font-body text-[13px] font-semibold tracking-wide text-slate-800 group-hover:text-slate-900">
+        {label}
+      </span>
+    </Link>
   );
 }
 
-function DesktopOriginalsMegaPanel({ onLinkClick }: { onLinkClick: () => void }) {
-  const items = MEDIA_CATEGORIES[0].items;
+function MegaCategoryLabel({ children }: { children: React.ReactNode }) {
   return (
-    <MegaPanelShell>
-      <nav aria-label="Media" className="mx-auto max-w-lg">
-        <MegaColumnHeading>Gallery</MegaColumnHeading>
-        <div className="grid grid-cols-2 gap-3">
-          {items.map((item) => (
-            <MegaNavItem
-              key={item.href}
-              href={item.href}
-              label={item.label}
-              icon={<NavMediaIcon href={item.href} />}
-              onClick={onLinkClick}
-            />
-          ))}
+    <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.26em] text-slate-700">{children}</p>
+  );
+}
+
+function MegaSidebarNavButton({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`w-full border-l-2 py-2.5 pl-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors ${
+        active
+          ? "border-slate-900 text-slate-900"
+          : "border-transparent text-slate-600 hover:border-slate-300 hover:text-slate-900"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
+function DesktopStudioMegaPanel({ onLinkClick }: { onLinkClick: () => void }) {
+  const [section, setSection] = useState<StudioMegaSection>("playbooks");
+  const visual = NAV_MEGA_VISUALS.studio[section];
+
+  return (
+    <MegaPanelLuxury bgSrc={visual.src} bgAlt={visual.alt} caption={visual.caption}>
+      <div className="mb-8 flex gap-8 border-b border-slate-100 pb-6">
+        <Link
+          href="/modules"
+          prefetch
+          onClick={onLinkClick}
+          className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-800 transition hover:text-slate-950"
+        >
+          All playbooks
+        </Link>
+        <Link
+          href="/resources"
+          prefetch
+          onClick={onLinkClick}
+          className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-800 transition hover:text-slate-950"
+        >
+          All libraries
+        </Link>
+      </div>
+      <div className="flex min-h-[220px]">
+        <aside className="w-[168px] shrink-0 border-r border-slate-100 py-1 pr-8">
+          <nav className="flex flex-col gap-0.5" aria-label="Studio sections">
+            {STUDIO_MEGA_SIDEBAR.map((item) => (
+              <MegaSidebarNavButton
+                key={item.id}
+                active={section === item.id}
+                label={item.label}
+                onClick={() => setSection(item.id)}
+              />
+            ))}
+          </nav>
+        </aside>
+
+        <div className="min-w-0 flex-1 pl-6 lg:pl-8">
+          {section === "libraries" && (
+            <div className="grid gap-8 sm:grid-cols-3">
+              {RESOURCES_CATEGORIES.map((cat) => (
+                <nav key={cat.label} aria-label={cat.label}>
+                  <MegaCategoryLabel>{cat.label}</MegaCategoryLabel>
+                  <ul>
+                    {cat.items.map((item) => (
+                      <li key={item.href}>
+                        <MegaTextLink href={item.href} label={item.label} onClick={onLinkClick} />
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              ))}
+            </div>
+          )}
+
+          {section === "playbooks" && (
+            <div className="grid gap-10 sm:grid-cols-2">
+              {MODULES_CATEGORIES.map((cat) => (
+                <nav key={cat.label} aria-label={cat.label}>
+                  <MegaCategoryLabel>{cat.label}</MegaCategoryLabel>
+                  <ul>
+                    {cat.items.map((item) => (
+                      <li key={item.href}>
+                        <MegaTextLink href={item.href} label={item.label} onClick={onLinkClick} />
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              ))}
+            </div>
+          )}
         </div>
-      </nav>
-    </MegaPanelShell>
+      </div>
+    </MegaPanelLuxury>
   );
 }
 
@@ -820,84 +850,176 @@ function DesktopIndustriesMegaPanel({
   loading: boolean;
   onLinkClick: () => void;
 }) {
+  const [section, setSection] = useState<IndustryMegaSection>("commerce-tech");
   const columns = buildIndustryNavColumns(industries);
+  const activeColumn = columns.find((col) => col.id === section) ?? columns[0];
+
+  const visual = NAV_MEGA_VISUALS.industries[section];
 
   return (
-    <MegaPanelShell>
-      <div className="flex flex-col gap-6">
-        <MegaHorizontalFeaturedLink
-          href="/industries"
-          title="All Industries"
-          subtitle="Browse every vertical in one place"
-          onClick={onLinkClick}
-        />
-        {loading ? (
-          <div className="grid grid-cols-3 gap-6 lg:gap-0 lg:divide-x lg:divide-slate-100">
-            {Array.from({ length: 3 }).map((_, col) => (
-              <div key={col} className="space-y-3 lg:px-6 first:lg:pl-0" aria-hidden>
-                <div className="mb-4 h-3 w-24 rounded bg-blue-50" />
-                {Array.from({ length: 4 }).map((__, row) => (
-                  <div key={row} className="h-10 rounded-lg bg-slate-50" />
-                ))}
-              </div>
+    <MegaPanelLuxury bgSrc={visual.src} bgAlt={visual.alt} caption={visual.caption}>
+      <MegaHorizontalFeaturedLink
+        href="/industries"
+        title="Browse all industries"
+        subtitle="See every vertical we serve"
+        onClick={onLinkClick}
+      />
+      <div className="flex min-h-[220px]">
+        <aside className="w-[168px] shrink-0 border-r border-slate-100 py-1 pr-8">
+          <nav className="flex flex-col gap-1" aria-label="Industry categories">
+            {INDUSTRY_MEGA_SIDEBAR.map((item) => (
+              <MegaSidebarNavButton
+                key={item.id}
+                active={section === item.id}
+                label={item.label}
+                onClick={() => setSection(item.id)}
+              />
             ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 gap-6 lg:gap-0 lg:divide-x lg:divide-slate-100">
-            {columns.map((col) => (
-              <nav key={col.label} aria-label={col.label} className="lg:px-6 first:lg:pl-0 last:lg:pr-0">
-                <MegaColumnHeading>{col.label}</MegaColumnHeading>
-                <ul className="space-y-0.5">
-                  {col.items.map((item) => (
-                    <li key={item.href}>
-                      <MegaNavItem
-                        href={item.href}
-                        label={item.label}
-                        icon={<NavIndustryIcon slug={item.slug} />}
-                        onClick={onLinkClick}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            ))}
-          </div>
-        )}
+          </nav>
+        </aside>
+
+        <div className="min-w-0 flex-1 pl-6 lg:pl-8">
+          {loading ? (
+            <div className="max-w-xl divide-y divide-slate-100" aria-hidden>
+              {Array.from({ length: 4 }).map((_, row) => (
+                <div key={row} className="py-4">
+                  <div className="h-3.5 w-40 bg-slate-100" />
+                  <div className="mt-2 h-3 w-56 max-w-full bg-slate-50" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <nav aria-label={activeColumn?.label ?? "Industries"} className="max-w-xl">
+              {(activeColumn?.items ?? []).map((item) => (
+                <MegaMenuLink
+                  key={item.href}
+                  href={item.href}
+                  label={item.label}
+                  description={item.tagline ?? undefined}
+                  onClick={onLinkClick}
+                />
+              ))}
+            </nav>
+          )}
+        </div>
       </div>
-    </MegaPanelShell>
+    </MegaPanelLuxury>
   );
 }
 
-function DesktopExploreMegaPanel({ onLinkClick }: { onLinkClick: () => void }) {
+function MegaMenuLink({
+  href,
+  label,
+  description,
+  onClick,
+}: {
+  href: string;
+  label: string;
+  description?: string;
+  onClick: () => void;
+}) {
   return (
-    <MegaPanelShell>
-      <div className="flex flex-col gap-6">
-        <MegaHorizontalFeaturedLink
-          href="/events"
-          title="Events"
-          subtitle="Workshops, launches, and studio gatherings"
-          onClick={onLinkClick}
-        />
-        <div className="flex flex-col gap-8">
-          <nav aria-label="Avatars">
-            <MegaColumnHeading>Avatars</MegaColumnHeading>
-            <div className="flex flex-wrap gap-3">
-              {AVATAR_NAV_ITEMS.map((item) => (
-                <AvatarNavChip key={item.href} href={item.href} label={item.label} onClick={onLinkClick} />
-              ))}
-            </div>
+    <Link
+      href={href}
+      prefetch
+      onClick={onClick}
+      className="group flex items-start justify-between gap-6 border-b border-slate-100 py-4 transition-colors last:border-b-0 hover:border-slate-300"
+    >
+      <span className="min-w-0">
+        <span className="block font-body text-[15px] font-semibold tracking-wide text-slate-900">{label}</span>
+        {description ? (
+          <span className="mt-1 block text-[13px] font-normal leading-relaxed text-slate-600">{description}</span>
+        ) : null}
+      </span>
+      <span
+        className="shrink-0 pt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500 transition group-hover:text-slate-900"
+        aria-hidden
+      >
+        →
+      </span>
+    </Link>
+  );
+}
+
+function DesktopCreationsMegaPanel({ onLinkClick }: { onLinkClick: () => void }) {
+  const [section, setSection] = useState<CreationsMegaSection>("portfolio");
+  const visual = NAV_MEGA_VISUALS.creations[section];
+
+  return (
+    <MegaPanelLuxury bgSrc={visual.src} bgAlt={visual.alt} caption={visual.caption}>
+      <div className="flex min-h-[220px]">
+        <aside className="w-[168px] shrink-0 border-r border-slate-100 py-1 pr-8">
+          <nav className="flex flex-col gap-1" aria-label="Creations sections">
+            {CREATIONS_MEGA_SIDEBAR.map((item) => (
+              <MegaSidebarNavButton
+                key={item.id}
+                active={section === item.id}
+                label={item.label}
+                onClick={() => setSection(item.id)}
+              />
+            ))}
           </nav>
-          <nav aria-label="Social">
-            <MegaColumnHeading>Social</MegaColumnHeading>
-            <div className="flex flex-wrap gap-3">
-              {SOCIAL_DESTINATIONS.map((item) => (
-                <SocialNavPill key={item.href} href={item.href} label={item.label} icon={item.icon} onClick={onLinkClick} />
+        </aside>
+
+        <div className="min-w-0 flex-1 pl-6 lg:pl-8">
+          {section === "portfolio" && (
+            <nav aria-label="Portfolio" className="max-w-xl">
+              {CREATIONS_PORTFOLIO_LINKS.map((item) => (
+                <MegaMenuLink
+                  key={item.href}
+                  href={item.href}
+                  label={item.label}
+                  description={item.description}
+                  onClick={onLinkClick}
+                />
               ))}
-            </div>
-          </nav>
+            </nav>
+          )}
+
+          {section === "talent" && (
+            <nav aria-label="AI talent and events" className="max-w-xl">
+              {CREATIONS_TALENT_LINKS.map((item) => (
+                <MegaMenuLink
+                  key={item.href}
+                  href={item.href}
+                  label={item.label}
+                  description={item.description}
+                  onClick={onLinkClick}
+                />
+              ))}
+            </nav>
+          )}
+
+          {section === "channels" && (
+            <nav aria-label="Channels" className="max-w-xl">
+              {CREATIONS_CHANNEL_LINKS.map((item) => (
+                <MegaMenuLink
+                  key={item.href}
+                  href={item.href}
+                  label={item.label}
+                  description={item.description}
+                  onClick={onLinkClick}
+                />
+              ))}
+            </nav>
+          )}
+
+          {section === "future" && (
+            <nav aria-label="The Future" className="max-w-xl">
+              {CREATIONS_FUTURE_LINKS.map((item) => (
+                <MegaMenuLink
+                  key={item.href}
+                  href={item.href}
+                  label={item.label}
+                  description={item.description}
+                  onClick={onLinkClick}
+                />
+              ))}
+            </nav>
+          )}
         </div>
       </div>
-    </MegaPanelShell>
+    </MegaPanelLuxury>
   );
 }
 
@@ -986,37 +1108,39 @@ export default function Navbar() {
     };
   }, []);
 
-  const exploreMega = useSocialsMega(pathname);
-  const industriesMega = useSocialsMega(pathname);
-  const originalsMega = useSocialsMega(pathname);
-  const resourcesMega = useSocialsMega(pathname);
+  const creationsMega = useDesktopMegaMenu(pathname);
+  const industriesMega = useDesktopMegaMenu(pathname);
+  const studioMega = useDesktopMegaMenu(pathname);
 
-  const closeAll = useCallback(() => {
-    exploreMega.setOpen(false);
+  const toggleCreationsMega = useCallback(() => {
+    if (creationsMega.open) {
+      creationsMega.setOpen(false);
+      return;
+    }
     industriesMega.setOpen(false);
-    originalsMega.setOpen(false);
-    resourcesMega.setOpen(false);
-  }, [exploreMega, industriesMega, originalsMega, resourcesMega]);
+    studioMega.setOpen(false);
+    creationsMega.setOpen(true);
+  }, [creationsMega, industriesMega, studioMega]);
 
-  const openExploreMenu = useCallback(() => {
-    closeAll();
-    exploreMega.openMenu();
-  }, [closeAll, exploreMega]);
+  const toggleIndustriesMega = useCallback(() => {
+    if (industriesMega.open) {
+      industriesMega.setOpen(false);
+      return;
+    }
+    creationsMega.setOpen(false);
+    studioMega.setOpen(false);
+    industriesMega.setOpen(true);
+  }, [creationsMega, industriesMega, studioMega]);
 
-  const openIndustriesMenu = useCallback(() => {
-    closeAll();
-    industriesMega.openMenu();
-  }, [closeAll, industriesMega]);
-
-  const openOriginalsMenu = useCallback(() => {
-    closeAll();
-    originalsMega.openMenu();
-  }, [closeAll, originalsMega]);
-
-  const openResourcesMenu = useCallback(() => {
-    closeAll();
-    resourcesMega.openMenu();
-  }, [closeAll, resourcesMega]);
+  const toggleStudioMega = useCallback(() => {
+    if (studioMega.open) {
+      studioMega.setOpen(false);
+      return;
+    }
+    creationsMega.setOpen(false);
+    industriesMega.setOpen(false);
+    studioMega.setOpen(true);
+  }, [creationsMega, industriesMega, studioMega]);
 
   return (
     <>
@@ -1037,77 +1161,48 @@ export default function Navbar() {
         </Link>
 
       {/* Main navbar */}
-        <nav className="relative overflow-visible bg-white">
-        <div className="h-[3px] w-full bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400" />
-
+        <nav className="relative overflow-visible border-b border-slate-200/80 bg-white">
         <div className="mx-auto max-w-7xl px-6 lg:px-10">
-          <div className="flex h-20 items-center justify-between gap-8">
+          <div className="flex h-[4.25rem] items-center justify-between gap-6">
               <DesktopLogoLink />
 
-              <div className="hidden flex-1 items-center justify-center gap-1 lg:flex">
-                <div
-                  key="nav-industries"
-                  ref={industriesMega.triggerRef}
-                  className="relative"
-                  onMouseEnter={openIndustriesMenu}
-                  onMouseLeave={industriesMega.scheduleClose}
-                >
+              <div className="hidden flex-1 items-center justify-center lg:flex">
+                <div className="flex items-center gap-8 lg:gap-10">
+                <div key="nav-creations" ref={creationsMega.triggerRef} className="relative">
+                  <DesktopMegaMenuTrigger
+                    menuId="creations"
+                    panelId="nav-creations-mega"
+                    label={NAV_LABELS.creations}
+                    open={creationsMega.open}
+                    onToggle={toggleCreationsMega}
+                    active={isCreationsNavActive(pathname)}
+                  />
+                </div>
+                <div key="nav-industries" ref={industriesMega.triggerRef} className="relative">
                   <DesktopMegaMenuTrigger
                     menuId="industries"
                     panelId="nav-industries-mega"
-                    label="Industries"
+                    label={NAV_LABELS.industries}
                     open={industriesMega.open}
-                    onToggle={() => industriesMega.setOpen((v) => !v)}
+                    onToggle={toggleIndustriesMega}
                     active={isIndustriesNavActive(pathname)}
                   />
                 </div>
-                <div
-                  key="nav-media"
-                  ref={originalsMega.triggerRef}
-                  className="relative"
-                  onMouseEnter={openOriginalsMenu}
-                  onMouseLeave={originalsMega.scheduleClose}
-                >
+                <div key="nav-studio" ref={studioMega.triggerRef} className="relative">
                   <DesktopMegaMenuTrigger
-                    menuId="media"
-                    panelId="nav-originals-mega"
-                    label="Media"
-                    open={originalsMega.open}
-                    onToggle={() => originalsMega.setOpen((v) => !v)}
-                    active={isMediaNavActive(pathname)}
+                    menuId="studio"
+                    panelId="nav-studio-mega"
+                    label={NAV_LABELS.studio}
+                    open={studioMega.open}
+                    onToggle={toggleStudioMega}
+                    active={isStudioNavActive(pathname)}
                   />
                 </div>
-                <div
-                  key="nav-explore"
-                  ref={exploreMega.triggerRef}
-                  className="relative"
-                  onMouseEnter={openExploreMenu}
-                  onMouseLeave={exploreMega.scheduleClose}
-                >
-                  <DesktopMegaMenuTrigger
-                    menuId="explore"
-                    panelId="nav-explore-mega"
-                    label="Explore"
-                    open={exploreMega.open}
-                    onToggle={() => exploreMega.setOpen((v) => !v)}
-                    active={isExploreNavActive(pathname)}
-                  />
-                </div>
-                <div
-                  key="nav-resources"
-                  ref={resourcesMega.triggerRef}
-                  className="relative"
-                  onMouseEnter={openResourcesMenu}
-                  onMouseLeave={resourcesMega.scheduleClose}
-                >
-                  <DesktopMegaMenuTrigger
-                    menuId="resources"
-                    panelId="nav-resources-mega"
-                    label="Modules"
-                    open={resourcesMega.open}
-                    onToggle={() => resourcesMega.setOpen((v) => !v)}
-                    active={isResourcesNavActive(pathname)}
-                  />
+                <DesktopNavTextLink
+                  href="/pricing"
+                  label={NAV_LABELS.pricing}
+                  active={isPricingNavActive(pathname)}
+                />
                 </div>
               </div>
 
@@ -1128,40 +1223,20 @@ export default function Navbar() {
           </div>
         </div>
 
-          {/* Resources mega panel */}
+          {/* Creations mega panel */}
           <div
-            ref={resourcesMega.panelRef}
-            id="nav-resources-mega"
+            ref={creationsMega.panelRef}
+            id="nav-creations-mega"
             role="region"
-            aria-labelledby="nav-resources-trigger"
-            onMouseEnter={resourcesMega.cancelClose}
-            onMouseLeave={resourcesMega.scheduleClose}
-            aria-hidden={!resourcesMega.open}
-            className={`absolute left-0 right-0 top-full z-[80] w-full min-w-0 max-lg:hidden ${
-              resourcesMega.open
+            aria-labelledby="nav-creations-trigger"
+            aria-hidden={!creationsMega.open}
+            className={`absolute left-0 right-0 top-full z-[80] w-full min-w-0 transition-opacity duration-200 max-lg:hidden ${
+              creationsMega.open
                 ? "pointer-events-auto visible opacity-100"
                 : "pointer-events-none invisible opacity-0"
             }`}
           >
-            <DesktopResourcesMegaPanel onLinkClick={() => resourcesMega.setOpen(false)} />
-          </div>
-
-          {/* Media mega panel */}
-          <div
-            ref={originalsMega.panelRef}
-            id="nav-originals-mega"
-            role="region"
-            aria-labelledby="nav-originals-trigger"
-            onMouseEnter={originalsMega.cancelClose}
-            onMouseLeave={originalsMega.scheduleClose}
-            aria-hidden={!originalsMega.open}
-            className={`absolute left-0 right-0 top-full z-[80] w-full min-w-0 max-lg:hidden ${
-              originalsMega.open
-                ? "pointer-events-auto visible opacity-100"
-                : "pointer-events-none invisible opacity-0"
-            }`}
-          >
-            <DesktopOriginalsMegaPanel onLinkClick={() => originalsMega.setOpen(false)} />
+            <DesktopCreationsMegaPanel onLinkClick={() => creationsMega.setOpen(false)} />
           </div>
 
           {/* Industries mega panel */}
@@ -1170,10 +1245,8 @@ export default function Navbar() {
             id="nav-industries-mega"
             role="region"
             aria-labelledby="nav-industries-trigger"
-            onMouseEnter={industriesMega.cancelClose}
-            onMouseLeave={industriesMega.scheduleClose}
             aria-hidden={!industriesMega.open}
-            className={`absolute left-0 right-0 top-full z-[80] w-full min-w-0 max-lg:hidden ${
+            className={`absolute left-0 right-0 top-full z-[80] w-full min-w-0 transition-opacity duration-200 max-lg:hidden ${
               industriesMega.open
                 ? "pointer-events-auto visible opacity-100"
                 : "pointer-events-none invisible opacity-0"
@@ -1186,22 +1259,20 @@ export default function Navbar() {
             />
           </div>
 
-          {/* Explore mega panel (trigger order: Media before Explore) */}
+          {/* Studio mega panel */}
           <div
-            ref={exploreMega.panelRef}
-            id="nav-explore-mega"
+            ref={studioMega.panelRef}
+            id="nav-studio-mega"
             role="region"
-            aria-labelledby="nav-explore-trigger"
-            onMouseEnter={exploreMega.cancelClose}
-            onMouseLeave={exploreMega.scheduleClose}
-            aria-hidden={!exploreMega.open}
-            className={`absolute left-0 right-0 top-full z-[80] w-full min-w-0 max-lg:hidden ${
-              exploreMega.open
+            aria-labelledby="nav-studio-trigger"
+            aria-hidden={!studioMega.open}
+            className={`absolute left-0 right-0 top-full z-[80] w-full min-w-0 transition-opacity duration-200 max-lg:hidden ${
+              studioMega.open
                 ? "pointer-events-auto visible opacity-100"
                 : "pointer-events-none invisible opacity-0"
             }`}
           >
-            <DesktopExploreMegaPanel onLinkClick={() => exploreMega.setOpen(false)} />
+            <DesktopStudioMegaPanel onLinkClick={() => studioMega.setOpen(false)} />
           </div>
         </nav>
       </header>
@@ -1233,16 +1304,30 @@ export default function Navbar() {
 
             <div className="flex min-h-[calc(100dvh-6rem)] flex-col">
               <nav className="flex flex-col gap-1">
-                {/* Industries section */}
-                <p className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-white/40">Industries</p>
+                <p className="px-1 font-mono text-[11px] font-bold uppercase tracking-[0.32em] text-white/60">
+                  {NAV_LABELS.creations}
+                </p>
+                {CREATIONS_MOBILE_LINKS.map((link) => (
+                  <MobileNavLink
+                    key={link.href}
+                    href={link.href}
+                    label={link.label}
+                    pathname={pathname}
+                    onSamePathClose={closeIfSamePath}
+                  />
+                ))}
+
+                <p className="mt-5 px-1 font-mono text-[11px] font-bold uppercase tracking-[0.32em] text-white/60">
+                  {NAV_LABELS.industries}
+                </p>
                 <MobileNavLink
                   href="/industries"
-                  label="✦ All Industries"
+                  label="All industries"
                   pathname={pathname}
                   onSamePathClose={closeIfSamePath}
                 />
                 {industriesLoading ? (
-                  <p className="px-5 py-2 text-sm font-light text-white/50">Loading…</p>
+                  <p className="px-5 py-2 text-sm font-medium text-white/55">Loading…</p>
                 ) : (
                   navIndustries.map((ind) => (
                     <MobileNavLink
@@ -1255,9 +1340,10 @@ export default function Navbar() {
                   ))
                 )}
 
-                {/* Originals section */}
-                <p className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-white/40">Originals</p>
-                {MEDIA_DESTINATIONS.map((link) => (
+                <p className="mt-5 px-1 font-mono text-[11px] font-bold uppercase tracking-[0.32em] text-white/60">
+                  {NAV_LABELS.studio}
+                </p>
+                {STUDIO_MOBILE_LINKS.map((link) => (
                   <MobileNavLink
                     key={link.href}
                     href={link.href}
@@ -1267,56 +1353,15 @@ export default function Navbar() {
                   />
                 ))}
 
-                {/* Modules section */}
-                <p className="mt-4 px-1 font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-white/40">Modules</p>
-                <MobileNavLink href="/modules" label="✦ All Modules" pathname={pathname} onSamePathClose={closeIfSamePath} />
-                {MODULES_DESTINATIONS.map((item) => (
-                  <MobileNavLink
-                    key={item.href}
-                    href={item.href}
-                    label={item.label}
-                    pathname={pathname}
-                    onSamePathClose={closeIfSamePath}
-                  />
-                ))}
-
-                {/* Primary links: Events */}
-                {PRIMARY_NAV_LINKS.map((link) => (
-                  <MobileNavLink
-                    key={link.label}
-                    href={link.href}
-                    label={link.label}
-                    pathname={pathname}
-                    onSamePathClose={closeIfSamePath}
-                  />
-                ))}
-
-                <p className="mt-4 px-1 font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-white/40">Avatars</p>
+                <p className="mt-5 px-1 font-mono text-[11px] font-bold uppercase tracking-[0.32em] text-white/60">
+                  {NAV_LABELS.pricing}
+                </p>
                 <MobileNavLink
-                  href="/avatars"
-                  label="All avatars"
+                  href="/pricing"
+                  label="Packages & pricing"
                   pathname={pathname}
                   onSamePathClose={closeIfSamePath}
                 />
-                {AVATAR_DESTINATIONS.map((link) => (
-                  <MobileNavLink
-                    key={link.href}
-                    href={link.href}
-                    label={link.label}
-                    pathname={pathname}
-                    onSamePathClose={closeIfSamePath}
-                  />
-                ))}
-                <p className="mt-4 px-1 font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-white/40">Socials</p>
-                {SOCIAL_DESTINATIONS.map((link) => (
-                  <MobileNavLink
-                    key={link.href}
-                    href={link.href}
-                    label={link.label}
-                    pathname={pathname}
-                    onSamePathClose={closeIfSamePath}
-                  />
-                ))}
       </nav>
 
               <div className="mt-10 flex flex-col gap-4">

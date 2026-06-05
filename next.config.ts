@@ -34,34 +34,28 @@ if (supabaseUrl) {
   }
 }
 
+const s3Bucket = process.env.AWS_S3_BUCKET?.trim();
+const s3Region = (process.env.AWS_S3_REGION ?? process.env.AWS_REGION)?.trim();
+if (s3Bucket && s3Region) {
+  remotePatterns.push({
+    protocol: "https",
+    hostname: `${s3Bucket}.s3.${s3Region}.amazonaws.com`,
+    pathname: "/**",
+  });
+} else {
+  // Public industry/gallery assets (virtual-hosted style)
+  remotePatterns.push({
+    protocol: "https",
+    hostname: "yourailens.s3.ap-south-1.amazonaws.com",
+    pathname: "/**",
+  });
+}
+
 const nextConfig: NextConfig = {
   // Native binaries (ffmpeg) must resolve from node_modules at runtime on Vercel.
   serverExternalPackages: ["ffmpeg-static", "sharp"],
   images: {
     remotePatterns,
-  },
-  async redirects() {
-    return [
-      { source: "/resources", destination: "/modules", permanent: true },
-      { source: "/prompts", destination: "/modules", permanent: true },
-      { source: "/prompts/:path*", destination: "/modules", permanent: true },
-      { source: "/outfits", destination: "/modules", permanent: true },
-      { source: "/outfits/:path*", destination: "/modules", permanent: true },
-      { source: "/character-sheets", destination: "/modules", permanent: true },
-      { source: "/character-sheets/:path*", destination: "/modules", permanent: true },
-      { source: "/scenarios", destination: "/modules", permanent: true },
-      { source: "/scenarios/:path*", destination: "/modules", permanent: true },
-      { source: "/locations", destination: "/modules", permanent: true },
-      { source: "/locations/:path*", destination: "/modules", permanent: true },
-      { source: "/props", destination: "/modules", permanent: true },
-      { source: "/props/:path*", destination: "/modules", permanent: true },
-      { source: "/lighting-presets", destination: "/modules", permanent: true },
-      { source: "/lighting-presets/:path*", destination: "/modules", permanent: true },
-      { source: "/color-grades", destination: "/modules", permanent: true },
-      { source: "/color-grades/:path*", destination: "/modules", permanent: true },
-      { source: "/mood-boards", destination: "/modules", permanent: true },
-      { source: "/mood-boards/:path*", destination: "/modules", permanent: true },
-    ];
   },
 };
 

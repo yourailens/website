@@ -95,8 +95,16 @@ export function QAHeroSection({
   mediaCaption?: string | null;
   children?: React.ReactNode;
 }) {
+  const hasMedia = Boolean(mediaUrl?.trim());
+
   return (
-    <div className="grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-start lg:gap-14">
+    <div
+      className={
+        hasMedia
+          ? "grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-start lg:gap-14"
+          : "max-w-3xl"
+      }
+    >
       <div>
         <IndustryEyebrow>{plainCopy(eyebrow)}</IndustryEyebrow>
         <h1
@@ -111,12 +119,12 @@ export function QAHeroSection({
         {children ? <div className="mt-6">{children}</div> : null}
       </div>
 
-      <div>
-        {mediaUrl ? (
+      {hasMedia ? (
+        <div>
           <IndustryCard className="p-2">
             <figure>
               <QAMedia
-                url={mediaUrl}
+                url={mediaUrl!}
                 mediaType={mediaType}
                 aspectRatio={aspectRatio}
                 posterUrl={posterUrl}
@@ -132,15 +140,51 @@ export function QAHeroSection({
               ) : null}
             </figure>
           </IndustryCard>
-        ) : (
-          <div
-            className={`flex items-center justify-center rounded-2xl border border-dashed border-blue-200/80 bg-white/60 px-6 text-center ${aspectRatioClass(aspectRatio)}`}
-          >
-            <p className="text-sm font-light text-slate-500">Sample work for this page is coming soon.</p>
-          </div>
-        )}
-      </div>
+        </div>
+      ) : null}
     </div>
+  );
+}
+
+function QAExampleMasonryCard({ ex }: { ex: IndustryPlaybookExample }) {
+  const alt = (ex.caption ?? ex.title)?.trim() || "Sample work";
+  const type = resolveMediaType(ex.media_type, ex.media_url);
+  const hasCaption = Boolean(ex.title?.trim() || ex.caption?.trim() || ex.service_slug);
+
+  return (
+    <figure className="mb-4 break-inside-avoid overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-100/80">
+      {type === "video" ? (
+        <div className={`relative w-full overflow-hidden bg-slate-100 ${aspectRatioClass(ex.aspect_ratio)}`}>
+          <DeferredVideo
+            src={ex.media_url}
+            poster={ex.poster_url}
+            className="h-full w-full object-cover"
+          />
+        </div>
+      ) : (
+        // Intrinsic dimensions — masonry shows each asset at its natural proportions
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={ex.media_url} alt={alt} className="block h-auto w-full bg-slate-50" loading="lazy" decoding="async" />
+      )}
+      {hasCaption ? (
+        <figcaption className="space-y-1.5 border-t border-blue-50 px-5 py-4">
+          {ex.title ? (
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600/90">{ex.title}</p>
+          ) : null}
+          {ex.caption?.trim() ? (
+            <p className="text-sm font-light leading-relaxed text-slate-600">{ex.caption.trim()}</p>
+          ) : null}
+          {ex.service_slug ? (
+            <Link
+              href={`/pricing/${ex.service_slug}`}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700"
+            >
+              View package <span aria-hidden>→</span>
+            </Link>
+          ) : null}
+        </figcaption>
+      ) : null}
+    </figure>
   );
 }
 
@@ -155,35 +199,9 @@ export function QAExampleGallery({ examples }: { examples: IndustryPlaybookExamp
   }
 
   return (
-    <div className="grid gap-5 sm:grid-cols-2">
-      {published.map((ex, i) => (
-        <IndustryCard key={ex.id} className={i % 3 === 1 ? "sm:col-span-2" : ""}>
-          <QAMedia
-            url={ex.media_url}
-            mediaType={ex.media_type}
-            aspectRatio={ex.aspect_ratio}
-            posterUrl={ex.poster_url}
-            alt={ex.caption ?? ex.title}
-            className={`relative w-full rounded-b-none rounded-t-2xl ring-0 ${aspectRatioClass(ex.aspect_ratio)}`}
-            sizes="(max-width:768px) 100vw, 50vw"
-          />
-          <figcaption className="space-y-1.5 border-t border-blue-50 px-5 py-4">
-            {ex.title ? (
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600/90">{ex.title}</p>
-            ) : null}
-            {ex.caption?.trim() ? (
-              <p className="text-sm font-light leading-relaxed text-slate-600">{ex.caption.trim()}</p>
-            ) : null}
-            {ex.service_slug ? (
-              <Link
-                href={`/pricing/${ex.service_slug}`}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700"
-              >
-                View package <span aria-hidden>→</span>
-              </Link>
-            ) : null}
-          </figcaption>
-        </IndustryCard>
+    <div className="columns-1 gap-x-4 sm:columns-2 lg:columns-3">
+      {published.map((ex) => (
+        <QAExampleMasonryCard key={ex.id} ex={ex} />
       ))}
     </div>
   );

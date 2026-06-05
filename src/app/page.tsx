@@ -7,8 +7,7 @@ import Navbar from "@/components/Navbar";
 import HomeHero from "@/components/home/HomeHero";
 import HomeBlueTint from "@/components/home/HomeBlueTint";
 import HomeIndiaOlympicsStory from "@/components/home/HomeIndiaOlympicsStory";
-import type { Service } from "@/data/services";
-import { formatPrice } from "@/data/services";
+import HomePricingPreview from "@/components/home/HomePricingPreview";
 
 const PAGE = "mx-auto max-w-7xl px-6 lg:px-10";
 
@@ -63,98 +62,6 @@ const FEATURED_FILMS = [
 
 
 
-// ─── Service Card ─────────────────────────────────────────────────────────────
-
-const CARD_IMG: Record<string, string> = {
-  "campaign-sprint":        "/images/img1.jpeg",
-  "brand-film":             "/images/img2.jpeg",
-  "full-launch-pack":       "/images/img3.jpeg",
-  "monthly-content-engine": "/images/img4.jpeg",
-  "product-stills-pack":    "/images/shoe.png",
-  "social-creatives-pack":  "/images/otshirt1.png",
-  "ai-brand-avatar":        "/images/ai_avatar1.jpeg",
-  "product-demo-video":     "/images/cologne.png",
-  "performance-ad-pack":    "/images/img5.jpeg",
-  "print-creatives-pack":   "/images/otshirt2.png",
-  "brand-style-guide":      "/images/ws1.png",
-  "brand-kit":              "/images/ws3.png",
-};
-const FALLBACK_IMGS = ["/images/img1.jpeg","/images/img2.jpeg","/images/img3.jpeg","/images/ai_avatar1.jpeg"];
-
-function ServiceCard({ s, idx }: { s: Service; idx: number }) {
-  const img  = s.header_image_url ?? s.thumbnail_url ?? CARD_IMG[s.slug] ?? FALLBACK_IMGS[idx % 4];
-  const imgRemote = /^https?:\/\//i.test(img);
-  const accent = s.accent_color ?? "#2563eb";
-  return (
-    <Link
-      href={`/pricing/${s.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
-    >
-      {/* Image */}
-      <div className="relative h-44 overflow-hidden bg-slate-100">
-        <Image
-          src={img} alt={s.name} fill loading="lazy"
-          className="object-cover transition duration-500 group-hover:scale-[1.04]"
-          unoptimized={imgRemote}
-        />
-      </div>
-
-      {/* Body */}
-      <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
-        {/* Category */}
-        <p className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400">
-          {s.category_slug?.replace(/-/g, " ")}
-        </p>
-
-        {/* Name + tagline — clamped so all cards have identical text height */}
-        <h3
-          className="line-clamp-1 font-body text-lg font-black leading-snug text-slate-900 transition-colors group-hover:text-blue-700"
-          style={{ letterSpacing: "-0.02em" }}
-        >
-          {s.name}
-        </h3>
-        <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-slate-500" style={{ minHeight: "2.8em" }}>{s.tagline}</p>
-
-        {/* Price */}
-        <div className="mt-4 flex items-baseline gap-1.5 border-t border-slate-100 pt-4">
-          <span className="font-body text-2xl font-black text-slate-900" style={{ letterSpacing: "-0.03em" }}>
-            {formatPrice(s.price)}
-          </span>
-          {s.unit && <span className="text-[11px] text-slate-400">{s.unit}</span>}
-          {s.traditional_value && (
-            <span className="ml-auto text-[11px] text-slate-400 line-through">
-              {formatPrice(s.traditional_value)}
-            </span>
-          )}
-        </div>
-
-        {/* Includes */}
-        <ul className="mt-3 space-y-1.5">
-          {s.includes.slice(0, 3).map((f) => (
-            <li key={f} className="flex items-center gap-2 text-[12px] text-slate-600">
-              <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-blue-50">
-                <svg width="7" height="5" viewBox="0 0 8 6" fill="none">
-                  <path d="M1 3L3 5L7 1" stroke={accent} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </span>
-              <span className="line-clamp-1">{f}</span>
-            </li>
-          ))}
-        </ul>
-
-        {/* CTA */}
-        <div
-          className="mt-5 flex items-center justify-between rounded-xl px-4 py-3 text-[12px] font-bold text-white transition group-hover:brightness-110"
-          style={{ background: accent }}
-        >
-          <span>View package</span>
-          <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
 function DeepDiveVideo({ src, poster, title }: { src: string; poster: string; title: string }) {
   return (
     <video
@@ -176,20 +83,9 @@ function DeepDiveVideo({ src, poster, title }: { src: string; poster: string; ti
 type WallImage = { id: string; src: string; title: string; aspect: string };
 
 export default function Home() {
-  const [featuredServices, setFeaturedServices] = useState<Service[]>([]);
   const [wallImages, setWallImages] = useState<WallImage[]>([]);
 
   useEffect(() => {
-    fetch("/api/services")
-      .then((r) => r.ok ? r.json() : Promise.resolve({}))
-      .then((j: { services?: Service[] }) => {
-        if (Array.isArray(j.services)) {
-          const sorted = [...j.services].sort((a, b) => a.price - b.price);
-          setFeaturedServices(sorted.slice(0, 4));
-        }
-      })
-      .catch(() => {});
-
     fetch("/api/gallery/images")
       .then((r) => r.ok ? r.json() : Promise.resolve({}))
       .then((j: { images?: WallImage[] }) => {
@@ -344,66 +240,6 @@ export default function Home() {
       </HomeBlueTint>
 
 
-      {/* ── SERVICE CATALOGUE ─────────────────────────────────────────── */}
-      <HomeBlueTint id="services" className="scroll-mt-20 border-t border-blue-100/60 pt-10 pb-16 lg:pt-12 lg:pb-24">
-        <div className={PAGE}>
-          <div className="mb-2 flex items-center gap-2">
-            <div className="h-px w-6 bg-blue-500" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-blue-500">What we offer</span>
-          </div>
-          <div className="mb-12 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-            {/* Left: heading */}
-            <h2
-              className="font-body text-4xl font-black text-slate-900 lg:text-5xl"
-              style={{ letterSpacing: "-0.03em", lineHeight: 1.02 }}
-            >
-              Production-grade creatives.<br className="hidden sm:block" />
-              <span className="text-blue-600">Built by AI.</span>
-            </h2>
-
-            <div className="flex shrink-0 flex-col items-start sm:items-end">
-              <p className="max-w-xs text-sm leading-relaxed text-slate-500 sm:text-right">
-                Every package includes multiple revisions, various formats, and full rights to every asset delivered.
-              </p>
-              <Link
-                href="/pricing"
-                className="mt-4 hidden items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-black text-white shadow-md transition hover:bg-blue-700 active:scale-95 sm:inline-flex"
-              >
-                Browse all packages & pricing
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
-                  <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </Link>
-            </div>
-          </div>
-
-          {featuredServices.length > 0 ? (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-              {featuredServices.map((s, i) => (
-                <ServiceCard key={s.id} s={s} idx={i} />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-[440px] animate-pulse rounded-2xl bg-slate-100" />
-              ))}
-            </div>
-          )}
-
-          <Link
-            href="/pricing"
-            className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-black text-white shadow-md transition hover:bg-blue-700 active:scale-95 sm:hidden"
-          >
-            Browse all packages & pricing
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
-              <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </Link>
-
-        </div>
-      </HomeBlueTint>
-
       {/* ── INDIA IN OLYMPICS — special storytelling film ───────────────── */}
       <HomeBlueTint className="border-t border-blue-100/60 py-14 lg:py-20">
         <HomeIndiaOlympicsStory />
@@ -513,6 +349,9 @@ export default function Home() {
           </div>
         </div>
       </HomeBlueTint>
+
+      {/* ── PACKAGES (preview) — second-to-last ─────────────────────────── */}
+      <HomePricingPreview />
 
       {/* ── CONCLUSION CTA ──────────────────────────────────────────────── */}
       <HomeBlueTint className="border-t border-blue-100/60 py-16 lg:py-24">

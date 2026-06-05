@@ -3,7 +3,10 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import type { PlaybookPageData } from "@/data/industries";
-import { resolvePlaybookHeroMedia } from "@/lib/industries/resolve-hero-media";
+import {
+  resolvePlaybookCoverExample,
+  resolvePlaybookHeroMedia,
+} from "@/lib/industries/resolve-hero-media";
 import { clientHeadline, industryEyebrow } from "../../industry-copy";
 import {
   IndustryBreadcrumb,
@@ -32,6 +35,10 @@ export default function PlaybookMagazineExperience({ data }: { data: PlaybookPag
     playbook.description ??
     `YourAI Lens Studio creates production-grade visuals for ${industry.name} brands. Below is sample work from recent projects in this category.`;
   const hero = resolvePlaybookHeroMedia(industry, playbook.examples);
+  const heroExample = resolvePlaybookCoverExample(playbook.examples);
+  const galleryExamples = heroExample
+    ? playbook.examples.filter((e) => e.id !== heroExample.id)
+    : playbook.examples;
   const topicName = playbook.name;
 
   const prev = siblings[playbookIndex - 1];
@@ -64,18 +71,20 @@ export default function PlaybookMagazineExperience({ data }: { data: PlaybookPag
         />
       </IndustryHeroBand>
 
-      <IndustryTintSection>
-        <IndustryEyebrow>This playbook</IndustryEyebrow>
-        <IndustrySectionTitle accent={<span className="font-semibold text-blue-700">inside</span>}>
-          Sample work
-        </IndustrySectionTitle>
-        <p className="mt-3 max-w-xl text-sm font-light leading-relaxed text-slate-600">
-          Examples from this playbook: films, stills, and campaign assets we produce for {industry.name} clients.
-        </p>
-        <div className="mt-10">
-          <QAExampleGallery examples={playbook.examples} />
-        </div>
-      </IndustryTintSection>
+      {galleryExamples.some((e) => e.published) ? (
+        <IndustryTintSection>
+          <IndustryEyebrow>This playbook</IndustryEyebrow>
+          <IndustrySectionTitle accent={<span className="font-semibold text-blue-700">inside</span>}>
+            Sample work
+          </IndustrySectionTitle>
+          <p className="mt-3 max-w-xl text-sm font-light leading-relaxed text-slate-600">
+            Examples from this playbook: films, stills, and campaign assets we produce for {industry.name} clients.
+          </p>
+          <div className="mt-10">
+            <QAExampleGallery examples={galleryExamples} />
+          </div>
+        </IndustryTintSection>
+      ) : null}
 
       {playbook.description && playbook.description !== body ? (
         <IndustryTintSection>
