@@ -117,6 +117,14 @@ export function studioModuleCoverUrl(mod: StudioModule, items?: StudioModuleItem
   return first ? studioModuleItemMediaUrl(first) : null;
 }
 
+/** Best still image for link previews (WhatsApp, OG). Prefers cover, then first gallery image. */
+export function studioModuleShareImageUrl(mod: StudioModule, items?: StudioModuleItem[]): string | null {
+  if (mod.cover_image_url?.trim()) return mod.cover_image_url.trim();
+  const firstImage = items?.find((i) => i.media_type === "image" && i.image_url?.trim());
+  if (firstImage?.image_url?.trim()) return firstImage.image_url.trim();
+  return null;
+}
+
 /** Trailing episode number from titles like "Prompt Playbooks 01". */
 export function studioModuleEpisodeLabel(title: string): string | null {
   const match = title.trim().match(/\s(\d{1,4})$/);
