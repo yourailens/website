@@ -9,21 +9,11 @@ export const NAV_LABELS = {
 
 export const MODULES_NAV_CATEGORIES = [
   {
-    label: "By discipline",
+    label: "Browse",
     items: [
-      { href: "/modules?discipline=photography", label: "Photography" },
-      { href: "/modules?discipline=video", label: "Video" },
-      { href: "/modules?discipline=design", label: "Design" },
-      { href: "/modules?discipline=motion", label: "Motion" },
-      { href: "/modules?discipline=social", label: "Social" },
-    ],
-  },
-  {
-    label: "Featured playbooks",
-    items: [
-      { href: "/modules/product-shoot", label: "Product Shoot" },
-      { href: "/modules/trailer-cut", label: "Trailer Cut" },
-      { href: "/modules/poster-design", label: "Poster Design" },
+      { href: "/modules/prompt-playbooks", label: "Prompt Playbooks" },
+      { href: "/modules/client-showcases", label: "Client Showcases" },
+      { href: "/modules/products-visuals", label: "Products & Visuals" },
     ],
   },
 ] as const;
@@ -176,10 +166,10 @@ export const NAV_MEGA_VISUALS = {
     },
   },
   studio: {
-    playbooks: {
+    modules: {
       src: "/images/shoe.png",
-      alt: "Director playbook production",
-      caption: "Director playbooks",
+      alt: "Studio modules gallery",
+      caption: "Modules",
     },
     libraries: {
       src: "/images/ws3.png",
@@ -204,10 +194,10 @@ export const INDUSTRY_MEGA_LEGACY_SLICE: Record<IndustryMegaSection, number> = {
   "brands-services": 2,
 };
 
-export type StudioMegaSection = "playbooks" | "libraries";
+export type StudioMegaSection = "modules" | "libraries";
 
 export const STUDIO_MEGA_SIDEBAR: { id: StudioMegaSection; label: string }[] = [
-  { id: "playbooks", label: "Director playbooks" },
+  { id: "modules", label: "Modules" },
   { id: "libraries", label: "Reference libraries" },
 ];
 
@@ -223,7 +213,7 @@ export const CREATIONS_MOBILE_LINKS = [
 ] as const;
 
 export const STUDIO_MOBILE_LINKS = [
-  { href: "/modules", label: "Director playbooks" },
+  { href: "/modules", label: "Modules" },
   { href: "/resources", label: "Reference library" },
 ] as const;
 

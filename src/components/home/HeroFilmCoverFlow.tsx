@@ -12,7 +12,7 @@ type FilmItem = {
 /** Four homepage hero clips (compressed in public/videos). */
 const HERO_FILMS: FilmItem[] = [
   { id: "hero2", src: "/videos/hero2.mp4", posterUrl: "/videos/hero2-poster.jpg", title: "Fine Sugar" },
-  { id: "hero", src: "/videos/hero.mp4", posterUrl: "/videos/hero-poster.jpg", title: "Done & Dusted" },
+  { id: "hero5", src: "/videos/hero5.mp4", posterUrl: "/videos/hero5-poster.jpg", title: "Earbuds Commercial" },
   { id: "hero3", src: "/videos/hero3.mp4", posterUrl: "/videos/hero3-poster.jpg", title: "The Teaser" },
   { id: "hero4", src: "/videos/hero4.mp4", posterUrl: "/videos/hero4-poster.jpg", title: "FPV Drone Shot" },
 ];

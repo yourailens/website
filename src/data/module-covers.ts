@@ -38,6 +38,7 @@ export function parseCoverVariants(raw: unknown): ModuleCoverVariants {
 }
 
 export function coverAspectClass(id: ModuleCoverAspectId | string): string {
+  if (id === "natural") return "";
   return MODULE_COVER_ASPECTS.find((a) => a.id === id)?.className ?? "aspect-[16/10]";
 }
 

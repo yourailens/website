@@ -77,9 +77,9 @@ export default function SiteFooter() {
               ))}
             </FooterColumn>
 
-            <FooterColumn title="Playbooks">
+            <FooterColumn title="Modules">
               <Link href="/modules" className={hubClass}>
-                All playbooks
+                All modules
               </Link>
               {MODULES_NAV_CATEGORIES.map((cat) => (
                 <div key={cat.label}>

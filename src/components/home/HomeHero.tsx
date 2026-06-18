@@ -58,12 +58,16 @@ export default function HomeHero() {
               </span>
             </h1>
 
-            <p className="mt-5 max-w-md text-base leading-relaxed font-light text-slate-600">
-              Full campaign films, ads, and brand assets,{" "}
-              <span className="font-medium italic text-slate-700">production grade</span>, delivered in{" "}
-              <span className="font-semibold text-blue-800">48 hours</span>, starting under{" "}
-              <span className="font-semibold text-blue-800">₹50,000</span>.
-            </p>
+            <div className="mt-5 max-w-md space-y-2 text-base leading-relaxed font-light text-slate-600">
+              <p>
+                Creativity is the crude oil,{" "}
+                <span className="font-medium italic text-slate-700">we are the refinery.</span>
+              </p>
+              <p>
+                Applied AI refinery to accelerate{" "}
+                <span className="font-semibold text-blue-800">business outcomes</span>.
+              </p>
+            </div>
 
             <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
               <Link

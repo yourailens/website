@@ -764,7 +764,7 @@ function MegaSidebarNavButton({
 }
 
 function DesktopStudioMegaPanel({ onLinkClick }: { onLinkClick: () => void }) {
-  const [section, setSection] = useState<StudioMegaSection>("playbooks");
+  const [section, setSection] = useState<StudioMegaSection>("modules");
   const visual = NAV_MEGA_VISUALS.studio[section];
 
   return (
@@ -776,7 +776,7 @@ function DesktopStudioMegaPanel({ onLinkClick }: { onLinkClick: () => void }) {
           onClick={onLinkClick}
           className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-800 transition hover:text-slate-950"
         >
-          All playbooks
+          All modules
         </Link>
         <Link
           href="/resources"
@@ -819,7 +819,7 @@ function DesktopStudioMegaPanel({ onLinkClick }: { onLinkClick: () => void }) {
             </div>
           )}
 
-          {section === "playbooks" && (
+          {section === "modules" && (
             <div className="grid gap-10 sm:grid-cols-2">
               {MODULES_CATEGORIES.map((cat) => (
                 <nav key={cat.label} aria-label={cat.label}>

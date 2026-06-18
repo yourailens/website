@@ -2,7 +2,8 @@ import type { MetadataRoute } from "next";
 import { getGalleryFilms, getGalleryImages } from "@/lib/gallery/load";
 import { galleryRouteId } from "@/lib/gallery/route-id";
 import { getAvatarSummaries } from "@/lib/avatars/load";
-import { getPublishedModules } from "@/lib/modules/load";
+import { getPublishedStudioModules } from "@/lib/studio-modules/load";
+import { STUDIO_MODULE_TYPE_SLUGS } from "@/data/studio-modules";
 
 function siteOrigin(): string {
   return (process.env.PUBLIC_SITE_URL?.trim() || "https://yourailens.studio").replace(/\/+$/, "");
@@ -24,6 +25,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/contact`, lastModified: new Date() },
     { url: `${base}/resources`, lastModified: new Date() },
     { url: `${base}/modules`, lastModified: new Date() },
+    { url: `${base}/modules/prompt-playbooks`, lastModified: new Date() },
+    { url: `${base}/modules/client-showcases`, lastModified: new Date() },
+    { url: `${base}/modules/products-visuals`, lastModified: new Date() },
     { url: `${base}/prompts`, lastModified: new Date() },
     { url: `${base}/outfits`, lastModified: new Date() },
     { url: `${base}/character-sheets`, lastModified: new Date() },
@@ -42,7 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       getGalleryImages(),
       getGalleryFilms(),
       getAvatarSummaries(),
-      getPublishedModules({ limit: 500 }),
+      getPublishedStudioModules({ limit: 500 }),
     ]);
 
     const imageUrls: MetadataRoute.Sitemap = images.map((img, i) => ({
@@ -61,7 +65,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
     const moduleUrls: MetadataRoute.Sitemap = modules.map((m) => ({
-      url: `${base}/modules/${encodeURIComponent(m.slug)}`,
+      url: `${base}/modules/${encodeURIComponent(STUDIO_MODULE_TYPE_SLUGS[m.module_type])}/${encodeURIComponent(m.slug)}`,
       lastModified: new Date(m.updated_at),
     }));
 

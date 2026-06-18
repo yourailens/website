@@ -365,7 +365,7 @@ export default function AdminDashboard() {
           </div>
           <div className="flex flex-wrap gap-3">
             <Link href="/admin/modules" className="rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-800">
-              Director modules
+              Modules
             </Link>
             <Link href="/admin/the-future" className="rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-900">
               The Future

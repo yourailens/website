@@ -35,12 +35,12 @@ const FEATURED_FILMS = [
     poster: "/videos/hero2-poster.jpg",
   },
   {
-    type: "Product launch",
-    title: "Done & Dusted",
+    type: "Product commercial",
+    title: "Earbuds Commercial",
     detail: "Hero + paid social",
-    blurb: "Motion led product story built for organic and paid channels.",
-    video: "/videos/hero.mp4",
-    poster: "/videos/hero-poster.jpg",
+    blurb: "Product-led commercial built for launch day, organic, and paid channels.",
+    video: "/videos/hero5.mp4",
+    poster: "/videos/hero5-poster.jpg",
   },
   {
     type: "Drop teaser",
