@@ -57,6 +57,20 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns,
   },
+  async redirects() {
+    return [
+      {
+        source: "/modules/products-visuals",
+        destination: "/modules/subjects-visuals",
+        permanent: true,
+      },
+      {
+        source: "/modules/products-visuals/:slug",
+        destination: "/modules/subjects-visuals/:slug",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -42,7 +42,7 @@ export default function ModulesHubExperience() {
               Modules
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate-600 md:text-lg">
-              Prompt playbooks, client showcases, and product visuals — each a shareable gallery with
+              Prompt playbooks, client showcases, and subjects & visuals — each a shareable gallery with
               images, videos, and copy-ready prompts.
             </p>
           </div>

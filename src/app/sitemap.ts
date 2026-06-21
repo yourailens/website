@@ -27,7 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/modules`, lastModified: new Date() },
     { url: `${base}/modules/prompt-playbooks`, lastModified: new Date() },
     { url: `${base}/modules/client-showcases`, lastModified: new Date() },
-    { url: `${base}/modules/products-visuals`, lastModified: new Date() },
+    { url: `${base}/modules/subjects-visuals`, lastModified: new Date() },
     { url: `${base}/prompts`, lastModified: new Date() },
     { url: `${base}/outfits`, lastModified: new Date() },
     { url: `${base}/character-sheets`, lastModified: new Date() },

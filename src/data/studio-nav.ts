@@ -13,7 +13,7 @@ export const MODULES_NAV_CATEGORIES = [
     items: [
       { href: "/modules/prompt-playbooks", label: "Prompt Playbooks" },
       { href: "/modules/client-showcases", label: "Client Showcases" },
-      { href: "/modules/products-visuals", label: "Products & Visuals" },
+      { href: "/modules/subjects-visuals", label: "Subjects & Visuals" },
     ],
   },
 ] as const;

@@ -5,39 +5,42 @@ import Navbar from "@/components/Navbar";
 import ModuleGalleryCard from "@/components/modules/ModuleGalleryCard";
 import type { StudioModuleWithItems } from "@/data/studio-modules";
 import {
-  STUDIO_MODULE_TYPE_LABELS,
+  STUDIO_MODULE_LIST_BACK_LABEL,
+  STUDIO_MODULE_SERIES_THEME,
   studioModuleCoverUrl,
   studioModuleDisplayTitle,
   studioModuleEpisodeLabel,
   studioModuleListPath,
+  studioModuleUsesSeriesLayout,
 } from "@/data/studio-modules";
 
 export default function ModuleGalleryExperience({ mod }: { mod: StudioModuleWithItems }) {
-  const typeLabel = STUDIO_MODULE_TYPE_LABELS[mod.module_type];
   const items = mod.items.filter((i) => i.image_url || i.video_url);
   const cover = studioModuleCoverUrl(mod, mod.items);
   const episode = studioModuleEpisodeLabel(mod.title);
   const displayTitle = studioModuleDisplayTitle(mod.title);
-  const isPlaybook = mod.module_type === "prompt_playbooks";
+  const isSeries = studioModuleUsesSeriesLayout(mod.module_type);
+  const theme = STUDIO_MODULE_SERIES_THEME[mod.module_type];
+  const backLabel = STUDIO_MODULE_LIST_BACK_LABEL[mod.module_type];
 
   return (
     <>
       <Navbar />
       <div className="min-h-screen bg-[#f4f7fc]">
-        {isPlaybook ? (
-          <section className="w-full border-b border-violet-100/90 bg-gradient-to-r from-[#faf8ff] via-white to-[#f6f2ff]">
+        {isSeries ? (
+          <section className={`w-full border-b ${theme.heroBorder} ${theme.heroBg}`}>
             <div className="flex min-h-[3.25rem] w-full items-center gap-3 px-4 py-2.5 sm:gap-4 sm:px-6 lg:px-10">
               <Link
                 href={studioModuleListPath(mod.module_type)}
-                className="shrink-0 font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-violet-600 hover:text-violet-800 sm:text-[10px]"
+                className={`shrink-0 font-mono text-[9px] font-bold uppercase tracking-[0.28em] ${theme.link} ${theme.linkHover} sm:text-[10px]`}
               >
-                ← All playbooks
+                ← {backLabel}
               </Link>
 
-              <span className="hidden h-4 w-px shrink-0 bg-violet-200/80 sm:block" aria-hidden />
+              <span className={`hidden h-4 w-px shrink-0 sm:block ${theme.heroDivider}`} aria-hidden />
 
               {episode ? (
-                <span className="shrink-0 font-mono text-[10px] font-bold tabular-nums tracking-widest text-violet-500">
+                <span className={`shrink-0 font-mono text-[10px] font-bold tabular-nums tracking-widest ${theme.link}`}>
                   {episode}
                 </span>
               ) : null}
@@ -53,7 +56,7 @@ export default function ModuleGalleryExperience({ mod }: { mod: StudioModuleWith
                   </span>
                 ) : null}
                 {cover ? (
-                  <div className="h-9 w-7 overflow-hidden rounded-md border border-violet-100 bg-slate-100 shadow-sm sm:h-10 sm:w-8">
+                  <div className={`h-9 w-7 overflow-hidden rounded-md border bg-slate-100 shadow-sm sm:h-10 sm:w-8 ${theme.coverBorder}`}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={cover} alt="" className="h-full w-full object-cover" />
                   </div>
@@ -62,7 +65,7 @@ export default function ModuleGalleryExperience({ mod }: { mod: StudioModuleWith
             </div>
 
             {mod.description ? (
-              <div className="w-full border-t border-violet-100/70 px-4 py-2.5 sm:px-6 lg:px-10">
+              <div className={`w-full border-t px-4 py-2.5 sm:px-6 lg:px-10 ${theme.heroDescBorder}`}>
                 <p className="max-w-4xl text-xs leading-relaxed text-slate-600 sm:text-sm">
                   {mod.description}
                 </p>
@@ -70,34 +73,34 @@ export default function ModuleGalleryExperience({ mod }: { mod: StudioModuleWith
             ) : null}
           </section>
         ) : (
-          <section className="w-full border-b border-blue-100/80 bg-gradient-to-b from-white via-[#f8fbff] to-[#eef4ff]">
+          <section className={`w-full border-b ${theme.heroBorder} ${theme.heroBg}`}>
             <div className="flex min-h-[3.25rem] w-full flex-wrap items-center gap-3 px-4 py-2.5 sm:px-6 lg:px-10">
               <Link
                 href="/modules"
-                className="font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-blue-600 hover:text-blue-800 sm:text-[10px]"
+                className={`font-mono text-[9px] font-bold uppercase tracking-[0.28em] ${theme.link} ${theme.linkHover} sm:text-[10px]`}
               >
                 Modules
               </Link>
               <span className="text-slate-300">/</span>
               <Link
                 href={studioModuleListPath(mod.module_type)}
-                className="font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-blue-600 hover:text-blue-800 sm:text-[10px]"
+                className={`font-mono text-[9px] font-bold uppercase tracking-[0.28em] ${theme.link} ${theme.linkHover} sm:text-[10px]`}
               >
-                {typeLabel}
+                {backLabel}
               </Link>
-              <span className="hidden h-4 w-px bg-slate-200 sm:block" aria-hidden />
+              <span className={`hidden h-4 w-px sm:block ${theme.heroDivider}`} aria-hidden />
               <h1 className="min-w-0 flex-1 truncate font-heading text-sm font-bold text-slate-900 sm:text-base">
                 {mod.title}
               </h1>
               {cover ? (
-                <div className="h-9 w-7 shrink-0 overflow-hidden rounded-md border border-slate-200 bg-slate-100 sm:h-10 sm:w-8">
+                <div className={`h-9 w-7 shrink-0 overflow-hidden rounded-md border bg-slate-100 sm:h-10 sm:w-8 ${theme.coverBorder}`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={cover} alt="" className="h-full w-full object-cover" />
                 </div>
               ) : null}
             </div>
             {mod.description ? (
-              <div className="w-full border-t border-blue-50 px-4 py-2.5 sm:px-6 lg:px-10">
+              <div className={`w-full border-t px-4 py-2.5 sm:px-6 lg:px-10 ${theme.heroDescBorder}`}>
                 <p className="max-w-4xl text-xs leading-relaxed text-slate-600 sm:text-sm">{mod.description}</p>
               </div>
             ) : null}
@@ -112,7 +115,11 @@ export default function ModuleGalleryExperience({ mod }: { mod: StudioModuleWith
           ) : (
             <div className="columns-1 gap-3 sm:columns-2 sm:gap-4 lg:columns-3">
               {items.map((item) => (
-                <ModuleGalleryCard key={item.id} item={item} showPrompt />
+                <ModuleGalleryCard
+                  key={item.id}
+                  item={item}
+                  showPrompt={mod.module_type === "prompt_playbooks"}
+                />
               ))}
             </div>
           )}

@@ -1,63 +1,45 @@
 "use client";
 
 import Link from "next/link";
-import type { StudioModule, StudioModuleType } from "@/data/studio-modules";
+import type { StudioModule } from "@/data/studio-modules";
 import {
+  STUDIO_MODULE_SERIES_LABEL,
+  STUDIO_MODULE_SERIES_THEME,
+  STUDIO_MODULE_TYPE_ACCENTS,
   STUDIO_MODULE_TYPE_LABELS,
   studioModuleCoverUrl,
   studioModuleDetailPath,
   studioModuleDisplayTitle,
   studioModuleEpisodeLabel,
+  studioModuleUsesSeriesLayout,
 } from "@/data/studio-modules";
-
-const TYPE_THEME: Record<
-  StudioModuleType,
-  { ring: string; badge: string; glow: string; cta: string; num: string }
-> = {
-  prompt_playbooks: {
-    ring: "group-hover:ring-violet-200",
-    badge: "bg-violet-600/90 text-white",
-    glow: "group-hover:shadow-violet-200/60",
-    cta: "text-violet-700",
-    num: "text-violet-200",
-  },
-  client_showcases: {
-    ring: "group-hover:ring-blue-200",
-    badge: "bg-blue-600/90 text-white",
-    glow: "group-hover:shadow-blue-200/60",
-    cta: "text-blue-700",
-    num: "text-blue-200",
-  },
-  products_visuals: {
-    ring: "group-hover:ring-emerald-200",
-    badge: "bg-emerald-600/90 text-white",
-    glow: "group-hover:shadow-emerald-200/60",
-    cta: "text-emerald-700",
-    num: "text-emerald-200",
-  },
-};
 
 export default function ModuleListCard({
   mod,
   variant = "grid",
 }: {
   mod: StudioModule;
-  variant?: "grid" | "playbook";
+  variant?: "grid" | "series";
 }) {
   const cover = studioModuleCoverUrl(mod);
   const episode = studioModuleEpisodeLabel(mod.title);
   const displayTitle = studioModuleDisplayTitle(mod.title);
-  const theme = TYPE_THEME[mod.module_type];
+  const theme = STUDIO_MODULE_SERIES_THEME[mod.module_type];
   const href = studioModuleDetailPath(mod.module_type, mod.slug);
-  const isPlaybook = variant === "playbook" || mod.module_type === "prompt_playbooks";
+  const isSeries =
+    variant === "series" ||
+    (variant === "grid" && studioModuleUsesSeriesLayout(mod.module_type));
 
-  if (isPlaybook) {
+  if (isSeries) {
+    const seriesLabel = STUDIO_MODULE_SERIES_LABEL[mod.module_type];
     return (
       <Link
         href={href}
         className={`group relative flex break-inside-avoid flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm ring-1 ring-slate-100/80 transition duration-300 hover:-translate-y-1 hover:shadow-xl ${theme.ring} ${theme.glow}`}
       >
-        <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-slate-100 via-violet-50/30 to-slate-200">
+        <div
+          className={`relative aspect-[3/4] overflow-hidden bg-gradient-to-br ${theme.cardGradient}`}
+        >
           {cover ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -86,11 +68,13 @@ export default function ModuleListCard({
 
         <div className="relative flex flex-1 flex-col p-5">
           {episode ? (
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-violet-600">
-              Episode {episode}
+            <p className={`font-mono text-[10px] font-bold uppercase tracking-[0.35em] ${theme.episode}`}>
+              {seriesLabel} {episode}
             </p>
           ) : null}
-          <h2 className="mt-2 font-heading text-xl font-bold leading-snug text-slate-900 transition group-hover:text-violet-900">
+          <h2
+            className={`mt-2 font-heading text-xl font-bold leading-snug text-slate-900 transition ${theme.hoverTitle}`}
+          >
             {displayTitle}
           </h2>
           {mod.description ? (
@@ -127,7 +111,7 @@ export default function ModuleListCard({
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-transparent to-transparent" />
         <span
-          className={`absolute left-3 top-3 rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${theme.badge} border-transparent`}
+          className={`absolute left-3 top-3 rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${STUDIO_MODULE_TYPE_ACCENTS[mod.module_type]}`}
         >
           {STUDIO_MODULE_TYPE_LABELS[mod.module_type]}
         </span>
