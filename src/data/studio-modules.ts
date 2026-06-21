@@ -54,9 +54,18 @@ export const STUDIO_MODULE_TYPE_ACCENTS: Record<StudioModuleType, string> = {
   subjects_visuals: "bg-emerald-50 text-emerald-700 border-emerald-200",
 };
 
+/** Gallery items may expose copyable prompts on these module types. */
+export function studioModuleShowsPrompts(type: StudioModuleType): boolean {
+  return type === "prompt_playbooks" || type === "subjects_visuals";
+}
+
 /** Types that use the playbook-style series cards + strip hero + masonry gallery. */
 export function studioModuleUsesSeriesLayout(type: StudioModuleType): boolean {
-  return type === "prompt_playbooks" || type === "client_showcases";
+  return (
+    type === "prompt_playbooks" ||
+    type === "client_showcases" ||
+    type === "subjects_visuals"
+  );
 }
 
 export const STUDIO_MODULE_LIST_BACK_LABEL: Record<StudioModuleType, string> = {

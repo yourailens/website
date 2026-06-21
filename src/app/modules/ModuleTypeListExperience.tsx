@@ -20,6 +20,9 @@ function listMeta(type: StudioModuleType, count: number): string | null {
   if (type === "client_showcases") {
     return `${count} showcase${count === 1 ? "" : "s"} · campaign work and deliverables`;
   }
+  if (type === "subjects_visuals") {
+    return `${count} volume${count === 1 ? "" : "s"} · subject-led hero shots and styling`;
+  }
   return null;
 }
 

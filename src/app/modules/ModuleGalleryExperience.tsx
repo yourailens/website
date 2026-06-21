@@ -11,6 +11,7 @@ import {
   studioModuleDisplayTitle,
   studioModuleEpisodeLabel,
   studioModuleListPath,
+  studioModuleShowsPrompts,
   studioModuleUsesSeriesLayout,
 } from "@/data/studio-modules";
 
@@ -118,7 +119,8 @@ export default function ModuleGalleryExperience({ mod }: { mod: StudioModuleWith
                 <ModuleGalleryCard
                   key={item.id}
                   item={item}
-                  showPrompt={mod.module_type === "prompt_playbooks"}
+                  showPrompt={studioModuleShowsPrompts(mod.module_type)}
+                  promptAccent={mod.module_type}
                 />
               ))}
             </div>

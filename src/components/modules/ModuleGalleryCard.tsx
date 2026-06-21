@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { StudioModuleItem } from "@/data/studio-modules";
+import type { StudioModuleItem, StudioModuleType } from "@/data/studio-modules";
 import { studioModuleItemMediaUrl } from "@/data/studio-modules";
 import { coverAspectClass } from "@/data/module-covers";
 
@@ -27,7 +27,14 @@ function DeferredVideo({
   );
 }
 
-function CopyPromptButton({ prompt }: { prompt: string }) {
+const PROMPT_BUTTON_CLASS: Record<StudioModuleType, string> = {
+  prompt_playbooks:
+    "border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100",
+  client_showcases: "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100",
+  subjects_visuals: "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
+};
+
+function CopyPromptButton({ prompt, accent }: { prompt: string; accent: StudioModuleType }) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -44,7 +51,7 @@ function CopyPromptButton({ prompt }: { prompt: string }) {
     <button
       type="button"
       onClick={copy}
-      className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-[11px] font-bold text-violet-700 transition hover:bg-violet-100"
+      className={`mt-2 inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[11px] font-bold transition ${PROMPT_BUTTON_CLASS[accent]}`}
     >
       {copied ? "Copied!" : "Copy prompt"}
     </button>
@@ -54,9 +61,11 @@ function CopyPromptButton({ prompt }: { prompt: string }) {
 export default function ModuleGalleryCard({
   item,
   showPrompt,
+  promptAccent = "prompt_playbooks",
 }: {
   item: StudioModuleItem;
   showPrompt?: boolean;
+  promptAccent?: StudioModuleType;
 }) {
   const url = studioModuleItemMediaUrl(item);
   if (!url) return null;
@@ -98,7 +107,7 @@ export default function ModuleGalleryCard({
               <pre className="max-h-40 overflow-auto rounded-lg bg-slate-50 p-3 font-mono text-[11px] leading-relaxed text-slate-700 whitespace-pre-wrap">
                 {item.prompt!.trim()}
               </pre>
-              <CopyPromptButton prompt={item.prompt!.trim()} />
+              <CopyPromptButton prompt={item.prompt!.trim()} accent={promptAccent} />
             </div>
           ) : null}
         </figcaption>
