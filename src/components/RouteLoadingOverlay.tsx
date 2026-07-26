@@ -137,16 +137,21 @@ export default function RouteLoadingOverlay() {
     pollTimerRef.current = window.setTimeout(tick, 140);
   }
 
+  /** Pricing has its own inline skeletons/transitions — never show the global overlay there. */
+  function isExcludedPath(p: string) {
+    return p.startsWith("/admin") || p.startsWith("/pricing");
+  }
+
   useEffect(() => {
     if (!mountedRef.current) {
       mountedRef.current = true;
-      if (!pathname.startsWith("/admin") && pathname !== "/") {
+      if (!isExcludedPath(pathname) && pathname !== "/") {
         openOverlay();
         closeWhenMediaReady();
       }
       return;
     }
-    if (pathname.startsWith("/admin")) return;
+    if (isExcludedPath(pathname)) return;
     if (pathname === "/") {
       // arrived at homepage — dismiss any overlay that was triggered by back-nav
       closeOverlayNow();
@@ -158,7 +163,7 @@ export default function RouteLoadingOverlay() {
   }, [pathname]);
 
   useEffect(() => {
-    if (pathname.startsWith("/admin")) return;
+    if (isExcludedPath(pathname)) return;
 
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented) return;
@@ -183,7 +188,7 @@ export default function RouteLoadingOverlay() {
         return;
       }
       if (url.origin !== window.location.origin) return;
-      if (url.pathname.startsWith("/admin")) return;
+      if (isExcludedPath(url.pathname)) return;
       if (url.pathname === "/") return;
       if (url.pathname === window.location.pathname && url.search === window.location.search) return;
 
@@ -193,7 +198,7 @@ export default function RouteLoadingOverlay() {
     const onPop = () => {
       // Don't open overlay when popping back to the homepage
       const dest = window.location.pathname;
-      if (dest === "/" || dest.startsWith("/admin")) return;
+      if (dest === "/" || isExcludedPath(dest)) return;
       openOverlay();
     };
 

@@ -4,6 +4,7 @@ import { galleryRouteId } from "@/lib/gallery/route-id";
 import { getAvatarSummaries } from "@/lib/avatars/load";
 import { getPublishedStudioModules } from "@/lib/studio-modules/load";
 import { STUDIO_MODULE_TYPE_SLUGS } from "@/data/studio-modules";
+import { loadPublicServices } from "@/lib/services/load";
 
 function siteOrigin(): string {
   return (process.env.PUBLIC_SITE_URL?.trim() || "https://yourailens.studio").replace(/\/+$/, "");
@@ -22,6 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/events/ai-creator-workshop/day-2`, lastModified: new Date() },
     { url: `${base}/avatars`, lastModified: new Date() },
     { url: `${base}/pricing`, lastModified: new Date() },
+    { url: `${base}/pricing/estimator`, lastModified: new Date() },
     { url: `${base}/contact`, lastModified: new Date() },
     { url: `${base}/resources`, lastModified: new Date() },
     { url: `${base}/modules`, lastModified: new Date() },
@@ -42,11 +44,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const [images, films, avatars, modules] = await Promise.all([
+    const [images, films, avatars, modules, packages] = await Promise.all([
       getGalleryImages(),
       getGalleryFilms(),
       getAvatarSummaries(),
       getPublishedStudioModules({ limit: 500 }),
+      loadPublicServices(),
     ]);
 
     const imageUrls: MetadataRoute.Sitemap = images.map((img, i) => ({
@@ -69,7 +72,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(m.updated_at),
     }));
 
-    return [...staticUrls, ...imageUrls, ...filmUrls, ...avatarUrls, ...moduleUrls];
+    const packageUrls: MetadataRoute.Sitemap = packages.map((s) => ({
+      url: `${base}/pricing/${encodeURIComponent(s.slug)}`,
+      lastModified: new Date(s.updated_at || s.created_at),
+    }));
+
+    return [...staticUrls, ...packageUrls, ...imageUrls, ...filmUrls, ...avatarUrls, ...moduleUrls];
   } catch {
     return staticUrls;
   }

@@ -7,19 +7,19 @@ const HERO_IMAGE = "/images/call.png";
 
 const PACKAGE_NEEDS = [
   {
-    title: "Launch & campaign",
+    title: "AI commercials",
     description:
-      "Hero films, teasers, and launch-day cuts when you need one strong moment in market.",
+      "Starter, Growth, or Signature. Finished videos with script, production, and licensed audio.",
   },
   {
-    title: "Always-on content",
+    title: "Product and campaign stills",
     description:
-      "Monthly packs for social, ads, and product stories — without hiring a full studio.",
+      "Product Visuals Pack or Campaign Stills Suite. Hero shots and platform ready export sets.",
   },
   {
-    title: "Product & brand assets",
+    title: "Clear scope, fixed price",
     description:
-      "Stills, variants, and platform-ready creatives locked to your brand identity.",
+      "Five packages only. Open any package page for Q and A scope, sample gallery, and a direct enquiry.",
   },
 ] as const;
 
@@ -44,8 +44,8 @@ export default function HomePricingPreview() {
           <span className="text-blue-600">the way you work.</span>
         </h2>
         <p className="mt-3 max-w-2xl text-[13px] font-medium leading-relaxed text-slate-700 sm:mt-4 sm:text-sm">
-          From a single launch to an always-on content engine — pick a package shaped around your brief. Browse
-          pricing or map scope with the estimator.
+          From a single commercial to a full stills campaign. Five fixed packages with clear deliverables.
+          Open any package for sample work, or book a call if you need a custom scope.
         </p>
 
         <div className="mt-8 grid gap-6 sm:mt-10 sm:gap-8 lg:mt-12 lg:grid-cols-[1.05fr_1fr] lg:items-stretch lg:gap-10">
@@ -73,7 +73,7 @@ export default function HomePricingPreview() {
                     Fixed scope. Clear deliverables.
                   </p>
                   <p className="mt-1.5 hidden text-sm font-medium text-white/85 sm:mt-2 sm:block sm:max-w-sm">
-                    Films, stills, and campaign assets from one brief — delivered on your timeline.
+                    Films, stills, and campaign assets from one brief, delivered on your timeline.
                   </p>
                 </div>
               </div>
@@ -125,7 +125,7 @@ export default function HomePricingPreview() {
                 <Link href="/contact" className="font-bold text-blue-700 hover:underline">
                   Book a free call
                 </Link>{" "}
-                <span className="text-slate-600">— we&apos;ll match the right package to your goals.</span>
+                <span className="text-slate-600">and we will match the right package to your goals.</span>
               </p>
             </div>
           </div>
