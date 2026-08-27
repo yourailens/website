@@ -414,3 +414,21 @@ textarea {
   background-clip: text;
   animation: heroShimmer 5s linear infinite;
 }
+
+/* World of AI — slow push-in on the hero film */
+@keyframes woaiHeroPush {
+  from { transform: scale(1); }
+  to   { transform: scale(1.08); }
+}
+.woai-hero-push {
+  animation: woaiHeroPush 28s ease-out forwards;
+}
+
+@keyframes woaiScrollPulse {
+  0%, 100% { opacity: 0.35; transform: translateY(0); }
+  50%      { opacity: 0.9; transform: translateY(6px); }
+}
+.woai-scroll-cue {
+  animation: woaiScrollPulse 2.4s ease-in-out infinite;
+}
+

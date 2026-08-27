@@ -56,6 +56,11 @@ export const CREATIONS_MEGA_SIDEBAR: { id: CreationsMegaSection; label: string }
 
 export const CREATIONS_FUTURE_LINKS = [
   {
+    href: "/world-of-ai",
+    label: "World of AI",
+    description: "Interpretations, craft, and how the medium really works.",
+  },
+  {
     href: "/the-future/science-technology",
     label: "Science & Technology",
     description: "Research, systems, and what comes next.",
@@ -207,6 +212,7 @@ export const CREATIONS_MOBILE_LINKS = [
   { href: "/films", label: "Films & motion" },
   { href: "/avatars", label: "AI avatars" },
   { href: "/events", label: "Events" },
+  { href: "/world-of-ai", label: "World of AI" },
   { href: "/the-future", label: "The Future" },
   { href: "/instagram", label: "Instagram" },
   { href: "/youtube", label: "YouTube" },
@@ -224,6 +230,7 @@ export const EXPLORE_GALLERY_LINKS = [
 
 export const EXPLORE_FOOTER_LINKS = [
   { href: "/industries", label: "Industries" },
+  { href: "/world-of-ai", label: "World of AI" },
   { href: "/the-future", label: "The Future" },
   { href: "/images", label: "Stills" },
   { href: "/films", label: "Films" },

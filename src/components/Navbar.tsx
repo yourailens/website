@@ -452,7 +452,8 @@ function isCreationsNavActive(pathname: string) {
     pathname.startsWith("/avatars") ||
     pathname.startsWith("/instagram") ||
     pathname.startsWith("/youtube") ||
-    pathname.startsWith("/the-future")
+    pathname.startsWith("/the-future") ||
+    pathname.startsWith("/world-of-ai")
   );
 }
 

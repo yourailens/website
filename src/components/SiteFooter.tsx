@@ -50,6 +50,9 @@ export default function SiteFooter() {
               <Link href="/about" className={linkClass}>
                 About
               </Link>
+              <Link href="/world-of-ai" className={linkClass}>
+                World of AI
+              </Link>
               <Link href="/pricing" className={linkClass}>
                 Pricing
               </Link>
