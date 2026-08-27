@@ -10,7 +10,7 @@ function siteUrl() {
 
 const TITLE = "Pricing | YourAI Lens Studio";
 const DESCRIPTION =
-  "Five clear packages: Starter, Growth, and Signature AI commercials, plus Product Visuals and Campaign Stills. Fixed scope, clear deliverables.";
+  "5 packages. Brand Focus, Speed Focus, Virality Focus, Campaign Focus, and Custom. Pick why you are here."
 
 export async function generateMetadata(): Promise<Metadata> {
   const services = await loadPublicServices();

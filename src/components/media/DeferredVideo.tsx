@@ -1,65 +1,98 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 
-/**
- * Only attaches `src` and plays when near the viewport — avoids downloading
- * every MP4 on pages with many preview tiles (industry / playbook grids).
- */
-export function DeferredVideo({
-  src,
-  poster,
-  className,
-  /** Hero / above-the-fold: load soon, still avoids blocking other videos */
-  eager = false,
-  loop = true,
-}: {
+type DeferredVideoProps = {
   src: string;
   poster?: string | null;
   className?: string;
+  /** Hero / above-the-fold: attach src immediately */
   eager?: boolean;
   loop?: boolean;
-}) {
-  const ref = useRef<HTMLVideoElement>(null);
-  const [shouldLoad, setShouldLoad] = useState(eager);
+  controls?: boolean;
+  muted?: boolean;
+  /** How far before the viewport to start fetching. Pause still happens as soon as it leaves. */
+  rootMargin?: string;
+};
 
-  useEffect(() => {
-    if (eager) return;
-    const el = ref.current;
-    if (!el) return;
+export const DeferredVideo = forwardRef<HTMLVideoElement, DeferredVideoProps>(
+  function DeferredVideo(
+    {
+      src,
+      poster,
+      className,
+      eager = false,
+      loop = true,
+      controls = false,
+      muted = true,
+      rootMargin = "800px",
+    },
+    forwardedRef
+  ) {
+    const nodeRef = useRef<HTMLVideoElement>(null);
+    const inViewRef = useRef(eager);
+    const [shouldLoad, setShouldLoad] = useState(eager);
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) setShouldLoad(true);
-      },
-      { rootMargin: "120px", threshold: 0.05 }
+    useEffect(() => {
+      const node = nodeRef.current;
+      if (!node) return;
+
+      if (typeof forwardedRef === "function") forwardedRef(node);
+      else if (forwardedRef) forwardedRef.current = node;
+
+      const playIfReady = () => {
+        if (!inViewRef.current) return;
+        void node.play().catch(() => {});
+      };
+
+      const loadObserver = new IntersectionObserver(
+        ([entry]) => {
+          if (entry?.isIntersecting) setShouldLoad(true);
+        },
+        { rootMargin, threshold: 0 }
+      );
+
+      const playObserver = new IntersectionObserver(
+        ([entry]) => {
+          const visible = Boolean(entry?.isIntersecting);
+          inViewRef.current = visible;
+          if (visible) {
+            setShouldLoad(true);
+            playIfReady();
+          } else {
+            node.pause();
+          }
+        },
+        { rootMargin: "120px", threshold: 0 }
+      );
+
+      loadObserver.observe(node);
+      playObserver.observe(node);
+      node.addEventListener("canplay", playIfReady);
+      if (eager) playIfReady();
+
+      return () => {
+        loadObserver.disconnect();
+        playObserver.disconnect();
+        node.removeEventListener("canplay", playIfReady);
+        if (typeof forwardedRef === "function") forwardedRef(null);
+        else if (forwardedRef) forwardedRef.current = null;
+      };
+    }, [forwardedRef, rootMargin]);
+
+    return (
+      <video
+        ref={nodeRef}
+        src={shouldLoad ? src : undefined}
+        poster={poster ?? undefined}
+        className={className}
+        muted={muted}
+        loop={loop}
+        controls={controls}
+        playsInline
+        preload={shouldLoad ? "auto" : "none"}
+        onContextMenu={(event) => event.preventDefault()}
+      />
     );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [eager]);
-
-  useEffect(() => {
-    if (!shouldLoad) return;
-    const el = ref.current;
-    if (!el) return;
-    const play = () => {
-      void el.play().catch(() => {});
-    };
-    if (el.readyState >= 2) play();
-    else el.addEventListener("loadeddata", play, { once: true });
-    return () => el.removeEventListener("loadeddata", play);
-  }, [shouldLoad, src]);
-
-  return (
-    <video
-      ref={ref}
-      src={shouldLoad ? src : undefined}
-      poster={poster ?? undefined}
-      className={className}
-      muted
-      loop={loop}
-      playsInline
-      preload={shouldLoad ? "metadata" : "none"}
-    />
-  );
-}
+  }
+);
