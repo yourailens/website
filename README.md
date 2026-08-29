@@ -1,6 +1,6 @@
-# Yourailens Studios
+# YourAILens Studios
 
-Premium promotional landing page for an AI-based Ad, media and marketing agency.
+Premium promotional site for an applied AI studio focused on ads, media, and marketing.
 
 ## Hero Image
 
