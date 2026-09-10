@@ -4,7 +4,7 @@ import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import HomeBlueTint from "@/components/home/HomeBlueTint";
 import TeamWorkCard from "@/components/team/TeamWorkCard";
-import { TEAM_PAGE, TeamEyebrow, TeamProfileBar } from "@/components/team/TeamChrome";
+import { TEAM_PAGE, TeamEyebrow, TeamMonogram, TeamProfileBar } from "@/components/team/TeamChrome";
 import { TEAM_CALL_SHEETS } from "@/data/team-seed";
 import { teamMemberPortrait, type StudioTeamMemberPublic } from "@/data/studio-team";
 
@@ -70,9 +70,7 @@ export default function TeamMemberExperience({ member }: { member: StudioTeamMem
                     priority
                   />
                 ) : (
-                  <div className="flex h-full min-h-[320px] w-full items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/40 to-slate-50">
-                    <span className="font-heading text-[clamp(4rem,15vw,8rem)] text-slate-200">{member.name.charAt(0)}</span>
-                  </div>
+                  <TeamMonogram name={member.name} className="min-h-[320px]" />
                 )}
               </div>
               <figcaption className="mt-3 flex items-center justify-between gap-4 border-t border-blue-100/80 pt-3">

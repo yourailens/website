@@ -42,6 +42,27 @@ export function TeamMasthead({
   );
 }
 
+export function TeamMonogram({
+  name,
+  className = "",
+}: {
+  name: string;
+  className?: string;
+}) {
+  const letter = (name.trim().charAt(0) || "U").toUpperCase();
+  return (
+    <div
+      className={`relative flex h-full w-full items-center justify-center overflow-hidden bg-[#f4f8ff] ${className}`.trim()}
+      aria-hidden
+    >
+      <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(59,130,246,0.16),transparent_55%),radial-gradient(ellipse_at_80%_90%,rgba(37,99,235,0.08),transparent_50%)]" />
+      <span className="relative font-heading leading-none text-blue-600/80" style={{ fontSize: "clamp(4.5rem,18vw,9rem)" }}>
+        {letter}
+      </span>
+    </div>
+  );
+}
+
 export function TeamProfileBar({ unit }: { unit?: string }) {
   return (
     <div className="border-b border-blue-100/80 bg-white">

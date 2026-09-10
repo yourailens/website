@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import HomeBlueTint from "@/components/home/HomeBlueTint";
-import { TEAM_PAGE, TeamEyebrow, TeamMasthead } from "@/components/team/TeamChrome";
+import { TEAM_PAGE, TeamEyebrow, TeamMasthead, TeamMonogram } from "@/components/team/TeamChrome";
 import { teamMemberPortrait, type StudioTeamMemberPublic } from "@/data/studio-team";
 
 export default function TeamHubExperience({ members }: { members: StudioTeamMemberPublic[] }) {
@@ -60,9 +60,7 @@ export default function TeamHubExperience({ members }: { members: StudioTeamMemb
                             className="object-cover object-center transition duration-700 group-hover:scale-[1.02]"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center font-heading text-5xl text-slate-200">
-                            {m.name.slice(0, 1)}
-                          </div>
+                          <TeamMonogram name={m.name} />
                         )}
                       </div>
                       <div className="mt-4 flex items-baseline justify-between gap-3">
