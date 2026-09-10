@@ -768,11 +768,27 @@ export default function HomeStudioStory() {
               style={{ letterSpacing: "-0.04em" }}
             >
               What we plan to do next?{" "}
-              <span className="font-semibold text-blue-300">AI Films.</span>
+              <Link href="/ai-filmmaking" className="font-semibold text-blue-300 transition hover:text-blue-200">
+                AI Films.
+              </Link>
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-sm font-light leading-relaxed text-white/65">
               Commercials were the proof. Next we make cinema — longer stories, returning characters, worlds you can walk into.
             </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
+              <Link
+                href="/ai-filmmaking"
+                className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-300 transition hover:text-white"
+              >
+                AI Filmmaking →
+              </Link>
+              <Link
+                href="/ai-ads"
+                className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/55 transition hover:text-white"
+              >
+                AI Ads →
+              </Link>
+            </div>
           </div>
 
           <div className="relative mt-12 pb-8 lg:pb-24">

@@ -7,6 +7,7 @@ import {
   MODULES_NAV_CATEGORIES,
   NAV_LABELS,
   RESOURCES_NAV_CATEGORIES,
+  WORLD_OF_AI_FOOTER_LINKS,
 } from "@/data/studio-nav";
 import { SITE_CONTACT_EMAIL, SITE_LOCATION_LINE } from "@/lib/site-contact";
 
@@ -45,13 +46,13 @@ export default function SiteFooter() {
             <span className="ml-2 text-xs font-normal text-slate-700">Studios</span>
           </Link>
 
-          <div className="grid w-full min-w-0 max-w-5xl grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 sm:gap-x-8 lg:grid-cols-4 lg:gap-x-10">
+          <div className="grid w-full min-w-0 max-w-6xl grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 sm:gap-x-8 lg:grid-cols-5 lg:gap-x-8">
             <FooterColumn title="Company">
               <Link href="/about" className={linkClass}>
                 About
               </Link>
-              <Link href="/world-of-ai" className={linkClass}>
-                World of AI
+              <Link href="/team" className={linkClass}>
+                {NAV_LABELS.team}
               </Link>
               <Link href="/pricing" className={linkClass}>
                 Pricing
@@ -72,7 +73,15 @@ export default function SiteFooter() {
               <p className="text-slate-600">{SITE_LOCATION_LINE}</p>
             </FooterColumn>
 
-            <FooterColumn title={NAV_LABELS.creations}>
+            <FooterColumn title={NAV_LABELS.worldOfAi}>
+              {WORLD_OF_AI_FOOTER_LINKS.map((item) => (
+                <Link key={item.href} href={item.href} className={linkClass}>
+                  {item.label}
+                </Link>
+              ))}
+            </FooterColumn>
+
+            <FooterColumn title={NAV_LABELS.explore}>
               {EXPLORE_FOOTER_LINKS.map((item) => (
                 <Link key={item.href} href={item.href} className={linkClass}>
                   {item.label}

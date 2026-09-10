@@ -3,7 +3,7 @@
 export const WORLD_OF_AI = {
   eyebrow: "YAIL",
   brand: "YourAILens",
-  title: "World of AI",
+  title: "AI Verse",
   titleAccent: "Multimedia",
   lead: "How the medium gets read and made.",
   heroCta: "Talk to us",
@@ -156,14 +156,21 @@ export const WORLD_OF_AI = {
 
   usage: {
     eyebrow: "Discipline",
-    title: "Regular usage vs professional use",
+    title: "Generating vs Crafting",
+    body: "Same model. Two completely different jobs. One rolls the dice. The other speaks camera.",
     regular: {
-      title: "Regular usage",
-      text: "Prompts for curiosity. Inconsistent characters. No pipeline, no version control, no brand lock. Fine for personal play, fragile for a brand.",
+      title: "Generating",
+      kicker: "a dice roll",
+      text: "Random prompting. No hold on the face, the light, or the world. You ask for cinematic, get a surprise, roll again. Fun for play. Useless when the next frame has to match.",
+      prompt: "a woman, cinematic, cool lighting, 8k, surprise me",
+      chips: ["reroll", "make it cool", "another one", "???"],
     },
     professional: {
-      title: "Professional use",
-      text: "References, character sheets, lighting presets, review loops, and delivery specs. AI is treated like a department, not a party trick.",
+      title: "Crafting",
+      kicker: "camera language",
+      text: "You prompt like a director. Focal length, blocking, continuity, eyeline, and light get named so the model builds a shot, not a lottery ticket. Traditional film jargon is the control surface.",
+      prompt: "35 mm, over the shoulder, tungsten practicals, shallow focus, hold her eyeline, same wardrobe as take 04",
+      chips: ["35 mm", "key light", "blocking", "continuity", "eyeline", "shallow focus"],
     },
   },
 

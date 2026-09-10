@@ -60,6 +60,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/world-of-ai",
+        destination: "/ai-verse",
+        permanent: true,
+      },
+      {
         source: "/modules/products-visuals",
         destination: "/modules/subjects-visuals",
         permanent: true,

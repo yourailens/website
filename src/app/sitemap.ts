@@ -5,6 +5,7 @@ import { getAvatarSummaries } from "@/lib/avatars/load";
 import { getPublishedStudioModules } from "@/lib/studio-modules/load";
 import { STUDIO_MODULE_TYPE_SLUGS } from "@/data/studio-modules";
 import { loadPublicServices } from "@/lib/services/load";
+import { getPublishedTeamMembers } from "@/lib/team/load";
 
 function siteOrigin(): string {
   return (process.env.PUBLIC_SITE_URL?.trim() || "https://yourailens.studio").replace(/\/+$/, "");
@@ -17,6 +18,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/`, lastModified: new Date() },
     { url: `${base}/images`, lastModified: new Date() },
     { url: `${base}/films`, lastModified: new Date() },
+    { url: `${base}/ai-verse`, lastModified: new Date() },
+    { url: `${base}/ai-filmmaking`, lastModified: new Date() },
+    { url: `${base}/ai-ads`, lastModified: new Date() },
+    { url: `${base}/team`, lastModified: new Date() },
     { url: `${base}/events`, lastModified: new Date() },
     { url: `${base}/events/ai-creator-workshop`, lastModified: new Date() },
     { url: `${base}/events/ai-creator-workshop/day-1`, lastModified: new Date() },
@@ -44,12 +49,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const [images, films, avatars, modules, packages] = await Promise.all([
+    const [images, films, avatars, modules, packages, team] = await Promise.all([
       getGalleryImages(),
       getGalleryFilms(),
       getAvatarSummaries(),
       getPublishedStudioModules({ limit: 500 }),
       loadPublicServices(),
+      getPublishedTeamMembers(),
     ]);
 
     const imageUrls: MetadataRoute.Sitemap = images.map((img, i) => ({
@@ -77,7 +83,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(s.updated_at || s.created_at),
     }));
 
-    return [...staticUrls, ...packageUrls, ...imageUrls, ...filmUrls, ...avatarUrls, ...moduleUrls];
+    const teamUrls: MetadataRoute.Sitemap = team.map((m) => ({
+      url: `${base}/team/${encodeURIComponent(m.slug)}`,
+      lastModified: new Date(m.updated_at),
+    }));
+
+    return [...staticUrls, ...packageUrls, ...imageUrls, ...filmUrls, ...avatarUrls, ...moduleUrls, ...teamUrls];
   } catch {
     return staticUrls;
   }

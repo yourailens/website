@@ -36,25 +36,28 @@ type Props = {
   onChange: (items: ModuleGalleryItemDraft[]) => void;
   uploadSlug: string;
   showPromptField?: boolean;
+  allowUrlPaste?: boolean;
+  uploadPath?: string;
 };
 
-async function uploadBlob(blob: Blob, slug: string): Promise<string> {
+async function uploadBlob(blob: Blob, slug: string, uploadPath: string): Promise<string> {
   const fd = new FormData();
   fd.append("file", blob, "crop.jpg");
   fd.append("slug", slug);
-  const res = await fetch("/api/admin/studio-modules/upload-media", { method: "POST", body: fd });
+  const res = await fetch(uploadPath, { method: "POST", body: fd });
   if (!res.ok) throw new Error("Upload failed");
   return ((await res.json()) as { url?: string }).url ?? "";
 }
 
 async function uploadFile(
   file: File,
-  slug: string
+  slug: string,
+  uploadPath: string
 ): Promise<{ url: string; media_type: StudioModuleMediaType }> {
   const fd = new FormData();
   fd.append("file", file);
   fd.append("slug", slug);
-  const res = await fetch("/api/admin/studio-modules/upload-media", { method: "POST", body: fd });
+  const res = await fetch(uploadPath, { method: "POST", body: fd });
   if (!res.ok) throw new Error("Upload failed");
   const json = (await res.json()) as { url?: string; media_type?: StudioModuleMediaType };
   return { url: json.url ?? "", media_type: json.media_type ?? "image" };
@@ -71,6 +74,8 @@ export default function ModuleGalleryEditor({
   onChange,
   uploadSlug,
   showPromptField = true,
+  allowUrlPaste = false,
+  uploadPath = "/api/admin/studio-modules/upload-media",
 }: Props) {
   const imageRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
@@ -97,7 +102,7 @@ export default function ModuleGalleryEditor({
   }
 
   async function uploadImageAt(index: number, file: File) {
-    const { url } = await uploadFile(file, uploadSlug);
+    const { url } = await uploadFile(file, uploadSlug, uploadPath);
     patch(index, { image_url: url, media_type: "image", video_url: "", aspect_ratio: "natural" });
   }
 
@@ -106,7 +111,7 @@ export default function ModuleGalleryEditor({
     setBusy(true);
     setErr("");
     try {
-      const url = await uploadBlob(blob, uploadSlug);
+      const url = await uploadBlob(blob, uploadSlug, uploadPath);
       patch(cropIndex, { image_url: url, media_type: "image", video_url: "" });
       URL.revokeObjectURL(cropSrc);
       setCropSrc(null);
@@ -176,7 +181,7 @@ export default function ModuleGalleryEditor({
             const newItems = [...items];
             for (const f of files) {
               const slot = emptyGalleryItem();
-              const { url, media_type } = await uploadFile(f, uploadSlug);
+              const { url, media_type } = await uploadFile(f, uploadSlug, uploadPath);
               if (media_type === "video") {
                 slot.media_type = "video";
                 slot.video_url = url;
@@ -297,6 +302,42 @@ export default function ModuleGalleryEditor({
                     />
                   </div>
 
+                  {allowUrlPaste ? (
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1 block font-mono text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                          Image URL
+                        </label>
+                        <input
+                          type="url"
+                          value={item.image_url}
+                          onChange={(e) =>
+                            patch(i, { image_url: e.target.value, media_type: e.target.value ? "image" : item.media_type })
+                          }
+                          placeholder="https://…"
+                          className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block font-mono text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                          Video URL
+                        </label>
+                        <input
+                          type="url"
+                          value={item.video_url}
+                          onChange={(e) =>
+                            patch(i, {
+                              video_url: e.target.value,
+                              media_type: e.target.value ? "video" : item.media_type,
+                            })
+                          }
+                          placeholder="https://… or pasted upload link"
+                          className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+
                   {showPromptField ? (
                     <div>
                       <label className="mb-1 block font-mono text-[9px] font-bold uppercase tracking-widest text-slate-400">
@@ -349,7 +390,7 @@ export default function ModuleGalleryEditor({
           if (!f) return;
           setBusy(true);
           try {
-            const { url } = await uploadFile(f, uploadSlug);
+            const { url } = await uploadFile(f, uploadSlug, uploadPath);
             patch(cropIndex, { video_url: url, image_url: "", media_type: "video", aspect_ratio: "natural" });
           } catch (ex) {
             setErr(ex instanceof Error ? ex.message : "Upload failed");
