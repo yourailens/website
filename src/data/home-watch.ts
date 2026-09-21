@@ -27,6 +27,7 @@ export const HOME_WATCH_TITLES: HomeWatchTitle[] = [
     railHref: "/#ads",
     description: "Close on the product. The room goes quiet.",
     video: "/videos/yailhp.mp4",
+    poster: "/videos/yailhp-poster.jpg",
   },
   {
     slug: "areal",
@@ -37,6 +38,7 @@ export const HOME_WATCH_TITLES: HomeWatchTitle[] = [
     railHref: "/#ads",
     description: "Food lit like a set. Steam, gloss, hold.",
     video: "/videos/yailar02.mp4",
+    poster: "/videos/yailar02-poster.jpg",
   },
   {
     slug: "done-and-dusted",
@@ -115,6 +117,7 @@ export const HOME_WATCH_TITLES: HomeWatchTitle[] = [
     railHref: "/#films",
     description: "The cut where the world gets rewritten.",
     video: "/videos/aiss.mp4",
+    poster: "/videos/aiss-poster.jpg",
   },
   {
     slug: "from-the-feed",
@@ -125,6 +128,7 @@ export const HOME_WATCH_TITLES: HomeWatchTitle[] = [
     railHref: "/ai-verse",
     description: "What the floor posted. Uncorrected.",
     video: "/videos/ig-ddgVpJnTemc.mp4",
+    poster: "/videos/ig-ddgVpJnTemc-poster.jpg",
     watchUrl: "https://www.instagram.com/p/DdgVpJnTemc/",
     watchLabel: "Watch on Instagram",
     aspect: "poster",
@@ -138,6 +142,7 @@ export const HOME_WATCH_TITLES: HomeWatchTitle[] = [
     railHref: "/ai-verse",
     description: "Cameras rolling. Nobody posing.",
     video: "/videos/cs1.mp4",
+    poster: "/videos/cs1-poster.jpg",
   },
 ];
 
