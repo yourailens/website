@@ -34,7 +34,7 @@ export default function ModulesHubExperience() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-[#f4f7fc]">
+      <div className="min-h-screen bg-black text-white">
         <section className="border-b border-blue-100/80 bg-gradient-to-b from-white via-[#f8fbff] to-[#eef4ff]">
           <div className="mx-auto w-[92%] max-w-6xl py-14 md:py-20">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.4em] text-blue-600">Studio</p>

@@ -210,7 +210,7 @@ export default function ResourcesHubExperience() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-black text-white">
 
         {/* ── Hero ─────────────────────────────────────────────────────── */}
         <div className="relative overflow-hidden bg-white">

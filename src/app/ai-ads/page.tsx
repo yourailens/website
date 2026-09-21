@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { getPublishedOttCuts } from "@/lib/ott-cuts/load";
 import AiAdsExperience from "./AiAdsExperience";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "AI Ads | YourAILens Studios",
@@ -12,6 +15,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AiAdsPage() {
-  return <AiAdsExperience />;
+export default async function AiAdsPage() {
+  const cuts = await getPublishedOttCuts("ads");
+  return <AiAdsExperience cuts={cuts} />;
 }

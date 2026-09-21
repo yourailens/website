@@ -27,7 +27,7 @@ export default function ModuleGalleryExperience({ mod }: { mod: StudioModuleWith
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-[#f4f7fc]">
+      <div className="min-h-screen bg-black text-white">
         {isSeries ? (
           <section className={`w-full border-b ${theme.heroBorder} ${theme.heroBg}`}>
             <div className="flex min-h-[3.25rem] w-full items-center gap-3 px-4 py-2.5 sm:gap-4 sm:px-6 lg:px-10">

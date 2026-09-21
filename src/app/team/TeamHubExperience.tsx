@@ -9,7 +9,7 @@ import { teamMemberPortrait, type StudioTeamMemberPublic } from "@/data/studio-t
 
 export default function TeamHubExperience({ members }: { members: StudioTeamMemberPublic[] }) {
   return (
-    <div className="min-h-screen bg-white font-body text-slate-900">
+    <div className="min-h-screen bg-black font-body text-white">
       <Navbar />
 
       <TeamMasthead

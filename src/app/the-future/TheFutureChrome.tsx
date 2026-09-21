@@ -6,7 +6,7 @@ export function TheFutureChrome({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-[#f4f7fc] font-body text-slate-900">{children}</div>
+      <div className="min-h-screen bg-black font-body text-white">{children}</div>
     </>
   );
 }

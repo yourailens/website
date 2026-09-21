@@ -233,7 +233,7 @@ export default function PackageDetailExperience() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
+      <div className="flex min-h-screen items-center justify-center bg-black">
         <span className="h-8 w-8 animate-spin border-2 border-blue-600 border-t-transparent" />
       </div>
     );
@@ -276,7 +276,7 @@ export default function PackageDetailExperience() {
   const caption = [service.hero_label, service.hero_caption].filter(Boolean).join(" · ");
 
   return (
-    <div className="min-h-screen bg-white font-body text-slate-900">
+    <div className="min-h-screen bg-black font-body text-white">
       <Navbar />
 
       {scrolled ? (

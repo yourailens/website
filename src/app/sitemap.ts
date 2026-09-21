@@ -6,6 +6,7 @@ import { getPublishedStudioModules } from "@/lib/studio-modules/load";
 import { STUDIO_MODULE_TYPE_SLUGS } from "@/data/studio-modules";
 import { loadPublicServices } from "@/lib/services/load";
 import { getPublishedTeamMembers } from "@/lib/team/load";
+import { HOME_WATCH_TITLES } from "@/data/home-watch";
 
 function siteOrigin(): string {
   return (process.env.PUBLIC_SITE_URL?.trim() || "https://yourailens.studio").replace(/\/+$/, "");
@@ -30,6 +31,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/pricing`, lastModified: new Date() },
     { url: `${base}/pricing/estimator`, lastModified: new Date() },
     { url: `${base}/contact`, lastModified: new Date() },
+    ...HOME_WATCH_TITLES.map((t) => ({
+      url: `${base}/watch/${t.slug}`,
+      lastModified: new Date(),
+    })),
     { url: `${base}/resources`, lastModified: new Date() },
     { url: `${base}/modules`, lastModified: new Date() },
     { url: `${base}/modules/prompt-playbooks`, lastModified: new Date() },

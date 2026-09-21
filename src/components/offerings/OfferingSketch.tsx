@@ -55,12 +55,12 @@ export function SectionShell({
     </div>
   );
   if (dark) {
-    return <section className="border-t border-white/10 bg-slate-950 text-white">{inner}</section>;
+    return <section className="border-t border-white/10 bg-zinc-950 text-white">{inner}</section>;
   }
   if (tint) {
-    return <HomeBlueTint className="border-t border-blue-100/60">{inner}</HomeBlueTint>;
+    return <HomeBlueTint className="border-t border-white/10">{inner}</HomeBlueTint>;
   }
-  return <section className="border-t border-blue-100/60 bg-white">{inner}</section>;
+  return <section className="border-t border-white/10 bg-black">{inner}</section>;
 }
 
 export function SectionHead({
@@ -69,7 +69,7 @@ export function SectionHead({
   accent,
   body,
   note,
-  light = false,
+  light = true,
 }: {
   eyebrow: string;
   title: string;

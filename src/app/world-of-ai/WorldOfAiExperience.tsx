@@ -138,7 +138,7 @@ function WorldOfAiHero() {
   };
 
   return (
-    <header className="relative overflow-x-hidden border-b border-blue-100 bg-[#f8fbff]">
+    <header className="relative overflow-x-hidden border-b border-white/10 bg-black">
       <style>{`
         @keyframes woai-marquee {
           from { transform: translateX(0); }
@@ -306,7 +306,7 @@ function WorldOfAiHero() {
 
 export default function WorldOfAiExperience() {
   return (
-    <div className="min-h-screen bg-white font-body text-slate-900">
+    <div className="min-h-screen bg-black font-body text-white">
       <Navbar />
       <WorldOfAiHero />
       <WorldOfAiBody />

@@ -83,6 +83,7 @@ function RangeSlider({
   value,
   onChange,
   label,
+  ott,
 }: {
   id: string;
   min: number;
@@ -91,6 +92,7 @@ function RangeSlider({
   value: number;
   onChange: (next: number) => void;
   label: string;
+  ott?: boolean;
 }) {
   const pct = ((value - min) / (max - min)) * 100;
   return (
@@ -105,7 +107,9 @@ function RangeSlider({
       onChange={(event) => onChange(Number(event.target.value))}
       className="ala-carte-range h-2 w-full cursor-pointer appearance-none rounded-full"
       style={{
-        background: `linear-gradient(to right, #2563eb ${pct}%, #dbeafe ${pct}%)`,
+        background: ott
+          ? `linear-gradient(to right, #3b82f6 ${pct}%, rgba(255,255,255,0.12) ${pct}%)`
+          : `linear-gradient(to right, #2563eb ${pct}%, #dbeafe ${pct}%)`,
       }}
     />
   );
@@ -114,11 +118,15 @@ function RangeSlider({
 export default function PricingAlaCarte({
   embedded = false,
   idPrefix = "ala",
+  tone = "light",
 }: {
   /** Homepage: card only, no full page section chrome */
   embedded?: boolean;
   idPrefix?: string;
+  /** Dark OTT surface for the pricing page */
+  tone?: "light" | "ott";
 }) {
+  const ott = tone === "ott";
   const [seconds, setSeconds] = useState(40);
   const [count, setCount] = useState(1);
   const [hours, setHours] = useState(HOURS_STANDARD);
@@ -155,7 +163,11 @@ export default function PricingAlaCarte({
   }, [seconds, count, hours, quote.total, quote.label]);
 
   const meter = (
-    <div className={`overflow-hidden border border-blue-200 bg-white ${embedded ? "mt-8" : "mt-10"}`}>
+    <div
+      className={`overflow-hidden border ${
+        ott ? "border-white/15 bg-white/[0.03]" : "border-blue-200 bg-white"
+      } ${embedded ? "mt-8" : "mt-10"}`}
+    >
       <style>{`
         .ala-carte-range::-webkit-slider-thumb {
           -webkit-appearance: none;
@@ -164,7 +176,7 @@ export default function PricingAlaCarte({
           height: 18px;
           border-radius: 999px;
           background: #2563eb;
-          border: 2px solid #fff;
+          border: 2px solid ${ott ? "#0a0a0a" : "#fff"};
           box-shadow: 0 0 0 1px #93c5fd, 0 4px 10px rgba(37, 99, 235, 0.35);
         }
         .ala-carte-range::-moz-range-thumb {
@@ -172,26 +184,44 @@ export default function PricingAlaCarte({
           height: 18px;
           border-radius: 999px;
           background: #2563eb;
-          border: 2px solid #fff;
+          border: 2px solid ${ott ? "#0a0a0a" : "#fff"};
           box-shadow: 0 0 0 1px #93c5fd;
         }
       `}</style>
 
-      <div className="relative border-b border-blue-100 px-5 py-3.5 sm:px-7">
-        <div className="pointer-events-none absolute inset-0 opacity-70" style={GRID_PAPER} aria-hidden />
+      <div
+        className={`relative border-b px-5 py-3.5 sm:px-7 ${ott ? "border-white/10" : "border-blue-100"}`}
+      >
+        {!ott ? <div className="pointer-events-none absolute inset-0 opacity-70" style={GRID_PAPER} aria-hidden /> : null}
         <div className="relative flex flex-wrap items-center justify-between gap-3">
-          <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-blue-600">
-            {embedded ? "A la carte" : "YAIL · Build your own"}
+          <p
+            className={`font-mono text-[10px] uppercase tracking-[0.24em] ${
+              ott ? "text-blue-400" : "text-blue-600"
+            }`}
+          >
+            {embedded ? "A la carte" : ott ? "FARE · BUILD YOUR OWN" : "YAIL · Build your own"}
           </p>
-          <div className="flex rounded-full border border-blue-200 bg-white p-0.5">
+          <div
+            className={`flex p-0.5 ${
+              ott ? "border border-white/20 bg-black/40" : "rounded-full border border-blue-200 bg-white"
+            }`}
+          >
             {(["INR", "USD"] as const).map((code) => (
               <button
                 key={code}
                 type="button"
                 onClick={() => setCurrency(code)}
                 aria-pressed={currency === code}
-                className={`min-w-[3.25rem] rounded-full px-3 py-1 text-[10px] font-semibold tracking-[0.14em] transition ${
-                  currency === code ? "bg-blue-600 text-white" : "text-slate-500 hover:text-blue-700"
+                className={`min-w-[3.25rem] px-3 py-1 text-[10px] font-semibold tracking-[0.14em] transition ${
+                  ott ? "" : "rounded-full"
+                } ${
+                  currency === code
+                    ? ott
+                      ? "bg-[#fafafa] text-black"
+                      : "bg-blue-600 text-white"
+                    : ott
+                      ? "text-white/50 hover:text-white"
+                      : "text-slate-500 hover:text-blue-700"
                 }`}
               >
                 {code === "INR" ? "₹ INR" : "$ USD"}
@@ -202,18 +232,28 @@ export default function PricingAlaCarte({
       </div>
 
       <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="space-y-9 border-b border-blue-100 px-5 py-8 sm:px-7 lg:border-b-0 lg:border-r">
+        <div
+          className={`space-y-9 px-5 py-8 sm:px-7 ${
+            ott
+              ? "border-b border-white/10 lg:border-b-0 lg:border-r lg:border-white/10"
+              : "border-b border-blue-100 lg:border-b-0 lg:border-r"
+          }`}
+        >
           <div>
             <div className="flex items-end justify-between gap-3">
               <label
                 htmlFor={`${idPrefix}-seconds`}
-                className="text-[10px] font-medium uppercase tracking-[0.22em] text-slate-500"
+                className={`text-[10px] font-medium uppercase tracking-[0.22em] ${
+                  ott ? "text-white/45" : "text-slate-500"
+                }`}
               >
                 How many seconds
               </label>
-              <p className="text-sm font-light text-slate-900">
+              <p className={`text-sm font-light ${ott ? "text-white" : "text-slate-900"}`}>
                 {formatSeconds(seconds)}{" "}
-                <span className="text-slate-400">· {money(quote.unit, currency)} / film</span>
+                <span className={ott ? "text-white/40" : "text-slate-400"}>
+                  · {money(quote.unit, currency)} / film
+                </span>
               </p>
             </div>
             <div className="mt-4">
@@ -225,9 +265,14 @@ export default function PricingAlaCarte({
                 value={seconds}
                 onChange={setSeconds}
                 label="Video length in seconds"
+                ott={ott}
               />
             </div>
-            <div className="mt-2 flex justify-between font-mono text-[9px] tracking-[0.16em] text-slate-400">
+            <div
+              className={`mt-2 flex justify-between font-mono text-[9px] tracking-[0.16em] ${
+                ott ? "text-white/35" : "text-slate-400"
+              }`}
+            >
               <span>10s</span>
               <span>₹1.5k start · +₹750 / 5s</span>
               <span>10 min</span>
@@ -238,11 +283,13 @@ export default function PricingAlaCarte({
             <div className="flex items-end justify-between gap-3">
               <label
                 htmlFor={`${idPrefix}-count`}
-                className="text-[10px] font-medium uppercase tracking-[0.22em] text-slate-500"
+                className={`text-[10px] font-medium uppercase tracking-[0.22em] ${
+                  ott ? "text-white/45" : "text-slate-500"
+                }`}
               >
                 How many videos
               </label>
-              <p className="text-sm font-light text-slate-900">
+              <p className={`text-sm font-light ${ott ? "text-white" : "text-slate-900"}`}>
                 {count === 1 ? "1 video" : `${count} videos`}
               </p>
             </div>
@@ -255,9 +302,14 @@ export default function PricingAlaCarte({
                 value={count}
                 onChange={setCount}
                 label="Number of videos"
+                ott={ott}
               />
             </div>
-            <div className="mt-2 flex justify-between font-mono text-[9px] tracking-[0.16em] text-slate-400">
+            <div
+              className={`mt-2 flex justify-between font-mono text-[9px] tracking-[0.16em] ${
+                ott ? "text-white/35" : "text-slate-400"
+              }`}
+            >
               <span>1</span>
               <span>Same unit × count</span>
               <span>20</span>
@@ -268,12 +320,15 @@ export default function PricingAlaCarte({
             <div className="flex items-end justify-between gap-3">
               <label
                 htmlFor={`${idPrefix}-delivery`}
-                className="text-[10px] font-medium uppercase tracking-[0.22em] text-slate-500"
+                className={`text-[10px] font-medium uppercase tracking-[0.22em] ${
+                  ott ? "text-white/45" : "text-slate-500"
+                }`}
               >
                 Delivery time
               </label>
-              <p className="text-sm font-light text-slate-900">
-                {formatDelivery(hours)} <span className="text-slate-400">· {quote.label}</span>
+              <p className={`text-sm font-light ${ott ? "text-white" : "text-slate-900"}`}>
+                {formatDelivery(hours)}{" "}
+                <span className={ott ? "text-white/40" : "text-slate-400"}>· {quote.label}</span>
               </p>
             </div>
             <div className="mt-4">
@@ -285,88 +340,147 @@ export default function PricingAlaCarte({
                 value={hours}
                 onChange={setHours}
                 label="Delivery time"
+                ott={ott}
               />
             </div>
-            <div className="mt-2 flex justify-between font-mono text-[9px] tracking-[0.16em] text-slate-400">
+            <div
+              className={`mt-2 flex justify-between font-mono text-[9px] tracking-[0.16em] ${
+                ott ? "text-white/35" : "text-slate-400"
+              }`}
+            >
               <span>5 hrs</span>
               <span>2 days standard</span>
               <span>1 week</span>
             </div>
-            <p className="mt-3 text-[11px] font-light text-slate-500">
+            <p className={`mt-3 text-[11px] font-light ${ott ? "text-white/45" : "text-slate-500"}`}>
               Faster than 2 days adds a rush. Slower than 2 days eases the fare a little.
             </p>
           </div>
         </div>
 
         <div className="relative flex flex-col justify-between px-5 py-8 sm:px-7">
-          <div className="pointer-events-none absolute inset-0 opacity-40" style={GRID_PAPER} aria-hidden />
+          {!ott ? <div className="pointer-events-none absolute inset-0 opacity-40" style={GRID_PAPER} aria-hidden /> : null}
           <div className="relative">
-            <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-blue-600">Your fare</p>
             <p
-              className="mt-3 text-[clamp(2.4rem,5vw,3.6rem)] font-light leading-none tracking-tight text-slate-900"
+              className={`text-[10px] font-medium uppercase tracking-[0.22em] ${
+                ott ? "text-blue-400" : "text-blue-600"
+              }`}
+            >
+              Your fare
+            </p>
+            <p
+              className={`mt-3 leading-none tracking-tight ${
+                ott
+                  ? "font-heading text-[clamp(2.6rem,5vw,3.8rem)] text-[#fafafa]"
+                  : "text-[clamp(2.4rem,5vw,3.6rem)] font-light text-slate-900"
+              }`}
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
               {money(quote.total, currency)}
             </p>
-            <p className="mt-2 text-sm font-light text-slate-500">
+            <p className={`mt-2 text-sm font-light ${ott ? "text-white/50" : "text-slate-500"}`}>
               {count === 1 ? "1 film" : `${count} films`} · {formatSeconds(seconds)} · {formatDelivery(hours)}
             </p>
-            <p className="mt-1 text-[11px] font-light text-slate-400">
+            <p className={`mt-1 text-[11px] font-light ${ott ? "text-white/35" : "text-slate-400"}`}>
               {money(quote.perVideo, currency)} each after delivery
             </p>
           </div>
 
-          <div className="relative mt-8 space-y-2 border-t border-blue-100 pt-6 text-sm font-light">
+          <div
+            className={`relative mt-8 space-y-2 border-t pt-6 text-sm font-light ${
+              ott ? "border-white/10" : "border-blue-100"
+            }`}
+          >
             <div className="flex items-baseline justify-between gap-3">
-              <span className="text-slate-500">Length × count</span>
-              <span className="text-slate-700">{money(quote.base, currency)}</span>
+              <span className={ott ? "text-white/45" : "text-slate-500"}>Length × count</span>
+              <span className={ott ? "text-white/80" : "text-slate-700"}>{money(quote.base, currency)}</span>
             </div>
             {quote.rush > 0 ? (
               <div className="flex items-baseline justify-between gap-3">
-                <span className="text-slate-500">Rush</span>
-                <span className="text-blue-700">+{money(quote.rush, currency)}</span>
+                <span className={ott ? "text-white/45" : "text-slate-500"}>Rush</span>
+                <span className="text-blue-400">+{money(quote.rush, currency)}</span>
               </div>
             ) : null}
             {quote.save > 0 ? (
               <div className="flex items-baseline justify-between gap-3">
-                <span className="text-slate-500">Patient pace</span>
-                <span className="text-blue-700">−{money(quote.save, currency)}</span>
+                <span className={ott ? "text-white/45" : "text-slate-500"}>Patient pace</span>
+                <span className="text-blue-400">−{money(quote.save, currency)}</span>
               </div>
             ) : null}
-            <div className="flex items-baseline justify-between gap-3 border-t border-blue-100 pt-2">
-              <span className="text-slate-900">Total</span>
-              <span className="font-medium text-blue-700">{money(quote.total, currency)}</span>
+            <div
+              className={`flex items-baseline justify-between gap-3 border-t pt-2 ${
+                ott ? "border-white/10" : "border-blue-100"
+              }`}
+            >
+              <span className={ott ? "text-white" : "text-slate-900"}>Total</span>
+              <span className={`font-medium ${ott ? "text-blue-300" : "text-blue-700"}`}>
+                {money(quote.total, currency)}
+              </span>
             </div>
           </div>
 
           <div className="relative mt-8 flex flex-wrap gap-3">
-            <a
-              href={mailto}
-              className="inline-block rotate-[-1.5deg] border-2 border-blue-700 bg-blue-600 px-5 py-2.5 text-lg font-light text-white shadow-sm transition hover:bg-blue-700"
-              style={HAND}
-            >
-              Book this fare
-            </a>
-            {embedded ? (
-              <Link
-                href="/pricing#alacarte"
-                className="border border-blue-300 bg-white px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-blue-800 hover:border-blue-600"
-              >
-                Full pricing →
-              </Link>
+            {ott ? (
+              <>
+                <a
+                  href={mailto}
+                  className="inline-flex bg-[#fafafa] px-5 py-2.5 text-sm font-semibold text-black hover:bg-blue-100"
+                >
+                  Book this fare
+                </a>
+                <Link
+                  href="/contact"
+                  className="inline-flex border border-white/25 px-5 py-2.5 text-sm font-semibold text-white/85 hover:border-white/50 hover:text-white"
+                >
+                  Talk first
+                </Link>
+              </>
             ) : (
-              <Link
-                href="/contact"
-                className="border border-blue-300 bg-white px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-blue-800 hover:border-blue-600"
-              >
-                Talk first
-              </Link>
+              <>
+                <a
+                  href={mailto}
+                  className="inline-block rotate-[-1.5deg] border-2 border-blue-700 bg-blue-600 px-5 py-2.5 text-lg font-light text-white shadow-sm transition hover:bg-blue-700"
+                  style={HAND}
+                >
+                  Book this fare
+                </a>
+                {embedded ? (
+                  <Link
+                    href="/pricing#alacarte"
+                    className="border border-blue-300 bg-white px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-blue-800 hover:border-blue-600"
+                  >
+                    Full pricing →
+                  </Link>
+                ) : (
+                  <Link
+                    href="/contact"
+                    className="border border-blue-300 bg-white px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-blue-800 hover:border-blue-600"
+                  >
+                    Talk first
+                  </Link>
+                )}
+              </>
             )}
           </div>
         </div>
       </div>
     </div>
   );
+
+  if (ott) {
+    return (
+      <section id="alacarte" className="scroll-mt-24 border-t border-white/10 py-16 lg:py-20">
+        <div className="mx-auto max-w-[90rem] px-5 sm:px-8 lg:px-16">
+          <p className="font-mono text-[10px] tracking-[0.32em] text-blue-400">FARE 02 · VIDEOS</p>
+          <h2 className="mt-3 font-heading text-[clamp(2.2rem,5vw,3.6rem)] leading-none">A la carte</h2>
+          <p className="mt-3 max-w-md text-sm font-light text-white/60">
+            Build a video fare. Pick the seconds. Pick how many. Pick how fast.
+          </p>
+          {meter}
+        </div>
+      </section>
+    );
+  }
 
   if (embedded) {
     return (

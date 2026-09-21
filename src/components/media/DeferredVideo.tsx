@@ -59,26 +59,51 @@ export const DeferredVideo = forwardRef<HTMLVideoElement, DeferredVideoProps>(
           if (visible) {
             setShouldLoad(true);
             playIfReady();
-          } else {
+            return;
+          }
+
+          // While the tab/window is hidden, IntersectionObserver often falsely
+          // reports out-of-view. Pausing then clears the decoded frame and
+          // shows a grey/blue flash when you come back. Only pause on real scroll-away.
+          if (document.visibilityState === "visible") {
             node.pause();
           }
         },
         { rootMargin: "120px", threshold: 0 }
       );
 
+      const onVisibility = () => {
+        if (document.visibilityState === "visible") {
+          playIfReady();
+        }
+      };
+
+      // Some window switches pause media without flipping visibility, or pause
+      // before visibilitychange fires. If we still want playback, resume immediately
+      // so the cleared frame never sits on screen.
+      const onPause = () => {
+        if (document.visibilityState !== "visible") return;
+        if (!inViewRef.current) return;
+        void node.play().catch(() => {});
+      };
+
       loadObserver.observe(node);
       playObserver.observe(node);
       node.addEventListener("canplay", playIfReady);
+      node.addEventListener("pause", onPause);
+      document.addEventListener("visibilitychange", onVisibility);
       if (eager) playIfReady();
 
       return () => {
         loadObserver.disconnect();
         playObserver.disconnect();
         node.removeEventListener("canplay", playIfReady);
+        node.removeEventListener("pause", onPause);
+        document.removeEventListener("visibilitychange", onVisibility);
         if (typeof forwardedRef === "function") forwardedRef(null);
         else if (forwardedRef) forwardedRef.current = null;
       };
-    }, [forwardedRef, rootMargin]);
+    }, [forwardedRef, rootMargin, eager]);
 
     return (
       <video
@@ -89,8 +114,11 @@ export const DeferredVideo = forwardRef<HTMLVideoElement, DeferredVideoProps>(
         muted={muted}
         loop={loop}
         controls={controls}
+        autoPlay={eager}
         playsInline
         preload={shouldLoad ? "auto" : "none"}
+        controlsList="nodownload noplaybackrate noremoteplayback"
+        disablePictureInPicture
         onContextMenu={(event) => event.preventDefault()}
       />
     );

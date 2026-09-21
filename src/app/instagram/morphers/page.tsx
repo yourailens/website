@@ -8,7 +8,7 @@ export default async function InstagramMorphersPage() {
   const links = await getInstagramLinks("Morphers");
 
   return (
-    <div className="relative min-h-screen bg-[#f8fbff] text-slate-900">
+    <div className="relative min-h-screen bg-black text-white text-slate-900">
       <div
         className="pointer-events-none fixed inset-0 bg-[radial-gradient(#bfdbfe_0.5px,transparent_0.5px)] opacity-[0.25] [background-size:20px_20px]"
         aria-hidden

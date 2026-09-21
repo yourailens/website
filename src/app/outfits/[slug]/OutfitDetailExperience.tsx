@@ -47,9 +47,9 @@ export default function OutfitDetailExperience({ outfit }: { outfit: Outfit }) {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-black text-white">
         {/* Breadcrumb */}
-        <div className="border-b border-slate-200 bg-white">
+        <div className="border-b border-white/10 bg-black">
           <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-10">
             <div className="flex items-center gap-4">
               <Link

@@ -20,8 +20,8 @@ export default function LightingPresetDetailExperience({ item }: { item: Lightin
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-slate-50">
-        <div className="border-b border-slate-200 bg-white"><div className="w-[95%] mx-auto py-3 flex items-center gap-4">
+      <div className="min-h-screen bg-black text-white">
+        <div className="border-b border-white/10 bg-black"><div className="w-[95%] mx-auto py-3 flex items-center gap-4">
           <Link href="/lighting-presets" className="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Lighting Presets</Link>
           <span className="text-xs text-slate-400">/ <span className="font-semibold text-slate-700">{item.title}</span></span>
         </div></div>

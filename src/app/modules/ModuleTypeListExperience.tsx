@@ -63,7 +63,7 @@ export default function ModuleTypeListExperience({ moduleType }: { moduleType: S
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-[#f4f7fc]">
+      <div className="min-h-screen bg-black text-white">
         <section
           className={`border-b ${isSeries ? theme.heroBorder : "border-blue-100/80"} ${isSeries ? theme.heroBg : "bg-gradient-to-b from-white via-[#f8fbff] to-[#eef4ff]"}`}
         >

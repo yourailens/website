@@ -3,12 +3,62 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CHARACTER_TAGS, GALLERY_CATEGORY_TABS, type CharacterTag, type FilmCategory } from "@/data/gallery";
+import OttCutsDesk from "./OttCutsDesk";
 
 type SavedPreview = { url: string; title: string };
 
 const CATEGORY_OPTIONS = GALLERY_CATEGORY_TABS.filter(
   (t): t is { id: FilmCategory; label: string } => t.id !== null
 );
+
+const FIELD =
+  "mt-2 w-full border border-white/20 bg-white/[0.07] px-3.5 py-2.5 text-sm text-white placeholder:text-white/45 caret-white outline-none transition focus:border-white/55 [color-scheme:dark]";
+const BTN =
+  "bg-[#fafafa] px-5 py-2.5 text-sm font-semibold text-black hover:bg-blue-100 disabled:opacity-40";
+const PANEL = "border border-white/15 bg-black/45 p-6";
+
+const ADMIN_CHANNELS: { scene: string; title: string; links: { href: string; label: string }[] }[] = [
+  {
+    scene: "01",
+    title: "Studio",
+    links: [
+      { href: "/admin/team", label: "Team" },
+      { href: "/admin/services", label: "Pricing" },
+      { href: "/admin/workshops", label: "Workshops" },
+      { href: "/admin/avatars", label: "Avatars" },
+    ],
+  },
+  {
+    scene: "02",
+    title: "Libraries",
+    links: [
+      { href: "/admin/prompts", label: "Workflows" },
+      { href: "/admin/outfits", label: "Outfits" },
+      { href: "/admin/character-sheets", label: "Characters" },
+      { href: "/admin/scenarios", label: "Scenarios" },
+      { href: "/admin/locations", label: "Locations" },
+      { href: "/admin/props", label: "Props" },
+      { href: "/admin/lighting-presets", label: "Lighting" },
+      { href: "/admin/color-grades", label: "Color" },
+      { href: "/admin/mood-boards", label: "Mood boards" },
+    ],
+  },
+  {
+    scene: "03",
+    title: "World",
+    links: [
+      { href: "/admin/industries", label: "Industries" },
+      { href: "/admin/sample-brands", label: "Sample brands" },
+      { href: "/admin/modules", label: "Modules" },
+      { href: "/admin/the-future", label: "The Future" },
+    ],
+  },
+  {
+    scene: "04",
+    title: "Desk",
+    links: [{ href: "/admin/manage", label: "Manage uploads" }],
+  },
+];
 
 export default function AdminDashboard() {
   const [sessionOk, setSessionOk] = useState<boolean | null>(null);
@@ -334,11 +384,12 @@ export default function AdminDashboard() {
 
   if (sessionOk === false) {
     return (
-      <main className="relative min-h-screen bg-[#f6f2ea] px-6 py-24 text-slate-900">
+      <main className="ott-home relative min-h-screen bg-black px-6 py-24 font-body text-white">
         <div className="mx-auto max-w-lg text-center">
-          <h1 className="font-heading text-2xl font-bold">Not authorized</h1>
-          <p className="mt-3 text-sm text-slate-600">Sign in with the admin password to manage uploads.</p>
-          <Link href="/admin/login" className="mt-6 inline-block rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white">
+          <p className="font-mono text-[10px] tracking-[0.32em] text-blue-400">CONTROL ROOM</p>
+          <h1 className="mt-3 font-heading text-3xl leading-none">Not authorized</h1>
+          <p className="mt-3 text-sm text-white/70">Sign in to manage the studio desk.</p>
+          <Link href="/admin/login" className={`mt-6 inline-flex ${BTN}`}>
             Go to admin login
           </Link>
         </div>
@@ -348,135 +399,114 @@ export default function AdminDashboard() {
 
   if (sessionOk === null) {
     return (
-      <main className="relative min-h-screen bg-[#f6f2ea] px-6 py-24 text-slate-900">
-        <div className="mx-auto max-w-lg text-center text-sm text-slate-600">Loading...</div>
+      <main className="ott-home relative min-h-screen bg-black px-6 py-24 font-body text-white">
+        <div className="mx-auto max-w-lg text-center text-sm text-white/60">Loading desk…</div>
       </main>
     );
   }
 
   return (
-    <main className="relative min-h-screen bg-[#f6f2ea] px-6 py-16 text-slate-900">
-      <div className="mx-auto max-w-4xl space-y-10">
+    <main className="ott-home relative min-h-screen overflow-x-hidden bg-black px-5 py-10 font-body text-white sm:px-8 sm:py-12">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-40"
+        style={{
+          background:
+            "radial-gradient(ellipse 70% 45% at 12% 0%, rgba(37,99,235,0.32), transparent 55%), radial-gradient(ellipse 40% 30% at 90% 0%, rgba(29,78,216,0.18), transparent 50%)",
+        }}
+        aria-hidden
+      />
+      <div className="relative mx-auto max-w-5xl space-y-10">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-slate-500">Admin</p>
-            <h1 className="mt-2 font-heading text-3xl font-bold">Gallery uploads</h1>
-            <p className="mt-1 text-sm text-slate-600">Signed in</p>
+            <p className="font-mono text-[10px] tracking-[0.32em] text-blue-400">CONTROL ROOM</p>
+            <h1 className="mt-2 font-heading text-[clamp(2rem,5vw,3.4rem)] leading-none">Studio desk</h1>
+            <p className="mt-2 text-sm text-white/70">Signed in. Add cuts for AI ads, films, and community.</p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/admin/team" className="rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-800">
-              Team
-            </Link>
-            <Link href="/admin/services" className="rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-800">
-              Pricing packages
-            </Link>
-            <Link href="/admin/modules" className="rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-800">
-              Modules
-            </Link>
-            <Link href="/admin/the-future" className="rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-900">
-              The Future
-            </Link>
-            <Link href="/admin/prompts" className="rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-800">
-              Workflows (Prompts)
-            </Link>
-            <Link href="/admin/outfits" className="rounded-full border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-800">
-              Outfit Sheets
-            </Link>
-            <Link href="/admin/character-sheets" className="rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800">
-              Character Sheets
-            </Link>
-            <Link href="/admin/scenarios" className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-800">
-              Scenarios
-            </Link>
-            <Link href="/admin/locations" className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800">
-              Locations
-            </Link>
-            <Link href="/admin/props" className="rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800">
-              Props
-            </Link>
-            <Link href="/admin/lighting-presets" className="rounded-full border border-yellow-200 bg-yellow-50 px-4 py-2 text-sm font-semibold text-yellow-800">
-              Lighting
-            </Link>
-            <Link href="/admin/color-grades" className="rounded-full border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-800">
-              Color Grades
-            </Link>
-            <Link href="/admin/mood-boards" className="rounded-full border border-pink-200 bg-pink-50 px-4 py-2 text-sm font-semibold text-pink-800">
-              Mood Boards
-            </Link>
-            <Link href="/admin/industries" className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800">
-              Industries
-            </Link>
-            <Link href="/admin/sample-brands" className="rounded-full border border-teal-200 bg-teal-50 px-4 py-2 text-sm font-semibold text-teal-800">
-              Sample brands
-            </Link>
-            <Link href="/admin/workshops" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
-              Workshop bookings
-            </Link>
-            <Link href="/admin/avatars" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
-              Avatar images
-            </Link>
-            <Link href="/admin/manage" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
-              Manage uploaded items
-            </Link>
-            <Link href="/" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
+          <div className="flex flex-wrap gap-2">
+            <Link href="/" className="border border-white/30 px-4 py-2 text-sm font-semibold text-white hover:border-white">
               View site
             </Link>
-            <button type="button" onClick={signOut} className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
+            <button type="button" onClick={signOut} className={BTN}>
               Sign out
             </button>
           </div>
         </header>
 
+        <nav className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {ADMIN_CHANNELS.map((ch) => (
+            <div key={ch.scene} className="border border-white/15 bg-black/40 p-4">
+              <p className="font-heading text-2xl leading-none text-blue-400">{ch.scene}</p>
+              <p className="mt-1 font-mono text-[10px] tracking-[0.22em] text-white/45">{ch.title.toUpperCase()}</p>
+              <ul className="mt-3 space-y-1.5">
+                {ch.links.map((link) => (
+                  <li key={link.href}>
+                    <Link href={link.href} className="text-sm text-white/80 hover:text-white">
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
+
+        <OttCutsDesk />
+
+        <details className="border border-white/15 bg-black/30">
+          <summary className="cursor-pointer px-5 py-4 text-sm text-white/70 hover:text-white">
+            Classic gallery — images, films, Instagram, YouTube
+          </summary>
+          <div className="space-y-6 border-t border-white/10 px-5 pb-6 pt-5">
         {uploadErr ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
+          <div className="border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
             <p className="font-medium">{uploadErr.message}</p>
-            {uploadErr.hint ? <p className="mt-2 text-xs leading-relaxed text-red-800">{uploadErr.hint}</p> : null}
+            {uploadErr.hint ? <p className="mt-2 text-xs leading-relaxed text-red-200/80">{uploadErr.hint}</p> : null}
           </div>
         ) : null}
-        {msg ? <p className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800">{msg}</p> : null}
+        {msg ? <p className="border border-white/20 bg-white/[0.07] px-4 py-3 text-sm text-white/90">{msg}</p> : null}
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="font-heading text-xl font-bold">Images</h2>
-          <p className="mt-1 text-sm text-slate-500">
+        <section className={PANEL}>
+          <h2 className="font-heading text-2xl leading-none">Images</h2>
+          <p className="mt-2 text-sm text-white/60">
             Upload a file to your S3 bucket (needs AWS keys in .env.local), or paste any public image URL.
           </p>
           <form onSubmit={uploadImage} className="mt-4 flex flex-col gap-3">
-            <label className="block text-xs font-medium text-slate-700">
+            <label className="block text-xs font-medium text-white/70">
               Upload to S3
               <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => setImgFile(e.target.files?.[0] ?? null)}
-                className="mt-2 block w-full text-sm"
+                className="mt-2 block w-full text-sm text-white/70 file:mr-3 file:border-0 file:bg-[#fafafa] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-black"
               />
             </label>
-            <label className="block text-xs font-medium text-slate-700">
+            <label className="block text-xs font-medium text-white/70">
               Or image URL
               <input
                 type="url"
                 value={imgUrl}
                 onChange={(e) => setImgUrl(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                className={FIELD}
                 placeholder="https://..."
                 autoComplete="off"
               />
             </label>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-              <label className="flex-1 text-xs font-medium text-slate-700">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="text-xs font-medium text-white/70 sm:col-span-2">
                 Title
                 <input
                   value={imgTitle}
                   onChange={(e) => setImgTitle(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                  className={FIELD}
                   placeholder="Display title"
                 />
               </label>
-              <label className="text-xs font-medium text-slate-700 sm:w-44">
+              <label className="text-xs font-medium text-white/70">
                 Category
                 <select
                   value={imgCategory}
                   onChange={(e) => setImgCategory(e.target.value as FilmCategory)}
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                  className={FIELD}
                 >
                   {CATEGORY_OPTIONS.map((o) => (
                     <option key={o.id} value={o.id}>
@@ -485,12 +515,12 @@ export default function AdminDashboard() {
                   ))}
                 </select>
               </label>
-              <label className="text-xs font-medium text-slate-700 sm:w-40">
+              <label className="text-xs font-medium text-white/70">
                 Aspect
                 <select
                   value={imgAspect}
                   onChange={(e) => setImgAspect(e.target.value as typeof imgAspect)}
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                  className={FIELD}
                 >
                   <option value="">Auto</option>
                   <option value="square">Square</option>
@@ -498,11 +528,11 @@ export default function AdminDashboard() {
                   <option value="landscape">Landscape</option>
                 </select>
               </label>
-              <div className="text-xs font-medium text-slate-700 sm:w-64">
+              <div className="text-xs font-medium text-white/70 sm:col-span-2">
                 Characters
-                <div className="mt-2 grid grid-cols-2 gap-2 rounded-xl border border-slate-200 bg-white p-2">
+                <div className="mt-2 grid grid-cols-2 gap-2 border border-white/20 bg-white/[0.05] p-2 sm:grid-cols-4">
                   {CHARACTER_TAGS.map((name) => (
-                    <label key={`img-${name}`} className="flex items-center gap-2 text-xs text-slate-700">
+                    <label key={`img-${name}`} className="flex items-center gap-2 text-xs text-white/80">
                       <input
                         type="checkbox"
                         checked={imgPeopleTags.includes(name)}
@@ -516,37 +546,37 @@ export default function AdminDashboard() {
               <button
                 type="submit"
                 disabled={busyImage}
-                className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white enabled:hover:bg-slate-800 disabled:opacity-60 sm:self-end"
+                className={`${BTN} sm:col-span-2 sm:justify-self-start`}
               >
                 {busyImage ? "Saving..." : "Add image"}
               </button>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+            <div className="border border-white/15 bg-white/[0.04] p-4">
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold text-slate-800">Prompt (optional)</p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="text-xs font-semibold text-white/90">Prompt (optional)</p>
+                  <p className="mt-1 text-xs text-white/50">
                     Only shows on the site if filled. This will appear under the new “Prompt” button in fullscreen.
                   </p>
                 </div>
-                <p className="text-[11px] font-semibold text-slate-500">
+                <p className="text-[11px] font-semibold text-white/45">
                   {imgPrompt.trim() ? `${imgPrompt.trim().length} chars` : "Empty"}
                 </p>
               </div>
               <textarea
                 value={imgPrompt}
                 onChange={(e) => setImgPrompt(e.target.value)}
-                className="mt-3 min-h-[180px] w-full resize-y rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-[12px] leading-relaxed text-slate-900 shadow-inner shadow-slate-200/70 outline-none transition focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
+                className={`${FIELD} min-h-[180px] resize-y font-mono text-[12px] leading-relaxed`}
                 placeholder="Paste the generation prompt here…"
               />
             </div>
           </form>
 
           {pendingImgBlobUrl ? (
-            <div className="mt-6 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Selected file (before upload)</p>
-              <div className="relative mt-2 max-h-56 w-full overflow-hidden rounded-lg bg-white">
+            <div className="mt-6 border border-dashed border-white/25 bg-white/[0.03] p-4">
+              <p className="font-mono text-[10px] tracking-[0.22em] text-white/45">SELECTED FILE (BEFORE UPLOAD)</p>
+              <div className="relative mt-2 max-h-56 w-full overflow-hidden bg-black">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={pendingImgBlobUrl} alt="Pending upload" className="max-h-56 w-full object-contain" />
               </div>
@@ -554,29 +584,29 @@ export default function AdminDashboard() {
           ) : null}
 
           {lastSavedImage ? (
-            <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50/80 p-4">
+            <div className="mt-6 border border-white/20 bg-blue-500/10 p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-emerald-800">Just saved</p>
-                  <p className="mt-1 font-heading text-lg font-bold text-slate-900">{lastSavedImage.title}</p>
-                  <p className="mt-1 break-all font-mono text-[11px] text-slate-600">{lastSavedImage.url}</p>
+                  <p className="font-mono text-[10px] tracking-[0.22em] text-blue-300">JUST SAVED</p>
+                  <p className="mt-1 font-heading text-lg text-white">{lastSavedImage.title}</p>
+                  <p className="mt-1 break-all font-mono text-[11px] text-white/55">{lastSavedImage.url}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => copyUrl(lastSavedImage.url)}
-                  className="shrink-0 rounded-full border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-900"
+                  className="shrink-0 border border-white/30 px-3 py-1.5 text-xs font-semibold text-white hover:border-white"
                 >
                   Copy URL
                 </button>
               </div>
-              <div className="relative mt-3 max-h-72 w-full overflow-hidden rounded-lg bg-white ring-1 ring-slate-200">
+              <div className="relative mt-3 max-h-72 w-full overflow-hidden bg-black ring-1 ring-white/15">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={lastSavedImage.url} alt="" className="max-h-72 w-full object-contain" />
               </div>
               <button
                 type="button"
                 onClick={() => setLastSavedImage(null)}
-                className="mt-3 text-xs font-medium text-slate-600 underline-offset-2 hover:underline"
+                className="mt-3 text-xs font-medium text-white/55 underline-offset-2 hover:underline"
               >
                 Dismiss preview
               </button>
@@ -584,46 +614,46 @@ export default function AdminDashboard() {
           ) : null}
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="font-heading text-xl font-bold">Films</h2>
-          <p className="mt-1 text-sm text-slate-500">Upload a video file to S3, or paste a public video URL.</p>
+        <section className={PANEL}>
+          <h2 className="font-heading text-2xl leading-none">Films</h2>
+          <p className="mt-2 text-sm text-white/60">Upload a video file to S3, or paste a public video URL.</p>
           <form onSubmit={uploadFilm} className="mt-4 flex flex-col gap-3">
-            <label className="block text-xs font-medium text-slate-700">
+            <label className="block text-xs font-medium text-white/70">
               Upload to S3
               <input
                 type="file"
                 accept="video/*"
                 onChange={(e) => setFilmFile(e.target.files?.[0] ?? null)}
-                className="mt-2 block w-full text-sm"
+                className="mt-2 block w-full text-sm text-white/70 file:mr-3 file:border-0 file:bg-[#fafafa] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-black"
               />
             </label>
-            <label className="block text-xs font-medium text-slate-700">
+            <label className="block text-xs font-medium text-white/70">
               Or video URL
               <input
                 type="url"
                 value={filmUrl}
                 onChange={(e) => setFilmUrl(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                className={FIELD}
                 placeholder="https://... (.mp4, etc.)"
                 autoComplete="off"
               />
             </label>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-              <label className="flex-1 text-xs font-medium text-slate-700">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="text-xs font-medium text-white/70 sm:col-span-2">
                 Title
                 <input
                   value={filmTitle}
                   onChange={(e) => setFilmTitle(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                  className={FIELD}
                   placeholder="Display title"
                 />
               </label>
-              <label className="text-xs font-medium text-slate-700 sm:w-44">
+              <label className="text-xs font-medium text-white/70">
                 Category
                 <select
                   value={filmCategory}
                   onChange={(e) => setFilmCategory(e.target.value as FilmCategory)}
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                  className={FIELD}
                 >
                   {CATEGORY_OPTIONS.map((o) => (
                     <option key={o.id} value={o.id}>
@@ -632,23 +662,23 @@ export default function AdminDashboard() {
                   ))}
                 </select>
               </label>
-              <label className="text-xs font-medium text-slate-700 sm:w-40">
+              <label className="text-xs font-medium text-white/70">
                 Orientation
                 <select
                   value={filmOrientation}
                   onChange={(e) => setFilmOrientation(e.target.value as typeof filmOrientation)}
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                  className={FIELD}
                 >
                   <option value="">Auto</option>
                   <option value="landscape">Landscape</option>
                   <option value="portrait">Portrait</option>
                 </select>
               </label>
-              <div className="text-xs font-medium text-slate-700 sm:w-64">
+              <div className="text-xs font-medium text-white/70 sm:col-span-2">
                 Characters
-                <div className="mt-2 grid grid-cols-2 gap-2 rounded-xl border border-slate-200 bg-white p-2">
+                <div className="mt-2 grid grid-cols-2 gap-2 border border-white/20 bg-white/[0.05] p-2 sm:grid-cols-4">
                   {CHARACTER_TAGS.map((name) => (
-                    <label key={`film-${name}`} className="flex items-center gap-2 text-xs text-slate-700">
+                    <label key={`film-${name}`} className="flex items-center gap-2 text-xs text-white/80">
                       <input
                         type="checkbox"
                         checked={filmPeopleTags.includes(name)}
@@ -662,61 +692,75 @@ export default function AdminDashboard() {
               <button
                 type="submit"
                 disabled={busyFilm}
-                className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white enabled:hover:bg-slate-800 disabled:opacity-60 sm:self-end"
+                className={`${BTN} sm:col-span-2 sm:justify-self-start`}
               >
                 {busyFilm ? "Saving..." : "Add film"}
               </button>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+            <div className="border border-white/15 bg-white/[0.04] p-4">
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold text-slate-800">Prompt (optional)</p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="text-xs font-semibold text-white/90">Prompt (optional)</p>
+                  <p className="mt-1 text-xs text-white/50">
                     Only shows on the site if filled. This will appear under the new “Prompt” button in fullscreen.
                   </p>
                 </div>
-                <p className="text-[11px] font-semibold text-slate-500">
+                <p className="text-[11px] font-semibold text-white/45">
                   {filmPrompt.trim() ? `${filmPrompt.trim().length} chars` : "Empty"}
                 </p>
               </div>
               <textarea
                 value={filmPrompt}
                 onChange={(e) => setFilmPrompt(e.target.value)}
-                className="mt-3 min-h-[180px] w-full resize-y rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-[12px] leading-relaxed text-slate-900 shadow-inner shadow-slate-200/70 outline-none transition focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
+                className={`${FIELD} min-h-[180px] resize-y font-mono text-[12px] leading-relaxed`}
                 placeholder="Paste the generation prompt here…"
               />
             </div>
           </form>
 
           {pendingFilmBlobUrl ? (
-            <div className="mt-6 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Selected file (before upload)</p>
-              <video src={pendingFilmBlobUrl} className="mt-2 max-h-64 w-full rounded-lg bg-black" controls playsInline />
+            <div className="mt-6 border border-dashed border-white/25 bg-white/[0.03] p-4">
+              <p className="font-mono text-[10px] tracking-[0.22em] text-white/45">SELECTED FILE (BEFORE UPLOAD)</p>
+              <video
+                src={pendingFilmBlobUrl}
+                className="mt-2 max-h-64 w-full bg-black"
+                controls
+                playsInline
+                controlsList="nodownload noplaybackrate noremoteplayback"
+                disablePictureInPicture
+              />
             </div>
           ) : null}
 
           {lastSavedFilm ? (
-            <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50/80 p-4">
+            <div className="mt-6 border border-white/20 bg-blue-500/10 p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-emerald-800">Just saved</p>
-                  <p className="mt-1 font-heading text-lg font-bold text-slate-900">{lastSavedFilm.title}</p>
-                  <p className="mt-1 break-all font-mono text-[11px] text-slate-600">{lastSavedFilm.url}</p>
+                  <p className="font-mono text-[10px] tracking-[0.22em] text-blue-300">JUST SAVED</p>
+                  <p className="mt-1 font-heading text-lg text-white">{lastSavedFilm.title}</p>
+                  <p className="mt-1 break-all font-mono text-[11px] text-white/55">{lastSavedFilm.url}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => copyUrl(lastSavedFilm.url)}
-                  className="shrink-0 rounded-full border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-900"
+                  className="shrink-0 border border-white/30 px-3 py-1.5 text-xs font-semibold text-white hover:border-white"
                 >
                   Copy URL
                 </button>
               </div>
-              <video src={lastSavedFilm.url} className="mt-3 max-h-72 w-full rounded-lg bg-black" controls playsInline />
+              <video
+                src={lastSavedFilm.url}
+                className="mt-3 max-h-72 w-full bg-black"
+                controls
+                playsInline
+                controlsList="nodownload noplaybackrate noremoteplayback"
+                disablePictureInPicture
+              />
               <button
                 type="button"
                 onClick={() => setLastSavedFilm(null)}
-                className="mt-3 text-xs font-medium text-slate-600 underline-offset-2 hover:underline"
+                className="mt-3 text-xs font-medium text-white/55 underline-offset-2 hover:underline"
               >
                 Dismiss preview
               </button>
@@ -724,14 +768,14 @@ export default function AdminDashboard() {
           ) : null}
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="font-heading text-xl font-bold">Instagram links</h2>
-          <p className="mt-1 text-sm text-slate-500">Add links for Instagram page. Upload thumbnail to S3 or paste thumbnail URL.</p>
+        <section className={PANEL}>
+          <h2 className="font-heading text-2xl leading-none">Instagram links</h2>
+          <p className="mt-2 text-sm text-white/60">Add links for Instagram page. Upload thumbnail to S3 or paste thumbnail URL.</p>
           <form onSubmit={addInstagramLink} className="mt-4 grid gap-3 sm:grid-cols-[1fr_1.1fr_1fr_1fr_0.8fr_auto]">
             <input
               value={igTitle}
               onChange={(e) => setIgTitle(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              className={FIELD}
               placeholder="Post title"
               required
             />
@@ -739,7 +783,7 @@ export default function AdminDashboard() {
               type="url"
               value={igUrl}
               onChange={(e) => setIgUrl(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              className={FIELD}
               placeholder="https://instagram.com/..."
               required
             />
@@ -747,45 +791,45 @@ export default function AdminDashboard() {
               type="url"
               value={igThumbUrl}
               onChange={(e) => setIgThumbUrl(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              className={FIELD}
               placeholder="Optional thumbnail URL"
             />
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setIgFile(e.target.files?.[0] ?? null)}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              className={FIELD}
             />
             <input
               value={igTag}
               onChange={(e) => setIgTag(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              className={FIELD}
               placeholder="Tag (e.g. Morphers)"
             />
             <button
               type="submit"
               disabled={busyIg}
-              className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white enabled:hover:bg-slate-800 disabled:opacity-60"
+              className={BTN}
             >
               {busyIg ? "Saving..." : "Add"}
             </button>
           </form>
           {pendingIgBlobUrl ? (
-            <div className="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-3">
+            <div className="mt-4 border border-dashed border-white/25 bg-white/[0.03] p-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={pendingIgBlobUrl} alt="Instagram thumbnail preview" className="h-32 w-48 rounded-lg object-cover" />
+              <img src={pendingIgBlobUrl} alt="Instagram thumbnail preview" className="h-32 w-48 object-cover" />
             </div>
           ) : null}
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="font-heading text-xl font-bold">YouTube links</h2>
-          <p className="mt-1 text-sm text-slate-500">Add links for YouTube page. Upload thumbnail to S3 or paste thumbnail URL.</p>
+        <section className={PANEL}>
+          <h2 className="font-heading text-2xl leading-none">YouTube links</h2>
+          <p className="mt-2 text-sm text-white/60">Add links for YouTube page. Upload thumbnail to S3 or paste thumbnail URL.</p>
           <form onSubmit={addYoutubeLink} className="mt-4 grid gap-3 sm:grid-cols-[1fr_1.1fr_1fr_1fr_0.8fr_auto]">
             <input
               value={ytTitle}
               onChange={(e) => setYtTitle(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              className={FIELD}
               placeholder="Video title"
               required
             />
@@ -793,7 +837,7 @@ export default function AdminDashboard() {
               type="url"
               value={ytUrl}
               onChange={(e) => setYtUrl(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              className={FIELD}
               placeholder="https://youtube.com/watch?v=..."
               required
             />
@@ -801,36 +845,38 @@ export default function AdminDashboard() {
               type="url"
               value={ytThumbUrl}
               onChange={(e) => setYtThumbUrl(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              className={FIELD}
               placeholder="Optional thumbnail URL"
             />
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setYtFile(e.target.files?.[0] ?? null)}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              className={FIELD}
             />
             <input
               value={ytTag}
               onChange={(e) => setYtTag(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              className={FIELD}
               placeholder="Tag (e.g. Morphers)"
             />
             <button
               type="submit"
               disabled={busyYt}
-              className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white enabled:hover:bg-slate-800 disabled:opacity-60"
+              className={BTN}
             >
               {busyYt ? "Saving..." : "Add"}
             </button>
           </form>
           {pendingYtBlobUrl ? (
-            <div className="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-3">
+            <div className="mt-4 border border-dashed border-white/25 bg-white/[0.03] p-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={pendingYtBlobUrl} alt="YouTube thumbnail preview" className="h-32 w-48 rounded-lg object-cover" />
+              <img src={pendingYtBlobUrl} alt="YouTube thumbnail preview" className="h-32 w-48 object-cover" />
             </div>
           ) : null}
         </section>
+          </div>
+        </details>
       </div>
     </main>
   );

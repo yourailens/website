@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { NavLinkPendingSpinner } from "@/components/NavLinkWithPending";
 import type { IndustryMediaType } from "@/data/industries";
 import { resolveMediaType } from "@/lib/industries/media";
@@ -24,6 +24,8 @@ import {
   type ExploreMegaSection,
   type IndustryMegaSection,
 } from "@/data/studio-nav";
+import { isOttOverlayPath, isOttPath } from "@/lib/ott-theme";
+import OttSearchOverlay, { SearchGlyph } from "@/components/OttSearchOverlay";
 
 const MODULES_CATEGORIES = MODULES_NAV_CATEGORIES;
 const RESOURCES_CATEGORIES = RESOURCES_NAV_CATEGORIES;
@@ -166,36 +168,59 @@ function DesktopLogoLink() {
   );
 }
 
+const OttNavContext = createContext(false);
+
 function DesktopLogoInner() {
   const { pending } = useLinkStatus();
+  const ott = useContext(OttNavContext);
   return (
     <>
-      {pending ? <span className="absolute inset-0 z-[1] cursor-wait rounded-xl" aria-hidden /> : null}
-      <span className="relative z-[2] flex items-center gap-3">
-        <NavLinkPendingSpinner borderClassName="border-blue-600" />
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-200">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      {pending ? <span className="absolute inset-0 z-[1] cursor-wait rounded-md" aria-hidden /> : null}
+      <span className="relative z-[2] flex items-center gap-2.5">
+        <NavLinkPendingSpinner borderClassName={ott ? "border-white" : "border-blue-600"} />
+        <div
+          className={`flex h-8 w-8 items-center justify-center ${
+            ott ? "rounded-md bg-blue-600" : "rounded-xl bg-blue-600 shadow-lg shadow-blue-200"
+          }`}
+        >
+          <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
             <path d="M9 1L16 5V13L9 17L2 13V5L9 1Z" fill="white" fillOpacity="0.15" stroke="white" strokeWidth="1.5" />
             <circle cx="9" cy="9" r="3" fill="white" />
           </svg>
         </div>
-        <div>
-          <span className="font-heading text-xl font-bold tracking-[-0.02em] text-slate-900">
-            YourAI<span className="text-blue-600">Lens</span>
+        <span className="flex flex-col justify-center leading-none">
+          <span
+            className={`font-heading ${
+              ott
+                ? "text-[1.35rem] tracking-[0.04em] text-white drop-shadow-[0_0_18px_rgba(96,165,250,0.35)]"
+                : "text-[1.35rem] tracking-tight text-slate-900"
+            }`}
+          >
+            YOUR<span className={ott ? "text-blue-400" : "text-blue-600"}>AI</span>LENS
           </span>
-          <span className="ml-2 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-blue-600">
+          <span
+            className={`mt-0.5 font-heading text-[0.58rem] uppercase tracking-[0.42em] ${
+              ott ? "text-white/55" : "text-slate-500"
+            }`}
+          >
             Studios
           </span>
-        </div>
+        </span>
       </span>
     </>
   );
 }
 
-const desktopNavLinkClass = (active: boolean) =>
-  `relative py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-800 transition-colors after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:bg-slate-900 after:transition-transform after:duration-300 after:content-[''] ${
-    active ? "after:scale-x-100" : "after:scale-x-0 hover:after:scale-x-100"
-  }`;
+const desktopNavLinkClass = (active: boolean, ott = false) =>
+  ott
+    ? `relative whitespace-nowrap py-2 text-[14.5px] font-medium tracking-[-0.015em] transition-colors after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-left after:bg-blue-500 after:transition-transform after:duration-200 after:content-[''] ${
+        active
+          ? "text-white after:scale-x-100"
+          : "text-white/70 after:scale-x-0 hover:text-white hover:after:scale-x-100 hover:after:bg-white/40"
+      }`
+    : `relative py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-800 transition-colors after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:bg-slate-900 after:transition-transform after:duration-300 after:content-[''] ${
+        active ? "after:scale-x-100" : "after:scale-x-0 hover:after:scale-x-100"
+      }`;
 
 function DesktopNavTextLink({
   href,
@@ -206,36 +231,53 @@ function DesktopNavTextLink({
   label: string;
   active: boolean;
 }) {
+  const ott = useContext(OttNavContext);
   return (
-    <Link href={href} prefetch className={desktopNavLinkClass(active)}>
+    <Link href={href} prefetch className={desktopNavLinkClass(active, ott)}>
       {label}
     </Link>
   );
 }
 
 function DesktopContactCta() {
+  const ott = useContext(OttNavContext);
   return (
     <Link
       href="/contact"
       prefetch
-      className="relative inline-flex rounded-full bg-blue-600 px-5 py-2.5 text-[13px] font-semibold text-white shadow-sm shadow-blue-200/50 transition hover:bg-blue-700"
+      className={
+        ott
+          ? "relative inline-flex rounded-md bg-blue-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-blue-500"
+          : "relative inline-flex rounded-full bg-blue-600 px-5 py-2.5 text-[13px] font-semibold text-white shadow-sm shadow-blue-200/50 transition hover:bg-blue-700"
+      }
     >
-      <DesktopContactCtaInner />
+      <DesktopContactCtaInner ott={ott} />
     </Link>
   );
 }
 
-function DesktopContactCtaInner() {
+function DesktopContactCtaInner({ ott = false }: { ott?: boolean }) {
   const { pending } = useLinkStatus();
   return (
     <>
       {pending ? <span className="absolute inset-0 z-[1] cursor-wait rounded-full" aria-hidden /> : null}
       <span className="relative z-[2] inline-flex items-center gap-2">
         <NavLinkPendingSpinner borderClassName="border-white" />
-        Book a call
-        <span className="ml-1.5 text-white/70" aria-hidden>
-          →
-        </span>
+        {ott ? (
+          <>
+            Contact
+            <span className="ml-0.5 text-white/70" aria-hidden>
+              →
+            </span>
+          </>
+        ) : (
+          <>
+            Book a call
+            <span className="ml-1.5 text-white/70" aria-hidden>
+              →
+            </span>
+          </>
+        )}
       </span>
     </>
   );
@@ -263,7 +305,7 @@ function MobileNavLink({
           onSamePathClose();
         }
       }}
-      className="relative block rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4 text-2xl font-black tracking-tight text-white backdrop-blur-sm transition-colors hover:bg-white/[0.12]"
+      className="relative block border-b border-white/10 py-4 font-heading text-[1.65rem] uppercase tracking-[0.08em] text-white transition-colors hover:text-blue-300"
     >
       <MobileNavLinkInner label={label} />
     </Link>
@@ -315,16 +357,20 @@ function MobileLogoInner() {
       {pending ? <span className="absolute inset-0 z-[1] -m-2 cursor-wait rounded-xl" aria-hidden /> : null}
       <span className="relative z-[2] flex items-center gap-3">
         <NavLinkPendingSpinner borderClassName="border-white" />
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25 backdrop-blur-sm">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <path d="M9 1L16 5V13L9 17L2 13V5L9 1Z" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="1.5" />
+        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-600">
+          <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+            <path d="M9 1L16 5V13L9 17L2 13V5L9 1Z" fill="white" fillOpacity="0.15" stroke="white" strokeWidth="1.5" />
             <circle cx="9" cy="9" r="3" fill="white" />
           </svg>
         </div>
-        <div>
-          <p className="font-heading text-base font-black tracking-tight text-white">YourAILens</p>
-          <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/45">Studios</p>
-        </div>
+        <span className="flex flex-col justify-center leading-none">
+          <span className="font-heading text-[1.25rem] tracking-tight text-white">
+            YOUR<span className="text-blue-400">AI</span>LENS
+          </span>
+          <span className="mt-0.5 font-heading text-[0.55rem] uppercase tracking-[0.42em] text-white/55">
+            Studios
+          </span>
+        </span>
       </span>
     </>
   );
@@ -346,7 +392,7 @@ function MobileContactCta({
           onSamePathClose();
         }
       }}
-      className="relative block w-full rounded-full bg-white py-4 text-center text-base font-bold text-blue-700 shadow-xl shadow-black/20 transition-transform active:scale-[0.98]"
+      className="relative mt-2 block w-full border border-white/20 py-3.5 text-center font-heading text-sm uppercase tracking-[0.22em] text-white transition hover:border-blue-400 hover:text-blue-300"
     >
       <MobileContactCtaInner />
     </Link>
@@ -359,46 +405,8 @@ function MobileContactCtaInner() {
     <>
       {pending ? <span className="absolute inset-0 z-[1] cursor-wait rounded-full" aria-hidden /> : null}
       <span className="relative z-[2] inline-flex items-center justify-center gap-2">
-        <NavLinkPendingSpinner borderClassName="border-blue-600" />
-        Book a free call →
-      </span>
-    </>
-  );
-}
-
-function MobilePricingLink({
-  pathname,
-  onSamePathClose,
-}: {
-  pathname: string;
-  onSamePathClose: () => void;
-}) {
-  return (
-    <Link
-      href="/pricing"
-      prefetch
-      onClick={() => {
-        if (pathname === "/pricing") {
-          onSamePathClose();
-        }
-      }}
-      className="relative block text-center text-sm font-semibold text-white/50 underline underline-offset-4 transition-colors hover:text-white/80"
-    >
-      <MobilePricingLinkInner />
-    </Link>
-  );
-}
-
-function MobilePricingLinkInner() {
-  const { pending } = useLinkStatus();
-  return (
-    <>
-      {pending ? (
-        <span className="absolute inset-0 z-[1] cursor-wait rounded-lg" aria-hidden />
-      ) : null}
-      <span className="relative z-[2] inline-flex items-center justify-center gap-2">
-        <NavLinkPendingSpinner borderClassName="border-white/70" />
-        Pricing
+        <NavLinkPendingSpinner borderClassName="border-white" />
+        Contact
       </span>
     </>
   );
@@ -443,7 +451,6 @@ function isExploreNavActive(pathname: string) {
     pathname.startsWith("/industries") ||
     pathname.startsWith("/images") ||
     pathname.startsWith("/films") ||
-    pathname.startsWith("/events") ||
     pathname.startsWith("/avatars") ||
     pathname.startsWith("/instagram") ||
     pathname.startsWith("/youtube") ||
@@ -461,13 +468,16 @@ function isExploreNavActive(pathname: string) {
   );
 }
 
-function isWorldOfAiDropdownActive(pathname: string) {
-  return (
-    pathname.startsWith("/ai-verse") ||
-    pathname.startsWith("/world-of-ai") ||
-    pathname.startsWith("/ai-filmmaking") ||
-    pathname.startsWith("/ai-ads")
-  );
+function isAdsNavActive(pathname: string) {
+  return pathname.startsWith("/ai-ads");
+}
+
+function isFilmsChannelActive(pathname: string) {
+  return pathname.startsWith("/ai-filmmaking");
+}
+
+function isCommunityNavActive(pathname: string) {
+  return pathname.startsWith("/ai-verse") || pathname.startsWith("/world-of-ai");
 }
 
 function isTeamNavActive(pathname: string) {
@@ -476,6 +486,10 @@ function isTeamNavActive(pathname: string) {
 
 function isPricingNavActive(pathname: string) {
   return pathname.startsWith("/pricing");
+}
+
+function isEventsNavActive(pathname: string) {
+  return pathname.startsWith("/events");
 }
 
 /** Luxury-style mega menu: editorial image column + clean white content */
@@ -491,12 +505,12 @@ function MegaPanelLuxury({
   children: React.ReactNode;
 }) {
   return (
-    <div className="border-b border-slate-200 bg-white shadow-[0_20px_50px_-30px_rgba(0,0,0,0.15)]">
+    <div className="border-b border-white/10 bg-zinc-950 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.65)]">
       <div className="flex min-h-[min(420px,54vh)] w-full">
         <div className="relative hidden w-[min(46vw,640px)] min-w-[300px] shrink-0 self-stretch lg:block">
           <Image key={bgSrc} src={bgSrc} alt={bgAlt} fill className="object-cover object-center" sizes="50vw" priority={false} />
           <div
-            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/5 via-black/0 to-white"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/5 via-black/0 to-black"
             aria-hidden
           />
           {caption ? (
@@ -505,7 +519,7 @@ function MegaPanelLuxury({
             </p>
           ) : null}
         </div>
-        <div className="flex min-w-0 flex-1 bg-white">
+        <div className="flex min-w-0 flex-1 bg-zinc-950">
           <div className="mx-auto flex w-full max-w-3xl flex-col px-6 py-9 sm:px-10 lg:max-w-none lg:px-12 lg:py-11">
             {children}
           </div>
@@ -531,14 +545,14 @@ function MegaHorizontalFeaturedLink({
       href={href}
       prefetch
       onClick={onClick}
-      className="group mb-8 block max-w-lg border-b border-slate-900 pb-5 transition-opacity hover:opacity-80"
+      className="group mb-8 block max-w-lg border-b border-white/25 pb-5 transition-opacity hover:opacity-80"
     >
       {subtitle ? (
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-600">{subtitle}</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-blue-400/80">{subtitle}</p>
       ) : null}
       <span className="mt-2 flex items-end justify-between gap-4">
-        <span className="font-body text-xl font-medium tracking-tight text-slate-900 sm:text-2xl">{title}</span>
-        <span className="pb-0.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-600 group-hover:text-slate-900">
+        <span className="font-heading text-xl tracking-tight text-white sm:text-2xl">{title}</span>
+        <span className="pb-0.5 text-[10px] uppercase tracking-[0.24em] text-white/40 group-hover:text-blue-300">
           View all
         </span>
       </span>
@@ -548,8 +562,8 @@ function MegaHorizontalFeaturedLink({
 
 function MegaColumnHeading({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-3 border-b border-slate-200/80 pb-2.5">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.26em] text-slate-700">{children}</p>
+    <div className="mb-3 border-b border-white/10 pb-2.5">
+      <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-blue-400/80">{children}</p>
     </div>
   );
 }
@@ -570,14 +584,14 @@ function MegaNavItem({
       href={href}
       prefetch
       onClick={onClick}
-      className="group flex items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-2 hover:border-blue-100/80 hover:bg-blue-50/60"
+      className="group flex items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-2 hover:border-white/10 hover:bg-white/[0.04]"
     >
       {icon ? (
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-blue-100/90 bg-blue-50/80 text-blue-600">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-blue-400">
           {icon}
         </span>
       ) : null}
-      <span className="font-body text-[13px] font-semibold text-slate-900 group-hover:text-blue-700">
+      <span className="font-body text-[13px] font-medium text-white/85 group-hover:text-white">
         {label}
       </span>
     </Link>
@@ -585,7 +599,7 @@ function MegaNavItem({
 }
 
 function NavMediaIcon({ href }: { href: string }) {
-  const cls = "text-blue-600";
+  const cls = "text-blue-400";
   const size = 16;
   if (href === "/films") {
     return (
@@ -605,7 +619,7 @@ function NavMediaIcon({ href }: { href: string }) {
 }
 
 function NavIndustryIcon({ slug }: { slug: string }) {
-  const cls = "text-blue-600";
+  const cls = "text-blue-400";
   const size = 16;
   if (slug === "real-estate") {
     return (
@@ -705,6 +719,7 @@ function DesktopMegaMenuTrigger({
   onToggle: () => void;
   active: boolean;
 }) {
+  const ott = useContext(OttNavContext);
   return (
     <button
       type="button"
@@ -713,9 +728,23 @@ function DesktopMegaMenuTrigger({
       aria-controls={panelId}
       id={`nav-${menuId}-trigger`}
       onClick={onToggle}
-      className={`${desktopNavLinkClass(active || open)} cursor-pointer border-0 bg-transparent p-0`}
+      className={`${desktopNavLinkClass(active || open, ott)} inline-flex cursor-pointer items-center gap-1 border-0 bg-transparent p-0`}
     >
       {label}
+      {ott ? (
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          className={`opacity-70 transition-transform ${open ? "rotate-180" : ""}`}
+          aria-hidden
+        >
+          <path d="M4 6l4 4 4-4" />
+        </svg>
+      ) : null}
     </button>
   );
 }
@@ -728,7 +757,7 @@ function MegaTextLink({ href, label, onClick }: { href: string; label: string; o
       onClick={onClick}
       className="group block py-1.5 transition-colors"
     >
-      <span className="font-body text-[13px] font-semibold tracking-wide text-slate-800 group-hover:text-slate-900">
+      <span className="font-body text-[13px] font-medium tracking-wide text-white/80 group-hover:text-white">
         {label}
       </span>
     </Link>
@@ -737,7 +766,7 @@ function MegaTextLink({ href, label, onClick }: { href: string; label: string; o
 
 function MegaCategoryLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.26em] text-slate-700">{children}</p>
+    <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.26em] text-white/40">{children}</p>
   );
 }
 
@@ -754,10 +783,10 @@ function MegaSidebarNavButton({
     <button
       type="button"
       onClick={onClick}
-      className={`w-full border-l-2 py-2.5 pl-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors ${
+      className={`w-full border-l-2 py-2.5 pl-3 text-left text-[11px] uppercase tracking-[0.16em] transition-colors ${
         active
-          ? "border-slate-900 text-slate-900"
-          : "border-transparent text-slate-600 hover:border-slate-300 hover:text-slate-900"
+          ? "border-blue-400 text-white"
+          : "border-transparent text-white/40 hover:border-white/25 hover:text-white"
       }`}
     >
       {label}
@@ -770,27 +799,34 @@ function DesktopWorldOfAiMegaPanel({ onLinkClick }: { onLinkClick: () => void })
   return (
     <MegaPanelLuxury bgSrc={visual.image} bgAlt={visual.label} caption={NAV_LABELS.worldOfAi}>
       <div className="flex min-h-[220px] flex-col justify-center">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.26em] text-slate-500">
+        <p className="font-mono text-[10px] uppercase tracking-[0.26em] text-blue-400/80">
           {NAV_LABELS.worldOfAi}
         </p>
-        <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-6 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
           {WORLD_OF_AI_NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               prefetch
               onClick={onLinkClick}
-              className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:border-blue-200 hover:shadow-md"
+              className="group relative overflow-hidden bg-black"
             >
-              <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
-                <Image src={link.image} alt="" fill className="object-cover transition duration-500 group-hover:scale-[1.04]" sizes="320px" />
-              </div>
-              <div className="p-5">
-                <p className="font-heading text-lg font-bold text-slate-900">{link.label}</p>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{link.description}</p>
-                <span className="mt-3 inline-flex text-sm font-semibold text-blue-600">
-                  Open →
-                </span>
+              <div className="relative aspect-video overflow-hidden">
+                <Image
+                  src={link.image}
+                  alt=""
+                  fill
+                  className="object-cover transition duration-500 group-hover:scale-[1.06]"
+                  sizes="320px"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-4">
+                  <p className="font-mono text-[8px] tracking-[0.2em] text-blue-300">Open</p>
+                  <p className="mt-0.5 font-heading text-lg leading-none text-white">{link.label}</p>
+                  <p className="mt-1.5 line-clamp-2 text-xs font-light leading-relaxed text-white/50">
+                    {link.description}
+                  </p>
+                </div>
               </div>
             </Link>
           ))}
@@ -819,11 +855,11 @@ function DesktopExploreMegaPanel({
   return (
     <MegaPanelLuxury bgSrc={visual.src} bgAlt={visual.alt} caption={visual.caption}>
       <div className="flex min-h-[220px]">
-        <aside className="w-[168px] shrink-0 border-r border-slate-100 py-1 pr-8">
+        <aside className="w-[168px] shrink-0 border-r border-white/10 py-1 pr-8">
           <nav className="flex flex-col gap-5" aria-label="Explore sections">
             {EXPLORE_MEGA_GROUPS.map((group) => (
               <div key={group.label}>
-                <p className="mb-1.5 px-3 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                <p className="mb-1.5 px-3 font-mono text-[9px] uppercase tracking-[0.22em] text-white/30">
                   {group.label}
                 </p>
                 <div className="flex flex-col gap-0.5">
@@ -893,11 +929,11 @@ function DesktopExploreMegaPanel({
                 onClick={onLinkClick}
               />
               {loading ? (
-                <div className="max-w-xl divide-y divide-slate-100" aria-hidden>
+                <div className="max-w-xl divide-y divide-white/10" aria-hidden>
                   {Array.from({ length: 4 }).map((_, row) => (
                     <div key={row} className="py-4">
-                      <div className="h-3.5 w-40 bg-slate-100" />
-                      <div className="mt-2 h-3 w-56 max-w-full bg-slate-50" />
+                      <div className="h-3.5 w-40 bg-white/10" />
+                      <div className="mt-2 h-3 w-56 max-w-full bg-white/5" />
                     </div>
                   ))}
                 </div>
@@ -919,12 +955,12 @@ function DesktopExploreMegaPanel({
 
           {section === "modules" && (
             <>
-              <div className="mb-6 flex gap-8 border-b border-slate-100 pb-5">
+              <div className="mb-6 flex gap-8 border-b border-white/10 pb-5">
                 <Link
                   href="/modules"
                   prefetch
                   onClick={onLinkClick}
-                  className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-800 transition hover:text-slate-950"
+                  className="text-[11px] uppercase tracking-[0.2em] text-white/60 transition hover:text-white"
                 >
                   All modules
                 </Link>
@@ -948,12 +984,12 @@ function DesktopExploreMegaPanel({
 
           {section === "libraries" && (
             <>
-              <div className="mb-6 flex gap-8 border-b border-slate-100 pb-5">
+              <div className="mb-6 flex gap-8 border-b border-white/10 pb-5">
                 <Link
                   href="/resources"
                   prefetch
                   onClick={onLinkClick}
-                  className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-800 transition hover:text-slate-950"
+                  className="text-[11px] uppercase tracking-[0.2em] text-white/60 transition hover:text-white"
                 >
                   All libraries
                 </Link>
@@ -996,16 +1032,16 @@ function MegaMenuLink({
       href={href}
       prefetch
       onClick={onClick}
-      className="group flex items-start justify-between gap-6 border-b border-slate-100 py-4 transition-colors last:border-b-0 hover:border-slate-300"
+      className="group flex items-start justify-between gap-6 border-b border-white/10 py-4 transition-colors last:border-b-0 hover:border-white/25"
     >
       <span className="min-w-0">
-        <span className="block font-body text-[15px] font-semibold tracking-wide text-slate-900">{label}</span>
+        <span className="block font-heading text-[15px] tracking-wide text-white">{label}</span>
         {description ? (
-          <span className="mt-1 block text-[13px] font-normal leading-relaxed text-slate-600">{description}</span>
+          <span className="mt-1 block text-[13px] font-light leading-relaxed text-white/45">{description}</span>
         ) : null}
       </span>
       <span
-        className="shrink-0 pt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500 transition group-hover:text-slate-900"
+        className="shrink-0 pt-1 text-[10px] uppercase tracking-[0.24em] text-white/30 transition group-hover:text-blue-300"
         aria-hidden
       >
         →
@@ -1019,8 +1055,11 @@ const NAV_HEADER_FALLBACK_PX = 132;
 
 export default function Navbar() {
   const pathname = usePathname();
+  const ott = isOttPath(pathname);
+  const overlay = isOttOverlayPath(pathname);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [exploreOpen, setExploreOpen] = useState(false);
   const [worldOfAiOpen, setWorldOfAiOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
@@ -1044,8 +1083,8 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    // Prevent background scroll while mobile menu is open (including iOS).
-    if (!menuOpen) {
+    // Prevent background scroll while mobile menu or search overlay is open (including iOS).
+    if (!menuOpen && !searchOpen) {
       const y = bodyScrollYRef.current;
       document.body.style.position = "";
       document.body.style.top = "";
@@ -1077,11 +1116,12 @@ export default function Navbar() {
       if (y) window.scrollTo(0, y);
       bodyScrollYRef.current = 0;
     };
-  }, [menuOpen]);
+  }, [menuOpen, searchOpen]);
 
   /** Close drawer after navigation completes (don’t hide immediately on tap). */
   useEffect(() => {
     setMenuOpen(false);
+    setSearchOpen(false);
     setExploreOpen(false);
     setWorldOfAiOpen(false);
   }, [pathname]);
@@ -1124,14 +1164,55 @@ export default function Navbar() {
     worldOfAiMega.setOpen((open) => !open);
   }, [exploreMega, worldOfAiMega]);
 
+  const openSearch = useCallback(() => {
+    setMenuOpen(false);
+    exploreMega.setOpen(false);
+    worldOfAiMega.setOpen(false);
+    setSearchOpen(true);
+  }, [exploreMega, worldOfAiMega]);
+
+  useEffect(() => {
+    if (!ott) return;
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const typing =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable;
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen((open) => !open);
+        return;
+      }
+      if (!typing && e.key === "/" && !searchOpen) {
+        e.preventDefault();
+        openSearch();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [ott, openSearch, searchOpen]);
+
+  const navSolid = ott && (scrolled || !overlay || exploreMega.open);
+
   return (
+    <OttNavContext.Provider value={ott}>
     <>
       {/* fixed: sticky fails site-wide because html/body use overflow-x hidden */}
       <header
         ref={headerRef}
-        className={`fixed top-0 left-0 right-0 z-50 w-full transition-shadow duration-300 ${scrolled ? "shadow-md" : "shadow-sm"}`}
+        className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${
+          ott
+            ? navSolid
+              ? "bg-black/95 shadow-lg shadow-black/40 backdrop-blur-md"
+              : "bg-gradient-to-b from-black via-black/70 to-transparent shadow-none"
+            : scrolled
+              ? "shadow-md"
+              : "shadow-sm"
+        }`}
       >
         {/* Book a call banner */}
+        {ott ? null : (
         <Link
           href="/contact"
           prefetch
@@ -1141,13 +1222,34 @@ export default function Navbar() {
             <span>✦ Let&apos;s build something with AI</span>
           </span>
         </Link>
+        )}
 
       {/* Main navbar */}
-        <nav className="relative overflow-visible border-b border-slate-200/80 bg-white">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
-          <div className="flex h-[4.25rem] items-center justify-between gap-6">
+        <nav className={`relative overflow-visible ${ott ? "bg-transparent" : "border-b border-slate-200/80 bg-white"}`}>
+        <div className="px-4 sm:px-6 lg:px-10">
+          <div className={`flex items-center justify-between gap-4 ${ott ? "h-16" : "h-[4.25rem]"}`}>
               <DesktopLogoLink />
 
+              {ott ? (
+                <div className="hidden min-w-0 flex-1 items-center gap-5 lg:flex">
+                  <DesktopNavTextLink href="/ai-ads" label="Ads" active={isAdsNavActive(pathname)} />
+                  <DesktopNavTextLink href="/ai-filmmaking" label="Films" active={isFilmsChannelActive(pathname)} />
+                  <DesktopNavTextLink href="/ai-verse" label="Community" active={isCommunityNavActive(pathname)} />
+                  <DesktopNavTextLink href="/team" label="Team" active={isTeamNavActive(pathname)} />
+                  <div key="nav-explore" ref={exploreMega.triggerRef} className="relative">
+                    <DesktopMegaMenuTrigger
+                      menuId="explore"
+                      panelId="nav-explore-mega"
+                      label="Browse"
+                      open={exploreMega.open}
+                      onToggle={toggleExploreMega}
+                      active={isExploreNavActive(pathname)}
+                    />
+                  </div>
+                  <DesktopNavTextLink href="/pricing" label="Pricing" active={isPricingNavActive(pathname)} />
+                  <DesktopNavTextLink href="/events" label="Events" active={isEventsNavActive(pathname)} />
+                </div>
+              ) : (
               <div className="hidden flex-1 items-center justify-center lg:flex">
                 <div className="flex items-center gap-8 lg:gap-10">
                 <div key="nav-world-of-ai" ref={worldOfAiMega.triggerRef} className="relative">
@@ -1157,7 +1259,7 @@ export default function Navbar() {
                     label={NAV_LABELS.worldOfAi}
                     open={worldOfAiMega.open}
                     onToggle={toggleWorldOfAiMega}
-                    active={isWorldOfAiDropdownActive(pathname)}
+                    active={isCommunityNavActive(pathname) || isAdsNavActive(pathname) || isFilmsChannelActive(pathname)}
                   />
                 </div>
                 <DesktopNavTextLink
@@ -1180,23 +1282,55 @@ export default function Navbar() {
                     active={isExploreNavActive(pathname)}
                   />
                 </div>
+                <DesktopNavTextLink
+                  href="/events"
+                  label="Events"
+                  active={isEventsNavActive(pathname)}
+                />
                 </div>
               </div>
+              )}
 
-            <div className="hidden shrink-0 items-center gap-3 lg:flex">
+            <div className="ml-auto hidden shrink-0 items-center gap-2 lg:flex">
+                {ott ? (
+                  <button
+                    type="button"
+                    onClick={openSearch}
+                    aria-label="Search"
+                    className="flex h-10 w-10 items-center justify-center text-white/75 transition hover:text-white"
+                  >
+                    <SearchGlyph />
+                  </button>
+                ) : null}
                 <DesktopContactCta />
               </div>
 
+            <div className="ml-auto flex items-center gap-1 lg:hidden">
+            {ott ? (
+              <button
+                type="button"
+                onClick={openSearch}
+                aria-label="Search"
+                className="flex h-10 w-10 items-center justify-center rounded-md bg-white/20 text-neutral-200 ring-1 ring-white/30"
+              >
+                <SearchGlyph />
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
-              className="flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-xl border border-slate-200 lg:hidden"
+              className={`flex h-10 w-10 flex-col items-center justify-center gap-[5px] ${
+                ott
+                  ? "rounded-md bg-white/20 ring-1 ring-white/30"
+                  : "rounded-xl border border-slate-200"
+              }`}
               aria-label="Toggle menu"
             >
-              <span className={`h-[2px] w-5 rounded-full bg-slate-700 transition-all duration-300 ${menuOpen ? "translate-y-[7px] rotate-45" : ""}`} />
-              <span className={`h-[2px] w-5 rounded-full bg-slate-700 transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`} />
-              <span className={`h-[2px] w-5 rounded-full bg-slate-700 transition-all duration-300 ${menuOpen ? "-translate-y-[7px] -rotate-45" : ""}`} />
+              <span className={`h-[2px] w-5 rounded-full transition-all duration-300 ${ott ? "bg-neutral-200" : "bg-slate-700"} ${menuOpen ? "translate-y-[7px] rotate-45" : ""}`} />
+              <span className={`h-[2px] w-5 rounded-full transition-all duration-300 ${ott ? "bg-neutral-200" : "bg-slate-700"} ${menuOpen ? "opacity-0" : ""}`} />
+              <span className={`h-[2px] w-5 rounded-full transition-all duration-300 ${ott ? "bg-neutral-200" : "bg-slate-700"} ${menuOpen ? "-translate-y-[7px] -rotate-45" : ""}`} />
             </button>
+            </div>
           </div>
         </div>
 
@@ -1237,24 +1371,23 @@ export default function Navbar() {
           </div>
         </nav>
       </header>
-      <div aria-hidden className="shrink-0" style={{ height: headerOffsetPx }} />
+      <div aria-hidden className="shrink-0" style={{ height: overlay ? 0 : headerOffsetPx }} />
 
       {/* Mobile menu — above nav (z-50) so nothing stacks on top */}
       <div
-        className={`fixed inset-0 z-[100] flex min-h-[100dvh] flex-col bg-[#1e3a8a] transition-opacity duration-300 lg:hidden ${menuOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 z-[100] flex min-h-[100dvh] flex-col bg-black transition-opacity duration-300 lg:hidden ${menuOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-[#172554] via-[#1d4ed8] to-[#1e3a8a]" aria-hidden />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30" aria-hidden />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(37,99,235,0.18),_transparent_55%)]" aria-hidden />
 
         <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
           {/* Scroll container (menu scrolls, page behind does not). */}
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]">
-            <div className="mb-8 flex items-center justify-between gap-4">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:px-8">
+            <div className="mb-10 flex items-center justify-between gap-4">
               <MobileLogoLink pathname={pathname} onSamePathClose={closeIfSamePath} />
               <button
                 type="button"
                 onClick={() => setMenuOpen(false)}
-                className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+                className="flex h-11 w-11 items-center justify-center border border-white/20 text-white transition-colors hover:border-white/50"
                 aria-label="Close menu"
               >
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -1264,75 +1397,14 @@ export default function Navbar() {
             </div>
 
             <div className="flex min-h-[calc(100dvh-6rem)] flex-col">
-              <nav className="flex flex-col gap-1">
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setExploreOpen(false);
-                      setWorldOfAiOpen((open) => !open);
-                    }}
-                    aria-expanded={worldOfAiOpen}
-                    aria-controls="mobile-world-of-ai-panel"
-                    className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4 text-left text-white backdrop-blur-sm transition-colors hover:bg-white/[0.12]"
-                  >
-                    <span className="font-mono text-[11px] font-bold uppercase tracking-[0.32em] text-white/80">
-                      {NAV_LABELS.worldOfAi}
-                    </span>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      className={`shrink-0 text-white/70 transition-transform duration-200 ${
-                        worldOfAiOpen ? "rotate-180" : ""
-                      }`}
-                      aria-hidden
-                    >
-                      <path d="M4 6l4 4 4-4" />
-                    </svg>
-                  </button>
-                  <div
-                    id="mobile-world-of-ai-panel"
-                    hidden={!worldOfAiOpen}
-                    className={worldOfAiOpen ? "mt-3 flex flex-col gap-1" : undefined}
-                  >
-                    {WORLD_OF_AI_NAV_LINKS.map((link) => (
-                      <MobileNavLink
-                        key={link.href}
-                        href={link.href}
-                        label={link.label}
-                        pathname={pathname}
-                        onSamePathClose={closeIfSamePath}
-                      />
-                    ))}
-                  </div>
-                </div>
+              <nav className="flex flex-col">
+                <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.32em] text-blue-400/70">Channels</p>
+                <MobileNavLink href="/ai-ads" label="Ads" pathname={pathname} onSamePathClose={closeIfSamePath} />
+                <MobileNavLink href="/ai-filmmaking" label="Films" pathname={pathname} onSamePathClose={closeIfSamePath} />
+                <MobileNavLink href="/ai-verse" label="Community" pathname={pathname} onSamePathClose={closeIfSamePath} />
+                <MobileNavLink href="/team" label="Team" pathname={pathname} onSamePathClose={closeIfSamePath} />
 
-                <p className="mt-5 px-1 font-mono text-[11px] font-bold uppercase tracking-[0.32em] text-white/60">
-                  {NAV_LABELS.team}
-                </p>
-                <MobileNavLink
-                  href="/team"
-                  label={NAV_LABELS.team}
-                  pathname={pathname}
-                  onSamePathClose={closeIfSamePath}
-                />
-
-                <p className="mt-5 px-1 font-mono text-[11px] font-bold uppercase tracking-[0.32em] text-white/60">
-                  {NAV_LABELS.pricing}
-                </p>
-                <MobileNavLink
-                  href="/pricing"
-                  label="Packages & pricing"
-                  pathname={pathname}
-                  onSamePathClose={closeIfSamePath}
-                />
-
-                <div className="mt-5">
+                <div className="mt-6">
                   <button
                     type="button"
                     onClick={() => {
@@ -1341,10 +1413,10 @@ export default function Navbar() {
                     }}
                     aria-expanded={exploreOpen}
                     aria-controls="mobile-explore-panel"
-                    className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4 text-left text-white backdrop-blur-sm transition-colors hover:bg-white/[0.12]"
+                    className="flex w-full items-center justify-between border-b border-white/10 py-4 text-left text-white"
                   >
-                    <span className="font-mono text-[11px] font-bold uppercase tracking-[0.32em] text-white/80">
-                      {NAV_LABELS.explore}
+                    <span className="font-heading text-[1.65rem] uppercase tracking-[0.08em] text-white">
+                      Browse
                     </span>
                     <svg
                       width="16"
@@ -1368,7 +1440,7 @@ export default function Navbar() {
                     hidden={!exploreOpen}
                     className={exploreOpen ? "mt-3 flex flex-col gap-1" : undefined}
                   >
-                    <p className="mt-1 px-1 font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-white/45">
+                    <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.28em] text-blue-400/70">
                       {NAV_LABELS.creations}
                     </p>
                     {CREATIONS_MOBILE_LINKS.map((link) => (
@@ -1381,7 +1453,7 @@ export default function Navbar() {
                       />
                     ))}
 
-                    <p className="mt-4 px-1 font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-white/45">
+                    <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-blue-400/70">
                       {NAV_LABELS.industries}
                     </p>
                     <MobileNavLink
@@ -1404,7 +1476,7 @@ export default function Navbar() {
                       ))
                     )}
 
-                    <p className="mt-4 px-1 font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-white/45">
+                    <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-blue-400/70">
                       {NAV_LABELS.studio}
                     </p>
                     {STUDIO_MOBILE_LINKS.map((link) => (
@@ -1418,11 +1490,12 @@ export default function Navbar() {
                     ))}
                   </div>
                 </div>
+                <MobileNavLink href="/pricing" label="Pricing" pathname={pathname} onSamePathClose={closeIfSamePath} />
+                <MobileNavLink href="/events" label="Events" pathname={pathname} onSamePathClose={closeIfSamePath} />
       </nav>
 
               <div className="mt-10 flex flex-col gap-4">
                 <MobileContactCta pathname={pathname} onSamePathClose={closeIfSamePath} />
-                <MobilePricingLink pathname={pathname} onSamePathClose={closeIfSamePath} />
               </div>
 
               {/* Extra empty space so the last item can scroll up into view comfortably. */}
@@ -1431,6 +1504,14 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+      {ott ? (
+        <OttSearchOverlay
+          open={searchOpen}
+          onClose={() => setSearchOpen(false)}
+          industries={navIndustries}
+        />
+      ) : null}
     </>
+    </OttNavContext.Provider>
   );
 }

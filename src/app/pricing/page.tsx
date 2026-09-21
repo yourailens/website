@@ -8,9 +8,9 @@ function siteUrl() {
   return (process.env.PUBLIC_SITE_URL?.trim() || "https://yourailens.studio").replace(/\/+$/, "");
 }
 
-const TITLE = "Pricing | YourAI Lens Studio";
+const TITLE = "Pricing | YourAILens Studios";
 const DESCRIPTION =
-  "5 packages. Brand Focus, Speed Focus, Virality Focus, Campaign Focus, and Custom. Pick why you are here."
+  "Market rate ₹5,000 per 45s film. Weekly from ₹38,250 (15% below), monthly ₹1,44,000 (20% below), 3 months ₹4,05,000 (25% below). Sound, music, and commercial license included.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const services = await loadPublicServices();

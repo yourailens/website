@@ -1,18 +1,21 @@
 import type { Metadata } from "next";
-import WorldOfAiExperience from "../world-of-ai/WorldOfAiExperience";
+import { getPublishedOttCuts } from "@/lib/ott-cuts/load";
+import AiVerseExperience from "./AiVerseExperience";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "AI Verse | YourAILens Studios",
+  title: "AI Community | YourAILens Studios",
   description:
-    "Interpretations of AI content, Clean vs Natural Realism, AI first production systems, VFX vs AI, and how creators, businesses, and audiences see the medium.",
+    "Studio floor cuts, community shares, and work from the lot — the same channel desk as AI ads and AI films.",
   openGraph: {
-    title: "AI Verse | YourAILens Studios",
-    description:
-      "What AI content really is: capability, craft, efficiency, and the difference between regular use and professional direction.",
+    title: "AI Community | YourAILens Studios",
+    description: "Cuts from the lot and the feed. Published from the studio desk.",
     url: "/ai-verse",
   },
 };
 
-export default function AiVersePage() {
-  return <WorldOfAiExperience />;
+export default async function AiVersePage() {
+  const cuts = await getPublishedOttCuts("community");
+  return <AiVerseExperience cuts={cuts} />;
 }

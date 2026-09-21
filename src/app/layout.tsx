@@ -7,8 +7,8 @@ import {
 } from "@/lib/seo/og-image";
 import "./globals.css";
 import SiteFooter from "@/components/SiteFooter";
+import OttThemeSync from "@/components/OttThemeSync";
 import { SITE_CONTACT_EMAIL, SITE_LOCATION_LINE } from "@/lib/site-contact";
-import RouteLoadingOverlay from "@/components/RouteLoadingOverlay";
 
 const unicaOne = Unica_One({
   weight: "400",
@@ -100,8 +100,18 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={`scroll-smooth ${unicaOne.variable} ${comfortaa.variable}`}>
+    <html
+      lang="en"
+      className={`scroll-smooth ${unicaOne.variable} ${comfortaa.variable}`}
+      suppressHydrationWarning
+    >
       <head>
+        <script
+          // Public pages are dark. Mutates <html> before paint; suppressHydrationWarning above is required.
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{if(!location.pathname.startsWith("/admin"))document.documentElement.classList.add("ott-theme")}catch(e){}})();`,
+          }}
+        />
         <script
           type="application/ld+json"
           // eslint-disable-next-line react/no-danger
@@ -114,7 +124,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <RouteLoadingOverlay />
+        <OttThemeSync />
         {children}
         <SiteFooter />
       </body>

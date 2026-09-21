@@ -27,8 +27,8 @@ export default function ScenarioDetailExperience({ scenario: s }: { scenario: Sc
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-slate-50">
-        <div className="border-b border-slate-200 bg-white">
+      <div className="min-h-screen bg-black text-white">
+        <div className="border-b border-white/10 bg-black">
           <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-10">
             <div className="flex items-center gap-4">
               <Link href="/scenarios" className="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700">

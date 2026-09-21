@@ -137,7 +137,7 @@ export default function ImageGalleryExperience({ images }: { images: GalleryImag
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-black text-white">
         <div className="border-b border-slate-200 bg-white">
           <div className="mx-auto w-[95%] pt-6 pb-4">
             <div className="relative">

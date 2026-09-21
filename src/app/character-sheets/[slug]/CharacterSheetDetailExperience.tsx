@@ -100,10 +100,10 @@ export default function CharacterSheetDetailExperience({ sheet }: { sheet: Chara
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-black text-white">
 
         {/* ── Breadcrumb ── */}
-        <div className="border-b border-slate-200 bg-white">
+        <div className="border-b border-white/10 bg-black">
           <div className="w-[95%] mx-auto py-3">
             <div className="flex items-center gap-4">
               <Link

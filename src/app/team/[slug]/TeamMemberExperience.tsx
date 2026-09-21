@@ -17,7 +17,7 @@ export default function TeamMemberExperience({ member }: { member: StudioTeamMem
     .filter(Boolean);
 
   return (
-    <div className="min-h-screen bg-white font-body text-slate-900">
+    <div className="min-h-screen bg-black font-body text-white">
       <Navbar />
       <TeamProfileBar unit={sheet?.unit} />
 

@@ -38,6 +38,124 @@ html {
   font-family: var(--font-comfortaa), system-ui, sans-serif;
 }
 
+html:has(.ott-home),
+html:has(.ott-home) body,
+html.ott-theme,
+html.ott-theme body {
+  background: #000000 !important;
+  color: #f8fafc !important;
+  color-scheme: dark !important;
+}
+
+/* Public dark OTT: remap common light shells without rewriting every page */
+html.ott-theme .bg-white {
+  background-color: #0a0a0a !important;
+}
+html.ott-theme .bg-white\/70 {
+  background-color: rgb(10 10 10 / 0.7) !important;
+}
+html.ott-theme .bg-white\/80 {
+  background-color: rgb(10 10 10 / 0.8) !important;
+}
+html.ott-theme .bg-white\/95 {
+  background-color: rgb(10 10 10 / 0.95) !important;
+}
+html.ott-theme .bg-slate-50,
+html.ott-theme .bg-\[\#f4f7fc\],
+html.ott-theme .bg-\[\#f8fbff\],
+html.ott-theme .bg-\[\#fafbff\],
+html.ott-theme .bg-\[\#F8FAFF\] {
+  background-color: #000000 !important;
+}
+html.ott-theme .bg-blue-50,
+html.ott-theme .bg-blue-50\/70 {
+  background-color: rgb(23 37 84 / 0.45) !important;
+}
+html.ott-theme .text-slate-900,
+html.ott-theme .text-slate-800 {
+  color: #f8fafc !important;
+}
+html.ott-theme .text-slate-700 {
+  color: rgb(248 250 252 / 0.82) !important;
+}
+html.ott-theme .text-slate-600,
+html.ott-theme .text-slate-500 {
+  color: rgb(248 250 252 / 0.55) !important;
+}
+html.ott-theme .text-slate-400 {
+  color: rgb(248 250 252 / 0.4) !important;
+}
+html.ott-theme .text-blue-700,
+html.ott-theme .text-blue-600,
+html.ott-theme .text-blue-600\/80 {
+  color: rgb(96 165 250) !important;
+}
+html.ott-theme .text-blue-500\/90,
+html.ott-theme .text-blue-500 {
+  color: rgb(147 197 253 / 0.9) !important;
+}
+html.ott-theme .border-slate-200,
+html.ott-theme .border-slate-200\/80,
+html.ott-theme .border-slate-200\/90,
+html.ott-theme .border-blue-100,
+html.ott-theme .border-blue-100\/60,
+html.ott-theme .border-blue-200,
+html.ott-theme .border-blue-200\/80 {
+  border-color: rgb(255 255 255 / 0.12) !important;
+}
+html.ott-theme .border-blue-300,
+html.ott-theme .border-blue-600 {
+  border-color: rgb(96 165 250 / 0.55) !important;
+}
+html.ott-theme .shadow-sm,
+html.ott-theme .shadow-md,
+html.ott-theme .shadow-lg {
+  --tw-shadow-color: rgb(0 0 0 / 0.55);
+}
+html.ott-theme .ring-slate-100\/80,
+html.ott-theme .ring-1 {
+  --tw-ring-color: rgb(255 255 255 / 0.1);
+}
+html.ott-theme input,
+html.ott-theme textarea,
+html.ott-theme select {
+  color-scheme: dark;
+}
+
+html.ott-theme .contact-glass-field {
+  background-color: rgb(255 255 255 / 0.07) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    inset 0 -1px 0 rgb(0 0 0 / 0.25);
+}
+html.ott-theme .contact-glass-field:focus {
+  background-color: rgb(255 255 255 / 0.12) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    0 0 0 3px rgb(255 255 255 / 0.08);
+}
+html.ott-theme .hover\:bg-blue-50:hover,
+html.ott-theme .hover\:bg-blue-50\/60:hover {
+  background-color: rgb(30 58 138 / 0.35) !important;
+}
+html.ott-theme .hover\:bg-slate-50:hover {
+  background-color: rgb(255 255 255 / 0.06) !important;
+}
+html.ott-theme .placeholder\:text-slate-400::placeholder {
+  color: rgb(248 250 252 / 0.35) !important;
+}
+html.ott-theme .bg-zinc-950 {
+  background-color: #09090b !important;
+}
+
+.ott-rail {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.ott-rail::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   overflow-x: hidden;
 }
@@ -71,6 +189,13 @@ textarea {
     background: #ffffff !important;
     color: #0F172A !important;
   }
+  html:has(.ott-home),
+  html:has(.ott-home) body,
+  html.ott-theme,
+  html.ott-theme body {
+    background: #000000 !important;
+    color: #f8fafc !important;
+  }
 }
 
 .font-heading {
@@ -100,9 +225,9 @@ textarea {
   isolation: isolate;
   background: linear-gradient(
     165deg,
-    #f8fbff 0%,
-    rgba(239, 246, 255, 0.65) 38%,
-    #ffffff 100%
+    #05070d 0%,
+    rgba(15, 23, 42, 0.92) 38%,
+    #000000 100%
   );
 }
 .home-section-tint::before {
@@ -112,8 +237,8 @@ textarea {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 75% 55% at 8% 0%, rgba(59, 130, 246, 0.09), transparent 58%),
-    radial-gradient(ellipse 65% 45% at 92% 25%, rgba(34, 211, 238, 0.07), transparent 52%);
+    radial-gradient(ellipse 75% 55% at 8% 0%, rgba(59, 130, 246, 0.16), transparent 58%),
+    radial-gradient(ellipse 65% 45% at 92% 25%, rgba(34, 211, 238, 0.08), transparent 52%);
 }
 .home-section-tint > * {
   position: relative;
@@ -241,6 +366,13 @@ textarea {
 }
 .loader-app-tile {
   animation: loaderAppFloat 2.6s ease-in-out infinite;
+}
+
+video::-webkit-media-controls-overflow-button {
+  display: none;
+}
+video::-internal-media-controls-download-button {
+  display: none !important;
 }
 
 @keyframes heroFilmSkeletonShimmer {

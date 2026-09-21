@@ -177,9 +177,9 @@ export default function OutfitsExperience() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-black text-white">
         {/* ── Search + filters ── */}
-        <div className="border-b border-slate-200 bg-white">
+        <div className="border-b border-white/10 bg-black">
           <div className="w-[95%] mx-auto pt-6 pb-4">
             {/* Search bar */}
             <div className="relative">
