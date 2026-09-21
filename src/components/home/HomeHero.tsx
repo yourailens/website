@@ -1,25 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { DeferredVideo } from "@/components/media/DeferredVideo";
 
-export type HomeHeroFeature = {
-  slug: string;
-  caption: string;
-  mediaUrl: string;
-  posterUrl?: string | null;
-  youtubeId?: string | null;
-  href: string;
-};
-
-const FALLBACK_SRC = "/videos/hero_new.mp4";
-
-export default function HomeHero({ feature }: { feature?: HomeHeroFeature | null }) {
-  const youtubeId = feature?.youtubeId ?? null;
-  const videoSrc = !youtubeId && feature?.mediaUrl ? feature.mediaUrl : null;
-  const href = feature?.href ?? "#ads";
-  const caption = feature?.caption ?? null;
-
+export default function HomeHero() {
   return (
     <section
       id="lens"
@@ -27,40 +10,12 @@ export default function HomeHero({ feature }: { feature?: HomeHeroFeature | null
       className="relative aspect-video w-full bg-black md:aspect-auto md:h-[100svh] md:min-h-[560px]"
     >
       <h1 className="sr-only">YourAILens Studios</h1>
-
-      {youtubeId ? (
-        <iframe
-          title={caption ?? "Featured film"}
-          src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${youtubeId}&playsinline=1&rel=0&modestbranding=1&showinfo=0`}
-          className="pointer-events-none absolute inset-0 h-full w-full scale-[1.35] border-0 object-cover md:scale-[1.2]"
-          allow="autoplay; encrypted-media; picture-in-picture"
-          allowFullScreen
-        />
-      ) : (
-        <DeferredVideo
-          src={videoSrc ?? FALLBACK_SRC}
-          poster={feature?.posterUrl ?? undefined}
-          eager
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      )}
-
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/75 to-transparent md:h-40" />
-
-      {feature ? (
-        <div className="pointer-events-none absolute left-5 top-20 z-20 max-w-[min(22rem,70vw)] sm:left-8 sm:top-24 lg:left-16 xl:left-52">
-          <p className="font-mono text-[10px] tracking-[0.32em] text-blue-300">FEATURED</p>
-          <p className="mt-2 font-body text-lg font-semibold leading-tight tracking-tight text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.75)] sm:text-2xl">
-            {caption}
-          </p>
-          <Link
-            href={href}
-            className="pointer-events-auto mt-3 inline-flex text-[10px] font-medium uppercase tracking-[0.28em] text-white/70 transition hover:text-blue-300"
-          >
-            Open film
-          </Link>
-        </div>
-      ) : null}
+      <DeferredVideo
+        src="/videos/hero_new.mp4"
+        eager
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent md:h-36" />
 
       <a
         href="#ads"

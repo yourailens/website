@@ -25,27 +25,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (typeof b.homepage_feature === "boolean") {
     patch.homepage_feature = b.homepage_feature;
     if (b.homepage_feature) {
-      const nextCategory = isOttCutCategory(b.category) ? b.category : undefined;
-      const nextMedia = isOttCutMediaType(b.media_type) ? b.media_type : undefined;
-      if (nextCategory && nextCategory !== "films") {
-        return NextResponse.json({ error: "Only an AI films cut can be the homepage hero" }, { status: 400 });
-      }
-      if (nextMedia && nextMedia !== "video") {
-        return NextResponse.json({ error: "Homepage hero must be a video" }, { status: 400 });
-      }
-      if (!nextCategory || !nextMedia) {
-        const { data: existing } = await db
-          .from("ott_cuts")
-          .select("category, media_type")
-          .eq("id", id)
-          .maybeSingle();
-        if (existing?.category !== "films") {
-          return NextResponse.json({ error: "Only an AI films cut can be the homepage hero" }, { status: 400 });
-        }
-        if (existing?.media_type !== "video") {
-          return NextResponse.json({ error: "Homepage hero must be a video" }, { status: 400 });
-        }
-      }
       await clearOtherHomepageFeatures(db, id);
     }
   }

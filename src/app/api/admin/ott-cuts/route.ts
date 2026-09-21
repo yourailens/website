@@ -42,12 +42,6 @@ export async function POST(req: NextRequest) {
   const db = createServiceRoleClient();
   const homepage_feature = b.homepage_feature === true;
   if (homepage_feature) {
-    if (category !== "films") {
-      return NextResponse.json({ error: "Only an AI films cut can be the homepage hero" }, { status: 400 });
-    }
-    if (media_type !== "video") {
-      return NextResponse.json({ error: "Homepage hero must be a video" }, { status: 400 });
-    }
     await clearOtherHomepageFeatures(db);
   }
 

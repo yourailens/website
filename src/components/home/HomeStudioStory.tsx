@@ -59,7 +59,6 @@ export default async function HomeStudioStory() {
     .slice(0, 16)
     .map((cut) => cutToCard(cut, "/ai-ads"));
   const lot = [...filmCuts]
-    .filter((cut) => !cut.homepage_feature)
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
     .slice(0, 16)
     .map((cut) => cutToCard(cut, "/ai-filmmaking"));
