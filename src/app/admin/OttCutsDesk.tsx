@@ -86,7 +86,13 @@ export default function OttCutsDesk() {
   }, [draft.previewUrl]);
 
   function patch(p: Partial<Draft>) {
-    setDraft((d) => ({ ...d, ...p }));
+    setDraft((d) => {
+      const next = { ...d, ...p };
+      if (next.category !== "films" || next.mediaType !== "video") {
+        next.homepage_feature = false;
+      }
+      return next;
+    });
   }
 
   function reset(category: OttCutCategory = draft.category) {
@@ -480,11 +486,14 @@ export default function OttCutsDesk() {
                 type="checkbox"
                 checked={draft.homepage_feature}
                 onChange={(e) => patch({ homepage_feature: e.target.checked })}
+                disabled={draft.category !== "films" || draft.mediaType !== "video"}
               />
-              Show on homepage (films trailer)
+              Featured on homepage hero
             </label>
-            {draft.homepage_feature ? (
-              <p className="text-xs text-white/45">Only one cut can be the homepage feature. This replaces any previous one.</p>
+            {draft.category !== "films" || draft.mediaType !== "video" ? (
+              <p className="text-xs text-white/45">Only an AI films video can be the homepage hero. Switch the rail to AI films and use a video.</p>
+            ) : draft.homepage_feature ? (
+              <p className="text-xs text-white/45">Only one film can be featured. This replaces any previous hero.</p>
             ) : null}
             <button type="button" onClick={() => void save()} disabled={busy} className={BTN}>
               {busy ? "Saving…" : draft.id ? "Update cut" : "Save cut"}
@@ -544,7 +553,7 @@ export default function OttCutsDesk() {
                   <p className="font-mono text-[10px] tracking-[0.18em] text-white/40">
                     {OTT_CUT_CATEGORIES.find((c) => c.id === cut.category)?.label.toUpperCase()} · {cut.aspect_ratio}
                     {cut.published ? "" : " · DRAFT"}
-                    {cut.homepage_feature ? " · HOMEPAGE" : ""}
+                    {cut.homepage_feature ? " · HERO" : ""}
                   </p>
                   <p className="mt-1 font-heading text-lg leading-none">{cut.caption}</p>
                   {cut.description ? <p className="mt-2 line-clamp-2 text-xs text-white/55">{cut.description}</p> : null}
