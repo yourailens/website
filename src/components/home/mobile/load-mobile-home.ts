@@ -1,5 +1,3 @@
-import { existsSync } from "fs";
-import { join } from "path";
 import { HOME_WATCH_TITLES, type HomeWatchTitle } from "@/data/home-watch";
 import { ottCutYoutubeId, type OttCut } from "@/data/ott-cuts";
 import { getHomepageFeatureOttCut, getPublishedOttCuts } from "@/lib/ott-cuts/load";
@@ -9,26 +7,17 @@ const LOCAL_POSTER_ALIASES: Record<string, string> = {
   "/videos/d&d.mp4": "/videos/dnd-poster.jpg",
 };
 
-function publicAssetExists(relPath: string): boolean {
-  const clean = relPath.split("?")[0]?.split("#")[0] ?? "";
-  if (!clean.startsWith("/")) return false;
-  return existsSync(join(process.cwd(), "public", clean.slice(1)));
-}
-
+/** Map a local video path to its poster URL (string only — no fs, so Vercel won't pack videos into the function). */
 function localPosterGuess(src?: string | null): string | undefined {
   if (!src?.startsWith("/videos/")) return undefined;
   const path = src.split("#")[0]?.split("?")[0] ?? "";
-  if (LOCAL_POSTER_ALIASES[path]) {
-    return publicAssetExists(LOCAL_POSTER_ALIASES[path]) ? LOCAL_POSTER_ALIASES[path] : undefined;
-  }
+  if (LOCAL_POSTER_ALIASES[path]) return LOCAL_POSTER_ALIASES[path];
   if (!/\.(mp4|mov|webm)$/i.test(path)) return undefined;
-  const guess = path.replace(/\.(mp4|mov|webm)$/i, "-poster.jpg");
-  return publicAssetExists(guess) ? guess : undefined;
+  return path.replace(/\.(mp4|mov|webm)$/i, "-poster.jpg");
 }
 
-function ottPoster(slug: string): string | undefined {
-  const rel = `/videos/ott-posters/${slug}-poster.jpg`;
-  return publicAssetExists(rel) ? rel : undefined;
+function ottPoster(slug: string): string {
+  return `/videos/ott-posters/${slug}-poster.jpg`;
 }
 
 function fromWatch(item: HomeWatchTitle, section: string): MobileClip {
@@ -39,7 +28,7 @@ function fromWatch(item: HomeWatchTitle, section: string): MobileClip {
     section,
     href: item.watchUrl ?? `/watch/${item.slug}`,
     poster:
-      (item.poster && publicAssetExists(item.poster) ? item.poster : undefined) ||
+      item.poster ||
       (item.youtubeId ? `https://i.ytimg.com/vi/${item.youtubeId}/hqdefault.jpg` : undefined) ||
       localPosterGuess(item.video),
     video: item.video,

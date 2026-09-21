@@ -54,6 +54,15 @@ if (s3Bucket && s3Region) {
 const nextConfig: NextConfig = {
   // Native binaries (ffmpeg) must resolve from node_modules at runtime on Vercel.
   serverExternalPackages: ["ffmpeg-static", "sharp"],
+  // Keep huge static media out of serverless function traces
+  // (homepage was packing ~1GB of public/videos into the index function via fs tracing).
+  outputFileTracingExcludes: {
+    "*": [
+      "./public/videos/**/*.mp4",
+      "./public/videos/**/*.mov",
+      "./public/videos/**/*.webm",
+    ],
+  },
   images: {
     remotePatterns,
   },
