@@ -34,7 +34,7 @@ export function IndustryPagination({
       className={`flex flex-col items-center gap-4 sm:flex-row sm:justify-between ${className}`.trim()}
       aria-label={`${label} pagination`}
     >
-      <p className="font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-slate-400">
+      <p className="font-mono text-[10px] tracking-[0.2em] text-white/40">
         Showing {start} to {end} of {totalItems}
       </p>
 
@@ -44,13 +44,13 @@ export function IndustryPagination({
           onClick={() => onPageChange(page - 1)}
           aria-label="Previous page"
         >
-          ← Prev
+          Prev
         </PaginationButton>
 
         <ul className="flex items-center gap-1" role="list">
           {pages.map((p, i) =>
             p === "ellipsis" ? (
-              <li key={`ellipsis-${i}`} className="px-2 text-sm text-slate-300" aria-hidden>
+              <li key={`ellipsis-${i}`} className="px-2 text-sm text-white/25" aria-hidden>
                 …
               </li>
             ) : (
@@ -60,10 +60,10 @@ export function IndustryPagination({
                   onClick={() => onPageChange(p)}
                   aria-label={`Page ${p}`}
                   aria-current={p === page ? "page" : undefined}
-                  className={`min-h-9 min-w-9 rounded-lg border px-3 py-1.5 text-sm font-semibold tabular-nums transition ${
+                  className={`min-h-9 min-w-9 border px-3 py-1.5 text-sm font-semibold tabular-nums transition ${
                     p === page
-                      ? "border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-500/20"
-                      : "border-blue-100/90 bg-white/90 text-slate-600 hover:border-blue-200 hover:bg-blue-50/50 hover:text-blue-700"
+                      ? "border-blue-400/60 bg-blue-500/20 text-blue-200"
+                      : "border-white/15 bg-transparent text-white/60 hover:border-white/35 hover:text-white"
                   }`}
                 >
                   {p}
@@ -78,7 +78,7 @@ export function IndustryPagination({
           onClick={() => onPageChange(page + 1)}
           aria-label="Next page"
         >
-          Next →
+          Next
         </PaginationButton>
       </div>
     </nav>
@@ -102,7 +102,7 @@ function PaginationButton({
       disabled={disabled}
       onClick={onClick}
       aria-label={ariaLabel}
-      className="rounded-full border border-blue-100/90 bg-white/90 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-700 shadow-sm shadow-blue-100/20 transition enabled:hover:border-blue-200 enabled:hover:bg-blue-50/60 enabled:hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+      className="border border-white/20 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70 transition enabled:hover:border-white/40 enabled:hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
     >
       {children}
     </button>

@@ -12,10 +12,12 @@ function BrandCard({
   industrySlug,
   brand,
   showIndustry,
+  index,
 }: {
   industrySlug: string;
   brand: SampleBrandWithMedia;
   showIndustry?: boolean;
+  index: number;
 }) {
   const coverUrl = brand.cover_image_url ?? brand.hero_image_url;
   const coverType = resolveMediaType(
@@ -25,13 +27,14 @@ function BrandCard({
   const imageCount = brand.media.filter((m) => m.published && m.media_type === "image").length;
   const videoCount = brand.media.filter((m) => m.published && m.media_type === "video").length;
   const tagline = plainCopy(brand.tagline);
+  const ep = String(index + 1).padStart(2, "0");
 
   return (
     <Link
       href={`/industries/${industrySlug}/brands/${brand.slug}`}
-      className="group overflow-hidden rounded-2xl border border-blue-100/90 bg-white shadow-sm transition hover:border-blue-200 hover:shadow-md"
+      className="group overflow-hidden border border-white/12 bg-white/[0.02] transition hover:border-white/25 hover:bg-white/[0.04]"
     >
-      <div className="relative aspect-[16/10] bg-slate-100">
+      <div className="relative aspect-[16/10] bg-black">
         {coverUrl ? (
           coverType === "video" ? (
             <DeferredVideo
@@ -50,29 +53,30 @@ function BrandCard({
             />
           )
         ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-sky-50 to-blue-50/60">
-            <span className="text-xs text-slate-400">World building in progress</span>
+          <div className="flex h-full items-center justify-center">
+            <span className="text-xs text-white/35">World building in progress</span>
           </div>
         )}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        <p className="absolute bottom-3 left-3 font-mono text-[10px] tracking-[0.28em] text-blue-300">
+          WORLD {ep}
+        </p>
       </div>
       <div className="p-4">
         {showIndustry && brand.industry_name ? (
-          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">{brand.industry_name}</p>
+          <p className="font-mono text-[9px] tracking-[0.2em] text-white/35">{brand.industry_name}</p>
         ) : null}
-        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-blue-600/85">Sample brand</p>
-        <h3
-          className="mt-1 font-body text-lg font-black text-slate-900 transition group-hover:text-blue-700"
-          style={{ letterSpacing: "-0.02em" }}
-        >
+        <p className="mt-1 font-mono text-[10px] tracking-[0.22em] text-blue-400">SAMPLE BRAND</p>
+        <h3 className="mt-1 font-body text-lg font-semibold tracking-tight text-white transition group-hover:text-blue-100">
           {brand.name}
         </h3>
         {tagline ? (
-          <p className="mt-1 line-clamp-2 text-sm font-light text-slate-500">{tagline}</p>
+          <p className="mt-1 line-clamp-2 text-sm font-light text-white/50">{tagline}</p>
         ) : null}
-        <p className="mt-3 text-xs font-semibold text-blue-600">
-          Explore the world →
+        <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-300">
+          Explore the world
           {(imageCount > 0 || videoCount > 0) && (
-            <span className="ml-2 font-normal text-slate-400">
+            <span className="ml-2 font-normal normal-case tracking-normal text-white/35">
               {imageCount > 0 ? `${imageCount} stills` : ""}
               {imageCount > 0 && videoCount > 0 ? ", " : ""}
               {videoCount > 0 ? `${videoCount} films` : ""}
@@ -104,22 +108,21 @@ export function SampleBrandsSection(props: SampleBrandsSectionProps) {
 
   return (
     <IndustryTintSection>
-      <IndustryEyebrow>Sample brands</IndustryEyebrow>
+      <IndustryEyebrow>SAMPLE BRANDS</IndustryEyebrow>
       {isHub ? (
-        <IndustrySectionTitle accent={<span className="font-semibold text-blue-700">we built</span>}>
-          Worlds
+        <IndustrySectionTitle>
+          Worlds <span className="font-light text-white/55">we built</span>
         </IndustrySectionTitle>
       ) : (
-        <IndustrySectionTitle accent={<span className="font-semibold text-blue-700">{props.industryName}</span>}>
-          worlds we built
+        <IndustrySectionTitle>
+          Worlds for <span className="text-blue-300">{props.industryName}</span>
         </IndustrySectionTitle>
       )}
-      <p className="mt-3 max-w-xl text-sm font-light leading-relaxed text-slate-600">
-        Fictional brands with full creative systems: posters, motion, social, product, and ambience. Minimal copy,
-        mostly the work.
+      <p className="mt-3 max-w-xl text-sm font-light leading-relaxed text-white/55">
+        Fictional brands with full creative systems: posters, motion, social, product, and ambience.
       </p>
-      <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {published.map((b) => {
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+        {published.map((b, i) => {
           const slug = isHub ? (b.industry_slug ?? "") : props.industrySlug;
           if (!slug) return null;
           return (
@@ -128,6 +131,7 @@ export function SampleBrandsSection(props: SampleBrandsSectionProps) {
               industrySlug={slug}
               brand={b}
               showIndustry={isHub}
+              index={i}
             />
           );
         })}

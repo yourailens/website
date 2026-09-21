@@ -10,7 +10,6 @@ import {
   IndustryCard,
   IndustryEyebrow,
   IndustryPrimaryLink,
-  IndustrySectionTitle,
   IndustryTextLink,
 } from "./IndustryUI";
 
@@ -22,7 +21,7 @@ export function displayQuestion(q: string | null | undefined, fallback: string) 
 export function AnswerBody({ text, className = "" }: { text: string; className?: string }) {
   const paragraphs = text.split(/\n\n+/).filter(Boolean);
   return (
-    <div className={`space-y-4 text-base font-light leading-relaxed text-slate-600 ${className}`.trim()}>
+    <div className={`space-y-4 text-base font-light leading-relaxed text-white/60 ${className}`.trim()}>
       {paragraphs.map((p, i) => (
         <p key={i}>{plainCopy(p)}</p>
       ))}
@@ -51,7 +50,7 @@ export function QAMedia({
 }) {
   const boxClass =
     className ??
-    `relative w-full overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-blue-100/60 ${aspectRatioClass(aspectRatio)}`;
+    `relative w-full overflow-hidden border border-white/12 bg-black ${aspectRatioClass(aspectRatio)}`;
   const type = resolveMediaType(mediaType, url);
 
   if (type === "video") {
@@ -73,7 +72,7 @@ export function QAMedia({
   );
 }
 
-/** Main hero block — reads like a client landing page, not internal Q&A */
+/** Main hero block — OTT channel landing */
 export function QAHeroSection({
   eyebrow,
   headline,
@@ -107,10 +106,7 @@ export function QAHeroSection({
     >
       <div>
         <IndustryEyebrow>{plainCopy(eyebrow)}</IndustryEyebrow>
-        <h1
-          className="mt-3 text-[clamp(1.75rem,4.5vw,2.85rem)] font-light leading-[1.15] text-slate-900"
-          style={{ letterSpacing: "-0.02em" }}
-        >
+        <h1 className="mt-4 font-body text-[clamp(1.85rem,4.5vw,3rem)] font-semibold leading-[1.1] tracking-tight text-white">
           {plainCopy(headline)}
         </h1>
         <div className="mt-6">
@@ -129,12 +125,12 @@ export function QAHeroSection({
                 aspectRatio={aspectRatio}
                 posterUrl={posterUrl}
                 alt={mediaCaption ?? headline}
-                className={`relative w-full ${aspectRatioClass(aspectRatio)}`}
+                className={`relative w-full overflow-hidden bg-black ${aspectRatioClass(aspectRatio)}`}
                 priority
                 sizes="(max-width:1024px) 100vw, 50vw"
               />
               {mediaCaption?.trim() ? (
-                <figcaption className="px-3 pb-2 pt-3 text-sm font-light leading-relaxed text-slate-600">
+                <figcaption className="px-3 pb-2 pt-3 text-sm font-light leading-relaxed text-white/50">
                   {mediaCaption.trim()}
                 </figcaption>
               ) : null}
@@ -152,9 +148,9 @@ function QAExampleMasonryCard({ ex }: { ex: IndustryPlaybookExample }) {
   const hasCaption = Boolean(ex.title?.trim() || ex.caption?.trim() || ex.service_slug);
 
   return (
-    <figure className="mb-4 break-inside-avoid overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-100/80">
+    <figure className="mb-4 break-inside-avoid overflow-hidden border border-white/12 bg-white/[0.02]">
       {type === "video" ? (
-        <div className={`relative w-full overflow-hidden bg-slate-100 ${aspectRatioClass(ex.aspect_ratio)}`}>
+        <div className={`relative w-full overflow-hidden bg-black ${aspectRatioClass(ex.aspect_ratio)}`}>
           <DeferredVideo
             src={ex.media_url}
             poster={ex.poster_url}
@@ -162,24 +158,23 @@ function QAExampleMasonryCard({ ex }: { ex: IndustryPlaybookExample }) {
           />
         </div>
       ) : (
-        // Intrinsic dimensions — masonry shows each asset at its natural proportions
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={ex.media_url} alt={alt} className="block h-auto w-full bg-slate-50" loading="lazy" decoding="async" />
+        <img src={ex.media_url} alt={alt} className="block h-auto w-full bg-black" loading="lazy" decoding="async" />
       )}
       {hasCaption ? (
-        <figcaption className="space-y-1.5 border-t border-blue-50 px-5 py-4">
+        <figcaption className="space-y-1.5 border-t border-white/10 px-5 py-4">
           {ex.title ? (
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600/90">{ex.title}</p>
+            <p className="font-mono text-[10px] tracking-[0.2em] text-blue-400">{ex.title}</p>
           ) : null}
           {ex.caption?.trim() ? (
-            <p className="text-sm font-light leading-relaxed text-slate-600">{ex.caption.trim()}</p>
+            <p className="text-sm font-light leading-relaxed text-white/55">{ex.caption.trim()}</p>
           ) : null}
           {ex.service_slug ? (
             <Link
               href={`/pricing/${ex.service_slug}`}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700"
+              className="inline-flex text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-300 hover:text-blue-200"
             >
-              View package <span aria-hidden>→</span>
+              View package
             </Link>
           ) : null}
         </figcaption>
@@ -192,8 +187,8 @@ export function QAExampleGallery({ examples }: { examples: IndustryPlaybookExamp
   const published = examples.filter((e) => e.published);
   if (published.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-blue-200/80 bg-white/70 px-6 py-16 text-center">
-        <p className="text-sm font-light text-slate-500">New samples for this section are on the way.</p>
+      <div className="border border-dashed border-white/20 bg-white/[0.02] px-6 py-16 text-center">
+        <p className="text-sm font-light text-white/45">New samples for this section are on the way.</p>
       </div>
     );
   }
@@ -209,7 +204,7 @@ export function QAExampleGallery({ examples }: { examples: IndustryPlaybookExamp
 
 export function IndustryCTABlock({ industryName }: { industryName?: string }) {
   return (
-    <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:justify-center sm:text-left">
+    <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:justify-center sm:text-left">
       <IndustryPrimaryLink href="/pricing">
         {industryName ? `Packages for ${industryName}` : "View packages & pricing"}
       </IndustryPrimaryLink>
@@ -217,4 +212,3 @@ export function IndustryCTABlock({ industryName }: { industryName?: string }) {
     </div>
   );
 }
-

@@ -18,8 +18,10 @@ import { aspectRatioClass, masonrySpanClass, resolveMediaType } from "@/lib/samp
 import { SampleBrandMediaTile } from "../../../SampleBrandMedia";
 import { industryEyebrow, plainCopy } from "../../../industry-copy";
 import {
+  INDUSTRY_PAGE,
   IndustryBreadcrumb,
   IndustryEyebrow,
+  IndustryGlow,
   IndustrySectionTitle,
   IndustryShell,
   IndustryTextLink,
@@ -29,6 +31,9 @@ import {
 import { IndustryCTABlock } from "../../../QAComponents";
 
 type MediaTab = "all" | SampleBrandMediaType;
+
+const chipIdle = "border border-white/15 bg-transparent text-white/60 hover:border-white/35 hover:text-white";
+const chipOn = "border border-blue-400/55 bg-blue-500/15 text-blue-200";
 
 function BrandHero({
   url,
@@ -46,7 +51,7 @@ function BrandHero({
   name: string;
 }) {
   const type = resolveMediaType(mediaType, url);
-  const box = `relative w-full overflow-hidden rounded-2xl bg-slate-900/5 ring-1 ring-blue-100/70 ${aspectRatioClass(aspectRatio)} max-h-[min(72vh,820px)]`;
+  const box = `relative w-full overflow-hidden border border-white/12 bg-black ${aspectRatioClass(aspectRatio)} max-h-[min(72vh,820px)]`;
 
   return (
     <div className={box}>
@@ -113,39 +118,37 @@ export default function SampleBrandExperience({ data }: { data: SampleBrandPageD
   return (
     <IndustryShell>
       <Navbar />
+      <IndustryGlow />
 
       <IndustryTopBar>
         <IndustryBreadcrumb
           items={[
-            { label: "Solutions", href: "/industries" },
+            { label: "Industries", href: "/industries" },
             { label: industry.name, href: `/industries/${industry.slug}` },
             { label: brand.name, current: true },
           ]}
         />
       </IndustryTopBar>
 
-      <section className="px-4 pb-6 pt-2 sm:px-6 lg:px-10">
-        <IndustryEyebrow>{industryEyebrow("Sample brand", industry.name)}</IndustryEyebrow>
-        <h1
-          className="mt-2 font-body text-3xl font-black tracking-tight text-slate-900 sm:text-4xl lg:text-5xl"
-          style={{ letterSpacing: "-0.03em" }}
-        >
+      <section className={`relative ${INDUSTRY_PAGE} pb-6 pt-8`}>
+        <IndustryEyebrow>{industryEyebrow("SAMPLE BRAND", industry.name)}</IndustryEyebrow>
+        <h1 className="mt-4 font-body text-[clamp(2rem,5vw,3.5rem)] font-semibold leading-none tracking-tight text-white">
           {brand.name}
         </h1>
         {brand.tagline?.trim() ? (
-          <p className="mt-2 max-w-lg text-sm font-light text-slate-500">{plainCopy(brand.tagline)}</p>
+          <p className="mt-3 max-w-lg text-base font-light text-white/55">{plainCopy(brand.tagline)}</p>
         ) : null}
         {(imageCount > 0 || videoCount > 0) && (
-          <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-slate-400">
+          <p className="mt-4 font-mono text-[10px] tracking-[0.22em] text-white/40">
             {imageCount > 0 ? `${imageCount} stills` : ""}
-            {imageCount > 0 && videoCount > 0 ? ", " : ""}
+            {imageCount > 0 && videoCount > 0 ? " · " : ""}
             {videoCount > 0 ? `${videoCount} films` : ""}
           </p>
         )}
       </section>
 
       {heroUrl ? (
-        <section className="px-4 sm:px-6 lg:px-10">
+        <section className={`relative ${INDUSTRY_PAGE}`}>
           <BrandHero
             url={heroUrl}
             mediaType={heroType}
@@ -160,15 +163,15 @@ export default function SampleBrandExperience({ data }: { data: SampleBrandPageD
       <IndustryTintSection className="!pt-12">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <IndustryEyebrow>The world</IndustryEyebrow>
-            <IndustrySectionTitle accent={<span className="font-semibold text-blue-700">gallery</span>}>
-              Built for {brand.name}
+            <IndustryEyebrow>THE WORLD</IndustryEyebrow>
+            <IndustrySectionTitle>
+              Built for <span className="text-blue-300">{brand.name}</span>
             </IndustrySectionTitle>
           </div>
-          <IndustryTextLink href={`/industries/${industry.slug}`}>← {industry.name}</IndustryTextLink>
+          <IndustryTextLink href={`/industries/${industry.slug}`}>{industry.name}</IndustryTextLink>
         </div>
 
-        <div className="mt-8 flex flex-wrap gap-2 border-b border-blue-100/80 pb-4">
+        <div className="mt-8 flex flex-wrap gap-2 border-b border-white/10 pb-4">
           {(
             [
               { id: "all" as const, label: "All" },
@@ -180,10 +183,8 @@ export default function SampleBrandExperience({ data }: { data: SampleBrandPageD
               key={t.id}
               type="button"
               onClick={() => setTab(t.id)}
-              className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition ${
-                tab === t.id
-                  ? "bg-slate-900 text-white"
-                  : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+              className={`px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition ${
+                tab === t.id ? chipOn : chipIdle
               }`}
             >
               {t.label}
@@ -192,13 +193,11 @@ export default function SampleBrandExperience({ data }: { data: SampleBrandPageD
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="w-full text-[10px] font-bold uppercase tracking-widest text-slate-400">Ratio</span>
+          <span className="w-full font-mono text-[10px] tracking-[0.22em] text-white/35">RATIO</span>
           <button
             type="button"
             onClick={() => setRatioFilter("all")}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
-              ratioFilter === "all" ? "bg-blue-600 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200"
-            }`}
+            className={`px-3 py-1.5 text-xs font-semibold transition ${ratioFilter === "all" ? chipOn : chipIdle}`}
           >
             All
           </button>
@@ -207,8 +206,8 @@ export default function SampleBrandExperience({ data }: { data: SampleBrandPageD
               key={r.value}
               type="button"
               onClick={() => setRatioFilter(r.value)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
-                ratioFilter === r.value ? "bg-blue-600 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200"
+              className={`px-3 py-1.5 text-xs font-semibold transition ${
+                ratioFilter === r.value ? chipOn : chipIdle
               }`}
             >
               {r.label}
@@ -217,12 +216,12 @@ export default function SampleBrandExperience({ data }: { data: SampleBrandPageD
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="w-full text-[10px] font-bold uppercase tracking-widest text-slate-400">Category</span>
+          <span className="w-full font-mono text-[10px] tracking-[0.22em] text-white/35">CATEGORY</span>
           <button
             type="button"
             onClick={() => setCategoryFilter("all")}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
-              categoryFilter === "all" ? "bg-blue-600 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200"
+            className={`px-3 py-1.5 text-xs font-semibold transition ${
+              categoryFilter === "all" ? chipOn : chipIdle
             }`}
           >
             All
@@ -232,8 +231,8 @@ export default function SampleBrandExperience({ data }: { data: SampleBrandPageD
               key={c.value}
               type="button"
               onClick={() => setCategoryFilter(c.value)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
-                categoryFilter === c.value ? "bg-blue-600 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200"
+              className={`px-3 py-1.5 text-xs font-semibold transition ${
+                categoryFilter === c.value ? chipOn : chipIdle
               }`}
             >
               {c.short}
@@ -242,14 +241,14 @@ export default function SampleBrandExperience({ data }: { data: SampleBrandPageD
         </div>
 
         {filtered.length === 0 ? (
-          <p className="mt-12 rounded-2xl border border-dashed border-blue-200/80 bg-white/70 py-16 text-center text-sm font-light text-slate-500">
+          <p className="mt-12 border border-dashed border-white/20 bg-white/[0.02] py-16 text-center text-sm font-light text-white/45">
             No published assets match these filters yet.
           </p>
         ) : (
           <div className="mt-10 space-y-14">
             {byCategory.map(({ category, items }) => (
               <div key={category}>
-                <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-blue-600/90">
+                <h3 className="font-mono text-[11px] tracking-[0.22em] text-blue-400">
                   {categoryLabel(category)}
                 </h3>
                 <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -266,8 +265,8 @@ export default function SampleBrandExperience({ data }: { data: SampleBrandPageD
       </IndustryTintSection>
 
       {brand.description?.trim() ? (
-        <section className="px-4 py-8 sm:px-6 lg:px-10">
-          <p className="mx-auto max-w-2xl text-center text-sm font-light leading-relaxed text-slate-500">
+        <section className={`relative ${INDUSTRY_PAGE} py-8`}>
+          <p className="mx-auto max-w-2xl text-center text-sm font-light leading-relaxed text-white/50">
             {brand.description.trim()}
           </p>
         </section>
@@ -275,16 +274,16 @@ export default function SampleBrandExperience({ data }: { data: SampleBrandPageD
 
       {siblings.length > 0 ? (
         <IndustryTintSection>
-          <IndustryEyebrow>More sample brands</IndustryEyebrow>
-          <IndustrySectionTitle accent={<span className="font-semibold text-blue-700">{industry.name}</span>}>
-            Other worlds
+          <IndustryEyebrow>MORE SAMPLE BRANDS</IndustryEyebrow>
+          <IndustrySectionTitle>
+            Other worlds in <span className="text-blue-300">{industry.name}</span>
           </IndustrySectionTitle>
           <ul className="mt-6 flex flex-wrap gap-3">
             {siblings.map((s) => (
               <li key={s.id}>
                 <Link
                   href={`/industries/${industry.slug}/brands/${s.slug}`}
-                  className="rounded-full border border-blue-100 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:border-blue-300 hover:text-blue-700"
+                  className="border border-white/15 px-4 py-2 text-sm font-medium text-white/80 transition hover:border-white/35 hover:text-white"
                 >
                   {s.name}
                 </Link>
@@ -296,9 +295,9 @@ export default function SampleBrandExperience({ data }: { data: SampleBrandPageD
 
       <IndustryTintSection className="!py-14">
         <div className="text-center">
-          <IndustryEyebrow>Your brand</IndustryEyebrow>
+          <IndustryEyebrow>YOUR BRAND</IndustryEyebrow>
           <IndustrySectionTitle>
-            Build your <span className="font-semibold text-blue-700">{industry.name}</span> world
+            Build your <span className="text-blue-300">{industry.name}</span> world
           </IndustrySectionTitle>
           <div className="mt-8 flex justify-center">
             <IndustryCTABlock industryName={industry.name} />

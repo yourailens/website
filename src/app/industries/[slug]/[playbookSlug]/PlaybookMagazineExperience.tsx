@@ -51,7 +51,7 @@ export default function PlaybookMagazineExperience({ data }: { data: PlaybookPag
       <IndustryTopBar>
         <IndustryBreadcrumb
           items={[
-            { label: "Solutions", href: "/industries" },
+            { label: "Industries", href: "/industries" },
             { label: industry.name, href: `/industries/${industry.slug}` },
             { label: topicName, current: true },
           ]}
@@ -60,7 +60,7 @@ export default function PlaybookMagazineExperience({ data }: { data: PlaybookPag
 
       <IndustryHeroBand>
         <QAHeroSection
-          eyebrow={industryEyebrow("Playbook", industry.name)}
+          eyebrow={industryEyebrow("PLAYBOOK", industry.name)}
           headline={headline}
           body={body}
           mediaUrl={hero?.url}
@@ -73,11 +73,11 @@ export default function PlaybookMagazineExperience({ data }: { data: PlaybookPag
 
       {galleryExamples.some((e) => e.published) ? (
         <IndustryTintSection>
-          <IndustryEyebrow>This playbook</IndustryEyebrow>
-          <IndustrySectionTitle accent={<span className="font-semibold text-blue-700">inside</span>}>
-            Sample work
+          <IndustryEyebrow>THIS PLAYBOOK</IndustryEyebrow>
+          <IndustrySectionTitle>
+            Sample work <span className="font-light text-white/55">inside</span>
           </IndustrySectionTitle>
-          <p className="mt-3 max-w-xl text-sm font-light leading-relaxed text-slate-600">
+          <p className="mt-3 max-w-xl text-sm font-light leading-relaxed text-white/55">
             Examples from this playbook: films, stills, and campaign assets we produce for {industry.name} clients.
           </p>
           <div className="mt-10">
@@ -89,7 +89,7 @@ export default function PlaybookMagazineExperience({ data }: { data: PlaybookPag
       {playbook.description && playbook.description !== body ? (
         <IndustryTintSection>
           <IndustryCard className="p-6 lg:p-8">
-            <IndustryEyebrow>How we work</IndustryEyebrow>
+            <IndustryEyebrow>HOW WE WORK</IndustryEyebrow>
             <AnswerBody text={playbook.description} className="mt-4" />
           </IndustryCard>
         </IndustryTintSection>
@@ -97,9 +97,9 @@ export default function PlaybookMagazineExperience({ data }: { data: PlaybookPag
 
       {(prev || next) && (
         <IndustryTintSection>
-          <IndustryEyebrow>More playbooks</IndustryEyebrow>
-          <IndustrySectionTitle accent={<span className="font-semibold text-blue-700">{industry.name}</span>}>
-            Keep exploring
+          <IndustryEyebrow>MORE PLAYBOOKS</IndustryEyebrow>
+          <IndustrySectionTitle>
+            Keep exploring <span className="text-blue-300">{industry.name}</span>
           </IndustrySectionTitle>
           <div className="mt-8">
             <PlaybookNavPair
@@ -136,8 +136,11 @@ export default function PlaybookMagazineExperience({ data }: { data: PlaybookPag
           <IndustryTextLink href={`/industries/${industry.slug}`}>
             All {industry.name} playbooks
           </IndustryTextLink>
-          <Link href="/pricing" className="text-sm font-semibold text-blue-600 transition hover:text-blue-700">
-            Packages & pricing →
+          <Link
+            href="/pricing"
+            className="text-[11px] font-semibold uppercase tracking-[0.16em] text-blue-300 transition hover:text-blue-200"
+          >
+            Packages & pricing
           </Link>
         </div>
 

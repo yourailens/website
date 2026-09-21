@@ -46,7 +46,7 @@ export default function IndustryExperience({
       <IndustryTopBar>
         <IndustryBreadcrumb
           items={[
-            { label: "Solutions", href: "/industries" },
+            { label: "Industries", href: "/industries" },
             { label: industry.name, current: true },
           ]}
         />
@@ -54,7 +54,7 @@ export default function IndustryExperience({
 
       <IndustryHeroBand>
         <QAHeroSection
-          eyebrow={industryEyebrow("AI production", industry.name)}
+          eyebrow={industryEyebrow("CHANNEL", industry.name)}
           headline={headline}
           body={body}
           mediaUrl={hero?.url}
@@ -64,7 +64,7 @@ export default function IndustryExperience({
           mediaCaption={hero?.caption}
         >
           {industry.tagline ? (
-            <p className="rounded-xl border border-blue-100/80 bg-blue-50/40 px-4 py-3 text-sm font-medium text-blue-900/90">
+            <p className="border border-blue-400/30 bg-blue-500/10 px-4 py-3 text-sm font-light text-blue-200/90">
               {plainCopy(industry.tagline)}
             </p>
           ) : null}
@@ -82,7 +82,7 @@ export default function IndustryExperience({
         <PlaybookShowcase playbooks={playbookItems} industrySlug={industry.slug} industryName={industry.name} />
       ) : (
         <IndustryTintSection>
-          <p className="rounded-2xl border border-dashed border-blue-200/80 bg-white/70 py-12 text-center text-sm font-light text-slate-500">
+          <p className="border border-dashed border-white/20 bg-white/[0.02] py-12 text-center text-sm font-light text-white/45">
             New playbooks for this industry are on the way. Contact us to discuss your project.
           </p>
         </IndustryTintSection>
@@ -90,11 +90,11 @@ export default function IndustryExperience({
 
       <IndustryTintSection className="!py-14">
         <div className="text-center">
-          <IndustryEyebrow>Work with us</IndustryEyebrow>
+          <IndustryEyebrow>WORK WITH US</IndustryEyebrow>
           <IndustrySectionTitle>
-            Start your <span className="font-semibold text-blue-700">{industry.name}</span> project
+            Start your <span className="text-blue-300">{industry.name}</span> project
           </IndustrySectionTitle>
-          <p className="mx-auto mt-3 max-w-md text-sm font-light text-slate-600">
+          <p className="mx-auto mt-3 max-w-md text-sm font-light text-white/55">
             Fixed packages, clear timelines, and unlimited revisions on every deliverable.
           </p>
           <div className="mt-8 flex justify-center">

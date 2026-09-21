@@ -6,7 +6,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Navbar from "@/components/Navbar";
 import { DeferredVideo } from "@/components/media/DeferredVideo";
-import HomeBlueTint from "@/components/home/HomeBlueTint";
 import type { IndustryWithPlaybooks } from "@/data/industries";
 import type { SampleBrandWithMedia } from "@/data/sample-brands";
 import { SampleBrandsSection } from "./SampleBrandsSection";
@@ -15,9 +14,9 @@ import { plainCopy } from "./industry-copy";
 import { IndustryCTABlock } from "./QAComponents";
 import {
   INDUSTRY_PAGE,
-  IndustryBadge,
+  IndustryChannelTitle,
   IndustryEyebrow,
-  IndustryHeroBand,
+  IndustryGlow,
   IndustryPrimaryLink,
   IndustrySectionTitle,
   IndustryShell,
@@ -25,7 +24,7 @@ import {
 } from "./IndustryUI";
 import { INDUSTRIES_HUB_PAGE_SIZE, IndustryPagination } from "./IndustryPagination";
 
-function IndustryHubCard({ ind }: { ind: IndustryWithPlaybooks }) {
+function IndustryHubCard({ ind, index }: { ind: IndustryWithPlaybooks; index: number }) {
   const previewUrl = ind.hero_image_url ?? ind.cover_image_url;
   const isVideo = previewUrl && resolveMediaType(null, previewUrl) === "video";
   const playbookCount = ind.playbooks.filter((p) => p.published).length;
@@ -33,82 +32,75 @@ function IndustryHubCard({ ind }: { ind: IndustryWithPlaybooks }) {
   const description =
     plainCopy(ind.description) ||
     "Campaign films, product visuals, and brand assets, delivered fast and built for your category.";
-  const playbookLabel =
-    playbookCount > 0
-      ? `${playbookCount} ${playbookCount === 1 ? "playbook" : "playbooks"}`
-      : "Coming soon";
-
+  const ep = String(index + 1).padStart(2, "0");
   const titleId = `industry-card-title-${ind.slug}`;
 
   return (
     <Link
       href={`/industries/${ind.slug}`}
       aria-labelledby={titleId}
-      className="flex h-full flex-col overflow-hidden rounded-2xl border border-blue-100/90 bg-white shadow-sm shadow-blue-100/20"
+      className="group flex h-full flex-col border border-white/12 bg-white/[0.02] transition hover:border-white/25 hover:bg-white/[0.04]"
     >
-      <div className="p-3 pb-0">
-        <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-gradient-to-br from-sky-50 to-blue-50/80 ring-1 ring-blue-100/60">
-          {previewUrl ? (
-            isVideo ? (
-              <DeferredVideo
-                src={previewUrl}
-                poster={ind.hero_poster_url ?? ind.cover_poster_url}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <Image
-                src={previewUrl}
-                alt=""
-                aria-hidden
-                fill
-                className="object-cover"
-                sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw"
-                unoptimized
-              />
-            )
+      <div className="relative aspect-[16/10] overflow-hidden bg-black">
+        {previewUrl ? (
+          isVideo ? (
+            <DeferredVideo
+              src={previewUrl}
+              poster={ind.hero_poster_url ?? ind.cover_poster_url}
+              className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
+            />
           ) : (
-            <div className="flex h-full items-center justify-center">
-              <span
-                className="font-body text-4xl font-black text-blue-200/90"
-                style={{ letterSpacing: "-0.04em" }}
-                aria-hidden
-              >
-                {ind.name.charAt(0)}
-              </span>
-            </div>
-          )}
-        </div>
+            <Image
+              src={previewUrl}
+              alt=""
+              aria-hidden
+              fill
+              className="object-cover transition duration-700 group-hover:scale-[1.03]"
+              sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw"
+              unoptimized
+            />
+          )
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <span
+              className="font-body text-5xl font-semibold text-blue-500/40"
+              aria-hidden
+            >
+              {ind.name.charAt(0)}
+            </span>
+          </div>
+        )}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+        <p className="absolute bottom-3 left-3 font-mono text-[10px] tracking-[0.28em] text-blue-300">
+          CH. {ep}
+        </p>
       </div>
 
       <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
-        <div className="mb-2.5 flex items-center gap-2">
-          <div className="h-px w-5 shrink-0 bg-blue-400/80" aria-hidden />
-          <span className="font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-blue-600/85">
-            {playbookLabel}
-          </span>
-        </div>
+        <p className="font-mono text-[10px] tracking-[0.22em] text-white/40">
+          {playbookCount > 0
+            ? `${playbookCount} ${playbookCount === 1 ? "playbook" : "playbooks"}`
+            : "Coming soon"}
+        </p>
 
         <h2
           id={titleId}
-          className="font-body text-[clamp(1.2rem,2.2vw,1.5rem)] font-black leading-[1.12] text-slate-900"
-          style={{ letterSpacing: "-0.03em", textWrap: "balance" }}
+          className="mt-2 font-body text-[clamp(1.2rem,2.2vw,1.55rem)] font-semibold leading-[1.15] tracking-tight text-white transition group-hover:text-blue-100"
         >
           {ind.name}
         </h2>
 
         {tagline ? (
-          <p className="mt-2 line-clamp-2 text-sm font-medium leading-snug text-blue-800/90">{tagline}</p>
+          <p className="mt-2 line-clamp-2 text-sm font-light leading-snug text-blue-300/85">{tagline}</p>
         ) : null}
 
-        <p
-          className={`line-clamp-2 text-[13px] font-light leading-relaxed text-slate-500 ${tagline ? "mt-2" : "mt-2.5"}`}
-        >
+        <p className="mt-2 line-clamp-2 text-[13px] font-light leading-relaxed text-white/50">
           {description}
         </p>
 
-        <div className="mt-auto flex items-center justify-end border-t border-blue-50 pt-4">
-          <span className="text-xs font-semibold text-blue-600">Explore →</span>
-        </div>
+        <p className="mt-auto pt-5 text-[11px] font-semibold uppercase tracking-[0.16em] text-blue-300">
+          Open channel
+        </p>
       </div>
     </Link>
   );
@@ -161,43 +153,39 @@ export default function IndustriesHubExperience({
     [pathname, router, searchParams, totalPages]
   );
 
+  const pageOffset = (page - 1) * INDUSTRIES_HUB_PAGE_SIZE;
+
   return (
     <IndustryShell>
       <Navbar />
+      <IndustryGlow />
 
-      <IndustryHeroBand>
-        <IndustryBadge>YourAI Lens Studio</IndustryBadge>
-        <h1
-          className="mt-5 max-w-3xl text-[clamp(2rem,5vw,3.25rem)] font-light leading-[1.2] text-slate-900"
-          style={{ letterSpacing: "-0.02em" }}
-        >
-          AI production built for{" "}
-          <span className="font-semibold text-blue-700">your industry</span>
-        </h1>
-        <p className="mt-5 max-w-xl text-base font-light leading-relaxed text-slate-600">
-          We deliver campaign-grade films, product visuals, and brand content for real estate, ecommerce, SaaS, and
-          more, on the timelines modern teams expect.
+      <section className={`relative ${INDUSTRY_PAGE} pb-10 pt-12 sm:pt-16`}>
+        <IndustryChannelTitle channel="CHANNEL · INDUSTRIES" title="Industries" />
+        <p className="mt-6 max-w-xl text-base font-light leading-relaxed text-white/65 sm:text-lg">
+          AI production desks for real estate, ecommerce, SaaS, fashion, and more. Campaign films,
+          product stills, and brand systems on the clock modern teams expect.
         </p>
-        <div className="mt-8 flex flex-wrap items-center gap-5">
+        <div className="mt-8">
           <IndustryPrimaryLink href="/pricing">View packages</IndustryPrimaryLink>
         </div>
-      </IndustryHeroBand>
+      </section>
 
       <IndustryTintSection>
         <div ref={gridRef} className="scroll-mt-28">
-          <IndustryEyebrow>Who we work with</IndustryEyebrow>
-          <IndustrySectionTitle accent={<span className="font-semibold text-blue-700">we serve</span>}>
-            Industries
+          <IndustryEyebrow>WHO WE WORK WITH</IndustryEyebrow>
+          <IndustrySectionTitle>
+            Nine verticals. <span className="font-light text-white/55">One studio desk.</span>
           </IndustrySectionTitle>
-          <p className="mt-3 max-w-lg text-sm font-light leading-relaxed text-slate-600">
-            Explore how we approach creative production in your space, with real examples and clear deliverables.
+          <p className="mt-3 max-w-lg text-sm font-light leading-relaxed text-white/55">
+            Open a channel for playbooks, sample brands, and how we ship in that space.
           </p>
 
           {industries.length > 0 ? (
             <>
-              <div className="mt-10 grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-7">
-                {paginatedIndustries.map((ind) => (
-                  <IndustryHubCard key={ind.id} ind={ind} />
+              <div className="mt-10 grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+                {paginatedIndustries.map((ind, i) => (
+                  <IndustryHubCard key={ind.id} ind={ind} index={pageOffset + i} />
                 ))}
               </div>
               <IndustryPagination
@@ -210,7 +198,7 @@ export default function IndustriesHubExperience({
               />
             </>
           ) : (
-            <p className="mt-10 text-center text-sm font-light text-slate-500">
+            <p className="mt-10 text-center text-sm font-light text-white/45">
               Content is being published. Check back soon.
             </p>
           )}
@@ -219,20 +207,20 @@ export default function IndustriesHubExperience({
 
       <SampleBrandsSection variant="hub" brands={sampleBrands} />
 
-      <HomeBlueTint className="border-t border-blue-100/60 py-14 lg:py-20">
-        <div className={`${INDUSTRY_PAGE} text-center`}>
-          <IndustryEyebrow>Get started</IndustryEyebrow>
-          <IndustrySectionTitle accent={<span className="font-semibold text-blue-700">your next project</span>}>
-            Ready to start
+      <IndustryTintSection className="!py-16">
+        <div className="text-center">
+          <IndustryEyebrow>GET STARTED</IndustryEyebrow>
+          <IndustrySectionTitle>
+            Ready for your next project
           </IndustrySectionTitle>
-          <p className="mx-auto mt-3 max-w-md text-sm font-light text-slate-600">
+          <p className="mx-auto mt-3 max-w-md text-sm font-light text-white/55">
             Tell us what you are launching. We will scope packages, timelines, and deliverables for your brand.
           </p>
           <div className="mt-8 flex justify-center">
             <IndustryCTABlock />
           </div>
         </div>
-      </HomeBlueTint>
+      </IndustryTintSection>
     </IndustryShell>
   );
 }

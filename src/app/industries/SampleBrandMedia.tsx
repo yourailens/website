@@ -15,7 +15,7 @@ export function SampleBrandMediaTile({
   sizes?: string;
 }) {
   const type = resolveMediaType(item.media_type, item.media_url);
-  const boxClass = `relative w-full overflow-hidden rounded-xl bg-slate-100 ring-1 ring-blue-100/60 ${aspectRatioClass(item.aspect_ratio)}`;
+  const boxClass = `relative w-full overflow-hidden border border-white/12 bg-black ${aspectRatioClass(item.aspect_ratio)}`;
 
   return (
     <figure className="group">
@@ -46,21 +46,21 @@ export function SampleBrandMediaTile({
       {(item.label?.trim() || item.caption?.trim()) && (
         <figcaption className="mt-2 flex flex-wrap items-center gap-2 px-0.5">
           {item.label?.trim() ? (
-            <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600/90">
+            <span className="font-mono text-[10px] tracking-[0.18em] text-blue-400">
               {item.label.trim()}
             </span>
           ) : null}
           {item.caption?.trim() ? (
-            <span className="text-xs font-light text-slate-500">{item.caption.trim()}</span>
+            <span className="text-xs font-light text-white/50">{item.caption.trim()}</span>
           ) : null}
-          <span className="ml-auto font-mono text-[9px] text-slate-400">
+          <span className="ml-auto font-mono text-[9px] text-white/30">
             {aspectRatioLabel(item.aspect_ratio)}
           </span>
         </figcaption>
       )}
       {!item.label?.trim() && !item.caption?.trim() ? (
         <figcaption className="mt-1.5 px-0.5">
-          <span className="text-[10px] font-medium text-slate-400">
+          <span className="font-mono text-[10px] text-white/35">
             {categoryLabel(item.category)}, {aspectRatioLabel(item.aspect_ratio)}
           </span>
         </figcaption>

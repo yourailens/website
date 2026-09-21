@@ -7,7 +7,7 @@ import type { IndustryPlaybookExample, PlaybookCoverPreview } from "@/data/indus
 import { resolveMediaType } from "@/lib/industries/media";
 import { resolvePlaybookCoverExample } from "@/lib/industries/resolve-hero-media";
 import { plainCopy } from "./industry-copy";
-import { IndustryEyebrow, IndustrySectionTitle, IndustryTintSection } from "./IndustryUI";
+import { IndustryEyebrow, IndustryPrimaryLink, IndustrySectionTitle, IndustryTintSection } from "./IndustryUI";
 
 function coverAlt(cover: PlaybookCoverPreview): string {
   return cover.caption?.trim() || cover.title || "Playbook cover";
@@ -26,7 +26,6 @@ function publishedSampleCount(pb: PlaybookItem): number {
   return pb.example_count ?? 0;
 }
 
-/** Listing covers: poster still for video — never download MP4s in the grid */
 function PlaybookCoverStill({
   cover,
   className = "absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.02]",
@@ -41,8 +40,8 @@ function PlaybookCoverStill({
 
   if (!src) {
     return (
-      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-sky-50 to-blue-50/70">
-        <span className="text-xs font-light text-slate-400">Open playbook for samples</span>
+      <div className="absolute inset-0 flex items-center justify-center bg-black">
+        <span className="text-xs font-light text-white/35">Open playbook for samples</span>
       </div>
     );
   }
@@ -84,45 +83,36 @@ function PlaybookIndexRow({
       href={href}
       onMouseEnter={onActivate}
       onFocus={onActivate}
-      className={`group flex items-start gap-4 rounded-xl border-2 px-4 py-4 transition duration-200 ${
+      className={`group flex items-start gap-4 border px-4 py-4 transition duration-200 ${
         active
-          ? "border-blue-400 bg-white shadow-md shadow-blue-100/40"
-          : "border-transparent bg-white/70 hover:border-blue-200/80 hover:bg-white hover:shadow-sm"
+          ? "border-blue-400/50 bg-white/[0.06]"
+          : "border-white/10 bg-transparent hover:border-white/25 hover:bg-white/[0.03]"
       }`}
     >
       <span
-        className={`mt-0.5 font-mono text-2xl font-black tabular-nums transition-colors ${
-          active ? "text-blue-600" : "text-blue-200 group-hover:text-blue-400"
+        className={`mt-0.5 font-mono text-2xl font-semibold tabular-nums transition-colors ${
+          active ? "text-blue-400" : "text-white/25 group-hover:text-blue-400/70"
         }`}
       >
         {num}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-blue-600/80">Playbook</span>
+        <span className="font-mono text-[10px] tracking-[0.22em] text-blue-400/80">PLAYBOOK</span>
         <span
-          className={`mt-0.5 block font-body text-base font-bold leading-snug transition-colors ${
-            active ? "text-slate-900" : "text-slate-700 group-hover:text-blue-800"
+          className={`mt-0.5 block font-body text-base font-semibold leading-snug transition-colors ${
+            active ? "text-white" : "text-white/75 group-hover:text-white"
           }`}
-          style={{ letterSpacing: "-0.02em" }}
         >
           {name}
         </span>
         {tagline?.trim() ? (
-          <span className="mt-1 block line-clamp-2 text-sm font-light text-slate-500">{plainCopy(tagline)}</span>
+          <span className="mt-1 block line-clamp-2 text-sm font-light text-white/45">{plainCopy(tagline)}</span>
         ) : null}
         {sampleCount > 0 ? (
-          <span className="mt-2 inline-block text-[10px] font-medium text-slate-400">
+          <span className="mt-2 inline-block font-mono text-[10px] tracking-[0.14em] text-white/35">
             {sampleCount} {sampleCount === 1 ? "sample" : "samples"}
           </span>
         ) : null}
-      </span>
-      <span
-        className={`mt-1 shrink-0 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-blue-500 ${
-          active ? "text-blue-500" : ""
-        }`}
-        aria-hidden
-      >
-        →
       </span>
     </Link>
   );
@@ -140,40 +130,32 @@ function PlaybookPreviewPanel({
   const num = String(index + 1).padStart(2, "0");
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-blue-100/90 bg-white shadow-lg shadow-blue-100/30">
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
+    <div className="overflow-hidden border border-white/12 bg-white/[0.03]">
+      <div className="relative aspect-[16/10] w-full overflow-hidden bg-black">
         {playbook.cover ? (
           <PlaybookCoverStill cover={playbook.cover} />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-sky-50 to-blue-50/70">
-            <span className="text-xs font-light text-slate-400">Cover coming soon</span>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-xs font-light text-white/35">Cover coming soon</span>
           </div>
         )}
       </div>
-      <div className="border-t border-blue-50 px-6 py-6">
-        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.3em] text-blue-600/90">Playbook {num}</p>
-        <h3
-          className="mt-2 font-body text-2xl font-black leading-tight text-slate-900"
-          style={{ letterSpacing: "-0.03em" }}
-        >
+      <div className="border-t border-white/10 px-6 py-6">
+        <p className="font-mono text-[11px] tracking-[0.28em] text-blue-400">PLAYBOOK {num}</p>
+        <h3 className="mt-2 font-body text-2xl font-semibold leading-tight tracking-tight text-white">
           {playbook.name}
         </h3>
         {playbook.tagline?.trim() ? (
-          <p className="mt-2 text-sm font-light leading-relaxed text-slate-600">{plainCopy(playbook.tagline)}</p>
+          <p className="mt-2 text-sm font-light leading-relaxed text-white/55">{plainCopy(playbook.tagline)}</p>
         ) : null}
-        <Link
-          href={href}
-          className="mt-5 inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-500/20 transition hover:bg-blue-700"
-        >
-          Open playbook
-          <span aria-hidden>→</span>
-        </Link>
+        <div className="mt-5">
+          <IndustryPrimaryLink href={href}>Open playbook</IndustryPrimaryLink>
+        </div>
       </div>
     </div>
   );
 }
 
-/** Only mount playbooks UI when the section scrolls near the viewport */
 function PlaybookShowcaseWhenVisible({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -193,11 +175,7 @@ function PlaybookShowcaseWhenVisible({ children }: { children: React.ReactNode }
 
   return (
     <div ref={ref} className="min-h-[120px]">
-      {visible ? (
-        children
-      ) : (
-        <div className="mt-10 h-48 animate-pulse rounded-2xl bg-blue-50/80" aria-hidden />
-      )}
+      {visible ? children : <div className="mt-10 h-48 animate-pulse border border-white/10 bg-white/[0.03]" aria-hidden />}
     </div>
   );
 }
@@ -222,19 +200,22 @@ export function PlaybookShowcase({
   return (
     <IndustryTintSection>
       <div className="max-w-2xl">
-        <IndustryEyebrow>Playbooks</IndustryEyebrow>
-        <IndustrySectionTitle
-          accent={industryName ? <span className="font-semibold text-blue-700">{industryName}</span> : undefined}
-        >
-          {industryName ? "for" : "Browse"}
+        <IndustryEyebrow>PLAYBOOKS</IndustryEyebrow>
+        <IndustrySectionTitle>
+          {industryName ? (
+            <>
+              For <span className="text-blue-300">{industryName}</span>
+            </>
+          ) : (
+            "Browse"
+          )}
         </IndustrySectionTitle>
-        <p className="mt-3 text-sm font-light leading-relaxed text-slate-600">
+        <p className="mt-3 text-sm font-light leading-relaxed text-white/55">
           Pick a topic to see sample work on the full playbook page.
         </p>
       </div>
 
       <PlaybookShowcaseWhenVisible>
-        {/* All breakpoints: text list; one cover preview on large screens only */}
         <div className="mt-10 lg:grid lg:grid-cols-[minmax(300px,380px)_1fr] lg:items-start lg:gap-10">
           <ul className="space-y-2" role="list">
             {playbooks.map((pb, i) => (
@@ -273,7 +254,6 @@ function coverFromExamples(examples: IndustryPlaybookExample[]): PlaybookCoverPr
   };
 }
 
-/** Prev / next on playbook detail — poster stills only */
 export function PlaybookNavPair({
   prev,
   next,
@@ -299,38 +279,38 @@ export function PlaybookNavPair({
     return (
       <Link
         href={`/industries/${industrySlug}/${item.slug}`}
-        className={`group grid overflow-hidden rounded-2xl border border-blue-100/90 bg-white shadow-sm transition hover:border-blue-200 hover:shadow-md ${
+        className={`group grid overflow-hidden border border-white/12 bg-white/[0.02] transition hover:border-white/25 hover:bg-white/[0.04] ${
           flip ? "sm:grid-cols-[1fr_1.05fr]" : "sm:grid-cols-[1.05fr_1fr]"
         }`}
       >
         <div
-          className={`relative min-h-[160px] overflow-hidden bg-slate-100 sm:min-h-[180px] ${
+          className={`relative min-h-[160px] overflow-hidden bg-black sm:min-h-[180px] ${
             flip ? "sm:order-2" : ""
           }`}
         >
           {cover ? (
             <PlaybookCoverStill cover={cover} sizes="50vw" />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-sky-50 to-blue-50/70">
-              <span className="text-xs text-slate-400">No preview</span>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-xs text-white/35">No preview</span>
             </div>
           )}
         </div>
         <div
-          className={`flex flex-col justify-center px-5 py-5 sm:px-6 ${
-            flip ? "sm:order-1 sm:border-r-2 sm:border-r-blue-200/70" : "sm:border-l-2 sm:border-l-blue-200/70"
+          className={`flex flex-col justify-center border-white/10 px-5 py-5 sm:px-6 ${
+            flip ? "sm:order-1 sm:border-r" : "sm:border-l"
           }`}
         >
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-blue-600/90">Playbook {num}</p>
-          <h3 className="mt-2 font-body text-lg font-black text-slate-900 group-hover:text-blue-700">{item.name}</h3>
+          <p className="font-mono text-[10px] tracking-[0.28em] text-blue-400">PLAYBOOK {num}</p>
+          <h3 className="mt-2 font-body text-lg font-semibold text-white group-hover:text-blue-100">{item.name}</h3>
           {item.tagline?.trim() ? (
-            <p className="mt-1 line-clamp-2 text-sm font-light text-slate-600">{plainCopy(item.tagline)}</p>
+            <p className="mt-1 line-clamp-2 text-sm font-light text-white/50">{plainCopy(item.tagline)}</p>
           ) : null}
-          <p className="mt-3 text-xs font-semibold text-blue-600">
+          <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-300">
             Open playbook
             {sampleCount > 0 ? (
-              <span className="ml-2 font-normal text-slate-400">
-                , {sampleCount} {sampleCount === 1 ? "sample" : "samples"}
+              <span className="ml-2 font-normal normal-case tracking-normal text-white/35">
+                · {sampleCount} {sampleCount === 1 ? "sample" : "samples"}
               </span>
             ) : null}
           </p>

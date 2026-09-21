@@ -544,8 +544,12 @@ function DesktopExploreMegaPanel({
   loading: boolean;
   onLinkClick: () => void;
 }) {
-  const moduleLinks = MODULES_CATEGORIES.flatMap((cat) => cat.items);
-  const libraryLinks = RESOURCES_CATEGORIES.flatMap((cat) => cat.items);
+  const moduleLinks: { href: string; label: string }[] = MODULES_CATEGORIES.flatMap((cat) => [
+    ...cat.items,
+  ]);
+  const libraryLinks: { href: string; label: string }[] = RESOURCES_CATEGORIES.flatMap((cat) => [
+    ...cat.items,
+  ]);
 
   return (
     <MegaPanelShell>

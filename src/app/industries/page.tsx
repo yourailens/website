@@ -7,15 +7,13 @@ import IndustriesHubExperience from "./IndustriesHubExperience";
 export const dynamic = "force-dynamic";
 
 function IndustriesHubFallback() {
-  return (
-    <div className="min-h-screen animate-pulse bg-gradient-to-br from-sky-50 via-white to-blue-50/30" />
-  );
+  return <div className="ott-home min-h-screen animate-pulse bg-black" />;
 }
 
 export const metadata: Metadata = {
-  title: "Solutions by Industry | YourAI Lens Studio",
+  title: "Industries | YourAILens Studios",
   description:
-    "AI films, product visuals, and brand content for real estate, ecommerce, SaaS, and more. Production-grade deliverables from YourAI Lens Studio.",
+    "AI films, product visuals, and brand content for real estate, ecommerce, SaaS, and more. Production-grade deliverables from YourAILens Studios.",
 };
 
 export default async function IndustriesPage() {
