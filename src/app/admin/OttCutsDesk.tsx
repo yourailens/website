@@ -30,6 +30,7 @@ type Draft = {
   linkInput: string;
   localBlob: Blob | null;
   published: boolean;
+  homepage_feature: boolean;
 };
 
 const emptyDraft = (category: OttCutCategory = "ads"): Draft => ({
@@ -44,6 +45,7 @@ const emptyDraft = (category: OttCutCategory = "ads"): Draft => ({
   linkInput: "",
   localBlob: null,
   published: true,
+  homepage_feature: false,
 });
 
 function aspectLock(id: OttCutAspect): number | undefined {
@@ -65,7 +67,7 @@ export default function OttCutsDesk() {
     const j = (await res.json().catch(() => ({}))) as { cuts?: OttCut[]; error?: string };
     if (!res.ok) {
       const missing = /does not exist|schema cache/i.test(j.error ?? "");
-      setErr(missing ? "Run supabase/migrations/066_ott_cuts.sql in the Supabase SQL editor first." : j.error || "Could not load cuts.");
+      setErr(missing ? "Run supabase/migrations/066_ott_cuts.sql and 067_ott_cuts_homepage_feature.sql in the Supabase SQL editor first." : j.error || "Could not load cuts.");
       return;
     }
     setCuts(j.cuts ?? []);
@@ -203,6 +205,7 @@ export default function OttCutsDesk() {
         media_url,
         aspect_ratio: draft.aspect,
         published: draft.published,
+        homepage_feature: draft.homepage_feature,
       };
       const res = await fetch(draft.id ? `/api/admin/ott-cuts/${draft.id}` : "/api/admin/ott-cuts", {
         method: draft.id ? "PATCH" : "POST",
@@ -235,6 +238,7 @@ export default function OttCutsDesk() {
       linkInput: cut.media_url,
       localBlob: null,
       published: cut.published,
+      homepage_feature: cut.homepage_feature,
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -471,6 +475,17 @@ export default function OttCutsDesk() {
               />
               Published
             </label>
+            <label className="flex items-center gap-2 text-sm text-white/80">
+              <input
+                type="checkbox"
+                checked={draft.homepage_feature}
+                onChange={(e) => patch({ homepage_feature: e.target.checked })}
+              />
+              Show on homepage (films trailer)
+            </label>
+            {draft.homepage_feature ? (
+              <p className="text-xs text-white/45">Only one cut can be the homepage feature. This replaces any previous one.</p>
+            ) : null}
             <button type="button" onClick={() => void save()} disabled={busy} className={BTN}>
               {busy ? "Saving…" : draft.id ? "Update cut" : "Save cut"}
             </button>
@@ -529,6 +544,7 @@ export default function OttCutsDesk() {
                   <p className="font-mono text-[10px] tracking-[0.18em] text-white/40">
                     {OTT_CUT_CATEGORIES.find((c) => c.id === cut.category)?.label.toUpperCase()} · {cut.aspect_ratio}
                     {cut.published ? "" : " · DRAFT"}
+                    {cut.homepage_feature ? " · HOMEPAGE" : ""}
                   </p>
                   <p className="mt-1 font-heading text-lg leading-none">{cut.caption}</p>
                   {cut.description ? <p className="mt-2 line-clamp-2 text-xs text-white/55">{cut.description}</p> : null}

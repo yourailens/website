@@ -1,9 +1,10 @@
 import Link from "next/link";
 import OttRail, { type OttCard } from "@/components/home/OttRail";
+import OttSeeAllLink from "@/components/home/OttSeeAllLink";
 import FilmFeature from "@/components/home/FilmFeature";
 import { HOME_WATCH_TITLES, getHomeWatch, type HomeWatchRail, type HomeWatchTitle } from "@/data/home-watch";
+import { getHomepageFeatureOttCut, getPublishedOttCuts } from "@/lib/ott-cuts/load";
 import { ottCutAspectLabel, ottCutYoutubeId, type OttCut } from "@/data/ott-cuts";
-import { getPublishedOttCuts } from "@/lib/ott-cuts/load";
 
 function toOttCard(item: HomeWatchTitle): OttCard {
   return {
@@ -49,17 +50,42 @@ const PACKAGES: OttCard[] = [
 ];
 
 export default async function HomeStudioStory() {
-  const adsCuts = await getPublishedOttCuts("ads");
-  const filmCuts = await getPublishedOttCuts("films");
+  const [adsCuts, filmCuts, homepageFeature] = await Promise.all([
+    getPublishedOttCuts("ads"),
+    getPublishedOttCuts("films"),
+    getHomepageFeatureOttCut(),
+  ]);
   const landed = [...adsCuts]
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
     .slice(0, 16)
     .map((cut) => cutToCard(cut, "/ai-ads"));
   const lot = [...filmCuts]
+    .filter((cut) => !cut.homepage_feature)
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
     .slice(0, 16)
     .map((cut) => cutToCard(cut, "/ai-filmmaking"));
-  const feature = getHomeWatch("ai-films-trailer");
+
+  const trailerMeta = getHomeWatch("ai-films-trailer");
+  const feature: OttCard | null = homepageFeature
+    ? (() => {
+        const yt = ottCutYoutubeId(homepageFeature.media_url);
+        return {
+          href: trailerMeta?.watchUrl ?? `/ai-filmmaking#${homepageFeature.slug}`,
+          title: homepageFeature.caption || trailerMeta?.title || "Our first 45 min AI film",
+          tag: trailerMeta?.tag ?? "45 min",
+          video: !yt && homepageFeature.media_type === "video" ? homepageFeature.media_url : undefined,
+          image: homepageFeature.media_type === "image" ? homepageFeature.media_url : undefined,
+          poster: homepageFeature.poster_url ?? undefined,
+          embed: yt ? `https://www.youtube.com/embed/${yt}` : undefined,
+          watchUrl: trailerMeta?.watchUrl,
+          watchLabel: trailerMeta?.watchLabel,
+          featured: true,
+          aspect: "wide" as const,
+        };
+      })()
+    : trailerMeta
+      ? toOttCard(trailerMeta)
+      : null;
 
   return (
     <div className="space-y-16 bg-black pb-24 pt-10 text-white sm:space-y-20">
@@ -70,9 +96,7 @@ export default async function HomeStudioStory() {
             <h2 className="mt-2 font-heading text-[clamp(1.7rem,3.6vw,2.8rem)] leading-none">AI ads</h2>
             <p className="mt-2 max-w-lg text-sm font-light text-white/50">Commercials already in the world.</p>
           </div>
-          <Link href="/ai-ads" className="mb-0.5 text-[11px] uppercase tracking-[0.2em] text-white/45 hover:text-white">
-            All ads
-          </Link>
+          <OttSeeAllLink href="/ai-ads" label="All ads" className="mb-0.5" />
         </div>
         <div className="mt-8 space-y-10">
           {landed.length > 0 ? (
@@ -89,12 +113,10 @@ export default async function HomeStudioStory() {
             <h2 className="mt-2 font-heading text-[clamp(1.7rem,3.6vw,2.8rem)] leading-none">AI films</h2>
             <p className="mt-2 max-w-lg text-sm font-light text-white/50">Our first 45 min AI film. Then the cuts from the desk.</p>
           </div>
-          <Link href="/ai-filmmaking" className="mb-0.5 text-[11px] uppercase tracking-[0.2em] text-white/45 hover:text-white">
-            All films
-          </Link>
+          <OttSeeAllLink href="/ai-filmmaking" label="All films" className="mb-0.5" />
         </div>
         <div className="mt-8 space-y-10">
-          {feature ? <FilmFeature card={toOttCard(feature)} /> : null}
+          {feature ? <FilmFeature card={feature} /> : null}
           {lot.length > 0 ? <OttRail tone="row" scene="NEW" title="On the lot" cards={lot} /> : null}
         </div>
       </section>

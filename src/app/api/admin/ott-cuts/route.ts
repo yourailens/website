@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/api/admin-auth";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
 import {
   adminGetAllOttCuts,
+  clearOtherHomepageFeatures,
   isOttCutAspect,
   isOttCutCategory,
   isOttCutMediaType,
@@ -39,6 +40,11 @@ export async function POST(req: NextRequest) {
   if (!isOttCutAspect(aspect_ratio)) return NextResponse.json({ error: "Invalid ratio" }, { status: 400 });
 
   const db = createServiceRoleClient();
+  const homepage_feature = b.homepage_feature === true;
+  if (homepage_feature) {
+    await clearOtherHomepageFeatures(db);
+  }
+
   const { data: last } = await db
     .from("ott_cuts")
     .select("sort_order")
@@ -60,6 +66,7 @@ export async function POST(req: NextRequest) {
       poster_url: String(b.poster_url ?? "").trim() || null,
       aspect_ratio,
       published: b.published !== false,
+      homepage_feature,
       sort_order,
     })
     .select("id, slug")

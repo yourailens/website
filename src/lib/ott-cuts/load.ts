@@ -29,13 +29,14 @@ function rowToCut(row: Record<string, unknown>): OttCut {
     poster_url: typeof row.poster_url === "string" ? row.poster_url : null,
     aspect_ratio: (row.aspect_ratio as OttCutAspect) ?? "natural",
     published: Boolean(row.published),
+    homepage_feature: Boolean(row.homepage_feature),
     sort_order: Number(row.sort_order ?? 0),
     created_at: String(row.created_at ?? ""),
   };
 }
 
 const SELECT =
-  "id,slug,caption,description,category,media_type,media_url,poster_url,aspect_ratio,published,sort_order,created_at";
+  "id,slug,caption,description,category,media_type,media_url,poster_url,aspect_ratio,published,homepage_feature,sort_order,created_at";
 
 export async function getPublishedOttCuts(category?: OttCutCategory): Promise<OttCut[]> {
   const supabase = readClient();
@@ -45,6 +46,32 @@ export async function getPublishedOttCuts(category?: OttCutCategory): Promise<Ot
   const { data, error } = await q;
   if (error || !data?.length) return [];
   return data.map((row) => rowToCut(row as Record<string, unknown>));
+}
+
+/** The single published cut marked for the homepage films feature. */
+export async function getHomepageFeatureOttCut(): Promise<OttCut | null> {
+  const supabase = readClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("ott_cuts")
+    .select(SELECT)
+    .eq("published", true)
+    .eq("homepage_feature", true)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error || !data) return null;
+  return rowToCut(data as Record<string, unknown>);
+}
+
+/** Clears homepage_feature on every other cut so only one stays featured. */
+export async function clearOtherHomepageFeatures(
+  db: ReturnType<typeof createServiceRoleClient>,
+  exceptId?: string
+) {
+  let q = db.from("ott_cuts").update({ homepage_feature: false }).eq("homepage_feature", true);
+  if (exceptId) q = q.neq("id", exceptId);
+  await q;
 }
 
 export async function adminGetAllOttCuts(): Promise<OttCut[]> {

@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { DeferredVideo } from "@/components/media/DeferredVideo";
+import OttSeeAllLink from "@/components/home/OttSeeAllLink";
 
 /** Inner player stays 1080p for bitrate. Scale it to the card so mobile isn't a cropped zoom. */
 const YT_PLAYER_W = 1920;
@@ -333,11 +334,7 @@ export default function OttRail({
           {kicker ? <p className={`max-w-lg text-sm font-light text-white/50 ${row ? "mt-1.5" : "mt-2"}`}>{kicker}</p> : null}
         </div>
         <div className="mb-0.5 flex shrink-0 items-center gap-3">
-          {seeAllHref ? (
-            <Link href={seeAllHref} className="text-[11px] uppercase tracking-[0.2em] text-white/45 hover:text-white">
-              {seeAllLabel}
-            </Link>
-          ) : null}
+          {seeAllHref ? <OttSeeAllLink href={seeAllHref} label={seeAllLabel} /> : null}
           <div className="hidden gap-1 md:flex">
             <button
               type="button"

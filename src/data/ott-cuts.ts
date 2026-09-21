@@ -28,6 +28,7 @@ export type OttCut = {
   poster_url: string | null;
   aspect_ratio: OttCutAspect;
   published: boolean;
+  homepage_feature: boolean;
   sort_order: number;
   created_at: string;
 };

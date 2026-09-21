@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/api/admin-auth";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
-import { isOttCutAspect, isOttCutCategory, isOttCutMediaType } from "@/lib/ott-cuts/load";
+import { isOttCutAspect, isOttCutCategory, isOttCutMediaType, clearOtherHomepageFeatures } from "@/lib/ott-cuts/load";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +22,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (isOttCutAspect(b.aspect_ratio)) patch.aspect_ratio = b.aspect_ratio;
   if (typeof b.published === "boolean") patch.published = b.published;
   if (typeof b.sort_order === "number") patch.sort_order = b.sort_order;
+  if (typeof b.homepage_feature === "boolean") {
+    patch.homepage_feature = b.homepage_feature;
+    if (b.homepage_feature) {
+      await clearOtherHomepageFeatures(db, id);
+    }
+  }
 
   const { error } = await db.from("ott_cuts").update(patch).eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
