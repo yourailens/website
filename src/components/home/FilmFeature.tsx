@@ -11,7 +11,7 @@ export default function FilmFeature({ card }: { card: OttCard }) {
     <div>
       <div className="px-5 sm:px-8 lg:px-16 xl:pl-52 xl:pr-10">
         <p className="font-mono text-[10px] tracking-[0.32em] text-blue-400">FEATURE</p>
-        <h3 className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-0 font-heading leading-none">
+        <h3 className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-0 font-body font-semibold leading-none tracking-tight">
           <span className="pb-[0.35em] text-[clamp(1.25rem,2.5vw,1.9rem)]">Our first</span>
           <span className="relative text-[clamp(3.6rem,9vw,7rem)] leading-[0.75] text-blue-400 drop-shadow-[0_0_28px_rgba(59,130,246,0.85)]">
             45
@@ -27,7 +27,7 @@ export default function FilmFeature({ card }: { card: OttCard }) {
         <aside className="flex flex-col justify-between border border-white/12 bg-white/[0.03] px-5 py-6 sm:px-6 sm:py-7">
           <div>
             <p className="font-mono text-[10px] tracking-[0.28em] text-blue-400">FEATURE 01  45 MIN</p>
-            <p className="mt-3 font-heading text-[clamp(1.8rem,3.4vw,2.7rem)] leading-none">A film on a limited clock.</p>
+            <p className="mt-3 font-body text-[clamp(1.8rem,3.4vw,2.7rem)] font-semibold leading-none tracking-tight">A film on a limited clock.</p>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/60">
               Not a commercial that ran long. A picture made lean, made fast, finished like cinema.
             </p>
@@ -37,7 +37,7 @@ export default function FilmFeature({ card }: { card: OttCard }) {
             {NOTES.map((note) => (
               <li key={note.code}>
                 <p className="font-mono text-[9px] tracking-[0.22em] text-blue-300">{note.code}</p>
-                <p className="mt-1 font-heading text-xl leading-none sm:text-2xl">{note.title}</p>
+                <p className="mt-1 font-body text-xl font-semibold leading-none tracking-tight sm:text-2xl">{note.title}</p>
                 <p className="mt-2 text-sm text-white/50">{note.body}</p>
               </li>
             ))}

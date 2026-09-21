@@ -6,7 +6,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   OTT_SEARCH_CATALOG,
   OTT_SEARCH_CHIPS,
-  OTT_SEARCH_FEATURED,
   OTT_SEARCH_HINTS,
   groupOttSearch,
   matchOttSearch,
@@ -54,7 +53,7 @@ function ResultCard({ hit, onPick }: { hit: OttSearchHit; onPick: () => void }) 
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
         <p className="absolute left-3 top-3 font-mono text-[9px] uppercase tracking-[0.28em] text-blue-300">{hit.kind}</p>
         <div className="absolute inset-x-0 bottom-0 p-3">
-          <p className="font-heading text-lg leading-none text-white">{hit.title}</p>
+          <p className="font-body text-lg font-semibold leading-none tracking-tight text-white">{hit.title}</p>
           {hit.subtitle ? <p className="mt-1 line-clamp-1 text-xs text-white/50">{hit.subtitle}</p> : null}
         </div>
       </div>
@@ -174,7 +173,7 @@ export default function OttSearchOverlay({
       />
 
       <div className="relative flex items-center justify-between px-5 py-4 sm:px-8">
-        <p className="font-mono text-[10px] uppercase tracking-[0.36em] text-blue-400/80">Search the lot</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.36em] text-blue-400/80">Search</p>
         <button
           type="button"
           onClick={onClose}
@@ -202,7 +201,7 @@ export default function OttSearchOverlay({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={OTT_SEARCH_HINTS[hintIndex]}
-              className="w-full bg-transparent font-heading text-3xl text-white outline-none placeholder:text-white/25 sm:text-5xl"
+              className="w-full bg-transparent font-body text-3xl font-semibold tracking-tight text-white outline-none placeholder:text-white/25 sm:text-5xl"
             />
           </div>
         </label>
@@ -211,30 +210,20 @@ export default function OttSearchOverlay({
         </p>
 
         {!searching ? (
-          <>
-            <div className="mt-8 flex flex-wrap gap-2">
-              {OTT_SEARCH_CHIPS.map((chip) => (
-                <button
-                  key={chip.label}
-                  type="button"
-                  onClick={() => setQuery(chip.query)}
-                  className="rounded-full border border-white/15 px-4 py-1.5 text-[13px] text-white/75 transition hover:border-white/40 hover:text-white"
-                >
-                  {chip.label}
-                </button>
-              ))}
-            </div>
-            <section className="mt-10">
-              <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.32em] text-blue-400/80">Now on the lot</p>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-                {OTT_SEARCH_FEATURED.map((hit) => (
-                  <ResultCard key={hit.href} hit={hit} onPick={onClose} />
-                ))}
-              </div>
-            </section>
-          </>
+          <div className="mt-8 flex flex-wrap gap-2">
+            {OTT_SEARCH_CHIPS.map((chip) => (
+              <button
+                key={chip.label}
+                type="button"
+                onClick={() => setQuery(chip.query)}
+                className="rounded-full border border-white/15 px-4 py-1.5 text-[13px] text-white/75 transition hover:border-white/40 hover:text-white"
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
         ) : grouped.length === 0 ? (
-          <p className="mt-16 font-heading text-2xl text-white/50">Nothing matches “{query.trim()}”.</p>
+          <p className="mt-16 font-body text-2xl font-semibold tracking-tight text-white/50">Nothing matches “{query.trim()}”.</p>
         ) : (
           <div className="mt-10 flex flex-col gap-10">
             {grouped.map((group) => (

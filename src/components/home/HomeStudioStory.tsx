@@ -93,8 +93,7 @@ export default async function HomeStudioStory() {
         <div className="flex items-end justify-between gap-4 px-5 sm:px-8 lg:px-16 xl:pl-52 xl:pr-10">
           <div>
             <p className="font-mono text-[10px] tracking-[0.32em] text-blue-400">SC. 2 · AI ADS</p>
-            <h2 className="mt-2 font-heading text-[clamp(1.7rem,3.6vw,2.8rem)] leading-none">AI ads</h2>
-            <p className="mt-2 max-w-lg text-sm font-light text-white/50">Commercials already in the world.</p>
+            <h2 className="mt-2 font-body text-[clamp(1.7rem,3.6vw,2.8rem)] font-semibold leading-none tracking-tight">AI ads</h2>
           </div>
           <OttSeeAllLink href="/ai-ads" label="All ads" className="mb-0.5" />
         </div>
@@ -110,7 +109,7 @@ export default async function HomeStudioStory() {
         <div className="flex items-end justify-between gap-4 px-5 sm:px-8 lg:px-16 xl:pl-52 xl:pr-10">
           <div>
             <p className="font-mono text-[10px] tracking-[0.32em] text-blue-400">SC. 3 · AI FILMS</p>
-            <h2 className="mt-2 font-heading text-[clamp(1.7rem,3.6vw,2.8rem)] leading-none">AI films</h2>
+            <h2 className="mt-2 font-body text-[clamp(1.7rem,3.6vw,2.8rem)] font-semibold leading-none tracking-tight">AI films</h2>
             <p className="mt-2 max-w-lg text-sm font-light text-white/50">Our first 45 min AI film. Then the cuts from the desk.</p>
           </div>
           <OttSeeAllLink href="/ai-filmmaking" label="All films" className="mb-0.5" />

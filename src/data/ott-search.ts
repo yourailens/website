@@ -63,6 +63,12 @@ export const OTT_SEARCH_CATALOG: OttSearchHit[] = [
     subtitle: "Workshops and studio gatherings",
   },
   {
+    href: "/web-dev",
+    title: "Web Dev",
+    kind: "Page",
+    subtitle: "Full stack sites with AI integration",
+  },
+  {
     href: "/contact",
     title: "Contact",
     kind: "Page",
@@ -134,15 +140,6 @@ export const OTT_SEARCH_CATALOG: OttSearchHit[] = [
   { href: "/lighting-presets", title: "Lighting Presets", kind: "Library" },
   { href: "/color-grades", title: "Color Grading", kind: "Library" },
   { href: "/events/ai-creator-workshop", title: "AI Creator Workshop", kind: "Page", subtitle: "Hands-on studio session" },
-];
-
-export const OTT_SEARCH_FEATURED: OttSearchHit[] = [
-  { href: "/ai-ads", title: "AI Ads", kind: "Channel", image: "/images/img1.jpeg", subtitle: "Now on the lot" },
-  { href: "/ai-filmmaking", title: "AI Films", kind: "Channel", image: "/images/img2.jpeg", subtitle: "Now on the lot" },
-  { href: "/ai-verse", title: "Community", kind: "Channel", image: "/images/img3.jpeg", subtitle: "Now on the lot" },
-  { href: "/avatars", title: "Avatars", kind: "Page", image: "/images/ai_avatar1.jpeg", subtitle: "Talent" },
-  { href: "/images", title: "Stills", kind: "Still", image: "/images/ws3.png", subtitle: "Gallery" },
-  { href: "/films", title: "Motion", kind: "Film", image: "/images/img5.jpeg", subtitle: "Gallery" },
 ];
 
 const KIND_ORDER: OttSearchKind[] = ["Channel", "Film", "Still", "Industry", "Library", "Page"];

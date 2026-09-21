@@ -327,9 +327,9 @@ export default function OttRail({
         <div>
           <p className="font-mono text-[10px] tracking-[0.32em] text-blue-400">{scene}</p>
           {row ? (
-            <h3 className="mt-1.5 font-heading text-[clamp(1.2rem,2.6vw,1.75rem)] leading-none">{title}</h3>
+            <h3 className="mt-1.5 font-body text-[clamp(1.2rem,2.6vw,1.75rem)] font-semibold leading-none tracking-tight">{title}</h3>
           ) : (
-            <h2 className="mt-2 font-heading text-[clamp(1.7rem,3.6vw,2.8rem)] leading-none">{title}</h2>
+            <h2 className="mt-2 font-body text-[clamp(1.7rem,3.6vw,2.8rem)] font-semibold leading-none tracking-tight">{title}</h2>
           )}
           {kicker ? <p className={`max-w-lg text-sm font-light text-white/50 ${row ? "mt-1.5" : "mt-2"}`}>{kicker}</p> : null}
         </div>
