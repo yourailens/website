@@ -3,7 +3,7 @@ import OttRail, { type OttCard } from "@/components/home/OttRail";
 import OttSeeAllLink from "@/components/home/OttSeeAllLink";
 import FilmFeature from "@/components/home/FilmFeature";
 import { HOME_WATCH_TITLES, getHomeWatch, type HomeWatchRail, type HomeWatchTitle } from "@/data/home-watch";
-import { getPublishedOttCuts } from "@/lib/ott-cuts/load";
+import { getHomepageFeatureOttCut, getPublishedOttCuts } from "@/lib/ott-cuts/load";
 import { ottCutAspectLabel, ottCutYoutubeId, type OttCut } from "@/data/ott-cuts";
 
 function toOttCard(item: HomeWatchTitle): OttCard {
@@ -50,21 +50,40 @@ const PACKAGES: OttCard[] = [
 ];
 
 export default async function HomeStudioStory() {
-  const [adsCuts, filmCuts] = await Promise.all([
+  const [adsCuts, filmCuts, homepageFeature] = await Promise.all([
     getPublishedOttCuts("ads"),
     getPublishedOttCuts("films"),
+    getHomepageFeatureOttCut(),
   ]);
   const landed = [...adsCuts]
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
     .slice(0, 16)
     .map((cut) => cutToCard(cut, "/ai-ads"));
   const lot = [...filmCuts]
+    .filter((cut) => !cut.homepage_feature)
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
     .slice(0, 16)
     .map((cut) => cutToCard(cut, "/ai-filmmaking"));
 
   const trailerMeta = getHomeWatch("ai-films-trailer");
-  const feature: OttCard | null = trailerMeta ? toOttCard(trailerMeta) : null;
+  const feature: OttCard | null = homepageFeature
+    ? (() => {
+        const yt = ottCutYoutubeId(homepageFeature.media_url);
+        return {
+          href: `/ai-filmmaking#${homepageFeature.slug}`,
+          title: homepageFeature.caption || trailerMeta?.title || "Our first 45 min AI film",
+          tag: trailerMeta?.tag ?? "45 min",
+          video: !yt && homepageFeature.media_type === "video" ? homepageFeature.media_url : undefined,
+          image: homepageFeature.media_type === "image" ? homepageFeature.media_url : undefined,
+          poster: homepageFeature.poster_url ?? undefined,
+          embed: yt ? `https://www.youtube.com/embed/${yt}` : undefined,
+          featured: true,
+          aspect: "wide" as const,
+        };
+      })()
+    : trailerMeta
+      ? toOttCard(trailerMeta)
+      : null;
 
   return (
     <div className="space-y-16 bg-black pb-24 pt-10 text-white sm:space-y-20">

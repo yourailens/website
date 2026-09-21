@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/api/admin-auth";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
 import { isOttCutAspect, isOttCutCategory, isOttCutMediaType, clearOtherHomepageFeatures } from "@/lib/ott-cuts/load";
 
 export const dynamic = "force-dynamic";
+
+function revalidateOttSurfaces() {
+  revalidatePath("/");
+  revalidatePath("/ai-ads");
+  revalidatePath("/ai-filmmaking");
+  revalidatePath("/ai-verse");
+}
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireAdmin();
@@ -31,6 +39,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const { error } = await db.from("ott_cuts").update(patch).eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  revalidateOttSurfaces();
   return NextResponse.json({ ok: true });
 }
 
@@ -40,5 +49,6 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   const { id } = await params;
   const { error } = await createServiceRoleClient().from("ott_cuts").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  revalidateOttSurfaces();
   return NextResponse.json({ ok: true });
 }

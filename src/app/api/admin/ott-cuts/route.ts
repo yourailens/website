@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/api/admin-auth";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
 import {
@@ -11,6 +12,13 @@ import {
 } from "@/lib/ott-cuts/load";
 
 export const dynamic = "force-dynamic";
+
+function revalidateOttSurfaces() {
+  revalidatePath("/");
+  revalidatePath("/ai-ads");
+  revalidatePath("/ai-filmmaking");
+  revalidatePath("/ai-verse");
+}
 
 export async function GET() {
   const auth = await requireAdmin();
@@ -73,5 +81,6 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  revalidateOttSurfaces();
   return NextResponse.json({ ok: true, id: data.id, slug: data.slug });
 }

@@ -205,7 +205,7 @@ export default function OttCutsDesk() {
         media_url,
         aspect_ratio: draft.aspect,
         published: draft.published,
-        homepage_feature: false,
+        homepage_feature: draft.homepage_feature,
       };
       const res = await fetch(draft.id ? `/api/admin/ott-cuts/${draft.id}` : "/api/admin/ott-cuts", {
         method: draft.id ? "PATCH" : "POST",
@@ -475,6 +475,17 @@ export default function OttCutsDesk() {
               />
               Published
             </label>
+            <label className="flex items-center gap-2 text-sm text-white/80">
+              <input
+                type="checkbox"
+                checked={draft.homepage_feature}
+                onChange={(e) => patch({ homepage_feature: e.target.checked })}
+              />
+              Show on homepage (films trailer)
+            </label>
+            {draft.homepage_feature ? (
+              <p className="text-xs text-white/45">Only one cut can be the homepage trailer. This replaces any previous one.</p>
+            ) : null}
             <button type="button" onClick={() => void save()} disabled={busy} className={BTN}>
               {busy ? "Saving…" : draft.id ? "Update cut" : "Save cut"}
             </button>
@@ -533,6 +544,7 @@ export default function OttCutsDesk() {
                   <p className="font-mono text-[10px] tracking-[0.18em] text-white/40">
                     {OTT_CUT_CATEGORIES.find((c) => c.id === cut.category)?.label.toUpperCase()} · {cut.aspect_ratio}
                     {cut.published ? "" : " · DRAFT"}
+                    {cut.homepage_feature ? " · TRAILER" : ""}
                   </p>
                   <p className="mt-1 font-heading text-lg leading-none">{cut.caption}</p>
                   {cut.description ? <p className="mt-2 line-clamp-2 text-xs text-white/55">{cut.description}</p> : null}

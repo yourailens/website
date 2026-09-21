@@ -48,7 +48,7 @@ export async function getPublishedOttCuts(category?: OttCutCategory): Promise<Ot
   return data.map((row) => rowToCut(row as Record<string, unknown>));
 }
 
-/** The single published cut marked for the homepage films feature. */
+/** The single published cut marked for the homepage films trailer. */
 export async function getHomepageFeatureOttCut(): Promise<OttCut | null> {
   const supabase = readClient();
   if (!supabase) return null;
@@ -58,10 +58,9 @@ export async function getHomepageFeatureOttCut(): Promise<OttCut | null> {
     .eq("published", true)
     .eq("homepage_feature", true)
     .order("updated_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (error || !data) return null;
-  return rowToCut(data as Record<string, unknown>);
+    .limit(1);
+  if (error || !data?.length) return null;
+  return rowToCut(data[0] as Record<string, unknown>);
 }
 
 /** Clears homepage_feature on every other cut so only one stays featured. */
