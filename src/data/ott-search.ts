@@ -22,6 +22,12 @@ export const OTT_SEARCH_CHIPS: { label: string; query: string }[] = [
 
 export const OTT_SEARCH_CATALOG: OttSearchHit[] = [
   {
+    href: "/about",
+    title: "About",
+    kind: "Page",
+    subtitle: "The desk, the models, the method",
+  },
+  {
     href: "/ai-ads",
     title: "AI Ads",
     kind: "Channel",
@@ -139,6 +145,7 @@ export const OTT_SEARCH_CATALOG: OttSearchHit[] = [
   { href: "/prompts", title: "Workflows", kind: "Library" },
   { href: "/lighting-presets", title: "Lighting Presets", kind: "Library" },
   { href: "/color-grades", title: "Color Grading", kind: "Library" },
+  { href: "/events", title: "YAIL 01: AI Creators Meetup", kind: "Page", subtitle: "The Theatre Showcase" },
   { href: "/events/ai-creator-workshop", title: "AI Creator Workshop", kind: "Page", subtitle: "Hands-on studio session" },
 ];
 

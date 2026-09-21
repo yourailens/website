@@ -59,7 +59,11 @@ export default function TeamMemberExperience({ member }: { member: StudioTeamMem
             </div>
 
             <figure className="lg:col-span-6">
-              <div className="relative aspect-[3/4] overflow-hidden bg-slate-100 sm:aspect-[4/5]">
+              <div
+                className={`relative aspect-[3/4] overflow-hidden sm:aspect-[4/5] ${
+                  portrait ? "bg-slate-100" : "bg-transparent"
+                }`}
+              >
                 {portrait ? (
                   <Image
                     src={portrait}

@@ -24,7 +24,8 @@ const ADMIN_CHANNELS: { scene: string; title: string; links: { href: string; lab
     links: [
       { href: "/admin/team", label: "Team" },
       { href: "/admin/services", label: "Pricing" },
-      { href: "/admin/workshops", label: "Workshops" },
+      { href: "/admin/events", label: "Events" },
+      { href: "/admin/workshops", label: "Workshop bookings" },
       { href: "/admin/avatars", label: "Avatars" },
     ],
   },

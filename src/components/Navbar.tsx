@@ -437,6 +437,10 @@ function isEventsNavActive(pathname: string) {
   return pathname.startsWith("/events");
 }
 
+function isAboutNavActive(pathname: string) {
+  return pathname === "/about" || pathname.startsWith("/about/");
+}
+
 /** Full-width professional mega menu — text grid, no imagery */
 function MegaPanelShell({ children }: { children: React.ReactNode }) {
   return (
@@ -814,6 +818,7 @@ export default function Navbar() {
 
               {ott ? (
                 <div className="hidden min-w-0 flex-1 items-center gap-5 lg:flex">
+                  <DesktopNavTextLink href="/about" label="About" active={isAboutNavActive(pathname)} />
                   <DesktopNavTextLink href="/ai-ads" label="Ads" active={isAdsNavActive(pathname)} />
                   <DesktopNavTextLink href="/ai-filmmaking" label="Films" active={isFilmsChannelActive(pathname)} />
                   <DesktopNavTextLink href="/ai-verse" label="Community" active={isCommunityNavActive(pathname)} />
@@ -993,6 +998,7 @@ export default function Navbar() {
             <div className="flex min-h-[calc(100dvh-6rem)] flex-col">
               <nav className="flex flex-col">
                 <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.32em] text-blue-400/70">Channels</p>
+                <MobileNavLink href="/about" label="About" pathname={pathname} onSamePathClose={closeIfSamePath} />
                 <MobileNavLink href="/ai-ads" label="Ads" pathname={pathname} onSamePathClose={closeIfSamePath} />
                 <MobileNavLink href="/ai-filmmaking" label="Films" pathname={pathname} onSamePathClose={closeIfSamePath} />
                 <MobileNavLink href="/ai-verse" label="Community" pathname={pathname} onSamePathClose={closeIfSamePath} />

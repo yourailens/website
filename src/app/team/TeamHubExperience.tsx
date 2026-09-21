@@ -50,7 +50,11 @@ export default function TeamHubExperience({ members }: { members: StudioTeamMemb
                 return (
                   <li key={m.id}>
                     <Link href={`/team/${m.slug}`} className="group block">
-                      <div className="relative aspect-[3/4] overflow-hidden bg-slate-100">
+                      <div
+                        className={`relative aspect-[3/4] overflow-hidden ${
+                          portrait ? "bg-slate-100" : "bg-transparent"
+                        }`}
+                      >
                         {portrait ? (
                           <Image
                             src={portrait}

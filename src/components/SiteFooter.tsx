@@ -78,8 +78,8 @@ export default function SiteFooter() {
               <Link href="/contact" className={linkClass}>
                 Contact
               </Link>
-              <Link href="/events/ai-creator-workshop" className={linkClass}>
-                Workshop
+              <Link href="/events" className={linkClass}>
+                Events
               </Link>
               <p className={`${groupClass} !mt-5`}>Contact</p>
               <a

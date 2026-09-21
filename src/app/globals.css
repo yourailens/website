@@ -564,3 +564,99 @@ video::-internal-media-controls-download-button {
   animation: woaiScrollPulse 2.4s ease-in-out infinite;
 }
 
+@keyframes aboutHeroMesh {
+  0%, 100% { opacity: 1; transform: scale(1) translate(0, 0); }
+  50% { opacity: 0.85; transform: scale(1.06) translate(2%, -1%); }
+}
+@keyframes aboutHeroShimmer {
+  0% { background-position: 0% 40%; }
+  50% { background-position: 100% 60%; }
+  100% { background-position: 0% 40%; }
+}
+@keyframes aboutHeroOrb {
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.18); }
+}
+@keyframes aboutHeroMark {
+  0%, 100% { opacity: 0.08; transform: translate(-50%, -42%) scale(1); }
+  50% { opacity: 0.14; transform: translate(-50%, -42%) scale(1.04); }
+}
+
+.about-hero-fx {
+  inset: 0;
+}
+.about-hero-fx__mesh {
+  position: absolute;
+  inset: -15%;
+  background:
+    radial-gradient(ellipse 70% 55% at 18% 20%, rgba(37, 99, 235, 0.38) 0%, transparent 58%),
+    radial-gradient(ellipse 50% 45% at 88% 10%, rgba(14, 165, 233, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse 45% 50% at 70% 90%, rgba(29, 78, 216, 0.22) 0%, transparent 52%);
+  animation: aboutHeroMesh 16s ease-in-out infinite;
+}
+.about-hero-fx__shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(96, 165, 250, 0.1) 24%,
+    transparent 42%,
+    rgba(37, 99, 235, 0.08) 62%,
+    transparent 80%
+  );
+  background-size: 240% 240%;
+  animation: aboutHeroShimmer 14s ease-in-out infinite;
+}
+.about-hero-fx__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(48px);
+  animation: aboutHeroOrb 12s ease-in-out infinite;
+}
+.about-hero-fx__orb--left {
+  left: -8%;
+  top: 18%;
+  width: min(48vw, 380px);
+  height: min(48vw, 380px);
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, transparent 68%);
+}
+.about-hero-fx__orb--right {
+  right: -6%;
+  bottom: -10%;
+  width: min(42vw, 320px);
+  height: min(42vw, 320px);
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.28) 0%, transparent 68%);
+  animation-delay: -5s;
+}
+.about-hero-fx__scan {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(255, 255, 255, 0.04) 4px
+  );
+}
+.about-hero-fx__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.about-hero-fx__mark {
+  position: absolute;
+  left: 72%;
+  top: 52%;
+  width: min(90vw, 920px);
+  max-width: none;
+  height: auto;
+  object-fit: contain;
+  filter: brightness(1.4);
+  animation: aboutHeroMark 18s ease-in-out infinite;
+  pointer-events: none;
+  user-select: none;
+}
+
