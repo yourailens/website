@@ -132,7 +132,7 @@ export default async function HomeStudioStory() {
       <section id="callsheet">
         <OttRail
           scene="SC. 5 · COMMISSION"
-          title="Call sheet"
+          title="Pricing"
           kicker="Brief. Budget. Date. Then we build."
           seeAllHref="/pricing"
           seeAllLabel="Pricing"

@@ -12,7 +12,7 @@ export default function MobileHomeApp({ data }: { data: MobileHomeData }) {
   return (
     <div className="relative min-h-[100svh] bg-black font-body text-white">
       <main className="space-y-10 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-[calc(4.5rem+env(safe-area-inset-top))]">
-        {/* Same order as laptop: Opening film → Ads → Films → Community → Call sheet */}
+        {/* Same order as laptop: Opening film → Ads → Films → Community → Pricing */}
         <section id="lens" aria-label="Opening film">
           <h1 className="sr-only">YourAILens Studios</h1>
           <GlossyPlayCard
@@ -130,7 +130,7 @@ export default function MobileHomeApp({ data }: { data: MobileHomeData }) {
           <div className="mb-4 flex items-end justify-between gap-3">
             <div>
               <p className="font-mono text-[10px] tracking-[0.32em] text-blue-400">SC. 5 · COMMISSION</p>
-              <h2 className="mt-1.5 text-xl font-semibold tracking-tight">Call sheet</h2>
+              <h2 className="mt-1.5 text-xl font-semibold tracking-tight">Pricing</h2>
               <p className="mt-1.5 text-sm font-light text-white/45">Brief. Budget. Date. Then we build.</p>
             </div>
             <Link href="/pricing" className="text-xs text-white/45">

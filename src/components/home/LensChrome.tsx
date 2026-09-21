@@ -7,7 +7,7 @@ export const HOME_SCENES = [
   { id: "ads", sc: "2", slug: "AI ADS" },
   { id: "films", sc: "3", slug: "AI FILMS" },
   { id: "community", sc: "4", slug: "COMMUNITY" },
-  { id: "callsheet", sc: "5", slug: "CALL SHEET" },
+  { id: "callsheet", sc: "5", slug: "PRICING" },
 ] as const;
 
 export function SceneRail() {
