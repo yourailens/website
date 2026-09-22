@@ -4,8 +4,6 @@ import Link from "next/link";
 import type { StudioModule } from "@/data/studio-modules";
 import {
   STUDIO_MODULE_SERIES_LABEL,
-  STUDIO_MODULE_SERIES_THEME,
-  STUDIO_MODULE_TYPE_ACCENTS,
   STUDIO_MODULE_TYPE_LABELS,
   studioModuleCoverUrl,
   studioModuleDetailPath,
@@ -24,7 +22,6 @@ export default function ModuleListCard({
   const cover = studioModuleCoverUrl(mod);
   const episode = studioModuleEpisodeLabel(mod.title);
   const displayTitle = studioModuleDisplayTitle(mod.title);
-  const theme = STUDIO_MODULE_SERIES_THEME[mod.module_type];
   const href = studioModuleDetailPath(mod.module_type, mod.slug);
   const isSeries =
     variant === "series" ||
@@ -35,11 +32,9 @@ export default function ModuleListCard({
     return (
       <Link
         href={href}
-        className={`group relative flex break-inside-avoid flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm ring-1 ring-slate-100/80 transition duration-300 hover:-translate-y-1 hover:shadow-xl ${theme.ring} ${theme.glow}`}
+        className="group relative flex break-inside-avoid flex-col overflow-hidden border border-white/12 bg-white/[0.02] transition hover:border-white/25 hover:bg-white/[0.04]"
       >
-        <div
-          className={`relative aspect-[3/4] overflow-hidden bg-gradient-to-br ${theme.cardGradient}`}
-        >
+        <div className="relative aspect-[3/4] overflow-hidden bg-black">
           {cover ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -50,38 +45,33 @@ export default function ModuleListCard({
             />
           ) : (
             <div className="flex h-full items-center justify-center">
-              <span className="font-heading text-6xl font-black text-slate-300/80">
+              <span className="font-body text-6xl font-semibold text-blue-500/35">
                 {episode ?? "·"}
               </span>
             </div>
           )}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
           {episode ? (
             <span
-              className={`absolute bottom-3 left-3 font-heading text-5xl font-black leading-none tracking-tight ${theme.num} mix-blend-soft-light`}
+              className="absolute bottom-3 left-3 font-mono text-[10px] tracking-[0.28em] text-blue-300"
               aria-hidden
             >
-              {episode}
+              {seriesLabel} {episode}
             </span>
           ) : null}
         </div>
 
-        <div className="relative flex flex-1 flex-col p-5">
-          {episode ? (
-            <p className={`font-mono text-[10px] font-bold uppercase tracking-[0.35em] ${theme.episode}`}>
-              {seriesLabel} {episode}
-            </p>
-          ) : null}
-          <h2
-            className={`mt-2 font-heading text-xl font-bold leading-snug text-slate-900 transition ${theme.hoverTitle}`}
-          >
+        <div className="relative flex flex-1 flex-col px-5 pb-5 pt-4">
+          <h2 className="font-body text-xl font-semibold leading-snug tracking-tight text-white transition group-hover:text-blue-100">
             {displayTitle}
           </h2>
           {mod.description ? (
-            <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-500">{mod.description}</p>
+            <p className="mt-2 line-clamp-2 text-sm font-light leading-relaxed text-white/50">
+              {mod.description}
+            </p>
           ) : null}
-          <p className={`mt-4 font-mono text-[10px] font-bold uppercase tracking-widest ${theme.cta}`}>
-            Open gallery →
+          <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-blue-300">
+            Open gallery
           </p>
         </div>
       </Link>
@@ -91,9 +81,9 @@ export default function ModuleListCard({
   return (
     <Link
       href={href}
-      className={`group flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg ${theme.glow}`}
+      className="group flex flex-col overflow-hidden border border-white/12 bg-white/[0.02] transition hover:border-white/25 hover:bg-white/[0.04]"
     >
-      <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
+      <div className="relative aspect-[3/4] overflow-hidden bg-black">
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -104,27 +94,27 @@ export default function ModuleListCard({
           />
         ) : (
           <div className="flex h-full items-center justify-center">
-            <span className="font-heading text-4xl font-black text-slate-300">
+            <span className="font-body text-4xl font-semibold text-blue-500/35">
               {(mod.title.trim().charAt(0) || "M").toUpperCase()}
             </span>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-transparent to-transparent" />
-        <span
-          className={`absolute left-3 top-3 rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${STUDIO_MODULE_TYPE_ACCENTS[mod.module_type]}`}
-        >
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+        <span className="absolute left-3 top-3 font-mono text-[10px] tracking-[0.22em] text-blue-300">
           {STUDIO_MODULE_TYPE_LABELS[mod.module_type]}
         </span>
       </div>
-      <div className="flex flex-1 flex-col p-4">
-        <h2 className="font-heading text-lg font-bold leading-snug text-slate-900 group-hover:text-blue-800">
+      <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
+        <h2 className="font-body text-lg font-semibold leading-snug tracking-tight text-white group-hover:text-blue-100">
           {mod.title}
         </h2>
         {mod.description ? (
-          <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">{mod.description}</p>
+          <p className="mt-2 line-clamp-2 text-sm font-light leading-relaxed text-white/50">
+            {mod.description}
+          </p>
         ) : null}
-        <p className={`mt-3 font-mono text-[10px] font-semibold uppercase tracking-widest ${theme.cta}`}>
-          View gallery →
+        <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-blue-300">
+          View gallery
         </p>
       </div>
     </Link>

@@ -27,14 +27,7 @@ function DeferredVideo({
   );
 }
 
-const PROMPT_BUTTON_CLASS: Record<StudioModuleType, string> = {
-  prompt_playbooks:
-    "border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100",
-  client_showcases: "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100",
-  subjects_visuals: "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
-};
-
-function CopyPromptButton({ prompt, accent }: { prompt: string; accent: StudioModuleType }) {
+function CopyPromptButton({ prompt }: { prompt: string }) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -51,7 +44,7 @@ function CopyPromptButton({ prompt, accent }: { prompt: string; accent: StudioMo
     <button
       type="button"
       onClick={copy}
-      className={`mt-2 inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[11px] font-bold transition ${PROMPT_BUTTON_CLASS[accent]}`}
+      className="mt-2 inline-flex items-center gap-1.5 border border-blue-400/45 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-300 transition hover:border-blue-300 hover:text-blue-200"
     >
       {copied ? "Copied!" : "Copy prompt"}
     </button>
@@ -61,7 +54,6 @@ function CopyPromptButton({ prompt, accent }: { prompt: string; accent: StudioMo
 export default function ModuleGalleryCard({
   item,
   showPrompt,
-  promptAccent = "prompt_playbooks",
 }: {
   item: StudioModuleItem;
   showPrompt?: boolean;
@@ -75,13 +67,13 @@ export default function ModuleGalleryCard({
   const hasFooter = hasCaption || (showPrompt && hasPrompt);
 
   return (
-    <figure className="mb-3 break-inside-avoid overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-100/80 sm:mb-4">
+    <figure className="mb-3 break-inside-avoid overflow-hidden border border-white/12 bg-white/[0.03] sm:mb-4">
       {item.media_type === "video" ? (
         item.aspect_ratio === "natural" ? (
-          <DeferredVideo src={url} poster={item.poster_url} className="block h-auto w-full bg-slate-100" />
+          <DeferredVideo src={url} poster={item.poster_url} className="block h-auto w-full bg-black" />
         ) : (
           <div
-            className={`relative w-full overflow-hidden bg-slate-100 ${coverAspectClass(item.aspect_ratio)}`}
+            className={`relative w-full overflow-hidden bg-black ${coverAspectClass(item.aspect_ratio)}`}
           >
             <DeferredVideo src={url} poster={item.poster_url} className="h-full w-full object-cover" />
           </div>
@@ -91,23 +83,23 @@ export default function ModuleGalleryCard({
         <img
           src={url}
           alt={item.caption?.trim() || "Gallery item"}
-          className="block h-auto w-full bg-slate-50"
+          className="block h-auto w-full bg-black"
           loading="lazy"
           decoding="async"
         />
       )}
 
       {hasFooter ? (
-        <figcaption className="space-y-2 border-t border-blue-50 px-4 py-3 sm:px-5 sm:py-4">
+        <figcaption className="space-y-2 border-t border-white/10 px-4 py-3 sm:px-5 sm:py-4">
           {hasCaption ? (
-            <p className="text-sm font-light leading-relaxed text-slate-600">{item.caption!.trim()}</p>
+            <p className="text-sm font-light leading-relaxed text-white/55">{item.caption!.trim()}</p>
           ) : null}
           {showPrompt && hasPrompt ? (
             <div>
-              <pre className="max-h-40 overflow-auto rounded-lg bg-slate-50 p-3 font-mono text-[11px] leading-relaxed text-slate-700 whitespace-pre-wrap">
+              <pre className="max-h-40 overflow-auto border border-white/10 bg-black/60 p-3 font-mono text-[11px] leading-relaxed text-white/70 whitespace-pre-wrap">
                 {item.prompt!.trim()}
               </pre>
-              <CopyPromptButton prompt={item.prompt!.trim()} accent={promptAccent} />
+              <CopyPromptButton prompt={item.prompt!.trim()} />
             </div>
           ) : null}
         </figcaption>

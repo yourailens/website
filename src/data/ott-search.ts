@@ -136,6 +136,12 @@ export const OTT_SEARCH_CATALOG: OttSearchHit[] = [
     image: "/images/ws3.png",
     subtitle: "Models, outfits, locations, grades",
   },
+  {
+    href: "/proposal-hub",
+    title: "YAIL Proposal Hub",
+    kind: "Page",
+    subtitle: "Client decks and GenAI PR strategies",
+  },
   { href: "/character-sheets", title: "Models", kind: "Library", subtitle: "Character sheets" },
   { href: "/outfits", title: "Outfit Sheets", kind: "Library" },
   { href: "/props", title: "Props Library", kind: "Library" },

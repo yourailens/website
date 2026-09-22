@@ -1,16 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import ModuleListCard from "@/components/modules/ModuleListCard";
 import type { StudioModule, StudioModuleType } from "@/data/studio-modules";
 import {
-  STUDIO_MODULE_SERIES_THEME,
   STUDIO_MODULE_TYPE_DESCRIPTIONS,
   STUDIO_MODULE_TYPE_LABELS,
   studioModuleUsesSeriesLayout,
 } from "@/data/studio-modules";
+import {
+  IndustryBreadcrumb,
+  IndustryEyebrow,
+  IndustryHeroBand,
+  IndustryShell,
+  IndustryTintSection,
+  IndustryTopBar,
+} from "@/app/industries/IndustryUI";
 
 function listMeta(type: StudioModuleType, count: number): string | null {
   if (count === 0) return null;
@@ -32,7 +38,6 @@ export default function ModuleTypeListExperience({ moduleType }: { moduleType: S
   const label = STUDIO_MODULE_TYPE_LABELS[moduleType];
   const description = STUDIO_MODULE_TYPE_DESCRIPTIONS[moduleType];
   const isSeries = studioModuleUsesSeriesLayout(moduleType);
-  const theme = STUDIO_MODULE_SERIES_THEME[moduleType];
 
   useEffect(() => {
     let cancelled = false;
@@ -61,60 +66,55 @@ export default function ModuleTypeListExperience({ moduleType }: { moduleType: S
   const meta = listMeta(moduleType, sorted.length);
 
   return (
-    <>
+    <IndustryShell>
       <Navbar />
-      <div className="min-h-screen bg-black text-white">
-        <section
-          className={`border-b ${isSeries ? theme.heroBorder : "border-blue-100/80"} ${isSeries ? theme.heroBg : "bg-gradient-to-b from-white via-[#f8fbff] to-[#eef4ff]"}`}
-        >
-          <div className="mx-auto w-[92%] max-w-6xl py-14 md:py-20">
-            <Link
-              href="/modules"
-              className="font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-blue-600 hover:text-blue-800"
-            >
-              ← All modules
-            </Link>
-            <p className={`mt-4 font-mono text-[10px] font-bold uppercase tracking-[0.4em] ${theme.headerAccent}`}>
-              Modules
-            </p>
-            <h1 className="mt-3 max-w-3xl font-heading text-4xl font-black tracking-tight text-slate-900 md:text-5xl">
-              {label}
-            </h1>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate-600 md:text-lg">{description}</p>
-            {meta ? (
-              <p className="mt-4 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">
-                {meta}
-              </p>
-            ) : null}
-          </div>
-        </section>
+      <IndustryTopBar>
+        <IndustryBreadcrumb
+          items={[
+            { label: "MODULES", href: "/modules" },
+            { label: label.toUpperCase(), current: true },
+          ]}
+        />
+      </IndustryTopBar>
 
-        <div className="mx-auto w-[92%] max-w-6xl py-12">
-          {loading ? (
-            <div className="flex justify-center py-20">
-              <span className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-            </div>
-          ) : sorted.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-blue-200/80 bg-white/70 px-6 py-20 text-center">
-              <p className="text-sm font-light text-slate-500">New {label.toLowerCase()} are on the way.</p>
-            </div>
-          ) : isSeries ? (
-            <div className="columns-1 gap-5 sm:columns-2 lg:columns-3">
-              {sorted.map((mod) => (
-                <div key={mod.id} className="mb-5">
-                  <ModuleListCard mod={mod} variant="series" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {sorted.map((mod) => (
-                <ModuleListCard key={mod.id} mod={mod} />
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </>
+      <IndustryHeroBand>
+        <IndustryEyebrow>MODULES</IndustryEyebrow>
+        <h1 className="mt-4 max-w-3xl font-body text-[clamp(2rem,5vw,3.5rem)] font-semibold tracking-tight text-white">
+          {label}
+        </h1>
+        <p className="mt-5 max-w-2xl text-base font-light leading-relaxed text-white/60 md:text-lg">
+          {description}
+        </p>
+        {meta ? (
+          <p className="mt-4 font-mono text-[10px] tracking-[0.28em] text-white/40">{meta}</p>
+        ) : null}
+      </IndustryHeroBand>
+
+      <IndustryTintSection borderTop={false}>
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <span className="h-8 w-8 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
+          </div>
+        ) : sorted.length === 0 ? (
+          <div className="border border-dashed border-white/15 px-6 py-20 text-center">
+            <p className="text-sm font-light text-white/45">New {label.toLowerCase()} are on the way.</p>
+          </div>
+        ) : isSeries ? (
+          <div className="columns-1 gap-5 sm:columns-2 lg:columns-3">
+            {sorted.map((mod) => (
+              <div key={mod.id} className="mb-5">
+                <ModuleListCard mod={mod} variant="series" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+            {sorted.map((mod) => (
+              <ModuleListCard key={mod.id} mod={mod} />
+            ))}
+          </div>
+        )}
+      </IndustryTintSection>
+    </IndustryShell>
   );
 }

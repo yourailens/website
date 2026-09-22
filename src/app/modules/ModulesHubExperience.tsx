@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import type { StudioModule } from "@/data/studio-modules";
 import {
@@ -10,6 +10,15 @@ import {
   STUDIO_MODULE_TYPE_LABELS,
   studioModuleListPath,
 } from "@/data/studio-modules";
+import {
+  INDUSTRY_PAGE,
+  IndustryChannelTitle,
+  IndustryEyebrow,
+  IndustryGlow,
+  IndustrySectionTitle,
+  IndustryShell,
+  IndustryTintSection,
+} from "@/app/industries/IndustryUI";
 
 export default function ModulesHubExperience() {
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -32,47 +41,54 @@ export default function ModulesHubExperience() {
   }, []);
 
   return (
-    <>
+    <IndustryShell>
       <Navbar />
-      <div className="min-h-screen bg-black text-white">
-        <section className="border-b border-blue-100/80 bg-gradient-to-b from-white via-[#f8fbff] to-[#eef4ff]">
-          <div className="mx-auto w-[92%] max-w-6xl py-14 md:py-20">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.4em] text-blue-600">Studio</p>
-            <h1 className="mt-3 max-w-3xl font-heading text-4xl font-black tracking-tight text-slate-900 md:text-5xl">
-              Modules
-            </h1>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate-600 md:text-lg">
-              Prompt playbooks, client showcases, and subjects & visuals — each a shareable gallery with
-              images, videos, and copy-ready prompts.
-            </p>
-          </div>
-        </section>
+      <IndustryGlow />
 
-        <div className="mx-auto w-[92%] max-w-6xl py-12">
-          <div className="grid gap-6 md:grid-cols-3">
-            {ALL_STUDIO_MODULE_TYPES.map((type) => (
+      <section className={`relative ${INDUSTRY_PAGE} pb-10 pt-12 sm:pt-16`}>
+        <IndustryChannelTitle channel="CHANNEL · STUDIO" title="Modules" />
+        <p className="mt-6 max-w-xl text-base font-light leading-relaxed text-white/65 sm:text-lg">
+          Prompt playbooks, client showcases, and subjects & visuals — each a shareable gallery with
+          images, videos, and copy-ready prompts.
+        </p>
+      </section>
+
+      <IndustryTintSection>
+        <IndustryEyebrow>DESKS</IndustryEyebrow>
+        <IndustrySectionTitle>
+          Three module channels.{" "}
+          <span className="font-light text-white/55">Open a gallery.</span>
+        </IndustrySectionTitle>
+
+        <div className="mt-10 grid gap-4 md:grid-cols-3 lg:gap-5">
+          {ALL_STUDIO_MODULE_TYPES.map((type, index) => {
+            const ep = String(index + 1).padStart(2, "0");
+            return (
               <Link
                 key={type}
                 href={studioModuleListPath(type)}
-                className="group rounded-2xl border border-slate-200/90 bg-white p-8 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg"
+                className="group flex h-full flex-col border border-white/12 bg-white/[0.02] px-6 py-8 transition hover:border-white/25 hover:bg-white/[0.04]"
               >
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-blue-600">
-                  {counts[type] != null ? `${counts[type]} galleries` : "Browse"}
+                <p className="font-mono text-[10px] tracking-[0.28em] text-blue-300">CH. {ep}</p>
+                <p className="mt-4 font-mono text-[10px] tracking-[0.22em] text-white/40">
+                  {counts[type] != null
+                    ? `${counts[type]} ${counts[type] === 1 ? "gallery" : "galleries"}`
+                    : "Browse"}
                 </p>
-                <h2 className="mt-3 font-heading text-2xl font-bold text-slate-900 group-hover:text-blue-800">
+                <h2 className="mt-2 font-body text-[clamp(1.25rem,2.2vw,1.6rem)] font-semibold tracking-tight text-white transition group-hover:text-blue-100">
                   {STUDIO_MODULE_TYPE_LABELS[type]}
                 </h2>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                <p className="mt-3 flex-1 text-sm font-light leading-relaxed text-white/50">
                   {STUDIO_MODULE_TYPE_DESCRIPTIONS[type]}
                 </p>
-                <p className="mt-6 font-mono text-[10px] font-semibold uppercase tracking-widest text-blue-600">
-                  Explore →
+                <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.16em] text-blue-300">
+                  Open channel
                 </p>
               </Link>
-            ))}
-          </div>
+            );
+          })}
         </div>
-      </div>
-    </>
+      </IndustryTintSection>
+    </IndustryShell>
   );
 }
