@@ -617,9 +617,6 @@ function DesktopExploreMegaPanel({
                 <MegaTextLink href={item.href} label={item.label} onClick={onLinkClick} />
               </li>
             ))}
-            <li>
-              <MegaTextLink href="/proposal-hub" label="Proposal Hub" onClick={onLinkClick} />
-            </li>
           </ul>
         </nav>
 

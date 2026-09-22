@@ -256,7 +256,6 @@ export const CREATIONS_MOBILE_LINKS = [
 export const STUDIO_MOBILE_LINKS = [
   { href: "/modules", label: "Modules" },
   { href: "/resources", label: "Reference library" },
-  { href: "/proposal-hub", label: "Proposal Hub" },
 ] as const;
 
 export const EXPLORE_GALLERY_LINKS = [
