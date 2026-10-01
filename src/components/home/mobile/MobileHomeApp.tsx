@@ -13,6 +13,18 @@ export default function MobileHomeApp({ data }: { data: MobileHomeData }) {
     <div className="relative min-h-[100svh] bg-black font-body text-white">
       <main className="space-y-10 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-[calc(4.5rem+env(safe-area-inset-top))]">
         {/* Same order as laptop: Opening film → Ads → Films → Community → Pricing */}
+        {data.mattress ? (
+          <section aria-label="The mattress ad">
+            <GlossyPlayCard
+              clip={data.mattress}
+              playingId={playingId}
+              onPlay={setPlayingId}
+              onPause={pause}
+              large
+            />
+          </section>
+        ) : null}
+
         <section id="lens" aria-label="Opening film">
           <h1 className="sr-only">YourAILens Studios</h1>
           <GlossyPlayCard

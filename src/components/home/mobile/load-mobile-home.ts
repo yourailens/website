@@ -1,6 +1,6 @@
 import { HOME_WATCH_TITLES, type HomeWatchTitle } from "@/data/home-watch";
 import { ottCutYoutubeId, type OttCut } from "@/data/ott-cuts";
-import { getHomepageFeatureOttCut, getPublishedOttCuts } from "@/lib/ott-cuts/load";
+import { getHomepageFeatureOttCut, getMattressAdOttCut, getPublishedOttCuts, isMattressAdCaption } from "@/lib/ott-cuts/load";
 import type { MobileClip, MobileHomeData } from "./types";
 
 const LOCAL_POSTER_ALIASES: Record<string, string> = {
@@ -58,13 +58,15 @@ function fromCut(cut: OttCut, path: string, section: string): MobileClip {
 }
 
 export async function loadMobileHomeData(): Promise<MobileHomeData> {
-  const [adsCuts, filmCuts, homepageFeature] = await Promise.all([
+  const [adsCuts, filmCuts, homepageFeature, mattressCut] = await Promise.all([
     getPublishedOttCuts("ads"),
     getPublishedOttCuts("films"),
     getHomepageFeatureOttCut(),
+    getMattressAdOttCut(),
   ]);
 
   const landed = [...adsCuts]
+    .filter((cut) => !isMattressAdCaption(cut.caption))
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
     .slice(0, 12)
     .map((cut) => fromCut(cut, "/ai-ads", "Just landed"));
@@ -74,7 +76,7 @@ export async function loadMobileHomeData(): Promise<MobileHomeData> {
   const feature = homepageFeature ? fromCut(homepageFeature, "/ai-filmmaking", "Feature") : null;
 
   const lot = [...filmCuts]
-    .filter((cut) => !cut.homepage_feature)
+    .filter((cut) => !cut.homepage_feature && !isMattressAdCaption(cut.caption))
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
     .slice(0, 12)
     .map((cut) => fromCut(cut, "/ai-filmmaking", "On the lot"));
@@ -84,6 +86,9 @@ export async function loadMobileHomeData(): Promise<MobileHomeData> {
   );
 
   return {
+    mattress: mattressCut
+      ? fromCut(mattressCut, mattressCut.category === "films" ? "/ai-filmmaking" : mattressCut.category === "community" ? "/ai-verse" : "/ai-ads", "The mattress ad")
+      : null,
     hero: {
       id: "hero-opening",
       title: "YourAILens Studios",

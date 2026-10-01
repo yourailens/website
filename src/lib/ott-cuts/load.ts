@@ -48,6 +48,27 @@ export async function getPublishedOttCuts(category?: OttCutCategory): Promise<Ot
   return data.map((row) => rowToCut(row as Record<string, unknown>));
 }
 
+/** Caption that places a published cut as the film above the homepage hero. */
+export function isMattressAdCaption(caption: string) {
+  return caption.trim().toLowerCase().replace(/\s+/g, " ") === "the mattress ad";
+}
+
+/** Published cut uploaded in admin with the caption "The mattress ad". */
+export async function getMattressAdOttCut(): Promise<OttCut | null> {
+  const supabase = readClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("ott_cuts")
+    .select(SELECT)
+    .eq("published", true)
+    .ilike("caption", "the mattress ad")
+    .order("updated_at", { ascending: false })
+    .limit(8);
+  if (error || !data?.length) return null;
+  const match = data.map((row) => rowToCut(row as Record<string, unknown>)).find((cut) => isMattressAdCaption(cut.caption));
+  return match ?? null;
+}
+
 /** The single published cut marked for the homepage films trailer. */
 export async function getHomepageFeatureOttCut(): Promise<OttCut | null> {
   const supabase = readClient();

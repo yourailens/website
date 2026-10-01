@@ -3,7 +3,7 @@ import OttRail, { type OttCard } from "@/components/home/OttRail";
 import OttSeeAllLink from "@/components/home/OttSeeAllLink";
 import FilmFeature from "@/components/home/FilmFeature";
 import { HOME_WATCH_TITLES, getHomeWatch, type HomeWatchRail, type HomeWatchTitle } from "@/data/home-watch";
-import { getHomepageFeatureOttCut, getPublishedOttCuts } from "@/lib/ott-cuts/load";
+import { getHomepageFeatureOttCut, getPublishedOttCuts, isMattressAdCaption } from "@/lib/ott-cuts/load";
 import { ottCutAspectLabel, ottCutYoutubeId, type OttCut } from "@/data/ott-cuts";
 
 function toOttCard(item: HomeWatchTitle): OttCard {
@@ -56,11 +56,12 @@ export default async function HomeStudioStory() {
     getHomepageFeatureOttCut(),
   ]);
   const landed = [...adsCuts]
+    .filter((cut) => !isMattressAdCaption(cut.caption))
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
     .slice(0, 16)
     .map((cut) => cutToCard(cut, "/ai-ads"));
   const lot = [...filmCuts]
-    .filter((cut) => !cut.homepage_feature)
+    .filter((cut) => !cut.homepage_feature && !isMattressAdCaption(cut.caption))
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
     .slice(0, 16)
     .map((cut) => cutToCard(cut, "/ai-filmmaking"));
