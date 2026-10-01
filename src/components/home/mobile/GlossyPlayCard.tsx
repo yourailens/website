@@ -26,6 +26,7 @@ export default function GlossyPlayCard({
   const [warm, setWarm] = useState(false);
   const [posterFailed, setPosterFailed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [muted, setMuted] = useState(true);
   /** Keep poster until the first frame actually paints. */
   const [hasFrame, setHasFrame] = useState(false);
   const canPlay = Boolean(clip.video || clip.youtubeId);
@@ -106,7 +107,7 @@ export default function GlossyPlayCard({
     // or mobile browsers delay / block playback.
     const node = videoRef.current;
     if (node) {
-      node.muted = true;
+      node.muted = muted;
       const attempt = node.play();
       if (attempt) {
         void attempt
@@ -132,6 +133,20 @@ export default function GlossyPlayCard({
         "*"
       );
       setHasFrame(true);
+    }
+  };
+
+  const toggleMute = () => {
+    const next = !muted;
+    setMuted(next);
+    const node = videoRef.current;
+    if (node) node.muted = next;
+    const iframe = iframeRef.current;
+    if (iframe?.contentWindow) {
+      iframe.contentWindow.postMessage(
+        JSON.stringify({ event: "command", func: next ? "mute" : "unMute", args: [] }),
+        "*"
+      );
     }
   };
 
@@ -341,6 +356,27 @@ export default function GlossyPlayCard({
               <path d="M8 5v14l11-7z" />
             </svg>
           </span>
+        </button>
+      ) : null}
+
+      {isPlaying || isFullscreen ? (
+        <button
+          type="button"
+          onClick={toggleMute}
+          aria-label={muted ? `Sound on ${clip.title}` : `Sound off ${clip.title}`}
+          className={`absolute right-3 top-3 z-30 ${controlBtn}`}
+        >
+          {muted ? (
+            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-none stroke-white" strokeWidth="2" aria-hidden>
+              <path d="M11 5L6 9H3v6h3l5 4V5z" strokeLinejoin="round" />
+              <path d="M16 9l5 6M21 9l-5 6" strokeLinecap="round" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-none stroke-white" strokeWidth="2" aria-hidden>
+              <path d="M11 5L6 9H3v6h3l5 4V5z" strokeLinejoin="round" />
+              <path d="M16 9.5a3.5 3.5 0 010 5M18.5 7a6.5 6.5 0 010 10" strokeLinecap="round" />
+            </svg>
+          )}
         </button>
       ) : null}
 
