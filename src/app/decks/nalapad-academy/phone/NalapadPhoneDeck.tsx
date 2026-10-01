@@ -29,9 +29,10 @@ function loadScript(src: string) {
 }
 
 function loadDomToJpeg() {
-  const w = window as Window & { __domToJpeg?: (node: HTMLElement, options?: Record<string, unknown>) => Promise<string> };
+  type DomToJpeg = (node: HTMLElement, options?: Record<string, unknown>) => Promise<string>;
+  const w = window as Window & { __domToJpeg?: DomToJpeg };
   if (w.__domToJpeg) return Promise.resolve(w.__domToJpeg);
-  return new Promise<NonNullable<typeof w.__domToJpeg>>((resolve, reject) => {
+  return new Promise<DomToJpeg>((resolve, reject) => {
     const ready = () => {
       window.removeEventListener("deck-pdf-lib", ready);
       if (w.__domToJpeg) resolve(w.__domToJpeg);
