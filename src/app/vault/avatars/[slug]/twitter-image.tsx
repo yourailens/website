@@ -1,9 +1,7 @@
-import { NextResponse } from "next/server";
 import { getVaultAvatarBySlug } from "@/lib/yail-vault/load";
 import { OG_THUMB_HEIGHT, OG_THUMB_WIDTH } from "@/lib/seo/og-thumbnail";
-import { renderVaultAvatarOgJpeg } from "@/lib/seo/vault-avatar-og";
+import { ensureVaultAvatarOgImage, renderVaultAvatarOgJpeg } from "@/lib/seo/vault-avatar-og";
 
-// Route segment config must be literal exports (not re-exported) for the Next compiler.
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const alt = "YAIL Vault AI Avatar";
@@ -16,8 +14,27 @@ export default async function Image({ params }: Props) {
   const { slug } = await params;
   const avatar = await getVaultAvatarBySlug(slug);
 
-  if (avatar?.og_image_url) {
-    return NextResponse.redirect(avatar.og_image_url, 307);
+  const stored = avatar ? await ensureVaultAvatarOgImage(avatar) : null;
+  if (stored) {
+    try {
+      const upstream = await fetch(stored, {
+        headers: { Accept: "image/jpeg,image/*" },
+        cache: "no-store",
+        signal: AbortSignal.timeout(20_000),
+      });
+      if (upstream.ok) {
+        const buf = Buffer.from(await upstream.arrayBuffer());
+        return new Response(new Uint8Array(buf), {
+          headers: {
+            "Content-Type": "image/jpeg",
+            "Content-Length": String(buf.byteLength),
+            "Cache-Control": "public, max-age=86400, s-maxage=604800",
+          },
+        });
+      }
+    } catch {
+      /* fall through */
+    }
   }
 
   const jpeg = await renderVaultAvatarOgJpeg(avatar?.portrait_url);
@@ -25,7 +42,7 @@ export default async function Image({ params }: Props) {
     headers: {
       "Content-Type": "image/jpeg",
       "Content-Length": String(jpeg.byteLength),
-      "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+      "Cache-Control": "public, max-age=3600, s-maxage=86400",
     },
   });
 }

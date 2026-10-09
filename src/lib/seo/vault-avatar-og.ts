@@ -75,12 +75,54 @@ export async function renderVaultAvatarOgJpeg(portraitUrl: string | null | undef
 
 /**
  * Bake a WhatsApp-safe JPEG to S3 and return its public URL.
- * Stable key per slug so share cards stay predictable; bust with ?v=updated_at in metadata.
+ * Same public prefix as other vault media (`yail-vault/…`) so bucket policy allows it.
  */
 export async function bakeVaultAvatarOgToS3(slug: string, portraitUrl: string): Promise<string> {
   const jpeg = await renderVaultAvatarOgJpeg(portraitUrl);
   const safe = slug.replace(/[^a-z0-9\-]/gi, "").toLowerCase() || "avatar";
-  const key = `yail-vault/og/avatars/${safe}.jpg`;
+  // Flat key next to other public vault objects (avoid nested paths some policies miss).
+  const key = `yail-vault/og-${safe}.jpg`;
   const { publicUrl } = await uploadObjectToS3(key, jpeg, "image/jpeg");
   return publicUrl;
+}
+
+/**
+ * Ensure the avatar has a stored public OG JPEG. Bakes + writes DB when missing.
+ * Safe to call from metadata / image routes.
+ */
+export async function ensureVaultAvatarOgImage(avatar: {
+  id: string;
+  slug: string;
+  portrait_url: string;
+  og_image_url?: string | null;
+}): Promise<string | null> {
+  const existing = avatar.og_image_url?.trim();
+  if (existing) {
+    try {
+      const head = await fetch(existing, { method: "HEAD", signal: AbortSignal.timeout(8_000) });
+      if (head.ok) return existing;
+    } catch {
+      /* re-bake below */
+    }
+  }
+
+  try {
+    const { createServiceRoleClient } = await import("@/lib/supabase/admin");
+    const url = await bakeVaultAvatarOgToS3(avatar.slug, avatar.portrait_url);
+    const db = createServiceRoleClient();
+    const { error } = await db
+      .from("yail_vault_avatars")
+      .update({ og_image_url: url })
+      .eq("id", avatar.id);
+    if (error) {
+      // Column missing — still return the URL so this request can share.
+      if (!/og_image_url|schema cache|does not exist/i.test(error.message)) {
+        console.error("[vault-avatar-og] failed to persist", error.message);
+      }
+    }
+    return url;
+  } catch (e) {
+    console.error("[vault-avatar-og] bake failed", e);
+    return existing || null;
+  }
 }
