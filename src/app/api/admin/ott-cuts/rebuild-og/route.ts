@@ -2,20 +2,20 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/api/admin-auth";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
-import { ottCutYoutubeId } from "@/data/ott-cuts";
 import { adminGetAllOttCuts } from "@/lib/ott-cuts/load";
-import { bakeOgJpegToS3, mediaSourceForOg } from "@/lib/seo/bake-og-image";
+import { persistOgJpegFromApiRoute } from "@/lib/seo/persist-og-from-route";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-/** POST /api/admin/ott-cuts/rebuild-og — bake share thumbs for ads/films/community cuts. */
+/** POST /api/admin/ott-cuts/rebuild-og — bake share thumbs via OG routes (no sharp in this function). */
 export async function POST(req: Request) {
   const auth = await requireAdmin();
   if (!auth.ok) return auth.response;
 
   const body = (await req.json().catch(() => ({}))) as { missingOnly?: boolean };
   const missingOnly = body.missingOnly !== false;
+  const origin = new URL(req.url).origin;
   const db = createServiceRoleClient();
   const cuts = await adminGetAllOttCuts();
   const targets = missingOnly ? cuts.filter((c) => !c.og_image_url) : cuts;
@@ -24,15 +24,12 @@ export async function POST(req: Request) {
 
   for (const cut of targets) {
     try {
-      const yt = ottCutYoutubeId(cut.media_url);
-      const source = mediaSourceForOg({
-        poster_url: cut.poster_url,
-        media_url: cut.media_url,
-        media_type: cut.media_type,
-        youtubeThumb: yt ? `https://i.ytimg.com/vi/${yt}/hqdefault.jpg` : null,
+      const og_image_url = await persistOgJpegFromApiRoute({
+        origin,
+        apiPath: `/api/og/ott-cut/${encodeURIComponent(cut.slug)}`,
+        s3Prefix: "ott-cuts",
+        slug: cut.slug,
       });
-      if (!source) throw new Error("No poster/image source");
-      const og_image_url = await bakeOgJpegToS3("ott-cuts", cut.slug, source);
       const { error } = await db.from("ott_cuts").update({ og_image_url }).eq("id", cut.id);
       if (error) throw new Error(error.message);
       results.push({ id: cut.id, slug: cut.slug, ok: true, og_image_url });
