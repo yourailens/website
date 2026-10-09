@@ -57,47 +57,13 @@ if (s3Bucket && s3Region) {
 }
 
 const nextConfig: NextConfig = {
-  // Native binaries (ffmpeg) must resolve from node_modules at runtime on Vercel.
-  serverExternalPackages: ["ffmpeg-static", "sharp"],
-  // Keep huge static media + unused native binaries out of serverless function traces
+  // Keep huge static media out of serverless function traces
   // (homepage was packing ~1GB of public/videos into the index function via fs tracing).
-  // ffmpeg-static alone is ~70MB+; sharp ships multi-platform libvips (~200MB+).
-  // OG / most APIs must not ship sharp+ffmpeg (~300MB). Only poster upload routes re-include them.
   outputFileTracingExcludes: {
     "*": [
       "./public/videos/**/*.mp4",
       "./public/videos/**/*.mov",
       "./public/videos/**/*.webm",
-      "**/node_modules/ffmpeg-static/**",
-      "**/node_modules/sharp/**",
-      "**/node_modules/@img/**",
-    ],
-  },
-  // Video poster extraction still needs ffmpeg + linux sharp/libvips only.
-  outputFileTracingIncludes: {
-    "/api/admin/ott-cuts/upload-media": [
-      "**/node_modules/ffmpeg-static/**",
-      "**/node_modules/sharp/**",
-      "**/node_modules/@img/sharp-linux-x64/**",
-      "**/node_modules/@img/sharp-libvips-linux-x64/**",
-    ],
-    "/api/admin/yail-vault/upload-media": [
-      "**/node_modules/ffmpeg-static/**",
-      "**/node_modules/sharp/**",
-      "**/node_modules/@img/sharp-linux-x64/**",
-      "**/node_modules/@img/sharp-libvips-linux-x64/**",
-    ],
-    "/api/admin/upload-film": [
-      "**/node_modules/ffmpeg-static/**",
-      "**/node_modules/sharp/**",
-      "**/node_modules/@img/sharp-linux-x64/**",
-      "**/node_modules/@img/sharp-libvips-linux-x64/**",
-    ],
-    "/api/admin/regenerate-film-poster": [
-      "**/node_modules/ffmpeg-static/**",
-      "**/node_modules/sharp/**",
-      "**/node_modules/@img/sharp-linux-x64/**",
-      "**/node_modules/@img/sharp-libvips-linux-x64/**",
     ],
   },
   images: {

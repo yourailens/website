@@ -6,10 +6,8 @@ import { safeObjectFilename } from "@/lib/s3/keys";
 import { formatAwsLikeError } from "@/lib/aws/format-error";
 import { CHARACTER_TAGS, type CharacterTag } from "@/data/gallery";
 import { parsePublicHttpUrl } from "@/lib/validate-public-url";
-import { extractFilmPosterJpeg } from "@/lib/video/extract-poster";
 
 export const runtime = "nodejs";
-/** Poster extraction + S3 can exceed default 10s on Vercel. */
 export const maxDuration = 60;
 
 async function insertFilmRow(
@@ -80,16 +78,12 @@ export async function POST(request: Request) {
   let orientation: string;
   let peopleTags: CharacterTag[];
   let prompt: string;
-  let videoBuffer: Buffer | null = null;
-  let uploadedFileName = "clip.mp4";
-
   if (contentType.includes("multipart/form-data")) {
     const form = await request.formData();
     const file = form.get("file");
     if (!(file instanceof File) || file.size === 0) {
       return NextResponse.json({ error: "Missing file" }, { status: 400 });
     }
-    uploadedFileName = file.name || "clip.mp4";
     title = String(form.get("title") ?? "").trim() || "Film";
     category = String(form.get("category") ?? "").trim();
     orientation = String(form.get("orientation") ?? "").trim();
@@ -100,7 +94,6 @@ export async function POST(request: Request) {
     }
     try {
       const buf = Buffer.from(await file.arrayBuffer());
-      videoBuffer = buf;
       const key = `gallery/videos/${Date.now()}-${safeObjectFilename(file.name)}`;
       const ct = file.type || "video/mp4";
       const { publicUrl: url } = await uploadObjectToS3(key, buf, ct);
@@ -136,27 +129,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: insErr.message }, { status: 500 });
   }
 
-  let posterUrl: string | null = null;
-  let posterError: string | undefined;
-  if (contentType.includes("multipart/form-data") && videoBuffer && row?.id) {
-    const extracted = await extractFilmPosterJpeg(videoBuffer, uploadedFileName);
-    if (!extracted.ok) {
-      posterError = extracted.reason;
-    } else {
-      try {
-        const key = `gallery/posters/${row.id}.jpg`;
-        const { publicUrl: p } = await uploadObjectToS3(key, extracted.jpeg, "image/jpeg");
-        posterUrl = p;
-        const { error: updErr } = await svc.from("gallery_films").update({ poster_url: p }).eq("id", row.id);
-        if (updErr) {
-          posterError = `Saved poster to storage but DB update failed: ${updErr.message}`;
-        }
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : String(e);
-        posterError = `Poster upload/update failed: ${msg.slice(0, 400)}`;
-      }
-    }
-  }
-
-  return NextResponse.json({ ok: true, id: row?.id, publicUrl, posterUrl, posterError });
+  return NextResponse.json({
+    ok: true,
+    id: row?.id,
+    publicUrl,
+    posterUrl: null,
+    posterError: undefined,
+  });
 }

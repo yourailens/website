@@ -3,10 +3,8 @@ import { requireAdmin } from "@/lib/api/admin-auth";
 import { uploadObjectToS3 } from "@/lib/s3/client";
 import { safeObjectFilename } from "@/lib/s3/keys";
 import { formatAwsLikeError } from "@/lib/aws/format-error";
-import { extractFilmPosterJpeg } from "@/lib/video/extract-poster";
 
 export const runtime = "nodejs";
-/** Frame grab plus two S3 uploads can exceed the default limit. */
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
@@ -26,15 +24,24 @@ export async function POST(req: NextRequest) {
   try {
     const bytes = Buffer.from(await file.arrayBuffer());
     const { publicUrl } = await uploadObjectToS3(key, bytes, file.type || (isVideo ? "video/mp4" : "image/jpeg"));
+
+    // Optional custom poster image — no server-side ffmpeg/sharp (keeps Vercel functions deployable).
     let poster_url: string | null = null;
-    if (isVideo) {
-      const extracted = await extractFilmPosterJpeg(bytes, file.name || "clip.mp4");
-      if (extracted.ok) {
-        const posterKey = `ott-cuts/posters/${Date.now()}.jpg`;
-        const poster = await uploadObjectToS3(posterKey, extracted.jpeg, "image/jpeg");
-        poster_url = poster.publicUrl;
-      }
+    const posterFile = fd.get("poster");
+    if (posterFile instanceof File && posterFile.size > 0 && posterFile.type.startsWith("image/")) {
+      const posterBytes = Buffer.from(await posterFile.arrayBuffer());
+      const posterExt = safeObjectFilename(posterFile.name.split(".").pop() || "jpg");
+      const posterKey = `ott-cuts/posters/${Date.now()}-custom-${posterExt}`;
+      const poster = await uploadObjectToS3(
+        posterKey,
+        posterBytes,
+        posterFile.type || "image/jpeg"
+      );
+      poster_url = poster.publicUrl;
+    } else if (!isVideo) {
+      poster_url = publicUrl;
     }
+
     return NextResponse.json({ url: publicUrl, media_type: isVideo ? "video" : "image", poster_url });
   } catch (err) {
     const { message, hint, httpStatus } = formatAwsLikeError(err);
