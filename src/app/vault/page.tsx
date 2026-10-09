@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import VaultExperience from "@/components/vault/VaultExperience";
 import {
   getFeaturedVaultEntry,
@@ -23,14 +24,17 @@ type Props = {
   searchParams: Promise<{ view?: string | string[] }>;
 };
 
-function parseView(raw: string | string[] | undefined): "all" | "filmmaking" | "ads" | "avatars" {
+function parseView(raw: string | string[] | undefined): "all" | "ads" | "avatars" {
   const value = Array.isArray(raw) ? raw[0] : raw;
-  if (value === "filmmaking" || value === "ads" || value === "avatars") return value;
+  if (value === "ads" || value === "avatars") return value;
   return "all";
 }
 
 export default async function VaultPage({ searchParams }: Props) {
   const params = await searchParams;
+  const raw = Array.isArray(params.view) ? params.view[0] : params.view;
+  if (raw === "filmmaking") redirect("/vault/filmmaking");
+
   const initialView = parseView(params.view);
 
   const [featured, filmmaking, ads, avatars] = await Promise.all([

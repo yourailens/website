@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import VaultAvatarExperience from "@/components/vault/VaultAvatarExperience";
+import { collectFilmmakingGenres } from "@/lib/yail-vault/genres";
 import {
   getPublishedVaultAvatars,
   getPublishedVaultEntries,
@@ -102,5 +103,12 @@ export default async function VaultAvatarPage({ params }: Props) {
     avatars: directory.length,
   };
 
-  return <VaultAvatarExperience avatar={avatar} cuts={cuts} counts={counts} />;
+  return (
+    <VaultAvatarExperience
+      avatar={avatar}
+      cuts={cuts}
+      counts={counts}
+      genres={collectFilmmakingGenres(filmmaking)}
+    />
+  );
 }

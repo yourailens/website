@@ -167,6 +167,7 @@ export function homeWatchAsOttCuts(rail: HomeWatchRail): OttCut[] {
       media_type: item.video || item.youtubeId ? "video" : "image",
       media_url,
       poster_url: item.poster ?? null,
+      og_image_url: null,
       aspect_ratio: aspect,
       published: true,
       homepage_feature: false,

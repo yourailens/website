@@ -12,6 +12,12 @@ import {
   yailVaultCategoryLabel,
   type YailVaultEntry,
 } from "@/data/yail-vault";
+import {
+  entryGenreSlug,
+  filmmakingHubHref,
+  genreHref,
+  type VaultGenreNavItem,
+} from "@/lib/yail-vault/genres";
 
 function VaultStill({ src, alt }: { src: string; alt: string }) {
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
@@ -41,9 +47,10 @@ type Props = {
   entry: YailVaultEntry;
   avatars: YailVaultAvatar[];
   counts: VaultShellCounts;
+  genres?: VaultGenreNavItem[];
 };
 
-export default function VaultCutExperience({ entry, avatars, counts }: Props) {
+export default function VaultCutExperience({ entry, avatars, counts, genres = [] }: Props) {
   const [copied, setCopied] = useState(false);
   const genre = tagsOfKind(entry, "genre")[0]?.name;
   const subject = tagsOfKind(entry, "subject")[0]?.name;
@@ -51,6 +58,13 @@ export default function VaultCutExperience({ entry, avatars, counts }: Props) {
   const poster = entry.poster_url || (entry.media_type === "image" ? entry.media_url : null);
 
   const activeView: VaultView = entry.category;
+  const genreSlug = entry.category === "filmmaking" ? entryGenreSlug(entry) : null;
+  const backHref =
+    entry.category === "filmmaking"
+      ? genreSlug
+        ? genreHref(genreSlug)
+        : filmmakingHubHref()
+      : `/vault?view=${entry.category}`;
 
   const share = useCallback(async () => {
     // Exactly the page you're on (origin + path), nothing reconstructed.
@@ -76,7 +90,9 @@ export default function VaultCutExperience({ entry, avatars, counts }: Props) {
   return (
     <VaultShell
       counts={counts}
+      genres={genres}
       activeView={activeView}
+      activeGenreSlug={genreSlug}
       headerKicker={yailVaultCategoryLabel(entry.category)}
       headerTitle={entry.title}
       headerMeta="Lab cut"
@@ -95,10 +111,10 @@ export default function VaultCutExperience({ entry, avatars, counts }: Props) {
         <div className="relative mx-auto w-[90%] pt-4 sm:pt-5">
           <div>
             <VaultPendingLink
-              href={`/vault?view=${entry.category}`}
+              href={backHref}
               className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-sky-300/80 transition hover:text-sky-200"
             >
-              ← {yailVaultCategoryLabel(entry.category)}
+              ← {genre && entry.category === "filmmaking" ? genre : yailVaultCategoryLabel(entry.category)}
             </VaultPendingLink>
           </div>
 

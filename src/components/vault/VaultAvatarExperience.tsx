@@ -12,6 +12,7 @@ import {
   yailVaultCategoryLabel,
   type YailVaultEntry,
 } from "@/data/yail-vault";
+import type { VaultGenreNavItem } from "@/lib/yail-vault/genres";
 
 function AvatarCutCard({ entry }: { entry: YailVaultEntry }) {
   const thumb = entryThumb(entry);
@@ -78,6 +79,7 @@ type Props = {
   avatar: YailVaultAvatar;
   cuts: YailVaultEntry[];
   counts: VaultShellCounts;
+  genres?: VaultGenreNavItem[];
 };
 
 function entryThumb(entry: YailVaultEntry) {
@@ -92,7 +94,7 @@ function PlayGlyph({ size = 12 }: { size?: number }) {
   );
 }
 
-export default function VaultAvatarExperience({ avatar, cuts, counts }: Props) {
+export default function VaultAvatarExperience({ avatar, cuts, counts, genres = [] }: Props) {
   const [copied, setCopied] = useState(false);
 
   const share = useCallback(async () => {
@@ -119,6 +121,7 @@ export default function VaultAvatarExperience({ avatar, cuts, counts }: Props) {
   return (
     <VaultShell
       counts={counts}
+      genres={genres}
       activeView="avatars"
       headerKicker="AI Avatar"
       headerTitle={avatar.name}

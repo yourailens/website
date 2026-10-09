@@ -2,29 +2,20 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
+import VaultBrowseNav from "@/components/vault/VaultBrowseNav";
 import VaultPendingLink from "@/components/vault/VaultPendingLink";
-import { YAIL_VAULT_CATEGORIES } from "@/data/yail-vault";
+import type { VaultGenreNavItem } from "@/lib/yail-vault/genres";
+import type { VaultShellCounts, VaultView } from "@/components/vault/vault-nav-types";
 
-const NAV_PILL = "group flex flex-col rounded-2xl px-3.5 py-2.5 transition";
-const NAV_ON =
-  "bg-gradient-to-br from-white/[0.14] to-white/[0.05] text-white shadow-[0_12px_28px_-18px_rgba(0,0,0,0.9)] ring-1 ring-white/20";
-const NAV_OFF =
-  "text-white/60 hover:bg-white/[0.06] hover:text-white hover:ring-1 hover:ring-white/10";
-
-export type VaultView = "all" | "filmmaking" | "ads" | "avatars";
-
-export type VaultShellCounts = {
-  all: number;
-  filmmaking: number;
-  ads: number;
-  avatars: number;
-};
+export type { VaultShellCounts, VaultView } from "@/components/vault/vault-nav-types";
 
 type Props = {
   children: ReactNode;
   counts: VaultShellCounts;
+  genres?: VaultGenreNavItem[];
   /** Which browse item is active in the sidebar */
   activeView?: VaultView;
+  activeGenreSlug?: string | null;
   /** Main panel title strip (optional — detail pages pass cut title) */
   headerKicker?: string;
   headerTitle?: string;
@@ -33,15 +24,12 @@ type Props = {
   headerMode?: "overlay" | "bar";
 };
 
-function viewHref(view: VaultView) {
-  if (view === "all") return "/vault";
-  return `/vault?view=${view}`;
-}
-
 export default function VaultShell({
   children,
   counts,
+  genres = [],
   activeView = "all",
+  activeGenreSlug = null,
   headerKicker = "GenAI labs",
   headerTitle,
   headerMeta,
@@ -63,57 +51,14 @@ export default function VaultShell({
     };
   }, [menuOpen]);
 
-  const navItems: { id: VaultView; label: string; hint: string; count: number }[] = [
-    { id: "all", label: "All labs", hint: "Everything in the vault", count: counts.all },
-    {
-      id: "filmmaking",
-      label: YAIL_VAULT_CATEGORIES[0].label,
-      hint: YAIL_VAULT_CATEGORIES[0].rail,
-      count: counts.filmmaking,
-    },
-    {
-      id: "ads",
-      label: YAIL_VAULT_CATEGORIES[1].label,
-      hint: YAIL_VAULT_CATEGORIES[1].rail,
-      count: counts.ads,
-    },
-    { id: "avatars", label: "AI Avatars", hint: "Directory & jumbotrons", count: counts.avatars },
-  ];
-
   const nav = (
-    <nav className="flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto px-3 pb-6 pt-2">
-      <div>
-        <p className="mb-2.5 px-3 font-mono text-[9px] uppercase tracking-[0.28em] text-white/35">Browse</p>
-        <ul className="space-y-1.5">
-          {navItems.map((item) => {
-            const on = activeView === item.id;
-            return (
-              <li key={item.id}>
-                <VaultPendingLink
-                  href={viewHref(item.id)}
-                  onClick={() => setMenuOpen(false)}
-                  className={`${NAV_PILL} ${on ? NAV_ON : NAV_OFF}`}
-                >
-                  <span className="flex items-center justify-between gap-2">
-                    <span className="text-[13px] font-semibold tracking-tight">{item.label}</span>
-                    <span className={`font-mono text-[10px] ${on ? "text-white/45" : "text-white/25"}`}>
-                      {item.count}
-                    </span>
-                  </span>
-                  <span
-                    className={`mt-0.5 text-[11px] leading-snug ${
-                      on ? "text-white/45" : "text-white/30 group-hover:text-white/40"
-                    }`}
-                  >
-                    {item.hint}
-                  </span>
-                </VaultPendingLink>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </nav>
+    <VaultBrowseNav
+      counts={counts}
+      genres={genres}
+      activeView={activeView}
+      activeGenreSlug={activeGenreSlug}
+      onNavigate={() => setMenuOpen(false)}
+    />
   );
 
   const brand = (
@@ -132,7 +77,6 @@ export default function VaultShell({
   const sidebarHeader = (closeBtn?: ReactNode) => (
     <div className="shrink-0 border-b border-white/10">
       <div className="relative flex items-center gap-1 overflow-hidden px-3 py-2.5">
-        {/* Soft sky wash — hint, not a billboard */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-gradient-to-r from-sky-500/[0.14] via-sky-400/[0.05] to-transparent"

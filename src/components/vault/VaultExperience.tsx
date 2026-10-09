@@ -1,26 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import AiModelBadge from "@/components/vault/AiModelBadge";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import VaultBrowseNav from "@/components/vault/VaultBrowseNav";
 import VaultPendingLink from "@/components/vault/VaultPendingLink";
+import { EmptyVault, VaultOttHero, VaultRail } from "@/components/vault/vault-browse-ui";
 import type { YailVaultAvatar } from "@/data/yail-vault-avatars";
 import {
   YAIL_VAULT_CATEGORIES,
-  tagsOfKind,
-  yailVaultCategoryLabel,
   type YailVaultCategory,
   type YailVaultEntry,
 } from "@/data/yail-vault";
+import { collectFilmmakingGenres } from "@/lib/yail-vault/genres";
 
-const NAV_PILL = "group flex flex-col rounded-2xl px-3.5 py-2.5 transition";
-const NAV_ON =
-  "bg-gradient-to-br from-white/[0.14] to-white/[0.05] text-white shadow-[0_12px_28px_-18px_rgba(0,0,0,0.9)] ring-1 ring-white/20";
-const NAV_OFF =
-  "text-white/60 hover:bg-white/[0.06] hover:text-white hover:ring-1 hover:ring-white/10";
+type Filter = "all" | "ads" | "avatars";
 
-type Filter = "all" | YailVaultCategory | "avatars";
-
-const FILTERS: Filter[] = ["all", "filmmaking", "ads", "avatars"];
+const FILTERS: Filter[] = ["all", "ads", "avatars"];
 
 function isVaultFilter(value: string | null | undefined): value is Filter {
   return Boolean(value && (FILTERS as string[]).includes(value));
@@ -30,255 +24,6 @@ function readFilterFromUrl(): Filter {
   if (typeof window === "undefined") return "all";
   const view = new URLSearchParams(window.location.search).get("view");
   return isVaultFilter(view) ? view : "all";
-}
-
-function writeFilterToUrl(next: Filter) {
-  if (typeof window === "undefined") return;
-  const url = new URL(window.location.href);
-  if (next === "all") url.searchParams.delete("view");
-  else url.searchParams.set("view", next);
-  const qs = url.searchParams.toString();
-  window.history.replaceState(null, "", qs ? `${url.pathname}?${qs}` : url.pathname);
-}
-
-function entryThumb(entry: YailVaultEntry) {
-  return entry.poster_url || (entry.media_type === "image" ? entry.media_url : null);
-}
-
-function PlayGlyph({ size = 14 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 14 14" fill="currentColor" aria-hidden>
-      <path d="M3 1.5v11l9-5.5L3 1.5z" />
-    </svg>
-  );
-}
-
-/** OTT hero: full-bleed media + bottom-left overlay copy. */
-function VaultOttHero({ entry }: { entry: YailVaultEntry }) {
-  const poster = entryThumb(entry);
-  const genre = tagsOfKind(entry, "genre")[0]?.name;
-  const avatar = tagsOfKind(entry, "avatar")[0]?.name;
-
-  return (
-    <section className="relative isolate min-h-[min(72vh,42rem)] w-full overflow-hidden bg-zinc-950">
-      {entry.media_type === "video" ? (
-        <video
-          key={entry.id}
-          src={entry.media_url}
-          poster={poster ?? undefined}
-          className="absolute inset-0 h-full w-full object-cover"
-          muted
-          playsInline
-          loop
-          autoPlay
-          preload="auto"
-        />
-      ) : poster ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={poster} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0a1628] via-black to-black" />
-      )}
-
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
-
-      <div className="relative z-10 flex min-h-[min(72vh,42rem)] flex-col justify-end px-5 pb-10 pt-24 sm:px-8 sm:pb-12 lg:px-10 lg:pb-14">
-        <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-sky-300/90">
-          {yailVaultCategoryLabel(entry.category)}
-          {genre ? ` · ${genre}` : ""}
-          {avatar ? ` · ${avatar}` : ""}
-        </p>
-        <h1 className="mt-3 max-w-2xl font-body text-[clamp(2.1rem,5vw,4rem)] font-semibold leading-[0.95] tracking-tight text-white">
-          {entry.title}
-        </h1>
-        {entry.caption ? (
-          <p className="mt-3 max-w-xl text-sm font-light leading-relaxed text-white/70 sm:text-base">
-            {entry.caption}
-          </p>
-        ) : null}
-
-        <div className="mt-6 flex flex-wrap items-center gap-3">
-          <VaultPendingLink
-            href={`/vault/${entry.slug}`}
-            className="inline-flex items-center gap-2 rounded-md bg-[#fafafa] px-5 py-2.5 text-sm font-semibold text-black shadow-[0_8px_24px_-8px_rgba(0,0,0,0.65)] transition hover:bg-sky-100"
-          >
-            <PlayGlyph size={12} />
-            Open
-          </VaultPendingLink>
-          <AiModelBadge modelId={entry.ai_model} size="md" />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/** Rail tile: fixed height, width follows the cut’s natural ratio. */
-function VaultRailCard({ entry }: { entry: YailVaultEntry }) {
-  const genre = tagsOfKind(entry, "genre")[0]?.name;
-  const tag = genre ?? yailVaultCategoryLabel(entry.category);
-  const thumb = entryThumb(entry);
-  const isVideo = entry.media_type === "video";
-  const [ratio, setRatio] = useState(() =>
-    entry.aspect_width && entry.aspect_height
-      ? entry.aspect_width / entry.aspect_height
-      : 16 / 9
-  );
-
-  useEffect(() => {
-    if (entry.aspect_width && entry.aspect_height) {
-      setRatio(entry.aspect_width / entry.aspect_height);
-      return;
-    }
-    // Older cuts without stored size — learn from the poster/frame once.
-    const src = thumb || (isVideo ? entry.media_url : null);
-    if (!src) return;
-    if (thumb) {
-      const img = new window.Image();
-      img.onload = () => {
-        if (img.naturalWidth > 0 && img.naturalHeight > 0) {
-          setRatio(img.naturalWidth / img.naturalHeight);
-        }
-      };
-      img.src = thumb;
-      return;
-    }
-    const video = document.createElement("video");
-    video.preload = "metadata";
-    video.muted = true;
-    video.onloadedmetadata = () => {
-      if (video.videoWidth > 0 && video.videoHeight > 0) {
-        setRatio(video.videoWidth / video.videoHeight);
-      }
-    };
-    video.src = entry.media_url;
-  }, [entry.aspect_height, entry.aspect_width, entry.media_url, isVideo, thumb]);
-
-  return (
-    <VaultPendingLink
-      href={`/vault/${entry.slug}`}
-      className="group relative block h-[9.5rem] shrink-0 overflow-hidden rounded-md bg-zinc-900 sm:h-[11rem] lg:h-[12rem]"
-      style={{ aspectRatio: `${ratio}`, width: "auto" }}
-    >
-      {thumb ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={thumb}
-          alt={entry.title}
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
-        />
-      ) : isVideo ? (
-        <video
-          src={entry.media_url}
-          className="h-full w-full object-cover"
-          muted
-          playsInline
-          preload="metadata"
-        />
-      ) : (
-        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-sky-950 to-black">
-          <PlayGlyph size={20} />
-        </div>
-      )}
-
-      {isVideo ? (
-        <span className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition group-hover:opacity-100">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#fafafa] text-black shadow-lg">
-            <PlayGlyph size={14} />
-          </span>
-        </span>
-      ) : null}
-
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-2.5 pb-2 pt-10">
-        {tag ? (
-          <p className="font-mono text-[7px] tracking-[0.18em] text-sky-300/90">{tag}</p>
-        ) : null}
-        <p className="mt-0.5 truncate text-[12px] font-medium leading-tight text-white sm:text-[13px]">
-          {entry.title}
-        </p>
-        {entry.ai_model ? (
-          <div className="mt-1.5">
-            <AiModelBadge modelId={entry.ai_model} />
-          </div>
-        ) : null}
-      </div>
-    </VaultPendingLink>
-  );
-}
-
-function VaultRail({
-  title,
-  scene,
-  entries,
-}: {
-  title: string;
-  scene: string;
-  entries: YailVaultEntry[];
-}) {
-  const scroller = useRef<HTMLDivElement>(null);
-
-  const scrollBy = (dir: -1 | 1) => {
-    const node = scroller.current;
-    if (!node) return;
-    node.scrollBy({ left: dir * node.clientWidth * 0.72, behavior: "smooth" });
-  };
-
-  if (!entries.length) return null;
-
-  return (
-    <section className="w-full">
-      <div className="flex items-end justify-between gap-3 px-5 sm:px-8 lg:px-10">
-        <div className="min-w-0">
-          <p className="font-mono text-[9px] tracking-[0.28em] text-sky-400/90">{scene}</p>
-          <h2 className="mt-1 font-body text-[clamp(1.05rem,2.2vw,1.45rem)] font-semibold leading-none tracking-tight">
-            {title}
-          </h2>
-        </div>
-        <div className="mb-0.5 hidden shrink-0 gap-1 md:flex">
-          <button
-            type="button"
-            aria-label="Previous"
-            onClick={() => scrollBy(-1)}
-            className="flex h-7 w-7 items-center justify-center rounded-md border border-white/15 text-white/70 transition hover:border-white/40 hover:text-white"
-          >
-            ‹
-          </button>
-          <button
-            type="button"
-            aria-label="Next"
-            onClick={() => scrollBy(1)}
-            className="flex h-7 w-7 items-center justify-center rounded-md border border-white/15 text-white/70 transition hover:border-white/40 hover:text-white"
-          >
-            ›
-          </button>
-        </div>
-      </div>
-
-      <div
-        ref={scroller}
-        className="ott-rail mt-3 flex snap-x snap-mandatory gap-2 overflow-x-auto px-5 pb-1 sm:gap-2.5 sm:px-8 lg:px-10"
-      >
-        {entries.map((entry) => (
-          <div key={entry.id} className="snap-start">
-            <VaultRailCard entry={entry} />
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function EmptyVault() {
-  return (
-    <section className="flex min-h-[60vh] flex-col items-center justify-center px-6 text-center">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/images/logo_yail.png" alt="" className="h-10 w-auto opacity-90" />
-      <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.32em] text-sky-300/80">Vault</p>
-      <h1 className="mt-3 font-heading text-4xl tracking-tight text-white sm:text-5xl">Enter the labs</h1>
-      <p className="mt-4 max-w-md text-sm leading-relaxed text-white/55">
-        GenAI experiments in filmmaking and ads will land here. Check back once the first cut is published.
-      </p>
-    </section>
-  );
 }
 
 /** Portrait-first jumbotron — atmospheric, alternating, type-forward. */
@@ -435,6 +180,7 @@ function EmptyAvatars() {
   );
 }
 
+
 export default function VaultExperience({
   featured,
   filmmaking,
@@ -446,13 +192,18 @@ export default function VaultExperience({
   filmmaking: YailVaultEntry[];
   ads: YailVaultEntry[];
   avatars?: YailVaultAvatar[];
-  initialView?: Filter;
+  initialView?: Filter | "filmmaking" | YailVaultCategory;
 }) {
   const avatars = avatarsProp ?? [];
+  const genres = useMemo(() => collectFilmmakingGenres(filmmaking), [filmmaking]);
   const [filter, setFilter] = useState<Filter>(() =>
     isVaultFilter(initialView) ? initialView : "all"
   );
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setFilter(isVaultFilter(initialView) ? initialView : "all");
+  }, [initialView]);
 
   useEffect(() => {
     const onPop = () => setFilter(readFilterFromUrl());
@@ -482,20 +233,18 @@ export default function VaultExperience({
 
   const hero = useMemo(() => {
     if (filter === "avatars") return null;
-    if (filter === "filmmaking") return filmmaking[0] ?? null;
     if (filter === "ads") return ads[0] ?? null;
     return featured ?? all[0] ?? null;
-  }, [filter, featured, filmmaking, ads, all]);
+  }, [filter, featured, ads, all]);
 
   const filmmakingRail = useMemo(() => {
     if (filter === "ads" || filter === "avatars") return [];
-    if (filter === "filmmaking") return filmmaking;
     return filmmaking.filter((e) => e.id !== hero?.id);
   }, [filter, filmmaking, hero?.id]);
 
   const adsRail = useMemo(() => {
-    if (filter === "filmmaking" || filter === "avatars") return [];
-    if (filter === "ads") return ads;
+    if (filter === "avatars") return [];
+    if (filter === "ads") return ads.filter((e) => e.id !== hero?.id);
     return ads.filter((e) => e.id !== hero?.id);
   }, [filter, ads, hero?.id]);
 
@@ -515,72 +264,26 @@ export default function VaultExperience({
     if (filter === "avatars") {
       return { title: "AI Avatars", hint: "Directory", count: avatars.length };
     }
-    if (filter === "filmmaking") {
-      return { title: YAIL_VAULT_CATEGORIES[0].label, hint: "Filmmaking labs", count: filmmaking.length };
-    }
     if (filter === "ads") {
       return { title: YAIL_VAULT_CATEGORIES[1].label, hint: "Ads labs", count: ads.length };
     }
     return { title: "All labs", hint: "Filmmaking & ads", count: all.length };
-  }, [filter, filmmaking.length, ads.length, all.length, avatars.length]);
+  }, [filter, ads.length, all.length, avatars.length]);
 
-  const navItems: { id: Filter; label: string; hint: string; count: number }[] = [
-    { id: "all", label: "All labs", hint: "Everything in the vault", count: all.length },
-    {
-      id: "filmmaking",
-      label: YAIL_VAULT_CATEGORIES[0].label,
-      hint: YAIL_VAULT_CATEGORIES[0].rail,
-      count: filmmaking.length,
-    },
-    {
-      id: "ads",
-      label: YAIL_VAULT_CATEGORIES[1].label,
-      hint: YAIL_VAULT_CATEGORIES[1].rail,
-      count: ads.length,
-    },
-    { id: "avatars", label: "AI Avatars", hint: "Directory & jumbotrons", count: avatars.length },
-  ];
-
-  function pickFilter(next: Filter) {
-    setFilter(next);
-    writeFilterToUrl(next);
-    setMenuOpen(false);
-  }
+  const counts = {
+    all: all.length,
+    filmmaking: filmmaking.length,
+    ads: ads.length,
+    avatars: avatars.length,
+  };
 
   const nav = (
-    <nav className="flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto px-3 pb-6 pt-2">
-      <div>
-        <p className="mb-2.5 px-3 font-mono text-[9px] uppercase tracking-[0.28em] text-white/35">Browse</p>
-        <ul className="space-y-1.5">
-          {navItems.map((item) => {
-            const on = filter === item.id;
-            return (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  onClick={() => pickFilter(item.id)}
-                  className={`w-full text-left ${NAV_PILL} ${on ? NAV_ON : NAV_OFF}`}
-                >
-                  <span className="flex items-center justify-between gap-2">
-                    <span className="text-[13px] font-semibold tracking-tight">{item.label}</span>
-                    <span className={`font-mono text-[10px] ${on ? "text-white/45" : "text-white/25"}`}>
-                      {item.count}
-                    </span>
-                  </span>
-                  <span
-                    className={`mt-0.5 text-[11px] leading-snug ${
-                      on ? "text-white/45" : "text-white/30 group-hover:text-white/40"
-                    }`}
-                  >
-                    {item.hint}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </nav>
+    <VaultBrowseNav
+      counts={counts}
+      genres={genres}
+      activeView={filter === "all" ? "all" : filter}
+      onNavigate={() => setMenuOpen(false)}
+    />
   );
 
   const brand = (
@@ -599,7 +302,6 @@ export default function VaultExperience({
   const sidebarHeader = (closeBtn?: ReactNode) => (
     <div className="shrink-0 border-b border-white/10">
       <div className="relative flex items-center gap-1 overflow-hidden px-3 py-2.5">
-        {/* Soft sky wash — hint, not a billboard */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-gradient-to-r from-sky-500/[0.14] via-sky-400/[0.05] to-transparent"
@@ -669,33 +371,33 @@ export default function VaultExperience({
       <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <header className="pointer-events-none absolute left-0 right-0 top-0 z-40 flex items-center gap-3 bg-gradient-to-b from-black/45 to-transparent px-4 py-3.5 sm:px-6 lg:px-8">
           <div className="pointer-events-auto flex w-full items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setMenuOpen(true)}
-            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/20 bg-black/40 text-white/80 backdrop-blur-sm lg:hidden"
-            aria-label="Open menu"
-          >
-            <span className="flex flex-col gap-1" aria-hidden>
-              <span className="block h-px w-4 bg-current" />
-              <span className="block h-px w-4 bg-current" />
-              <span className="block h-px w-4 bg-current" />
-            </span>
-          </button>
-          <div className="min-w-0 flex-1 lg:pl-1">
-            <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-sky-300/80">GenAI labs</p>
-            <p className="mt-0.5 truncate text-sm font-medium text-white/85">
-              {meta.title}
-              <span className="ml-2 text-xs font-normal text-white/40">
-                {meta.count} {filter === "avatars" ? "avatars" : "cuts"}
+            <button
+              type="button"
+              onClick={() => setMenuOpen(true)}
+              className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/20 bg-black/40 text-white/80 backdrop-blur-sm lg:hidden"
+              aria-label="Open menu"
+            >
+              <span className="flex flex-col gap-1" aria-hidden>
+                <span className="block h-px w-4 bg-current" />
+                <span className="block h-px w-4 bg-current" />
+                <span className="block h-px w-4 bg-current" />
               </span>
-            </p>
-          </div>
-          <VaultPendingLink
-            href="/"
-            className="hidden rounded-md border border-white/20 bg-black/35 px-3.5 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70 backdrop-blur-sm transition hover:border-white/40 hover:text-white sm:inline-flex"
-          >
-            Studio
-          </VaultPendingLink>
+            </button>
+            <div className="min-w-0 flex-1 lg:pl-1">
+              <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-sky-300/80">GenAI labs</p>
+              <p className="mt-0.5 truncate text-sm font-medium text-white/85">
+                {meta.title}
+                <span className="ml-2 text-xs font-normal text-white/40">
+                  {meta.count} {filter === "avatars" ? "avatars" : "cuts"}
+                </span>
+              </p>
+            </div>
+            <VaultPendingLink
+              href="/"
+              className="hidden rounded-md border border-white/20 bg-black/35 px-3.5 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70 backdrop-blur-sm transition hover:border-white/40 hover:text-white sm:inline-flex"
+            >
+              Studio
+            </VaultPendingLink>
           </div>
         </header>
 
@@ -720,9 +422,13 @@ export default function VaultExperience({
           ) : (
             <div className="pb-14">
               {hero ? <VaultOttHero entry={hero} /> : null}
-
               <div className="relative z-10 -mt-6 space-y-8 sm:-mt-8 sm:space-y-10">
-                <VaultRail title={YAIL_VAULT_CATEGORIES[0].label} scene="01" entries={filmmakingRail} />
+                <VaultRail
+                  title={YAIL_VAULT_CATEGORIES[0].label}
+                  scene="01"
+                  entries={filmmakingRail}
+                  titleHref="/vault/filmmaking"
+                />
                 <VaultRail title={YAIL_VAULT_CATEGORIES[1].label} scene="02" entries={adsRail} />
                 {!filmmakingRail.length && !adsRail.length ? (
                   <p className="px-5 text-sm text-white/40 sm:px-8 lg:px-10">
