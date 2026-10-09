@@ -112,17 +112,52 @@ function VaultOttHero({ entry }: { entry: YailVaultEntry }) {
   );
 }
 
-/** Rail tile: poster/thumb only — no empty black cards. */
+/** Rail tile: fixed height, width follows the cut’s natural ratio. */
 function VaultRailCard({ entry }: { entry: YailVaultEntry }) {
   const genre = tagsOfKind(entry, "genre")[0]?.name;
   const tag = genre ?? yailVaultCategoryLabel(entry.category);
   const thumb = entryThumb(entry);
   const isVideo = entry.media_type === "video";
+  const [ratio, setRatio] = useState(() =>
+    entry.aspect_width && entry.aspect_height
+      ? entry.aspect_width / entry.aspect_height
+      : 16 / 9
+  );
+
+  useEffect(() => {
+    if (entry.aspect_width && entry.aspect_height) {
+      setRatio(entry.aspect_width / entry.aspect_height);
+      return;
+    }
+    // Older cuts without stored size — learn from the poster/frame once.
+    const src = thumb || (isVideo ? entry.media_url : null);
+    if (!src) return;
+    if (thumb) {
+      const img = new window.Image();
+      img.onload = () => {
+        if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+          setRatio(img.naturalWidth / img.naturalHeight);
+        }
+      };
+      img.src = thumb;
+      return;
+    }
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    video.muted = true;
+    video.onloadedmetadata = () => {
+      if (video.videoWidth > 0 && video.videoHeight > 0) {
+        setRatio(video.videoWidth / video.videoHeight);
+      }
+    };
+    video.src = entry.media_url;
+  }, [entry.aspect_height, entry.aspect_width, entry.media_url, isVideo, thumb]);
 
   return (
     <VaultPendingLink
       href={`/vault/${entry.slug}`}
-      className="group relative block h-[9.5rem] w-[16.5rem] shrink-0 overflow-hidden rounded-md bg-zinc-900 sm:h-[11rem] sm:w-[19.5rem] lg:h-[12rem] lg:w-[21.5rem]"
+      className="group relative block h-[9.5rem] shrink-0 overflow-hidden rounded-md bg-zinc-900 sm:h-[11rem] lg:h-[12rem]"
+      style={{ aspectRatio: `${ratio}`, width: "auto" }}
     >
       {thumb ? (
         // eslint-disable-next-line @next/next/no-img-element

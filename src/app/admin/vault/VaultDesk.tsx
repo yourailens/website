@@ -16,6 +16,7 @@ import {
   type YailVaultEntry,
   type YailVaultTag,
 } from "@/data/yail-vault";
+import { readMediaDimensions } from "@/lib/media/read-dimensions";
 import VaultAvatarsDesk from "./VaultAvatarsDesk";
 
 const FIELD =
@@ -36,6 +37,8 @@ type Draft = {
   media_type: "image" | "video" | null;
   media_url: string;
   poster_url: string | null;
+  aspect_width: number | null;
+  aspect_height: number | null;
   featured: boolean;
   published: boolean;
   localBlob: Blob | null;
@@ -55,6 +58,8 @@ const emptyDraft = (): Draft => ({
   media_type: null,
   media_url: "",
   poster_url: null,
+  aspect_width: null,
+  aspect_height: null,
   featured: false,
   published: true,
   localBlob: null,
@@ -75,6 +80,8 @@ function entryToDraft(entry: YailVaultEntry): Draft {
     media_type: entry.media_type,
     media_url: entry.media_url,
     poster_url: entry.poster_url,
+    aspect_width: entry.aspect_width,
+    aspect_height: entry.aspect_height,
     featured: entry.featured,
     published: entry.published,
     localBlob: null,
@@ -185,14 +192,21 @@ export default function VaultDesk() {
     }
     const url = URL.createObjectURL(file);
     if (draft.previewUrl.startsWith("blob:")) URL.revokeObjectURL(draft.previewUrl);
+    const kind = isVideo ? "video" : "image";
     patch({
-      media_type: isVideo ? "video" : "image",
+      media_type: kind,
       previewUrl: url,
       localBlob: file,
       media_url: "",
       poster_url: null,
+      aspect_width: null,
+      aspect_height: null,
     });
     setErr("");
+    void readMediaDimensions(file, kind).then((dims) => {
+      if (!dims) return;
+      patch({ aspect_width: dims.width, aspect_height: dims.height });
+    });
   }
 
   async function uploadMedia(blob: Blob, filename: string) {
@@ -237,6 +251,19 @@ export default function VaultDesk() {
       }
       if (!media_type || !media_url) throw new Error("Media is required");
 
+      let aspect_width = draft.aspect_width;
+      let aspect_height = draft.aspect_height;
+      if ((!aspect_width || !aspect_height) && draft.localBlob) {
+        const dims = await readMediaDimensions(
+          draft.localBlob,
+          media_type === "video" ? "video" : "image"
+        );
+        if (dims) {
+          aspect_width = dims.width;
+          aspect_height = dims.height;
+        }
+      }
+
       const body = {
         title,
         caption: draft.caption,
@@ -250,6 +277,8 @@ export default function VaultDesk() {
         media_type,
         media_url,
         poster_url,
+        aspect_width,
+        aspect_height,
         featured: draft.featured,
         published: draft.published,
       };
@@ -508,24 +537,28 @@ export default function VaultDesk() {
           </div>
 
           <div className="space-y-4">
-            <div className="relative aspect-video overflow-hidden rounded-[1.25rem] border border-white/12 bg-black/60">
+            <div className="relative flex min-h-[14rem] max-h-[min(70vh,32rem)] items-center justify-center overflow-hidden rounded-[1.25rem] border border-white/12 bg-black/60">
               {draft.previewUrl ? (
                 draft.media_type === "video" && !draft.localBlob?.type.startsWith("image/") ? (
                   <video
                     src={draft.media_url || draft.previewUrl}
                     poster={draft.poster_url ?? undefined}
-                    className="h-full w-full object-cover"
+                    className="max-h-[min(70vh,32rem)] max-w-full object-contain"
                     muted
                     playsInline
                     controls
                   />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={draft.previewUrl} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={draft.previewUrl}
+                    alt=""
+                    className="max-h-[min(70vh,32rem)] max-w-full object-contain"
+                  />
                 )
               ) : (
-                <div className="flex h-full items-center justify-center px-6 text-center text-sm text-white/40">
-                  Drop a still or a motion cut here
+                <div className="flex min-h-[14rem] items-center justify-center px-6 text-center text-sm text-white/40">
+                  Any ratio — still or motion
                 </div>
               )}
             </div>
@@ -545,7 +578,7 @@ export default function VaultDesk() {
               onClick={() => fileRef.current?.click()}
               className="w-full rounded-full border border-dashed border-white/25 bg-white/[0.04] py-3 text-sm font-semibold text-white/80 transition hover:border-emerald-300/50 hover:text-white"
             >
-              Upload image or video
+              Upload image or video · any ratio
             </button>
             <div className="flex flex-wrap gap-2">
               <button
@@ -608,7 +641,15 @@ export default function VaultDesk() {
           return (
             <div key={entry.id} className={`${BUBBLE} !p-3 sm:!p-4`}>
               <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
-                <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl bg-black/50 lg:aspect-[16/10] lg:w-52">
+                <div
+                  className="relative h-36 w-full shrink-0 overflow-hidden rounded-2xl bg-black/50 lg:h-32 lg:w-auto"
+                  style={{
+                    aspectRatio:
+                      entry.aspect_width && entry.aspect_height
+                        ? `${entry.aspect_width} / ${entry.aspect_height}`
+                        : "16 / 9",
+                  }}
+                >
                   {entry.media_type === "video" ? (
                     <video
                       src={entry.media_url}

@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useState } from "react";
 import AiModelBadge from "@/components/vault/AiModelBadge";
 import VaultPendingLink from "@/components/vault/VaultPendingLink";
 import VaultPlayer from "@/components/vault/VaultPlayer";
 import VaultShell, { type VaultShellCounts, type VaultView } from "@/components/vault/VaultShell";
+import { vaultStageShellStyle } from "@/components/vault/vault-media-frame";
 import type { YailVaultAvatar } from "@/data/yail-vault-avatars";
 import {
   tagsOfKind,
@@ -13,6 +13,30 @@ import {
   type YailVaultEntry,
 } from "@/data/yail-vault";
 import { canonicalPublicUrl } from "@/lib/site-url";
+
+function VaultStill({ src, alt }: { src: string; alt: string }) {
+  const [size, setSize] = useState<{ w: number; h: number } | null>(null);
+  return (
+    <div className="relative overflow-hidden bg-black" style={vaultStageShellStyle(size?.w, size?.h)}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt={alt}
+        className="absolute inset-0 h-full w-full object-contain"
+        onLoad={(e) => {
+          const img = e.currentTarget;
+          if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+            setSize({ w: img.naturalWidth, h: img.naturalHeight });
+          }
+        }}
+      />
+      <div className="pointer-events-none absolute right-4 top-4 opacity-30" aria-hidden>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/logo_yail.png" alt="" className="h-7 w-auto sm:h-8" draggable={false} />
+      </div>
+    </div>
+  );
+}
 
 type Props = {
   entry: YailVaultEntry;
@@ -91,21 +115,7 @@ export default function VaultCutExperience({ entry, avatars, counts, shareUrl }:
             {entry.media_type === "video" ? (
               <VaultPlayer src={entry.media_url} poster={poster} title={entry.title} />
             ) : poster ? (
-              <div className="relative aspect-video bg-black">
-                <Image
-                  src={poster}
-                  alt={entry.title}
-                  fill
-                  priority
-                  sizes="90vw"
-                  className="object-contain"
-                  unoptimized
-                />
-                <div className="pointer-events-none absolute right-4 top-4 opacity-30" aria-hidden>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/images/logo_yail.png" alt="" className="h-7 w-auto sm:h-8" draggable={false} />
-                </div>
-              </div>
+              <VaultStill src={poster} alt={entry.title} />
             ) : (
               <div className="aspect-video bg-zinc-950" />
             )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { attachProgressivePlayback } from "@/components/media/progressive-playback";
 
 function pad(n: number) {
   return String(Math.floor(n)).padStart(2, "0");
@@ -41,15 +42,45 @@ export default function SpotPlayer({ src, poster, caption, mode, onMode }: Props
   const shellRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const modeRef = useRef(mode);
+  const mutedRef = useRef(false);
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(1);
   const [dragging, setDragging] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [buffering, setBuffering] = useState(true);
+  const [hasFrame, setHasFrame] = useState(false);
 
   const live = mode === "preview";
   const active = mode !== "preview";
+
+  modeRef.current = mode;
+  mutedRef.current = muted;
+
+  const applyPlayback = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const current = modeRef.current;
+    video.muted = current === "preview" || mutedRef.current;
+    video.loop = current === "preview";
+
+    if (current === "paused") {
+      video.pause();
+      return;
+    }
+
+    // Start as soon as a short buffer exists — rest keeps loading while playing.
+    void video.play().catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    setHasFrame(false);
+    setBuffering(true);
+    setTime(0);
+    setDuration(0);
+  }, [src]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -65,28 +96,27 @@ export default function SpotPlayer({ src, poster, caption, mode, onMode }: Props
     video.addEventListener("durationchange", onMeta);
     video.addEventListener("ended", onEnded);
     onMeta();
+
+    const release = attachProgressivePlayback(video, {
+      onReadyToPlay: applyPlayback,
+      onBuffering: setBuffering,
+      onFirstFrame: () => setHasFrame(true),
+    });
+
     return () => {
+      release();
       video.removeEventListener("timeupdate", onTime);
       video.removeEventListener("durationchange", onMeta);
       video.removeEventListener("ended", onEnded);
     };
-  }, [dragging, onMode, src]);
+  }, [applyPlayback, dragging, onMode, src]);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
     video.volume = volume;
-    video.muted = live || muted;
-    video.loop = live;
-    if (mode === "playing") {
-      void video.play().catch(() => {});
-    } else if (mode === "paused") {
-      video.pause();
-    } else {
-      video.muted = true;
-      void video.play().catch(() => {});
-    }
-  }, [live, mode, muted, volume]);
+    applyPlayback();
+  }, [applyPlayback, live, mode, muted, volume]);
 
   const seekFromEvent = useCallback((clientX: number) => {
     const video = videoRef.current;
@@ -148,6 +178,7 @@ export default function SpotPlayer({ src, poster, caption, mode, onMode }: Props
   }
 
   const progress = duration > 0 ? time / duration : 0;
+  const showPoster = Boolean(poster) && !hasFrame;
 
   return (
     <div ref={shellRef} className="absolute inset-0 bg-black">
@@ -168,7 +199,25 @@ export default function SpotPlayer({ src, poster, caption, mode, onMode }: Props
         onClick={togglePlay}
       />
 
-      {mode !== "playing" ? (
+      {showPoster ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={poster!}
+          alt=""
+          className={`pointer-events-none absolute inset-0 z-[1] h-full w-full ${
+            isFullscreen ? "object-contain" : "object-cover"
+          }`}
+        />
+      ) : null}
+
+      {buffering ? (
+        <div className="pointer-events-none absolute inset-0 z-[15] flex items-center justify-center">
+          <span className="h-10 w-10 animate-spin rounded-full border-2 border-white/25 border-t-blue-400" aria-hidden />
+          <span className="sr-only">Loading</span>
+        </div>
+      ) : null}
+
+      {mode !== "playing" && !buffering ? (
         <button
           type="button"
           onClick={togglePlay}

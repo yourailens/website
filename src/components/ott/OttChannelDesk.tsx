@@ -43,17 +43,13 @@ function CutThumb({ cut, className }: { cut: OttCut; className?: string }) {
     // eslint-disable-next-line @next/next/no-img-element
     return <img src={`https://i.ytimg.com/vi/${yt}/hqdefault.jpg`} alt="" className={className} />;
   }
+  // Prefer still posters — never attach video src in the rail (steals bandwidth from the stage player).
   if (cut.media_type === "video") {
-    return (
-      <video
-        src={cut.media_url}
-        poster={cut.poster_url ?? undefined}
-        className={className}
-        muted
-        playsInline
-        preload="metadata"
-      />
-    );
+    if (cut.poster_url) {
+      // eslint-disable-next-line @next/next/no-img-element
+      return <img src={cut.poster_url} alt="" className={className} />;
+    }
+    return <div className={`${className} bg-zinc-900`} aria-hidden />;
   }
   // eslint-disable-next-line @next/next/no-img-element
   return <img src={cut.media_url} alt="" className={className} />;

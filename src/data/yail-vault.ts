@@ -25,6 +25,9 @@ export type YailVaultEntry = {
   media_type: "image" | "video";
   media_url: string;
   poster_url: string | null;
+  /** Pixel size of the media frame (any ratio). Null until measured. */
+  aspect_width: number | null;
+  aspect_height: number | null;
   /** Catalog id from YAIL_VAULT_AI_MODELS */
   ai_model: string | null;
   /** FKs to yail_vault_avatars (many-to-many) */

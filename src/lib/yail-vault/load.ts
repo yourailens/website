@@ -20,6 +20,8 @@ type EntryRow = {
   media_type: string;
   media_url: string;
   poster_url: string | null;
+  aspect_width?: number | null;
+  aspect_height?: number | null;
   ai_model: string | null;
   featured: boolean;
   published: boolean;
@@ -96,6 +98,10 @@ function rowToEntry(
     media_type: row.media_type,
     media_url: row.media_url,
     poster_url: row.poster_url,
+    aspect_width:
+      typeof row.aspect_width === "number" && row.aspect_width > 0 ? row.aspect_width : null,
+    aspect_height:
+      typeof row.aspect_height === "number" && row.aspect_height > 0 ? row.aspect_height : null,
     ai_model: row.ai_model ?? null,
     avatar_ids: avatarIds,
     featured: row.featured,

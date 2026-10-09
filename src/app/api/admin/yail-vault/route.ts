@@ -103,6 +103,15 @@ export async function POST(req: NextRequest) {
 
   const avatarIds = parseAvatarIds(b) ?? [];
 
+  const aspect_width =
+    typeof b.aspect_width === "number" && Number.isFinite(b.aspect_width) && b.aspect_width > 0
+      ? Math.round(b.aspect_width)
+      : null;
+  const aspect_height =
+    typeof b.aspect_height === "number" && Number.isFinite(b.aspect_height) && b.aspect_height > 0
+      ? Math.round(b.aspect_height)
+      : null;
+
   const { data, error } = await db
     .from("yail_vault_entries")
     .insert({
@@ -114,6 +123,8 @@ export async function POST(req: NextRequest) {
       media_type,
       media_url,
       poster_url: String(b.poster_url ?? "").trim() || null,
+      aspect_width,
+      aspect_height,
       ai_model,
       featured,
       published: b.published !== false,
@@ -123,11 +134,11 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) {
-    const missing = /does not exist|schema cache|ai_model/i.test(error.message);
+    const missing = /does not exist|schema cache|ai_model|aspect_/i.test(error.message);
     return NextResponse.json(
       {
         error: missing
-          ? "Run supabase/migrations/074_yail_vault.sql and 077_yail_vault_ai_models.sql in the Supabase SQL editor first."
+          ? "Run supabase/migrations/074_yail_vault.sql, 077_yail_vault_ai_models.sql, and 080_yail_vault_aspect.sql in the Supabase SQL editor first."
           : error.message,
       },
       { status: 400 }

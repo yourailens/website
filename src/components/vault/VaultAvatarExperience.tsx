@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AiModelBadge from "@/components/vault/AiModelBadge";
 import VaultPendingLink from "@/components/vault/VaultPendingLink";
 import VaultShell, { type VaultShellCounts } from "@/components/vault/VaultShell";
+import { aspectRatioCss } from "@/components/vault/vault-media-frame";
 import type { YailVaultAvatar } from "@/data/yail-vault-avatars";
 import {
   tagsOfKind,
@@ -12,6 +13,67 @@ import {
   type YailVaultEntry,
 } from "@/data/yail-vault";
 import { canonicalPublicUrl } from "@/lib/site-url";
+
+function AvatarCutCard({ entry }: { entry: YailVaultEntry }) {
+  const thumb = entryThumb(entry);
+  const genre = tagsOfKind(entry, "genre")[0]?.name;
+  const [ratioCss, setRatioCss] = useState(() =>
+    aspectRatioCss(entry.aspect_width, entry.aspect_height)
+  );
+
+  useEffect(() => {
+    if (entry.aspect_width && entry.aspect_height) {
+      setRatioCss(aspectRatioCss(entry.aspect_width, entry.aspect_height));
+      return;
+    }
+    if (!thumb) return;
+    const img = new window.Image();
+    img.onload = () => {
+      if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+        setRatioCss(aspectRatioCss(img.naturalWidth, img.naturalHeight));
+      }
+    };
+    img.src = thumb;
+  }, [entry.aspect_height, entry.aspect_width, thumb]);
+
+  return (
+    <VaultPendingLink
+      href={`/vault/${entry.slug}`}
+      className="group block overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] transition hover:border-white/25"
+    >
+      <div className="relative w-full bg-zinc-950" style={{ aspectRatio: ratioCss }}>
+        {thumb ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={thumb}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+          />
+        ) : entry.media_type === "video" ? (
+          <video
+            src={entry.media_url}
+            className="absolute inset-0 h-full w-full object-cover"
+            muted
+            playsInline
+            preload="metadata"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-white/30">
+            <PlayGlyph size={18} />
+          </div>
+        )}
+      </div>
+      <div className="space-y-1.5 p-3.5">
+        <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-sky-300/80">
+          {yailVaultCategoryLabel(entry.category)}
+          {genre ? ` · ${genre}` : ""}
+        </p>
+        <p className="truncate text-sm font-semibold text-white">{entry.title}</p>
+        {entry.ai_model ? <AiModelBadge modelId={entry.ai_model} /> : null}
+      </div>
+    </VaultPendingLink>
+  );
+}
 
 type Props = {
   avatar: YailVaultAvatar;
@@ -153,49 +215,11 @@ export default function VaultAvatarExperience({ avatar, cuts, counts, shareUrl }
                 Tagged cuts
               </h2>
               <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {cuts.map((entry) => {
-                  const thumb = entryThumb(entry);
-                  const genre = tagsOfKind(entry, "genre")[0]?.name;
-                  return (
-                    <li key={entry.id}>
-                      <VaultPendingLink
-                        href={`/vault/${entry.slug}`}
-                        className="group block overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] transition hover:border-white/25"
-                      >
-                        <div className="relative aspect-video bg-zinc-950">
-                          {thumb ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={thumb}
-                              alt=""
-                              className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-                            />
-                          ) : entry.media_type === "video" ? (
-                            <video
-                              src={entry.media_url}
-                              className="h-full w-full object-cover"
-                              muted
-                              playsInline
-                              preload="metadata"
-                            />
-                          ) : (
-                            <div className="flex h-full items-center justify-center text-white/30">
-                              <PlayGlyph size={18} />
-                            </div>
-                          )}
-                        </div>
-                        <div className="space-y-1.5 p-3.5">
-                          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-sky-300/80">
-                            {yailVaultCategoryLabel(entry.category)}
-                            {genre ? ` · ${genre}` : ""}
-                          </p>
-                          <p className="truncate text-sm font-semibold text-white">{entry.title}</p>
-                          {entry.ai_model ? <AiModelBadge modelId={entry.ai_model} /> : null}
-                        </div>
-                      </VaultPendingLink>
-                    </li>
-                  );
-                })}
+                {cuts.map((entry) => (
+                  <li key={entry.id}>
+                    <AvatarCutCard entry={entry} />
+                  </li>
+                ))}
               </ul>
             </section>
           ) : (

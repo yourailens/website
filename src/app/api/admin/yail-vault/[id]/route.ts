@@ -63,6 +63,18 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
   if (b.media_type === "image" || b.media_type === "video") patch.media_type = b.media_type;
   if (typeof b.media_url === "string" && b.media_url.trim()) patch.media_url = b.media_url.trim();
   if (typeof b.poster_url === "string") patch.poster_url = b.poster_url.trim() || null;
+  if ("aspect_width" in b || "aspect_height" in b) {
+    const aw =
+      typeof b.aspect_width === "number" && Number.isFinite(b.aspect_width) && b.aspect_width > 0
+        ? Math.round(b.aspect_width)
+        : null;
+    const ah =
+      typeof b.aspect_height === "number" && Number.isFinite(b.aspect_height) && b.aspect_height > 0
+        ? Math.round(b.aspect_height)
+        : null;
+    patch.aspect_width = aw && ah ? aw : null;
+    patch.aspect_height = aw && ah ? ah : null;
+  }
   if (typeof b.published === "boolean") patch.published = b.published;
   if (typeof b.sort_order === "number" && Number.isFinite(b.sort_order)) {
     patch.sort_order = Math.round(b.sort_order);
@@ -80,11 +92,11 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
   if (Object.keys(patch).length) {
     const { error } = await db.from("yail_vault_entries").update(patch).eq("id", id);
     if (error) {
-      const missing = /ai_model|schema cache/i.test(error.message);
+      const missing = /ai_model|aspect_|schema cache/i.test(error.message);
       return NextResponse.json(
         {
           error: missing
-            ? "Run supabase/migrations/077_yail_vault_ai_models.sql in the Supabase SQL editor first."
+            ? "Run supabase/migrations/077_yail_vault_ai_models.sql and 080_yail_vault_aspect.sql in the Supabase SQL editor first."
             : error.message,
         },
         { status: 400 }
