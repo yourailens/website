@@ -20,6 +20,7 @@ type EntryRow = {
   media_type: string;
   media_url: string;
   poster_url: string | null;
+  og_image_url?: string | null;
   aspect_width?: number | null;
   aspect_height?: number | null;
   ai_model: string | null;
@@ -100,6 +101,7 @@ function rowToEntry(
     media_type: row.media_type,
     media_url: row.media_url,
     poster_url: row.poster_url,
+    og_image_url: row.og_image_url?.trim() || null,
     aspect_width:
       typeof row.aspect_width === "number" && row.aspect_width > 0 ? row.aspect_width : null,
     aspect_height:

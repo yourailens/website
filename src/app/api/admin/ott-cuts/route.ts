@@ -12,6 +12,8 @@ import {
   isOttCutMediaType,
   uniqueOttCutSlug,
 } from "@/lib/ott-cuts/load";
+import { ottCutYoutubeId } from "@/data/ott-cuts";
+import { bakeOgJpegToS3, mediaSourceForOg } from "@/lib/seo/bake-og-image";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +22,7 @@ function revalidateOttSurfaces() {
   revalidatePath("/ai-ads");
   revalidatePath("/ai-filmmaking");
   revalidatePath("/ai-verse");
+  revalidatePath("/cut/[slug]", "page");
 }
 
 export async function GET() {
@@ -65,6 +68,22 @@ export async function POST(req: NextRequest) {
     .limit(1);
   const sort_order = (last?.[0]?.sort_order ?? 0) + 1;
   const slug = await uniqueOttCutSlug(db, caption);
+  const poster_url = String(b.poster_url ?? "").trim() || null;
+  const yt = ottCutYoutubeId(media_url);
+  const ogSource = mediaSourceForOg({
+    poster_url,
+    media_url,
+    media_type,
+    youtubeThumb: yt ? `https://i.ytimg.com/vi/${yt}/hqdefault.jpg` : null,
+  });
+  let og_image_url: string | null = null;
+  if (ogSource) {
+    try {
+      og_image_url = await bakeOgJpegToS3("ott-cuts", slug, ogSource);
+    } catch {
+      /* page ensure will retry */
+    }
+  }
 
   const { data, error } = await db
     .from("ott_cuts")
@@ -75,7 +94,8 @@ export async function POST(req: NextRequest) {
       category,
       media_type,
       media_url,
-      poster_url: String(b.poster_url ?? "").trim() || null,
+      poster_url,
+      og_image_url,
       aspect_ratio,
       published: b.published !== false,
       homepage_feature,
@@ -86,7 +106,17 @@ export async function POST(req: NextRequest) {
     .select("id, slug")
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) {
+    const missing = /og_image_url|schema cache|does not exist/i.test(error.message);
+    return NextResponse.json(
+      {
+        error: missing
+          ? "Run supabase/migrations/082_vault_ott_og_images.sql in the Supabase SQL editor first."
+          : error.message,
+      },
+      { status: 400 }
+    );
+  }
   revalidateOttSurfaces();
   return NextResponse.json({ ok: true, id: data.id, slug: data.slug });
 }

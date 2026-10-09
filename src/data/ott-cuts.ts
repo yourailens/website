@@ -37,6 +37,8 @@ export type OttCut = {
   media_type: OttCutMediaType;
   media_url: string;
   poster_url: string | null;
+  /** Pre-baked 1200×630 JPEG on S3 for WhatsApp / OG. */
+  og_image_url: string | null;
   aspect_ratio: OttCutAspect;
   published: boolean;
   homepage_feature: boolean;
@@ -48,6 +50,12 @@ export type OttCut = {
 
 export function ottCutCategoryLabel(id: OttCutCategory): string {
   return OTT_CUT_CATEGORIES.find((c) => c.id === id)?.label ?? id;
+}
+
+export function ottCutChannelPath(category: OttCutCategory): string {
+  if (category === "films") return "/ai-filmmaking";
+  if (category === "community") return "/ai-verse";
+  return "/ai-ads";
 }
 
 export function ottCutAspectLabel(id: OttCutAspect): string {

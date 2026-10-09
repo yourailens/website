@@ -12,7 +12,6 @@ import {
   yailVaultCategoryLabel,
   type YailVaultEntry,
 } from "@/data/yail-vault";
-import { canonicalPublicUrl } from "@/lib/site-url";
 
 function AvatarCutCard({ entry }: { entry: YailVaultEntry }) {
   const thumb = entryThumb(entry);
@@ -79,7 +78,6 @@ type Props = {
   avatar: YailVaultAvatar;
   cuts: YailVaultEntry[];
   counts: VaultShellCounts;
-  shareUrl: string;
 };
 
 function entryThumb(entry: YailVaultEntry) {
@@ -94,15 +92,12 @@ function PlayGlyph({ size = 12 }: { size?: number }) {
   );
 }
 
-export default function VaultAvatarExperience({ avatar, cuts, counts, shareUrl }: Props) {
+export default function VaultAvatarExperience({ avatar, cuts, counts }: Props) {
   const [copied, setCopied] = useState(false);
 
   const share = useCallback(async () => {
-    // Always the public domain — never preview/localhost from window.location.
-    const url =
-      shareUrl?.startsWith("https://yourailens.studio/")
-        ? shareUrl
-        : canonicalPublicUrl(`/vault/avatars/${encodeURIComponent(avatar.slug)}`);
+    // Exactly the page you're on (origin + path), nothing reconstructed.
+    const url = `${window.location.origin}${window.location.pathname}`;
 
     try {
       await navigator.clipboard.writeText(url);
@@ -114,16 +109,12 @@ export default function VaultAvatarExperience({ avatar, cuts, counts, shareUrl }
 
     try {
       if (navigator.share) {
-        await navigator.share({
-          title: `${avatar.name} · YAIL Vault`,
-          text: avatar.tagline ?? `${avatar.name} — AI Avatar in YAIL Vault`,
-          url,
-        });
+        await navigator.share({ url });
       }
     } catch {
       /* share cancelled */
     }
-  }, [avatar.name, avatar.slug, avatar.tagline, shareUrl]);
+  }, []);
 
   return (
     <VaultShell

@@ -27,6 +27,7 @@ function rowToCut(row: Record<string, unknown>): OttCut {
     media_type: row.media_type === "video" ? "video" : "image",
     media_url: String(row.media_url ?? ""),
     poster_url: typeof row.poster_url === "string" ? row.poster_url : null,
+    og_image_url: typeof row.og_image_url === "string" ? row.og_image_url : null,
     aspect_ratio: (row.aspect_ratio as OttCutAspect) ?? "natural",
     published: Boolean(row.published),
     homepage_feature: Boolean(row.homepage_feature),
@@ -38,7 +39,7 @@ function rowToCut(row: Record<string, unknown>): OttCut {
 }
 
 const SELECT =
-  "id,slug,caption,description,category,media_type,media_url,poster_url,aspect_ratio,published,homepage_feature,homepage_hero,hero_slot,sort_order,created_at";
+  "id,slug,caption,description,category,media_type,media_url,poster_url,og_image_url,aspect_ratio,published,homepage_feature,homepage_hero,hero_slot,sort_order,created_at";
 
 export async function getPublishedOttCuts(category?: OttCutCategory): Promise<OttCut[]> {
   const supabase = readClient();
@@ -48,6 +49,19 @@ export async function getPublishedOttCuts(category?: OttCutCategory): Promise<Ot
   const { data, error } = await q;
   if (error || !data?.length) return [];
   return data.map((row) => rowToCut(row as Record<string, unknown>));
+}
+
+export async function getOttCutBySlug(slug: string): Promise<OttCut | null> {
+  const supabase = readClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("ott_cuts")
+    .select(SELECT)
+    .eq("slug", slug)
+    .eq("published", true)
+    .maybeSingle();
+  if (error || !data) return null;
+  return rowToCut(data as Record<string, unknown>);
 }
 
 function isMattressCaption(caption: string) {

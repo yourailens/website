@@ -102,10 +102,5 @@ export default async function VaultAvatarPage({ params }: Props) {
     avatars: directory.length,
   };
 
-  const bust = encodeURIComponent(avatar.updated_at || avatar.id);
-  const shareUrl = canonicalPublicUrl(`/vault/avatars/${encodeURIComponent(avatar.slug)}?v=${bust}`);
-
-  return (
-    <VaultAvatarExperience avatar={avatar} cuts={cuts} counts={counts} shareUrl={shareUrl} />
-  );
+  return <VaultAvatarExperience avatar={avatar} cuts={cuts} counts={counts} />;
 }

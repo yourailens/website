@@ -98,7 +98,7 @@ export default function WatchExperience({ title }: Props) {
   }, []);
 
   async function sharePage() {
-    const url = window.location.href;
+    const url = `${window.location.origin}${window.location.pathname}`;
     try {
       if (navigator.share) {
         await navigator.share({ title: `${title.title} · YourAILens Studios`, url });

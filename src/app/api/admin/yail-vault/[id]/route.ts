@@ -12,6 +12,7 @@ import {
   setEntryTags,
   uniqueVaultSlug,
 } from "@/lib/yail-vault/load";
+import { bakeOgJpegToS3, mediaSourceForOg } from "@/lib/seo/bake-og-image";
 
 export const dynamic = "force-dynamic";
 
@@ -89,14 +90,45 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
     else if (isYailVaultAiModelId(raw)) patch.ai_model = raw;
     else return NextResponse.json({ error: "Pick a model from the AI Model list" }, { status: 400 });
   }
+  const mediaTouched =
+    "media_url" in patch || "poster_url" in patch || "media_type" in patch || "slug" in patch;
+  if (mediaTouched) {
+    const { data: current } = await db
+      .from("yail_vault_entries")
+      .select("slug, media_type, media_url, poster_url")
+      .eq("id", id)
+      .maybeSingle();
+    if (current) {
+      const nextSlug = String(patch.slug ?? current.slug);
+      const nextType = String(patch.media_type ?? current.media_type);
+      const nextMedia = String(patch.media_url ?? current.media_url);
+      const nextPoster =
+        "poster_url" in patch
+          ? (typeof patch.poster_url === "string" ? patch.poster_url : null)
+          : (current.poster_url as string | null);
+      const source = mediaSourceForOg({
+        poster_url: nextPoster,
+        media_url: nextMedia,
+        media_type: nextType,
+      });
+      if (source) {
+        try {
+          patch.og_image_url = await bakeOgJpegToS3("yail-vault", nextSlug, source);
+        } catch {
+          /* keep previous */
+        }
+      }
+    }
+  }
+
   if (Object.keys(patch).length) {
     const { error } = await db.from("yail_vault_entries").update(patch).eq("id", id);
     if (error) {
-      const missing = /ai_model|aspect_|schema cache/i.test(error.message);
+      const missing = /ai_model|aspect_|og_image_url|schema cache/i.test(error.message);
       return NextResponse.json(
         {
           error: missing
-            ? "Run supabase/migrations/077_yail_vault_ai_models.sql and 080_yail_vault_aspect.sql in the Supabase SQL editor first."
+            ? "Run supabase/migrations/077_yail_vault_ai_models.sql, 080_yail_vault_aspect.sql, and 082_vault_ott_og_images.sql in the Supabase SQL editor first."
             : error.message,
         },
         { status: 400 }

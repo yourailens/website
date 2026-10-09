@@ -44,14 +44,14 @@ function fromWatch(item: HomeWatchTitle, section: string): MobileClip {
   };
 }
 
-function fromCut(cut: OttCut, path: string, section: string): MobileClip {
+function fromCut(cut: OttCut, section: string): MobileClip {
   const yt = ottCutYoutubeId(cut.media_url);
   return {
     id: cut.id,
     title: cut.caption,
     tag: cut.aspect_ratio === "natural" ? undefined : cut.aspect_ratio.toUpperCase(),
     section,
-    href: `${path}#${cut.slug}`,
+    href: `/cut/${encodeURIComponent(cut.slug)}`,
     poster:
       cut.poster_url ||
       (yt ? `https://i.ytimg.com/vi/${yt}/hqdefault.jpg` : undefined) ||
@@ -76,17 +76,17 @@ export async function loadMobileHomeData(): Promise<MobileHomeData> {
     .filter((cut) => !isHomepageHeroCut(cut))
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
     .slice(0, 12)
-    .map((cut) => fromCut(cut, "/ai-ads", "Just landed"));
+    .map((cut) => fromCut(cut, "Just landed"));
 
   const formats = HOME_WATCH_TITLES.filter((t) => t.rail === "ads").map((t) => fromWatch(t, "Any format"));
 
-  const feature = homepageFeature ? fromCut(homepageFeature, "/ai-filmmaking", "Feature") : null;
+  const feature = homepageFeature ? fromCut(homepageFeature, "Feature") : null;
 
   const lot = [...filmCuts]
     .filter((cut) => !cut.homepage_feature && !isHomepageHeroCut(cut))
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
     .slice(0, 12)
-    .map((cut) => fromCut(cut, "/ai-filmmaking", "On the lot"));
+    .map((cut) => fromCut(cut, "On the lot"));
 
   const community = HOME_WATCH_TITLES.filter((t) => t.rail === "community").map((t) =>
     fromWatch(t, "Community")
@@ -94,11 +94,7 @@ export async function loadMobileHomeData(): Promise<MobileHomeData> {
 
   return {
     heroes: heroCuts.map((cut) =>
-      fromCut(
-        cut,
-        cut.category === "films" ? "/ai-filmmaking" : cut.category === "community" ? "/ai-verse" : "/ai-ads",
-        HERO_SLOTS.find((slot) => slot.id === cut.hero_slot)?.label ?? "Hero"
-      )
+      fromCut(cut, HERO_SLOTS.find((slot) => slot.id === cut.hero_slot)?.label ?? "Hero")
     ),
     hero: {
       id: "hero-opening",

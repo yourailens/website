@@ -25,6 +25,8 @@ export type YailVaultEntry = {
   media_type: "image" | "video";
   media_url: string;
   poster_url: string | null;
+  /** Pre-baked 1200×630 JPEG on S3 for WhatsApp / OG. */
+  og_image_url: string | null;
   /** Pixel size of the media frame (any ratio). Null until measured. */
   aspect_width: number | null;
   aspect_height: number | null;

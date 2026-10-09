@@ -4,6 +4,8 @@ import { requireAdmin } from "@/lib/api/admin-auth";
 import { isHeroSlot } from "@/data/ott-cuts";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
 import { isOttCutAspect, isOttCutCategory, isOttCutMediaType, clearOtherHomepageFeatures, clearHeroSlot } from "@/lib/ott-cuts/load";
+import { ottCutYoutubeId } from "@/data/ott-cuts";
+import { bakeOgJpegToS3, mediaSourceForOg } from "@/lib/seo/bake-og-image";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +14,7 @@ function revalidateOttSurfaces() {
   revalidatePath("/ai-ads");
   revalidatePath("/ai-filmmaking");
   revalidatePath("/ai-verse");
+  revalidatePath("/cut/[slug]", "page");
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -44,8 +47,49 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     patch.homepage_hero = Boolean(hero_slot);
   }
 
+  const mediaTouched = "media_url" in patch || "poster_url" in patch || "media_type" in patch;
+  if (mediaTouched) {
+    const { data: current } = await db
+      .from("ott_cuts")
+      .select("slug, media_type, media_url, poster_url")
+      .eq("id", id)
+      .maybeSingle();
+    if (current) {
+      const nextType = String(patch.media_type ?? current.media_type);
+      const nextMedia = String(patch.media_url ?? current.media_url);
+      const nextPoster =
+        "poster_url" in patch
+          ? (typeof patch.poster_url === "string" ? patch.poster_url : null)
+          : (current.poster_url as string | null);
+      const yt = ottCutYoutubeId(nextMedia);
+      const source = mediaSourceForOg({
+        poster_url: nextPoster,
+        media_url: nextMedia,
+        media_type: nextType,
+        youtubeThumb: yt ? `https://i.ytimg.com/vi/${yt}/hqdefault.jpg` : null,
+      });
+      if (source) {
+        try {
+          patch.og_image_url = await bakeOgJpegToS3("ott-cuts", String(current.slug), source);
+        } catch {
+          /* keep previous */
+        }
+      }
+    }
+  }
+
   const { error } = await db.from("ott_cuts").update(patch).eq("id", id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) {
+    const missing = /og_image_url|schema cache|does not exist/i.test(error.message);
+    return NextResponse.json(
+      {
+        error: missing
+          ? "Run supabase/migrations/082_vault_ott_og_images.sql in the Supabase SQL editor first."
+          : error.message,
+      },
+      { status: 400 }
+    );
+  }
   revalidateOttSurfaces();
   return NextResponse.json({ ok: true });
 }

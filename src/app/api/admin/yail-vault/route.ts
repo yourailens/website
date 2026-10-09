@@ -13,6 +13,7 @@ import {
   setEntryTags,
   uniqueVaultSlug,
 } from "@/lib/yail-vault/load";
+import { bakeOgJpegToS3, mediaSourceForOg } from "@/lib/seo/bake-og-image";
 
 export const dynamic = "force-dynamic";
 
@@ -112,6 +113,17 @@ export async function POST(req: NextRequest) {
       ? Math.round(b.aspect_height)
       : null;
 
+  const poster_url = String(b.poster_url ?? "").trim() || null;
+  let og_image_url: string | null = null;
+  const ogSource = mediaSourceForOg({ poster_url, media_url, media_type });
+  if (ogSource) {
+    try {
+      og_image_url = await bakeOgJpegToS3("yail-vault", slug, ogSource);
+    } catch {
+      /* page ensure will retry */
+    }
+  }
+
   const { data, error } = await db
     .from("yail_vault_entries")
     .insert({
@@ -122,7 +134,8 @@ export async function POST(req: NextRequest) {
       notes: String(b.notes ?? "").trim() || null,
       media_type,
       media_url,
-      poster_url: String(b.poster_url ?? "").trim() || null,
+      poster_url,
+      og_image_url,
       aspect_width,
       aspect_height,
       ai_model,
@@ -134,11 +147,11 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) {
-    const missing = /does not exist|schema cache|ai_model|aspect_/i.test(error.message);
+    const missing = /does not exist|schema cache|ai_model|aspect_|og_image_url/i.test(error.message);
     return NextResponse.json(
       {
         error: missing
-          ? "Run supabase/migrations/074_yail_vault.sql, 077_yail_vault_ai_models.sql, and 080_yail_vault_aspect.sql in the Supabase SQL editor first."
+          ? "Run supabase/migrations/074_yail_vault.sql, 077_yail_vault_ai_models.sql, 080_yail_vault_aspect.sql, and 082_vault_ott_og_images.sql in the Supabase SQL editor first."
           : error.message,
       },
       { status: 400 }

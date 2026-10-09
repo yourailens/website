@@ -36,11 +36,11 @@ function cards(rail: HomeWatchRail) {
   );
 }
 
-function cutToCard(cut: OttCut, path: string): OttCard {
+function cutToCard(cut: OttCut): OttCard {
   const poster = cut.aspect_ratio === "story" || cut.aspect_ratio === "portrait";
   const yt = ottCutYoutubeId(cut.media_url);
   return {
-    href: `${path}#${cut.slug}`,
+    href: `/cut/${encodeURIComponent(cut.slug)}`,
     title: cut.caption,
     tag: ottCutAspectLabel(cut.aspect_ratio),
     video: !yt && cut.media_type === "video" ? cut.media_url : undefined,
@@ -70,19 +70,19 @@ export default async function HomeStudioStory() {
     .filter((cut) => !isHomepageHeroCut(cut))
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
     .slice(0, 16)
-    .map((cut) => cutToCard(cut, "/ai-ads"));
+    .map((cut) => cutToCard(cut));
   const lot = [...filmCuts]
     .filter((cut) => !cut.homepage_feature && !isHomepageHeroCut(cut))
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
     .slice(0, 16)
-    .map((cut) => cutToCard(cut, "/ai-filmmaking"));
+    .map((cut) => cutToCard(cut));
 
   const trailerMeta = getHomeWatch("ai-films-trailer");
   const feature: OttCard | null = homepageFeature
     ? (() => {
         const yt = ottCutYoutubeId(homepageFeature.media_url);
         return {
-          href: `/ai-filmmaking#${homepageFeature.slug}`,
+          href: `/cut/${encodeURIComponent(homepageFeature.slug)}`,
           title: homepageFeature.caption || trailerMeta?.title || "Our first 45 min AI film",
           tag: trailerMeta?.tag ?? "45 min",
           video: !yt && homepageFeature.media_type === "video" ? homepageFeature.media_url : undefined,

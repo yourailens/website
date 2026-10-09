@@ -66,8 +66,35 @@ export default function OttCutsDesk() {
   const [filter, setFilter] = useState<OttCutCategory | "all">("all");
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [bakingOg, setBakingOg] = useState(false);
   const [err, setErr] = useState("");
   const [msg, setMsg] = useState("");
+
+  async function rebuildShareThumbs(all = false) {
+    setBakingOg(true);
+    setErr("");
+    setMsg("");
+    try {
+      const res = await fetch("/api/admin/ott-cuts/rebuild-og", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ missingOnly: !all }),
+      });
+      const j = (await res.json().catch(() => ({}))) as {
+        baked?: number;
+        failed?: number;
+        cuts?: OttCut[];
+        error?: string;
+      };
+      if (!res.ok) throw new Error(j.error || "Rebuild failed");
+      if (j.cuts) setCuts(j.cuts);
+      setMsg(`Share thumbs ready: ${j.baked ?? 0} baked${j.failed ? `, ${j.failed} failed` : ""}.`);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Rebuild failed");
+    } finally {
+      setBakingOg(false);
+    }
+  }
 
   const load = useCallback(async () => {
     const res = await fetch("/api/admin/ott-cuts");
@@ -313,13 +340,24 @@ export default function OttCutsDesk() {
             </h2>
             <p className="mt-2 text-sm text-white/60">
               Pick a rail, upload media or paste a link, choose a ratio, caption it. Description is optional.
+              Share thumbs bake to S3 (1200×630) for WhatsApp via /cut/slug pages.
             </p>
           </div>
-          {draft.id ? (
-            <button type="button" onClick={() => reset()} className="border border-white/30 px-4 py-2 text-sm text-white hover:border-white">
-              New cut
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={bakingOg || busy}
+              onClick={() => void rebuildShareThumbs(true)}
+              className="border border-white/30 px-4 py-2 text-sm text-white hover:border-white disabled:opacity-40"
+            >
+              {bakingOg ? "Baking thumbs…" : "Bake WhatsApp thumbs"}
             </button>
-          ) : null}
+            {draft.id ? (
+              <button type="button" onClick={() => reset()} className="border border-white/30 px-4 py-2 text-sm text-white hover:border-white">
+                New cut
+              </button>
+            ) : null}
+          </div>
         </div>
 
         <div className="mt-6 grid gap-2 sm:grid-cols-3">
@@ -585,6 +623,7 @@ export default function OttCutsDesk() {
                     {cut.published ? "" : " · DRAFT"}
                     {cut.homepage_feature ? " · TRAILER" : ""}
                     {cut.hero_slot ? ` · ${cut.hero_slot === "hero1" ? "HERO 1" : cut.hero_slot === "hero2" ? "HERO 2" : "HERO 3"}` : ""}
+                    {cut.og_image_url ? " · Share thumb ready" : " · Share thumb missing"}
                   </p>
                   <p className="mt-1 font-heading text-lg leading-none">{cut.caption}</p>
                   {cut.description ? <p className="mt-2 line-clamp-2 text-xs text-white/55">{cut.description}</p> : null}

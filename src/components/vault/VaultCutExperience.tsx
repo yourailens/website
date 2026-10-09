@@ -12,7 +12,6 @@ import {
   yailVaultCategoryLabel,
   type YailVaultEntry,
 } from "@/data/yail-vault";
-import { canonicalPublicUrl } from "@/lib/site-url";
 
 function VaultStill({ src, alt }: { src: string; alt: string }) {
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
@@ -42,10 +41,9 @@ type Props = {
   entry: YailVaultEntry;
   avatars: YailVaultAvatar[];
   counts: VaultShellCounts;
-  shareUrl: string;
 };
 
-export default function VaultCutExperience({ entry, avatars, counts, shareUrl }: Props) {
+export default function VaultCutExperience({ entry, avatars, counts }: Props) {
   const [copied, setCopied] = useState(false);
   const genre = tagsOfKind(entry, "genre")[0]?.name;
   const subject = tagsOfKind(entry, "subject")[0]?.name;
@@ -55,10 +53,8 @@ export default function VaultCutExperience({ entry, avatars, counts, shareUrl }:
   const activeView: VaultView = entry.category;
 
   const share = useCallback(async () => {
-    const url =
-      shareUrl?.startsWith("https://yourailens.studio")
-        ? shareUrl
-        : canonicalPublicUrl(`/vault/${encodeURIComponent(entry.slug)}`);
+    // Exactly the page you're on (origin + path), nothing reconstructed.
+    const url = `${window.location.origin}${window.location.pathname}`;
 
     try {
       await navigator.clipboard.writeText(url);
@@ -70,16 +66,12 @@ export default function VaultCutExperience({ entry, avatars, counts, shareUrl }:
 
     try {
       if (navigator.share) {
-        await navigator.share({
-          title: `${entry.title} · YAIL Vault`,
-          text: entry.caption ?? entry.title,
-          url,
-        });
+        await navigator.share({ url });
       }
     } catch {
       /* share cancelled */
     }
-  }, [entry.caption, entry.slug, entry.title, shareUrl]);
+  }, []);
 
   return (
     <VaultShell
