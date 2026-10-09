@@ -38,7 +38,7 @@ export default function VaultAvatarExperience({ avatar, cuts, counts, shareUrl }
   const share = useCallback(async () => {
     // Always the public domain — never preview/localhost from window.location.
     const url =
-      shareUrl?.startsWith("https://yourailens.studio")
+      shareUrl?.startsWith("https://yourailens.studio/")
         ? shareUrl
         : canonicalPublicUrl(`/vault/avatars/${encodeURIComponent(avatar.slug)}`);
 

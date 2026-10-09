@@ -19,21 +19,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const avatar = await getVaultAvatarBySlug(slug);
   if (!avatar) return { title: "AI Avatar | YAIL Vault" };
 
-  const url = canonicalPublicUrl(`/vault/avatars/${encodeURIComponent(avatar.slug)}`);
+  const origin = siteOriginForMetadata();
+  // Cache-bust WhatsApp's aggressive link preview cache when the DP changes.
+  const bust = encodeURIComponent(avatar.updated_at || avatar.id);
+  const pageUrl = canonicalPublicUrl(`/vault/avatars/${encodeURIComponent(avatar.slug)}?v=${bust}`);
   const title = `${avatar.name} | YAIL Vault`;
   const description =
     avatar.tagline ?? avatar.bio ?? `${avatar.name} — AI Avatar character file from YAIL Vault.`;
-  // Short path on our origin — sharp compresses the DP to 1200×630 for WhatsApp.
-  const ogImage = `${siteOriginForMetadata()}/api/og/vault-avatar/${encodeURIComponent(avatar.slug)}`;
+
+  // Prefer the colocated Next opengraph-image route (same path as the page).
+  const ogImage = `${origin}/vault/avatars/${encodeURIComponent(avatar.slug)}/opengraph-image?v=${bust}`;
+  // Keep API path as a second candidate for crawlers that retry.
+  const ogImageApi = `${origin}/api/og/vault-avatar/${encodeURIComponent(avatar.slug)}?v=${bust}`;
 
   return {
     title,
     description,
-    alternates: { canonical: url },
+    alternates: { canonical: canonicalPublicUrl(`/vault/avatars/${encodeURIComponent(avatar.slug)}`) },
     openGraph: {
       title,
       description,
-      url,
+      url: pageUrl,
       siteName: "YourAILens Studios",
       type: "website",
       images: [
@@ -45,19 +51,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           width: OG_THUMB_WIDTH,
           height: OG_THUMB_HEIGHT,
         },
+        {
+          url: ogImageApi,
+          secureUrl: ogImageApi,
+          alt: `${avatar.name} — YAIL Vault AI Avatar`,
+          type: "image/jpeg",
+          width: OG_THUMB_WIDTH,
+          height: OG_THUMB_HEIGHT,
+        },
       ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [{ url: ogImage, alt: `${avatar.name} — YAIL Vault AI Avatar` }],
-    },
-    other: {
-      "og:image:secure_url": ogImage,
-      "og:image:type": "image/jpeg",
-      "og:image:width": String(OG_THUMB_WIDTH),
-      "og:image:height": String(OG_THUMB_HEIGHT),
+      images: [ogImage],
     },
   };
 }
@@ -82,7 +90,9 @@ export default async function VaultAvatarPage({ params }: Props) {
     avatars: directory.length,
   };
 
-  const shareUrl = canonicalPublicUrl(`/vault/avatars/${encodeURIComponent(avatar.slug)}`);
+  // Share link includes ?v= so WhatsApp re-scrapes instead of showing a blank cached card.
+  const bust = encodeURIComponent(avatar.updated_at || avatar.id);
+  const shareUrl = canonicalPublicUrl(`/vault/avatars/${encodeURIComponent(avatar.slug)}?v=${bust}`);
 
   return (
     <VaultAvatarExperience avatar={avatar} cuts={cuts} counts={counts} shareUrl={shareUrl} />

@@ -36,9 +36,8 @@ function siteOrigin(): string {
 const ogHomeImageAbsolute = `${siteOrigin()}${OG_FALLBACK_IMAGE_PATH}`;
 
 export const metadata: Metadata = {
-  metadataBase: process.env.PUBLIC_SITE_URL
-    ? new URL(process.env.PUBLIC_SITE_URL)
-    : undefined,
+  // Always absolute so child pages don't inherit localhost / preview hosts in OG tags.
+  metadataBase: new URL(siteOrigin()),
   title: DEFAULT_TITLE,
   description: DEFAULT_DESCRIPTION,
   openGraph: {
@@ -50,7 +49,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: OG_FALLBACK_IMAGE_PATH,
+        url: ogHomeImageAbsolute,
         width: OG_FALLBACK_IMAGE_WIDTH,
         height: OG_FALLBACK_IMAGE_HEIGHT,
         alt: "YourAILens Studios",
@@ -64,16 +63,10 @@ export const metadata: Metadata = {
     description: DEFAULT_DESCRIPTION,
     images: [
       {
-        url: OG_FALLBACK_IMAGE_PATH,
+        url: ogHomeImageAbsolute,
         alt: "YourAILens Studios",
       },
     ],
-  },
-  other: {
-    "og:image:secure_url": ogHomeImageAbsolute,
-    "og:image:type": "image/jpeg",
-    "og:image:width": String(OG_FALLBACK_IMAGE_WIDTH),
-    "og:image:height": String(OG_FALLBACK_IMAGE_HEIGHT),
   },
 };
 

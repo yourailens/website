@@ -1,25 +1,21 @@
-import { NextResponse } from "next/server";
 import { getVaultAvatarBySlug } from "@/lib/yail-vault/load";
+import { OG_THUMB_HEIGHT, OG_THUMB_WIDTH } from "@/lib/seo/og-thumbnail";
 import { renderVaultAvatarOgJpeg } from "@/lib/seo/vault-avatar-og";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const alt = "YAIL Vault AI Avatar";
+export const size = { width: OG_THUMB_WIDTH, height: OG_THUMB_HEIGHT };
+export const contentType = "image/jpeg";
 
-type Ctx = { params: Promise<{ slug: string }> };
+type Props = { params: Promise<{ slug: string }> };
 
-/**
- * GET /api/og/vault-avatar/[slug]
- * Compressed 1200×630 JPEG from the avatar DP for WhatsApp / OG crawlers.
- * Always returns a JPEG (site fallback if portrait missing) so previews never blank out.
- */
-export async function GET(_req: Request, ctx: Ctx) {
-  const { slug } = await ctx.params;
+/** Colocated OG image — WhatsApp scrapes this more reliably than /api routes. */
+export default async function Image({ params }: Props) {
+  const { slug } = await params;
   const avatar = await getVaultAvatarBySlug(slug);
   const jpeg = await renderVaultAvatarOgJpeg(avatar?.portrait_url);
-
-  return new NextResponse(new Uint8Array(jpeg), {
-    status: 200,
+  return new Response(new Uint8Array(jpeg), {
     headers: {
       "Content-Type": "image/jpeg",
       "Content-Length": String(jpeg.byteLength),
