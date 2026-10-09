@@ -145,7 +145,6 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
     else if (isYailVaultAiModelId(raw)) patch.ai_model = raw;
     else return NextResponse.json({ error: "Pick a model from the AI Model list" }, { status: 400 });
   }
-  // Clear stale share thumb when media changes — bake on cut page view or rebuild-og.
   if ("media_url" in patch || "poster_url" in patch || "media_type" in patch || "slug" in patch) {
     patch.og_image_url = null;
   }

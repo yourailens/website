@@ -45,7 +45,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     patch.homepage_hero = Boolean(hero_slot);
   }
 
-  // Clear stale share thumb when media changes — bake on /cut/[slug] view or rebuild-og.
   if ("media_url" in patch || "poster_url" in patch || "media_type" in patch) {
     patch.og_image_url = null;
   }

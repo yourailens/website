@@ -1,9 +1,4 @@
-import {
-  OG_THUMB_HEIGHT,
-  OG_THUMB_WIDTH,
-  buildOgThumbnailProxyUrl,
-  isS3ImageUrlAllowedForOgProxy,
-} from "@/lib/seo/og-thumbnail";
+import { OG_THUMB_HEIGHT, OG_THUMB_WIDTH } from "@/lib/seo/og-thumbnail";
 
 /** Same asset as homepage social preview — optimized JPEG on our origin. */
 export const OG_FALLBACK_IMAGE_PATH = "/images/og-home.jpeg";
@@ -34,8 +29,7 @@ function looksLikeVideoFile(url: string): boolean {
 
 /**
  * Waveyn-style: crawlers (esp. WhatsApp) need one absolute https image URL in og:image.
- * S3 gallery assets: use on-the-fly compressed 1200×630 JPEG via `/api/og/thumbnail` so crawlers
- * do not download huge originals. Other URLs: use as-is.
+ * Use the asset URL as-is — no resize proxy / bake pipeline.
  */
 export function pickOgImageForShare(
   siteOrigin: string,
@@ -58,19 +52,9 @@ export function pickOgImageForShare(
     };
   }
 
-  // Film posters are already 1200×630 JPEG on S3 — no second resize pass.
-  if (isS3ImageUrlAllowedForOgProxy(abs) && abs.includes("/gallery/posters/")) {
+  if (abs.includes("/gallery/posters/")) {
     return {
       url: abs,
-      type: "image/jpeg",
-      width: OG_THUMB_WIDTH,
-      height: OG_THUMB_HEIGHT,
-    };
-  }
-
-  if (isS3ImageUrlAllowedForOgProxy(abs)) {
-    return {
-      url: buildOgThumbnailProxyUrl(siteOrigin, abs),
       type: "image/jpeg",
       width: OG_THUMB_WIDTH,
       height: OG_THUMB_HEIGHT,

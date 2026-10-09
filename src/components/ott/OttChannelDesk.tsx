@@ -181,7 +181,6 @@ export default function OttChannelDesk({
 
   async function shareCut() {
     if (!active) return;
-    // Shareable page with baked OG thumb (hashes don't preview well in WhatsApp).
     const url = `${window.location.origin}/cut/${encodeURIComponent(active.slug)}`;
     try {
       if (navigator.share) {

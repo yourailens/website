@@ -105,35 +105,8 @@ export default function VaultDesk() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [filter, setFilter] = useState<YailVaultCategory | "all">("all");
   const [busy, setBusy] = useState(false);
-  const [bakingOg, setBakingOg] = useState(false);
   const [err, setErr] = useState("");
   const [msg, setMsg] = useState("");
-
-  async function rebuildShareThumbs(all = false) {
-    setBakingOg(true);
-    setErr("");
-    setMsg("");
-    try {
-      const res = await fetch("/api/admin/yail-vault/rebuild-og", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ missingOnly: !all }),
-      });
-      const j = (await res.json().catch(() => ({}))) as {
-        baked?: number;
-        failed?: number;
-        entries?: YailVaultEntry[];
-        error?: string;
-      };
-      if (!res.ok) throw new Error(j.error || "Rebuild failed");
-      if (j.entries) setEntries(j.entries);
-      setMsg(`Share thumbs ready: ${j.baked ?? 0} baked${j.failed ? `, ${j.failed} failed` : ""}.`);
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : "Rebuild failed");
-    } finally {
-      setBakingOg(false);
-    }
-  }
 
   const load = useCallback(async () => {
     const [entriesRes, tagsRes, avatarsRes] = await Promise.all([
@@ -465,17 +438,8 @@ export default function VaultDesk() {
             </h2>
             <p className="mt-2.5 max-w-xl text-sm leading-relaxed text-white/50">
               GenAI labs for AI Filmmaking and AI Ads. Pick an AI Avatar from the directory — manage them in the AI Avatars tab.
-              Share thumbs are baked to S3 (1200×630) for WhatsApp.
             </p>
           </div>
-          <button
-            type="button"
-            disabled={bakingOg || busy}
-            onClick={() => void rebuildShareThumbs(true)}
-            className="rounded-full border border-white/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white/75 transition hover:border-emerald-300/50 hover:text-white disabled:opacity-40"
-          >
-            {bakingOg ? "Baking share thumbs…" : "Bake WhatsApp thumbs"}
-          </button>
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
@@ -753,7 +717,6 @@ export default function VaultDesk() {
                         {entry.category_hero ? " · Page hero" : ""}
                         {entry.genre_hero ? " · Genre hero" : ""}
                         {!entry.published ? " · Draft" : ""}
-                        {entry.og_image_url ? " · Share thumb ready" : " · Share thumb missing"}
                       </p>
                       <p className="mt-1 truncate font-heading text-lg leading-tight">{entry.title}</p>
                       {entry.caption ? (

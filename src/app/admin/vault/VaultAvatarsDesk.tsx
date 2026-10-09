@@ -51,37 +51,8 @@ export default function VaultAvatarsDesk({ avatars, onChange }: Props) {
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [bakingOg, setBakingOg] = useState(false);
   const [err, setErr] = useState("");
   const [msg, setMsg] = useState("");
-
-  async function rebuildShareThumbs(all = false) {
-    setBakingOg(true);
-    setErr("");
-    setMsg("");
-    try {
-      const res = await fetch("/api/admin/yail-vault/avatars/rebuild-og", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ missingOnly: !all }),
-      });
-      const j = (await res.json().catch(() => ({}))) as {
-        baked?: number;
-        failed?: number;
-        avatars?: YailVaultAvatar[];
-        error?: string;
-      };
-      if (!res.ok) throw new Error(j.error || "Rebuild failed");
-      if (j.avatars) onChange(j.avatars);
-      setMsg(
-        `Share thumbs ready: ${j.baked ?? 0} baked${j.failed ? `, ${j.failed} failed` : ""}.`
-      );
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : "Rebuild failed");
-    } finally {
-      setBakingOg(false);
-    }
-  }
 
   useEffect(() => {
     return () => {
@@ -228,27 +199,16 @@ export default function VaultAvatarsDesk({ avatars, onChange }: Props) {
   return (
     <div className="space-y-10">
       <div className={BUBBLE}>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-emerald-300/80">
-              AI Avatars
-            </p>
-            <h2 className="mt-1.5 font-heading text-2xl leading-none tracking-tight">
-              {editingId ? "Edit avatar" : "New avatar"}
-            </h2>
-            <p className="mt-2.5 max-w-xl text-sm leading-relaxed text-white/50">
-              Portrait + name land in the vault directory and in the AI Avatar dropdown on every cut.
-              Share thumbs are baked to S3 (1200×630) for WhatsApp.
-            </p>
-          </div>
-          <button
-            type="button"
-            disabled={bakingOg || busy}
-            onClick={() => void rebuildShareThumbs(true)}
-            className="rounded-full border border-white/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white/75 transition hover:border-emerald-300/50 hover:text-white disabled:opacity-40"
-          >
-            {bakingOg ? "Baking share thumbs…" : "Bake WhatsApp thumbs"}
-          </button>
+        <div>
+          <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-emerald-300/80">
+            AI Avatars
+          </p>
+          <h2 className="mt-1.5 font-heading text-2xl leading-none tracking-tight">
+            {editingId ? "Edit avatar" : "New avatar"}
+          </h2>
+          <p className="mt-2.5 max-w-xl text-sm leading-relaxed text-white/50">
+            Portrait + name land in the vault directory and in the AI Avatar dropdown on every cut.
+          </p>
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
@@ -365,7 +325,6 @@ export default function VaultAvatarsDesk({ avatars, onChange }: Props) {
                   <div className="min-w-0">
                     <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-emerald-300/70">
                       {a.published ? "Published" : "Draft"}
-                      {a.og_image_url ? " · Share thumb ready" : " · Share thumb missing"}
                     </p>
                     <p className="mt-1 truncate font-heading text-lg leading-tight">{a.name}</p>
                     {a.tagline ? (

@@ -8,33 +8,31 @@ import {
   getVaultAvatarsByIds,
   getVaultEntryBySlug,
 } from "@/lib/yail-vault/load";
-import { OG_THUMB_HEIGHT, OG_THUMB_WIDTH } from "@/lib/seo/og-thumbnail";
-import { ensureVaultEntryOgImage, mediaSourceForOg } from "@/lib/seo/bake-og-image";
-import { canonicalPublicUrl, siteOriginForMetadata } from "@/lib/site-url";
+import { canonicalPublicUrl } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ slug: string }> };
+
+function entryPreviewImage(entry: {
+  media_type: string;
+  media_url: string;
+  poster_url: string | null;
+}): string | undefined {
+  if (entry.poster_url?.trim()) return entry.poster_url.trim();
+  if (entry.media_type === "image" && entry.media_url?.trim()) return entry.media_url.trim();
+  return undefined;
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const entry = await getVaultEntryBySlug(slug);
   if (!entry) return { title: "YAIL Vault" };
 
-  const origin = siteOriginForMetadata();
   const title = `${entry.title} | YAIL Vault`;
   const description = entry.caption ?? entry.notes ?? "GenAI lab cut from YAIL Vault.";
-  const stored = await ensureVaultEntryOgImage(entry);
-  const bust = encodeURIComponent(entry.updated_at || entry.id);
   const pageUrl = canonicalPublicUrl(`/vault/${encodeURIComponent(entry.slug)}`);
-  const s3Image = stored ? `${stored}${stored.includes("?") ? "&" : "?"}v=${bust}` : null;
-  const apiImage = `${origin}/api/og/vault-cut/${encodeURIComponent(entry.slug)}?v=${bust}`;
-  const primary = s3Image ?? apiImage;
-  const fallbackSource = mediaSourceForOg({
-    poster_url: entry.poster_url,
-    media_url: entry.media_url,
-    media_type: entry.media_type,
-  });
+  const image = entryPreviewImage(entry);
 
   return {
     title,
@@ -46,36 +44,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: pageUrl,
       siteName: "YourAILens Studios",
       type: entry.media_type === "video" ? "video.other" : "website",
-      images: [
-        {
-          url: primary,
-          secureUrl: primary,
-          alt: `${entry.title} — YAIL Vault`,
-          type: "image/png",
-          width: OG_THUMB_WIDTH,
-          height: OG_THUMB_HEIGHT,
-        },
-        ...(s3Image
-          ? [
-              {
-                url: apiImage,
-                secureUrl: apiImage,
-                alt: `${entry.title} — YAIL Vault`,
-                type: "image/png" as const,
-                width: OG_THUMB_WIDTH,
-                height: OG_THUMB_HEIGHT,
-              },
-            ]
-          : fallbackSource
-            ? []
-            : []),
-      ],
+      ...(image ? { images: [{ url: image, alt: entry.title }] } : {}),
     },
     twitter: {
-      card: "summary_large_image",
+      card: image ? "summary_large_image" : "summary",
       title,
       description,
-      images: [primary],
+      ...(image ? { images: [image] } : {}),
     },
   };
 }
@@ -84,8 +59,6 @@ export default async function VaultEntryPage({ params }: Props) {
   const { slug } = await params;
   const entry = await getVaultEntryBySlug(slug);
   if (!entry) notFound();
-
-  void ensureVaultEntryOgImage(entry);
 
   const [taggedAvatars, filmmaking, ads, directory] = await Promise.all([
     getVaultAvatarsByIds(entry.avatar_ids ?? []),

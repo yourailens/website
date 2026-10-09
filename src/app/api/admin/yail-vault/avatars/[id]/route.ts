@@ -44,7 +44,6 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
     return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
   }
 
-  // Clear stale share thumb when portrait/slug changes — bake on page view or rebuild-og.
   if (typeof patch.portrait_url === "string" || typeof patch.slug === "string") {
     patch.og_image_url = null;
   }

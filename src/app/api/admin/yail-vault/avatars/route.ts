@@ -49,7 +49,6 @@ export async function POST(req: NextRequest) {
     .limit(1);
   const sort_order = (last?.[0]?.sort_order ?? 0) + 1;
 
-  // Share thumbs bake on avatar page view / rebuild-og (keeps this function under Vercel size limits).
   const { data, error } = await db
     .from("yail_vault_avatars")
     .insert({
