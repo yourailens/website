@@ -1,93 +1,9 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { DeferredVideo } from "@/components/media/DeferredVideo";
 import OttSeeAllLink from "@/components/home/OttSeeAllLink";
-
-/** Inner player stays 1080p for bitrate. Scale it to the card so mobile isn't a cropped zoom. */
-const YT_PLAYER_W = 1920;
-const YT_PLAYER_H = 1080;
-const YT_COVER = 1.08;
-const YT_HD = ["hd1080", "hd1440", "hd2160", "highres"] as const;
-
-type YtPlayer = {
-  destroy: () => void;
-  mute: () => void;
-  playVideo: () => void;
-  setPlaybackQuality?: (quality: string) => void;
-  setPlaybackQualityRange?: (min: string, max: string) => void;
-  getPlaybackQuality?: () => string;
-  getAvailableQualityLevels?: () => string[];
-};
-
-type YtNamespace = {
-  Player: new (
-    el: HTMLElement | string,
-    opts: {
-      width: number;
-      height: number;
-      videoId: string;
-      playerVars?: Record<string, string | number>;
-      events?: Record<string, (e: { data?: number; target: YtPlayer }) => void>;
-    }
-  ) => YtPlayer;
-  PlayerState: { BUFFERING: number; PLAYING: number };
-};
-
-declare global {
-  interface Window {
-    YT?: YtNamespace;
-    onYouTubeIframeAPIReady?: () => void;
-  }
-}
-
-let youtubeApi: Promise<YtNamespace> | null = null;
-
-function loadYouTubeApi(): Promise<YtNamespace> {
-  if (typeof window === "undefined") return Promise.reject(new Error("no window"));
-  if (window.YT?.Player) return Promise.resolve(window.YT);
-  if (youtubeApi) return youtubeApi;
-  youtubeApi = new Promise((resolve) => {
-    const done = () => {
-      if (window.YT?.Player) resolve(window.YT);
-    };
-    const prev = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = () => {
-      prev?.();
-      done();
-    };
-    if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
-      const script = document.createElement("script");
-      script.src = "https://www.youtube.com/iframe_api";
-      script.async = true;
-      document.head.appendChild(script);
-    }
-    const poll = window.setInterval(() => {
-      if (window.YT?.Player) {
-        window.clearInterval(poll);
-        done();
-      }
-    }, 40);
-  });
-  return youtubeApi;
-}
-
-function lockYouTubeHd(player: YtPlayer) {
-  const levels = player.getAvailableQualityLevels?.() ?? [];
-  const pick = YT_HD.find((q) => levels.includes(q)) ?? "hd1080";
-  try {
-    player.setPlaybackQualityRange?.(pick, "highres");
-  } catch {
-    /* YouTube may ignore range */
-  }
-  try {
-    player.setPlaybackQuality?.(pick);
-  } catch {
-    /* deprecated no-op on some players */
-  }
-}
 
 export type OttCard = {
   href: string;
@@ -110,99 +26,8 @@ function youtubeId(embed: string) {
   return embed.match(/(?:embed\/|v=|youtu\.be\/)([^?/&]+)/)?.[1] ?? "";
 }
 
-function AutoYoutube({ title, embed }: { title: string; embed: string }) {
-  const id = youtubeId(embed);
-  const boxRef = useRef<HTMLDivElement>(null);
-  const mountRef = useRef<HTMLDivElement>(null);
-  const playerRef = useRef<YtPlayer | null>(null);
-  const [scale, setScale] = useState(0.2);
-
-  useLayoutEffect(() => {
-    const el = boxRef.current;
-    if (!el) return;
-    const update = () => {
-      const w = el.clientWidth;
-      const h = el.clientHeight;
-      if (!w || !h) return;
-      setScale(Math.max((w * YT_COVER) / YT_PLAYER_W, (h * YT_COVER) / YT_PLAYER_H));
-    };
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    const mount = mountRef.current;
-    if (!mount) return;
-
-    loadYouTubeApi().then((YT) => {
-      if (cancelled || !mountRef.current) return;
-      const player = new YT.Player(mountRef.current, {
-        width: YT_PLAYER_W,
-        height: YT_PLAYER_H,
-        videoId: id,
-        playerVars: {
-          autoplay: 1,
-          mute: 1,
-          controls: 0,
-          disablekb: 1,
-          fs: 0,
-          iv_load_policy: 3,
-          modestbranding: 1,
-          playsinline: 1,
-          rel: 0,
-          loop: 1,
-          playlist: id,
-          cc_load_policy: 0,
-          enablejsapi: 1,
-          origin: window.location.origin,
-        },
-        events: {
-          onReady(e) {
-            lockYouTubeHd(e.target);
-            e.target.mute();
-            e.target.playVideo();
-          },
-          onStateChange(e) {
-            if (e.data === YT.PlayerState.BUFFERING || e.data === YT.PlayerState.PLAYING) {
-              lockYouTubeHd(e.target);
-            }
-          },
-          onPlaybackQualityChange(e) {
-            const q = e.target.getPlaybackQuality?.();
-            if (q && !(YT_HD as readonly string[]).includes(q)) lockYouTubeHd(e.target);
-          },
-        },
-      });
-      playerRef.current = player;
-    });
-
-    return () => {
-      cancelled = true;
-      playerRef.current?.destroy();
-      playerRef.current = null;
-    };
-  }, [id]);
-
-  return (
-    <div ref={boxRef} className="absolute inset-0 overflow-hidden bg-black">
-      <div
-        className="absolute left-1/2 top-1/2 origin-center"
-        style={{
-          width: YT_PLAYER_W,
-          height: YT_PLAYER_H,
-          transform: `translate(-50%, -50%) scale(${scale})`,
-        }}
-      >
-        <div ref={mountRef} title={title} className="h-full w-full" />
-      </div>
-      <div className="absolute inset-0 z-[1]" aria-hidden />
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-14 bg-gradient-to-b from-black/70 to-transparent" aria-hidden />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-24 bg-gradient-to-t from-black to-transparent" aria-hidden />
-    </div>
-  );
+function youtubeThumb(id: string) {
+  return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 }
 
 export function RailCard({
@@ -216,37 +41,31 @@ export function RailCard({
 }) {
   const shape = card.aspect ?? aspect;
   const ytId = card.embed ? youtubeId(card.embed) : "";
+  const thumb = card.poster || card.image || (ytId ? youtubeThumb(ytId) : "");
   const watchLabel = card.watchLabel ?? (ytId ? "Watch on YouTube" : null);
 
   const frame = (
     <>
-      {card.embed ? (
-        <AutoYoutube title={card.title} embed={card.embed} />
-      ) : card.video ? (
-        <DeferredVideo
-          src={card.video}
-          poster={card.poster}
-          className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.06]"
-        />
-      ) : card.image ? (
+      {thumb ? (
         <Image
-          src={card.image}
+          src={thumb}
           alt={card.title}
           fill
-          sizes="(min-width: 1024px) 28vw, 70vw"
-          className={`transition duration-500 group-hover:scale-[1.06] ${
-            card.contain ? "object-contain object-bottom" : "object-cover"
-          }`}
+          sizes={fill ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 28vw, 70vw"}
+          className={card.contain ? "object-contain object-bottom" : "object-cover"}
           unoptimized
         />
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-blue-700 to-black" />
       )}
-      {!card.embed ? (
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent opacity-80 transition group-hover:opacity-95" />
-      ) : null}
-      <span className="pointer-events-none absolute left-2 top-2 z-[3] h-3 w-3 border-l border-t border-white/0 transition group-hover:border-blue-400" aria-hidden />
-      <span className="pointer-events-none absolute right-2 top-2 z-[3] h-3 w-3 border-r border-t border-white/0 transition group-hover:border-blue-400" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent opacity-80" />
+      <div className="pointer-events-none absolute inset-0 z-[2] flex items-center justify-center">
+        <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-black/35 text-white/80 shadow-[0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-[2px]">
+          <svg viewBox="0 0 24 24" className="ml-0.5 h-4 w-4 fill-current" aria-hidden>
+            <path d="M8 5.5v13l11-6.5-11-6.5z" />
+          </svg>
+        </span>
+      </div>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] flex items-end justify-between gap-3 p-3 sm:p-4">
         <div className="min-w-0">
           {card.tag ? (
@@ -263,7 +82,7 @@ export function RailCard({
     </>
   );
 
-  const box = `group relative block overflow-hidden bg-zinc-950 ${fill ? "w-full" : "shrink-0"} ${
+  const box = `relative block overflow-hidden bg-zinc-950 ${fill ? "w-full" : "shrink-0"} ${
     fill
       ? "aspect-video"
       : card.featured
@@ -273,8 +92,7 @@ export function RailCard({
           : "aspect-video w-[78vw] sm:w-[48vw] md:w-[36vw] lg:w-[28vw]"
   }`;
 
-  const external = card.href.startsWith("http");
-  if (external) {
+  if (card.href.startsWith("http")) {
     return (
       <a href={card.href} target="_blank" rel="noopener noreferrer" className={box}>
         {frame}

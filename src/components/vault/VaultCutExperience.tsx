@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useCallback, useState } from "react";
 import AiModelBadge from "@/components/vault/AiModelBadge";
+import VaultPendingLink from "@/components/vault/VaultPendingLink";
 import VaultPlayer from "@/components/vault/VaultPlayer";
 import VaultShell, { type VaultShellCounts, type VaultView } from "@/components/vault/VaultShell";
 import type { YailVaultAvatar } from "@/data/yail-vault-avatars";
@@ -12,6 +12,7 @@ import {
   yailVaultCategoryLabel,
   type YailVaultEntry,
 } from "@/data/yail-vault";
+import { canonicalPublicUrl } from "@/lib/site-url";
 
 type Props = {
   entry: YailVaultEntry;
@@ -30,19 +31,11 @@ export default function VaultCutExperience({ entry, avatars, counts, shareUrl }:
   const activeView: VaultView = entry.category;
 
   const share = useCallback(async () => {
-    const url = shareUrl || window.location.href;
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: `${entry.title} · YAIL Vault`,
-          text: entry.caption ?? entry.title,
-          url,
-        });
-        return;
-      }
-    } catch {
-      /* fall through to clipboard */
-    }
+    const url =
+      shareUrl?.startsWith("https://yourailens.studio")
+        ? shareUrl
+        : canonicalPublicUrl(`/vault/${encodeURIComponent(entry.slug)}`);
+
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
@@ -50,7 +43,19 @@ export default function VaultCutExperience({ entry, avatars, counts, shareUrl }:
     } catch {
       /* ignore */
     }
-  }, [entry.caption, entry.title, shareUrl]);
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `${entry.title} · YAIL Vault`,
+          text: entry.caption ?? entry.title,
+          url,
+        });
+      }
+    } catch {
+      /* share cancelled */
+    }
+  }, [entry.caption, entry.slug, entry.title, shareUrl]);
 
   return (
     <VaultShell
@@ -73,12 +78,12 @@ export default function VaultCutExperience({ entry, avatars, counts, shareUrl }:
 
         <div className="relative mx-auto w-[90%] pt-4 sm:pt-5">
           <div>
-            <Link
+            <VaultPendingLink
               href={`/vault?view=${entry.category}`}
               className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-sky-300/80 transition hover:text-sky-200"
             >
               ← {yailVaultCategoryLabel(entry.category)}
-            </Link>
+            </VaultPendingLink>
           </div>
 
           {/* Player — ~5% inset each side (90% width) */}
@@ -125,7 +130,7 @@ export default function VaultCutExperience({ entry, avatars, counts, shareUrl }:
               <div className="mt-6 flex flex-wrap items-center gap-2">
                 <AiModelBadge modelId={entry.ai_model} size="md" />
                 {avatars.map((avatar) => (
-                  <Link
+                  <VaultPendingLink
                     key={avatar.id}
                     href={`/vault/avatars/${avatar.slug}`}
                     className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5 text-xs text-white/80 transition hover:border-white/30 hover:text-white"
@@ -133,7 +138,7 @@ export default function VaultCutExperience({ entry, avatars, counts, shareUrl }:
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={avatar.portrait_url} alt="" className="h-5 w-5 rounded-full object-cover" />
                     {avatar.name}
-                  </Link>
+                  </VaultPendingLink>
                 ))}
                 {subject ? (
                   <span className="rounded-full border border-white/12 px-3 py-1.5 text-xs text-white/60">

@@ -6,9 +6,16 @@ import { HOME_WATCH_TITLES, getHomeWatch, type HomeWatchRail, type HomeWatchTitl
 import { getHomepageFeatureOttCut, getPublishedOttCuts, isHomepageHeroCut } from "@/lib/ott-cuts/load";
 import { ottCutAspectLabel, ottCutYoutubeId, type OttCut } from "@/data/ott-cuts";
 
-function toOttCard(item: HomeWatchTitle): OttCard {
+function channelPathForRail(rail: HomeWatchRail) {
+  if (rail === "ads") return "/ai-ads";
+  if (rail === "community") return "/ai-verse";
+  return "/ai-filmmaking";
+}
+
+function toOttCard(item: HomeWatchTitle, href?: string): OttCard {
   return {
-    href: `/watch/${item.slug}`,
+    // Channel page (same as “Just landed”), not the orphan /watch/[slug] player.
+    href: href ?? channelPathForRail(item.rail),
     title: item.title,
     tag: item.tag,
     video: item.video,
@@ -22,7 +29,11 @@ function toOttCard(item: HomeWatchTitle): OttCard {
 }
 
 function cards(rail: HomeWatchRail) {
-  return HOME_WATCH_TITLES.filter((t) => t.rail === rail).map(toOttCard);
+  const path = channelPathForRail(rail);
+  // Land on the Misc take filter on the channel desk.
+  return HOME_WATCH_TITLES.filter((t) => t.rail === rail).map((item) =>
+    toOttCard(item, `${path}#misc`)
+  );
 }
 
 function cutToCard(cut: OttCut, path: string): OttCard {

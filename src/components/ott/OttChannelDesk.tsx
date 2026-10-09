@@ -16,6 +16,7 @@ type Filter =
   | { id: "all"; label: string }
   | { id: "spots"; label: string }
   | { id: "stills"; label: string }
+  | { id: "misc"; label: string }
   | { id: OttCutAspect; label: string };
 
 const CHANNELS = [
@@ -28,11 +29,12 @@ function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
-function matches(cut: OttCut, filter: Filter) {
-  if (filter.id === "all") return true;
-  if (filter.id === "spots") return cut.media_type === "video";
-  if (filter.id === "stills") return cut.media_type === "image";
-  return cut.aspect_ratio === filter.id;
+function matches(cut: OttCut, filter: Filter, miscIds: Set<string>) {
+  if (filter.id === "misc") return miscIds.has(cut.id);
+  if (filter.id === "all") return !miscIds.has(cut.id);
+  if (filter.id === "spots") return !miscIds.has(cut.id) && cut.media_type === "video";
+  if (filter.id === "stills") return !miscIds.has(cut.id) && cut.media_type === "image";
+  return !miscIds.has(cut.id) && cut.aspect_ratio === filter.id;
 }
 
 function CutThumb({ cut, className }: { cut: OttCut; className?: string }) {
@@ -59,6 +61,8 @@ function CutThumb({ cut, className }: { cut: OttCut; className?: string }) {
 
 export type OttChannelDeskProps = {
   cuts: OttCut[];
+  /** Homepage “Any format” / static clips — shown in a Misc section. */
+  miscCuts?: OttCut[];
   path: string;
   scene: string;
   title: string;
@@ -71,6 +75,7 @@ export type OttChannelDeskProps = {
 
 export default function OttChannelDesk({
   cuts,
+  miscCuts = [],
   path,
   scene,
   title,
@@ -82,7 +87,9 @@ export default function OttChannelDesk({
 }: OttChannelDeskProps) {
   const stageRef = useRef<HTMLDivElement>(null);
   const [filterId, setFilterId] = useState<Filter["id"]>("all");
-  const [activeId, setActiveId] = useState<string | null>(cuts[0]?.id ?? null);
+  const allCuts = useMemo(() => [...cuts, ...miscCuts], [cuts, miscCuts]);
+  const miscIds = useMemo(() => new Set(miscCuts.map((c) => c.id)), [miscCuts]);
+  const [activeId, setActiveId] = useState<string | null>(allCuts[0]?.id ?? null);
   const [mode, setMode] = useState<"preview" | "playing" | "paused">("preview");
   const [copied, setCopied] = useState(false);
 
@@ -96,21 +103,51 @@ export default function OttChannelDesk({
     for (const aspect of aspects) {
       next.push({ id: aspect, label: ottCutAspectLabel(aspect) });
     }
+    if (miscCuts.length) {
+      next.push({ id: "misc", label: "Misc" });
+    }
     return next;
-  }, [cuts, videoFilter]);
+  }, [cuts, miscCuts.length, videoFilter]);
 
   const filter = filters.find((f) => f.id === filterId) ?? filters[0];
-  const visible = useMemo(() => cuts.filter((c) => matches(c, filter)), [cuts, filter]);
+  const visible = useMemo(
+    () => allCuts.filter((c) => matches(c, filter, miscIds)),
+    [allCuts, filter, miscIds]
+  );
   const active = visible.find((c) => c.id === activeId) ?? visible[0] ?? null;
-  const takeNo = active ? pad(cuts.findIndex((c) => c.id === active.id) + 1) : "00";
+  const takeNo = active ? pad(allCuts.findIndex((c) => c.id === active.id) + 1) : "00";
+
+  const openMisc = useCallback(
+    (cut?: OttCut) => {
+      setFilterId("misc");
+      const pick = cut ?? miscCuts[0];
+      if (pick) {
+        setActiveId(pick.id);
+        setMode("preview");
+        window.history.replaceState(null, "", `#${cut ? cut.slug : "misc"}`);
+      } else {
+        window.history.replaceState(null, "", "#misc");
+      }
+      stageRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    },
+    [miscCuts]
+  );
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const slug = window.location.hash.replace(/^#/, "");
     if (!slug) return;
-    const found = cuts.find((c) => c.slug === slug);
-    if (found) setActiveId(found.id);
-  }, [cuts]);
+    if (slug === "misc") {
+      setFilterId("misc");
+      if (miscCuts[0]) setActiveId(miscCuts[0].id);
+      return;
+    }
+    const found = allCuts.find((c) => c.slug === slug);
+    if (found) {
+      if (miscIds.has(found.id)) setFilterId("misc");
+      setActiveId(found.id);
+    }
+  }, [allCuts, miscCuts, miscIds]);
 
   useEffect(() => {
     if (active && !visible.some((c) => c.id === active.id)) {
@@ -122,12 +159,29 @@ export default function OttChannelDesk({
     setMode("preview");
   }, [active?.id]);
 
-  const select = useCallback((cut: OttCut) => {
-    setActiveId(cut.id);
-    setMode("preview");
-    window.history.replaceState(null, "", `#${cut.slug}`);
-    stageRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  }, []);
+  const select = useCallback(
+    (cut: OttCut) => {
+      if (miscIds.has(cut.id)) setFilterId("misc");
+      setActiveId(cut.id);
+      setMode("preview");
+      window.history.replaceState(null, "", `#${cut.slug}`);
+      stageRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    },
+    [miscIds]
+  );
+
+  function filterCount(f: Filter) {
+    return allCuts.filter((c) => matches(c, f, miscIds)).length;
+  }
+
+  function pickFilter(f: Filter) {
+    if (f.id === "misc") {
+      openMisc();
+      return;
+    }
+    setFilterId(f.id);
+    window.history.replaceState(null, "", path);
+  }
 
   async function shareCut() {
     if (!active) return;
@@ -172,15 +226,13 @@ export default function OttChannelDesk({
                 <li key={f.id}>
                   <button
                     type="button"
-                    onClick={() => setFilterId(f.id)}
+                    onClick={() => pickFilter(f)}
                     className={`w-full px-2 py-1.5 text-left text-sm ${
                       filter.id === f.id ? "bg-[#fafafa] font-semibold text-black" : "text-white/75 hover:text-white"
                     }`}
                   >
                     {f.label}
-                    <span className="ml-2 font-mono text-[10px] opacity-50">
-                      {cuts.filter((c) => matches(c, f)).length}
-                    </span>
+                    <span className="ml-2 font-mono text-[10px] opacity-50">{filterCount(f)}</span>
                   </button>
                 </li>
               ))}
@@ -217,12 +269,15 @@ export default function OttChannelDesk({
               <button
                 key={f.id}
                 type="button"
-                onClick={() => setFilterId(f.id)}
+                onClick={() => pickFilter(f)}
                 className={`shrink-0 px-3 py-1.5 text-xs font-semibold ${
                   filter.id === f.id ? "bg-[#fafafa] text-black" : "border border-white/25 text-white/80"
                 }`}
               >
                 {f.label}
+                {f.id === "misc" ? (
+                  <span className="ml-1.5 font-mono text-[10px] opacity-60">{miscCuts.length}</span>
+                ) : null}
               </button>
             ))}
           </div>
@@ -330,10 +385,10 @@ export default function OttChannelDesk({
             <section className="border border-white/15 bg-black/40 px-5 py-16 text-center">
               <p className="font-mono text-[10px] tracking-[0.28em] text-blue-400">NO SIGNAL</p>
               <h2 className="mt-3 font-heading text-3xl leading-none">
-                {cuts.length === 0 ? emptyNone : `No ${filter.label.toLowerCase()} in the sheet`}
+                {allCuts.length === 0 ? emptyNone : `No ${filter.label.toLowerCase()} in the sheet`}
               </h2>
               <p className="mx-auto mt-3 max-w-md text-sm text-white/65">
-                {cuts.length === 0 ? emptyHint : "Try another take filter, or book a call for a new cut."}
+                {allCuts.length === 0 ? emptyHint : "Try another take filter, or book a call for a new cut."}
               </p>
               <Link href="/contact" className="mt-6 inline-flex bg-[#fafafa] px-5 py-2.5 text-sm font-semibold text-black hover:bg-blue-100">
                 Book a call
@@ -342,16 +397,26 @@ export default function OttChannelDesk({
           )}
 
           {visible.length > 0 ? (
-            <section className="mt-10">
+            <section id={filter.id === "misc" ? "misc" : undefined} className="mt-10 scroll-mt-24">
               <div className="mb-4 flex items-end justify-between gap-3">
-                <h3 className="font-heading text-2xl leading-none">{filter.label}</h3>
+                <div>
+                  {filter.id === "misc" ? (
+                    <p className="font-mono text-[10px] tracking-[0.28em] text-blue-400">MISC</p>
+                  ) : null}
+                  <h3 className="font-heading text-2xl leading-none">{filter.label}</h3>
+                  {filter.id === "misc" ? (
+                    <p className="mt-2 max-w-md text-sm text-white/50">
+                      Format samples from the homepage rail.
+                    </p>
+                  ) : null}
+                </div>
                 <Link href="/contact" className="text-sm font-semibold text-white/70 hover:text-white lg:hidden">
                   Book a call
                 </Link>
               </div>
               <ul className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
-                {visible.map((cut) => {
-                  const n = pad(cuts.findIndex((c) => c.id === cut.id) + 1);
+                {visible.map((cut, index) => {
+                  const n = pad(index + 1);
                   const on = active?.id === cut.id;
                   return (
                     <li key={cut.id}>
@@ -360,7 +425,13 @@ export default function OttChannelDesk({
                         onClick={() => select(cut)}
                         className={`group w-full text-left ${on ? "ring-1 ring-white" : ""}`}
                       >
-                        <span className="relative block aspect-video overflow-hidden bg-black">
+                        <span
+                          className={`relative block overflow-hidden bg-black ${
+                            cut.aspect_ratio === "story" || cut.aspect_ratio === "portrait"
+                              ? "aspect-[3/4]"
+                              : "aspect-video"
+                          }`}
+                        >
                           <CutThumb cut={cut} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" />
                           <span className="pointer-events-none absolute left-2 top-2 font-heading text-lg leading-none text-white/90">{n}</span>
                           {on ? (
@@ -372,6 +443,7 @@ export default function OttChannelDesk({
                         </span>
                         <span className="mt-2 block truncate font-heading text-base leading-none sm:text-lg">{cut.caption}</span>
                         <span className="mt-1 block font-mono text-[10px] tracking-[0.18em] text-white/40">
+                          {filter.id === "misc" ? "MISC · " : ""}
                           {cut.media_type === "video" ? videoLabel : "STILL"} · {ottCutAspectLabel(cut.aspect_ratio)}
                         </span>
                       </button>

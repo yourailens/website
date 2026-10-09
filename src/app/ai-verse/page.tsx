@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { homeWatchAsOttCuts } from "@/data/home-watch";
 import { getPublishedOttCuts } from "@/lib/ott-cuts/load";
 import AiVerseExperience from "./AiVerseExperience";
 
@@ -17,5 +18,6 @@ export const metadata: Metadata = {
 
 export default async function AiVersePage() {
   const cuts = await getPublishedOttCuts("community");
-  return <AiVerseExperience cuts={cuts} />;
+  const miscCuts = homeWatchAsOttCuts("community");
+  return <AiVerseExperience cuts={cuts} miscCuts={miscCuts} />;
 }

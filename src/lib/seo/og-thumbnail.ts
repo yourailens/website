@@ -11,8 +11,28 @@ export function isS3ImageUrlAllowedForOgProxy(href: string): boolean {
   try {
     const u = new URL(href);
     if (u.protocol !== "https:") return false;
-    const expected = `${env.bucket}.s3.${env.region}.amazonaws.com`;
-    return u.hostname.toLowerCase() === expected.toLowerCase();
+    const host = u.hostname.toLowerCase();
+    const bucket = env.bucket.toLowerCase();
+    const region = env.region.toLowerCase();
+    const allowed = new Set([
+      `${bucket}.s3.${region}.amazonaws.com`,
+      `${bucket}.s3-${region}.amazonaws.com`,
+      `${bucket}.s3.amazonaws.com`,
+      `s3.${region}.amazonaws.com`,
+      `s3-${region}.amazonaws.com`,
+      "s3.amazonaws.com",
+    ]);
+    if (allowed.has(host)) return true;
+    // Path-style: s3.region.amazonaws.com/bucket/...
+    if (
+      (host === `s3.${region}.amazonaws.com` ||
+        host === `s3-${region}.amazonaws.com` ||
+        host === "s3.amazonaws.com") &&
+      u.pathname.toLowerCase().startsWith(`/${bucket}/`)
+    ) {
+      return true;
+    }
+    return false;
   } catch {
     return false;
   }

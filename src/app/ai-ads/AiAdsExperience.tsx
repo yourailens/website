@@ -3,10 +3,17 @@
 import OttChannelDesk from "@/components/ott/OttChannelDesk";
 import type { OttCut } from "@/data/ott-cuts";
 
-export default function AiAdsExperience({ cuts }: { cuts: OttCut[] }) {
+export default function AiAdsExperience({
+  cuts,
+  miscCuts = [],
+}: {
+  cuts: OttCut[];
+  miscCuts?: OttCut[];
+}) {
   return (
     <OttChannelDesk
       cuts={cuts}
+      miscCuts={miscCuts}
       path="/ai-ads"
       scene="01"
       title="AI ads"

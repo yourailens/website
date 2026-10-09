@@ -80,23 +80,9 @@ export default function MobileHomeApp({ data }: { data: MobileHomeData }) {
               All ads
             </Link>
           </div>
-          <Rail
-            scene="NEW"
-            title="Just landed"
-            clips={data.landed}
-            playingId={playingId}
-            onPlay={setPlayingId}
-            onPause={pause}
-          />
+          <Rail scene="NEW" title="Just landed" clips={data.landed} />
           <div className="mt-8">
-            <Rail
-              scene="FORMAT"
-              title="Any format"
-              clips={data.formats}
-              playingId={playingId}
-              onPlay={setPlayingId}
-              onPause={pause}
-            />
+            <Rail scene="FORMAT" title="Any format" clips={data.formats} />
           </div>
         </section>
 
@@ -124,18 +110,12 @@ export default function MobileHomeApp({ data }: { data: MobileHomeData }) {
                 onPlay={setPlayingId}
                 onPause={pause}
                 large
+                thumbnailOnly
               />
             </div>
           ) : null}
 
-          <Rail
-            scene="NEW"
-            title="On the lot"
-            clips={data.lot}
-            playingId={playingId}
-            onPlay={setPlayingId}
-            onPause={pause}
-          />
+          <Rail scene="NEW" title="On the lot" clips={data.lot} />
         </section>
 
         <section id="community">
@@ -157,6 +137,7 @@ export default function MobileHomeApp({ data }: { data: MobileHomeData }) {
                   playingId={playingId}
                   onPlay={setPlayingId}
                   onPause={pause}
+                  thumbnailOnly
                 />
               </div>
             ))}
@@ -204,16 +185,10 @@ function Rail({
   scene,
   title,
   clips,
-  playingId,
-  onPlay,
-  onPause,
 }: {
   scene: string;
   title: string;
   clips: MobileClip[];
-  playingId: string | null;
-  onPlay: (id: string) => void;
-  onPause: () => void;
 }) {
   if (!clips.length) return null;
   return (
@@ -225,9 +200,10 @@ function Rail({
           <GlossyPlayCard
             key={clip.id}
             clip={clip}
-            playingId={playingId}
-            onPlay={onPlay}
-            onPause={onPause}
+            playingId={null}
+            onPlay={() => {}}
+            onPause={() => {}}
+            thumbnailOnly
           />
         ))}
       </div>

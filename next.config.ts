@@ -16,6 +16,11 @@ const remotePatterns: NonNullable<NonNullable<NextConfig["images"]>["remotePatte
     hostname: "cdn.openai.com",
     pathname: "/**",
   },
+  {
+    protocol: "https",
+    hostname: "i.ytimg.com",
+    pathname: "/**",
+  },
 ];
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

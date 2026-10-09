@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import AiModelBadge from "@/components/vault/AiModelBadge";
+import VaultPendingLink from "@/components/vault/VaultPendingLink";
 import type { YailVaultAvatar } from "@/data/yail-vault-avatars";
 import {
   YAIL_VAULT_CATEGORIES,
@@ -98,13 +98,13 @@ function VaultOttHero({ entry }: { entry: YailVaultEntry }) {
         ) : null}
 
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          <Link
+          <VaultPendingLink
             href={`/vault/${entry.slug}`}
             className="inline-flex items-center gap-2 rounded-md bg-[#fafafa] px-5 py-2.5 text-sm font-semibold text-black shadow-[0_8px_24px_-8px_rgba(0,0,0,0.65)] transition hover:bg-sky-100"
           >
             <PlayGlyph size={12} />
             Open
-          </Link>
+          </VaultPendingLink>
           <AiModelBadge modelId={entry.ai_model} size="md" />
         </div>
       </div>
@@ -120,7 +120,7 @@ function VaultRailCard({ entry }: { entry: YailVaultEntry }) {
   const isVideo = entry.media_type === "video";
 
   return (
-    <Link
+    <VaultPendingLink
       href={`/vault/${entry.slug}`}
       className="group relative block h-[9.5rem] w-[16.5rem] shrink-0 overflow-hidden rounded-md bg-zinc-900 sm:h-[11rem] sm:w-[19.5rem] lg:h-[12rem] lg:w-[21.5rem]"
     >
@@ -166,7 +166,7 @@ function VaultRailCard({ entry }: { entry: YailVaultEntry }) {
           </div>
         ) : null}
       </div>
-    </Link>
+    </VaultPendingLink>
   );
 }
 
@@ -298,7 +298,7 @@ function AvatarJumbotron({
       >
         {/* Portrait stage — single frame, no overlapping deco cards */}
         <div className={`relative shrink-0 ${flip ? "lg:pl-10" : "lg:pr-10"}`}>
-          <Link
+          <VaultPendingLink
             href={`/vault/avatars/${avatar.slug}`}
             className="group relative block overflow-hidden rounded-[1.15rem] bg-zinc-900 ring-1 ring-white/10 shadow-[0_32px_80px_-28px_rgba(0,0,0,0.95)] transition hover:ring-white/25"
           >
@@ -319,7 +319,7 @@ function AvatarJumbotron({
                 </span>
               ) : null}
             </div>
-          </Link>
+          </VaultPendingLink>
         </div>
 
         {/* Copy */}
@@ -338,9 +338,12 @@ function AvatarJumbotron({
           </div>
 
           <h2 className="font-body text-[clamp(2.6rem,6vw,4.6rem)] font-semibold leading-[0.92] tracking-tight text-white">
-            <Link href={`/vault/avatars/${avatar.slug}`} className="transition hover:text-sky-100">
+            <VaultPendingLink
+              href={`/vault/avatars/${avatar.slug}`}
+              className="inline-block transition hover:text-sky-100"
+            >
               {avatar.name}
-            </Link>
+            </VaultPendingLink>
           </h2>
 
           {avatar.tagline ? (
@@ -364,12 +367,12 @@ function AvatarJumbotron({
           ) : null}
 
           <div className={`mt-8 ${flip ? "lg:flex lg:justify-end" : ""}`}>
-            <Link
+            <VaultPendingLink
               href={`/vault/avatars/${avatar.slug}`}
               className="inline-flex items-center gap-2 rounded-md bg-[#fafafa] px-5 py-2.5 text-sm font-semibold text-black shadow-[0_8px_24px_-8px_rgba(0,0,0,0.65)] transition hover:bg-sky-100"
             >
               Open profile
-            </Link>
+            </VaultPendingLink>
           </div>
         </div>
       </div>
@@ -545,19 +548,8 @@ export default function VaultExperience({
     </nav>
   );
 
-  const foot = (
-    <div className="shrink-0 space-y-2 border-t border-white/10 p-3">
-      <Link
-        href="/"
-        className="flex w-full items-center justify-center rounded-2xl border border-white/15 bg-white/[0.03] px-3 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70 transition hover:border-white/40 hover:text-white"
-      >
-        Studio home
-      </Link>
-    </div>
-  );
-
   const brand = (
-    <Link href="/vault" className="block rounded-2xl px-1 py-1 transition hover:bg-white/[0.03]">
+    <div className="select-none">
       <div className="flex items-center gap-2.5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/images/logo_yail.png" alt="" className="h-7 w-auto" />
@@ -566,15 +558,48 @@ export default function VaultExperience({
           <p className="mt-0.5 font-heading text-xl leading-none tracking-tight">Vault</p>
         </div>
       </div>
-    </Link>
+    </div>
+  );
+
+  const sidebarHeader = (closeBtn?: ReactNode) => (
+    <div className="shrink-0 border-b border-white/10">
+      <div className="relative flex items-center gap-1 overflow-hidden px-3 py-2.5">
+        {/* Soft sky wash — hint, not a billboard */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-sky-500/[0.14] via-sky-400/[0.05] to-transparent"
+        />
+        <div aria-hidden className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-sky-400/40 via-sky-400/10 to-transparent" />
+        <VaultPendingLink
+          href="/"
+          className="group relative z-[1] flex min-w-0 flex-1 items-center gap-2.5 rounded-xl px-2 py-1.5 transition hover:bg-white/[0.04]"
+        >
+          <span
+            aria-hidden
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-sky-300/25 bg-sky-400/10 font-mono text-[11px] text-sky-200/90 transition group-hover:border-sky-300/45 group-hover:bg-sky-400/16 group-hover:text-sky-100"
+          >
+            ←
+          </span>
+          <span className="min-w-0">
+            <span className="block text-[12px] font-medium tracking-tight text-sky-100/90 transition group-hover:text-white">
+              Back to Studios
+            </span>
+            <span className="mt-0.5 block font-mono text-[9px] uppercase tracking-[0.2em] text-sky-200/40 transition group-hover:text-sky-200/65">
+              Studio home
+            </span>
+          </span>
+        </VaultPendingLink>
+        {closeBtn ? <div className="relative z-[1] shrink-0">{closeBtn}</div> : null}
+      </div>
+      <div className="px-5 py-4">{brand}</div>
+    </div>
   );
 
   return (
     <div className="vault-shell flex h-[100dvh] max-h-[100dvh] overflow-hidden bg-black font-body text-white">
       <aside className="hidden h-full w-[15.5rem] shrink-0 flex-col border-r border-white/10 bg-[#0b0b0b] lg:flex">
-        <div className="shrink-0 px-5 pb-3 pt-6">{brand}</div>
+        {sidebarHeader()}
         {nav}
-        {foot}
       </aside>
 
       <div
@@ -592,19 +617,17 @@ export default function VaultExperience({
             menuOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <div className="flex shrink-0 items-center justify-between px-5 pb-3 pt-5">
-            {brand}
+          {sidebarHeader(
             <button
               type="button"
               onClick={() => setMenuOpen(false)}
-              className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/20 text-white/70"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/12 text-white/50 transition hover:border-white/25 hover:text-white/80"
               aria-label="Close"
             >
               ×
             </button>
-          </div>
+          )}
           {nav}
-          {foot}
         </aside>
       </div>
 
@@ -632,12 +655,12 @@ export default function VaultExperience({
               </span>
             </p>
           </div>
-          <Link
+          <VaultPendingLink
             href="/"
             className="hidden rounded-md border border-white/20 bg-black/35 px-3.5 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70 backdrop-blur-sm transition hover:border-white/40 hover:text-white sm:inline-flex"
           >
             Studio
-          </Link>
+          </VaultPendingLink>
           </div>
         </header>
 

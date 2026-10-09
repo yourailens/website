@@ -7,6 +7,7 @@ import {
 } from "@/lib/seo/og-image";
 import "./globals.css";
 import SiteFooter from "@/components/SiteFooter";
+import NavigationPendingGuard from "@/components/NavigationPendingGuard";
 import OttThemeSync from "@/components/OttThemeSync";
 import { SITE_CONTACT_EMAIL, SITE_LOCATION_LINE } from "@/lib/site-contact";
 
@@ -125,6 +126,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <OttThemeSync />
+        <NavigationPendingGuard />
         {children}
         <SiteFooter />
       </body>

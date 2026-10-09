@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { homeWatchAsOttCuts } from "@/data/home-watch";
 import { getPublishedOttCuts } from "@/lib/ott-cuts/load";
 import AiAdsExperience from "./AiAdsExperience";
 
@@ -17,5 +18,6 @@ export const metadata: Metadata = {
 
 export default async function AiAdsPage() {
   const cuts = await getPublishedOttCuts("ads");
-  return <AiAdsExperience cuts={cuts} />;
+  const miscCuts = homeWatchAsOttCuts("ads");
+  return <AiAdsExperience cuts={cuts} miscCuts={miscCuts} />;
 }

@@ -7,20 +7,17 @@ import {
   getVaultAvatarsByIds,
   getVaultEntryBySlug,
 } from "@/lib/yail-vault/load";
+import { canonicalPublicUrl } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ slug: string }> };
 
-function siteOrigin() {
-  return (process.env.PUBLIC_SITE_URL?.trim() || "https://yourailens.studio").replace(/\/+$/, "");
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const entry = await getVaultEntryBySlug(slug);
   if (!entry) return { title: "YAIL Vault" };
-  const url = `${siteOrigin()}/vault/${encodeURIComponent(entry.slug)}`;
+  const url = canonicalPublicUrl(`/vault/${encodeURIComponent(entry.slug)}`);
   return {
     title: `${entry.title} | YAIL Vault`,
     description: entry.caption ?? entry.notes ?? "GenAI lab cut from YAIL Vault.",
@@ -63,7 +60,7 @@ export default async function VaultEntryPage({ params }: Props) {
     avatars: directory.length,
   };
 
-  const shareUrl = `${siteOrigin()}/vault/${encodeURIComponent(entry.slug)}`;
+  const shareUrl = canonicalPublicUrl(`/vault/${encodeURIComponent(entry.slug)}`);
 
   return (
     <VaultCutExperience

@@ -38,6 +38,19 @@ html {
   font-family: var(--font-comfortaa), system-ui, sans-serif;
 }
 
+/* Site-wide nav click feedback (NavigationPendingGuard) — no spinner, just disable */
+html[data-navigating] {
+  cursor: wait;
+}
+
+a[data-nav-pending] {
+  pointer-events: none !important;
+  cursor: wait !important;
+  opacity: 0.45;
+  filter: saturate(0.9);
+  transition: opacity 0.12s ease;
+}
+
 html:has(.ott-home),
 html:has(.ott-home) body,
 html:has(.vault-shell),

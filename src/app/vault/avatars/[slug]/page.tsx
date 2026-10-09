@@ -7,26 +7,24 @@ import {
   getPublishedVaultEntriesForAvatar,
   getVaultAvatarBySlug,
 } from "@/lib/yail-vault/load";
-import { pickOgImageForShare } from "@/lib/seo/og-image";
+import { OG_THUMB_HEIGHT, OG_THUMB_WIDTH } from "@/lib/seo/og-thumbnail";
+import { canonicalPublicUrl, siteOriginForMetadata } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ slug: string }> };
-
-function siteOrigin() {
-  return (process.env.PUBLIC_SITE_URL?.trim() || "https://yourailens.studio").replace(/\/+$/, "");
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const avatar = await getVaultAvatarBySlug(slug);
   if (!avatar) return { title: "AI Avatar | YAIL Vault" };
 
-  const url = `${siteOrigin()}/vault/avatars/${encodeURIComponent(avatar.slug)}`;
+  const url = canonicalPublicUrl(`/vault/avatars/${encodeURIComponent(avatar.slug)}`);
   const title = `${avatar.name} | YAIL Vault`;
   const description =
     avatar.tagline ?? avatar.bio ?? `${avatar.name} — AI Avatar character file from YAIL Vault.`;
-  const og = pickOgImageForShare(siteOrigin(), avatar.portrait_url);
+  // Short path on our origin — sharp compresses the DP to 1200×630 for WhatsApp.
+  const ogImage = `${siteOriginForMetadata()}/api/og/vault-avatar/${encodeURIComponent(avatar.slug)}`;
 
   return {
     title,
@@ -36,14 +34,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       url,
-      type: "profile",
+      siteName: "YourAILens Studios",
+      type: "website",
       images: [
         {
-          url: og.url,
-          secureUrl: og.url.startsWith("https://") ? og.url : undefined,
+          url: ogImage,
+          secureUrl: ogImage,
           alt: `${avatar.name} — YAIL Vault AI Avatar`,
-          type: og.type,
-          ...(og.width != null && og.height != null ? { width: og.width, height: og.height } : {}),
+          type: "image/jpeg",
+          width: OG_THUMB_WIDTH,
+          height: OG_THUMB_HEIGHT,
         },
       ],
     },
@@ -51,14 +51,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: [{ url: og.url, alt: `${avatar.name} — YAIL Vault AI Avatar` }],
+      images: [{ url: ogImage, alt: `${avatar.name} — YAIL Vault AI Avatar` }],
     },
     other: {
-      "og:image:secure_url": og.url,
-      "og:image:type": og.type,
-      ...(og.width != null && og.height != null
-        ? { "og:image:width": String(og.width), "og:image:height": String(og.height) }
-        : {}),
+      "og:image:secure_url": ogImage,
+      "og:image:type": "image/jpeg",
+      "og:image:width": String(OG_THUMB_WIDTH),
+      "og:image:height": String(OG_THUMB_HEIGHT),
     },
   };
 }
@@ -83,7 +82,7 @@ export default async function VaultAvatarPage({ params }: Props) {
     avatars: directory.length,
   };
 
-  const shareUrl = `${siteOrigin()}/vault/avatars/${encodeURIComponent(avatar.slug)}`;
+  const shareUrl = canonicalPublicUrl(`/vault/avatars/${encodeURIComponent(avatar.slug)}`);
 
   return (
     <VaultAvatarExperience avatar={avatar} cuts={cuts} counts={counts} shareUrl={shareUrl} />

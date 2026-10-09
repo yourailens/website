@@ -20,13 +20,20 @@ function ottPoster(slug: string): string {
   return `/videos/ott-posters/${slug}-poster.jpg`;
 }
 
+function channelPathForRail(rail: HomeWatchTitle["rail"]) {
+  if (rail === "ads") return "/ai-ads";
+  if (rail === "community") return "/ai-verse";
+  return "/ai-filmmaking";
+}
+
 function fromWatch(item: HomeWatchTitle, section: string): MobileClip {
   return {
     id: item.slug,
     title: item.title,
     tag: item.tag,
     section,
-    href: item.watchUrl ?? `/watch/${item.slug}`,
+    // Open the channel’s Misc take filter.
+    href: `${channelPathForRail(item.rail)}#misc`,
     poster:
       item.poster ||
       (item.youtubeId ? `https://i.ytimg.com/vi/${item.youtubeId}/hqdefault.jpg` : undefined) ||

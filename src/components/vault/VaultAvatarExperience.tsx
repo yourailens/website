@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useCallback, useState } from "react";
 import AiModelBadge from "@/components/vault/AiModelBadge";
+import VaultPendingLink from "@/components/vault/VaultPendingLink";
 import VaultShell, { type VaultShellCounts } from "@/components/vault/VaultShell";
 import type { YailVaultAvatar } from "@/data/yail-vault-avatars";
 import {
@@ -11,6 +11,7 @@ import {
   yailVaultCategoryLabel,
   type YailVaultEntry,
 } from "@/data/yail-vault";
+import { canonicalPublicUrl } from "@/lib/site-url";
 
 type Props = {
   avatar: YailVaultAvatar;
@@ -35,19 +36,12 @@ export default function VaultAvatarExperience({ avatar, cuts, counts, shareUrl }
   const [copied, setCopied] = useState(false);
 
   const share = useCallback(async () => {
-    const url = shareUrl || window.location.href;
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: `${avatar.name} · YAIL Vault`,
-          text: avatar.tagline ?? `${avatar.name} — AI Avatar in YAIL Vault`,
-          url,
-        });
-        return;
-      }
-    } catch {
-      /* fall through to clipboard */
-    }
+    // Always the public domain — never preview/localhost from window.location.
+    const url =
+      shareUrl?.startsWith("https://yourailens.studio")
+        ? shareUrl
+        : canonicalPublicUrl(`/vault/avatars/${encodeURIComponent(avatar.slug)}`);
+
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
@@ -55,7 +49,19 @@ export default function VaultAvatarExperience({ avatar, cuts, counts, shareUrl }
     } catch {
       /* ignore */
     }
-  }, [avatar.name, avatar.tagline, shareUrl]);
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `${avatar.name} · YAIL Vault`,
+          text: avatar.tagline ?? `${avatar.name} — AI Avatar in YAIL Vault`,
+          url,
+        });
+      }
+    } catch {
+      /* share cancelled */
+    }
+  }, [avatar.name, avatar.slug, avatar.tagline, shareUrl]);
 
   return (
     <VaultShell
@@ -79,12 +85,12 @@ export default function VaultAvatarExperience({ avatar, cuts, counts, shareUrl }
 
         <div className="relative mx-auto w-[90%] pt-4 sm:pt-5">
           <div>
-            <Link
+            <VaultPendingLink
               href="/vault?view=avatars"
               className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-sky-300/80 transition hover:text-sky-200"
             >
               ← AI Avatars
-            </Link>
+            </VaultPendingLink>
           </div>
 
           <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] lg:items-start lg:gap-10">
@@ -152,7 +158,7 @@ export default function VaultAvatarExperience({ avatar, cuts, counts, shareUrl }
                   const genre = tagsOfKind(entry, "genre")[0]?.name;
                   return (
                     <li key={entry.id}>
-                      <Link
+                      <VaultPendingLink
                         href={`/vault/${entry.slug}`}
                         className="group block overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] transition hover:border-white/25"
                       >
@@ -186,7 +192,7 @@ export default function VaultAvatarExperience({ avatar, cuts, counts, shareUrl }
                           <p className="truncate text-sm font-semibold text-white">{entry.title}</p>
                           {entry.ai_model ? <AiModelBadge modelId={entry.ai_model} /> : null}
                         </div>
-                      </Link>
+                      </VaultPendingLink>
                     </li>
                   );
                 })}

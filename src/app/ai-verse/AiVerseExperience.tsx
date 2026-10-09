@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Navbar from "@/components/Navbar";
 import {
   ottCutAspectLabel,
@@ -131,9 +131,28 @@ function Lightbox({ cut, onClose }: { cut: OttCut; onClose: () => void }) {
   );
 }
 
-export default function AiVerseExperience({ cuts }: { cuts: OttCut[] }) {
+export default function AiVerseExperience({
+  cuts,
+  miscCuts = [],
+}: {
+  cuts: OttCut[];
+  miscCuts?: OttCut[];
+}) {
   const [active, setActive] = useState<OttCut | null>(null);
   const featured = useMemo(() => cuts.slice(0, 12), [cuts]);
+  const allCuts = useMemo(() => [...cuts, ...miscCuts], [cuts, miscCuts]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const slug = window.location.hash.replace(/^#/, "");
+    if (!slug) return;
+    if (slug === "misc") {
+      document.getElementById("misc")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    const found = allCuts.find((c) => c.slug === slug);
+    if (found) setActive(found);
+  }, [allCuts]);
 
   return (
     <div className="ott-home min-h-screen bg-black font-body text-white">
@@ -243,9 +262,19 @@ export default function AiVerseExperience({ cuts }: { cuts: OttCut[] }) {
                 Community cuts
               </h2>
             </div>
-            <p className="max-w-xs text-sm text-white/45">
-              Work shared by the lot — published from the studio desk.
-            </p>
+            <div className="flex flex-col items-end gap-3">
+              <p className="max-w-xs text-right text-sm text-white/45">
+                Work shared by the lot — published from the studio desk.
+              </p>
+              {miscCuts.length ? (
+                <a
+                  href="#misc"
+                  className="rounded-md border border-sky-400/40 bg-sky-500/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-sky-200 transition hover:border-sky-300/60 hover:bg-sky-500/16"
+                >
+                  Misc →
+                </a>
+              ) : null}
+            </div>
           </div>
 
           {featured.length ? (
@@ -271,6 +300,29 @@ export default function AiVerseExperience({ cuts }: { cuts: OttCut[] }) {
               </Link>
             </div>
           )}
+
+          {miscCuts.length ? (
+            <div id="misc" className="mt-16 scroll-mt-24 border-t border-white/10 pt-14">
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-sky-400/80">Misc</p>
+                  <h3 className="mt-3 font-body text-[clamp(1.5rem,3vw,2.1rem)] font-semibold leading-tight tracking-tight">
+                    Misc
+                  </h3>
+                  <p className="mt-2 max-w-md text-sm text-white/45">
+                    Floor clips from the homepage community rail.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-8 columns-1 gap-3 sm:columns-2 lg:columns-3 sm:gap-4">
+                {miscCuts.map((cut) => (
+                  <div key={cut.id} className="mb-3 break-inside-avoid sm:mb-4">
+                    <ShowcaseCard cut={cut} onOpen={() => setActive(cut)} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
       </section>
 

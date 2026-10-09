@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { attachPlaybackHold } from "@/components/media/playback-hold";
 import type { MobileClip } from "./types";
 
@@ -17,6 +18,8 @@ type GlossyPlayCardProps = {
   soundMuted?: boolean;
   hideSoundButton?: boolean;
   onPictureClick?: () => void;
+  /** Poster + play affordance that links out — no inline playback. */
+  thumbnailOnly?: boolean;
 };
 
 export default function GlossyPlayCard({
@@ -31,8 +34,9 @@ export default function GlossyPlayCard({
   soundMuted,
   hideSoundButton = false,
   onPictureClick,
+  thumbnailOnly = false,
 }: GlossyPlayCardProps) {
-  const isPlaying = playingId === clip.id;
+  const isPlaying = !thumbnailOnly && playingId === clip.id;
   const cardRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const stillRef = useRef<HTMLCanvasElement>(null);
@@ -48,14 +52,15 @@ export default function GlossyPlayCard({
   const mediaMounted = warm || isPlaying || hasFrame;
 
   useEffect(() => {
+    if (thumbnailOnly) return;
     if (large && canPlay) setWarm(true);
-  }, [large, canPlay]);
+  }, [large, canPlay, thumbnailOnly]);
 
   useEffect(() => {
-    if (!autoPlay || !canPlay) return;
+    if (thumbnailOnly || !autoPlay || !canPlay) return;
     setWarm(true);
     onPlay(clip.id);
-  }, [autoPlay, canPlay, clip.id, onPlay]);
+  }, [autoPlay, canPlay, clip.id, onPlay, thumbnailOnly]);
 
   useEffect(() => {
     if (soundMuted === undefined) return;
@@ -96,7 +101,7 @@ export default function GlossyPlayCard({
 
   useEffect(() => {
     const node = cardRef.current;
-    if (!node || !canPlay || large) return;
+    if (!node || thumbnailOnly || !canPlay || large) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) setWarm(true);
@@ -105,7 +110,7 @@ export default function GlossyPlayCard({
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [canPlay, large]);
+  }, [canPlay, large, thumbnailOnly]);
 
   useEffect(() => {
     const syncFullscreen = () => {
@@ -292,6 +297,61 @@ export default function GlossyPlayCard({
       ? "aspect-[3/4]"
       : "aspect-video";
   const fitClass = isFullscreen ? "object-contain" : "object-cover";
+
+  if (thumbnailOnly) {
+    const body = (
+      <>
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/18 via-transparent to-black/30" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/15 to-transparent" />
+        {clip.poster && !posterFailed ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={clip.poster}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+            loading={large ? "eager" : "lazy"}
+            decoding="async"
+            onError={() => setPosterFailed(true)}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-zinc-700 via-zinc-900 to-black" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full border border-white/25 bg-black/35 text-white/80 shadow-[0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-[2px]">
+            <svg viewBox="0 0 24 24" className="ml-0.5 h-4 w-4 fill-current" aria-hidden>
+              <path d="M8 5.5v13l11-6.5-11-6.5z" />
+            </svg>
+          </span>
+        </div>
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-4">
+          {clip.tag ? (
+            <p className="font-mono text-[9px] tracking-[0.22em] text-blue-200/90">{clip.tag}</p>
+          ) : null}
+          <p className={`mt-1 font-semibold leading-tight tracking-tight text-white drop-shadow ${large ? "text-lg" : "text-sm"}`}>
+            {clip.title}
+          </p>
+          <p className="mt-1 text-[11px] text-white/50">{clip.section}</p>
+        </div>
+      </>
+    );
+
+    const shell = `relative overflow-hidden rounded-[1.75rem] border border-white/18 bg-white/[0.07] shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur-xl ${aspectClass}`;
+
+    if (clip.href.startsWith("http")) {
+      return (
+        <a href={clip.href} target="_blank" rel="noreferrer" className={`block ${shell}`} aria-label={clip.title}>
+          {body}
+        </a>
+      );
+    }
+
+    return (
+      <Link href={clip.href} className={`block ${shell}`} aria-label={clip.title}>
+        {body}
+      </Link>
+    );
+  }
 
   return (
     <article

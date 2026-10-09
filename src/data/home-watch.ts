@@ -1,3 +1,5 @@
+import type { OttCut, OttCutAspect, OttCutCategory } from "@/data/ott-cuts";
+
 export type HomeWatchRail = "ads" | "films" | "community";
 
 export type HomeWatchTitle = {
@@ -145,6 +147,36 @@ export const HOME_WATCH_TITLES: HomeWatchTitle[] = [
     poster: "/videos/cs1-poster.jpg",
   },
 ];
+
+/** Static homepage rail clips as OttCut rows for channel Misc sections. */
+export function homeWatchAsOttCuts(rail: HomeWatchRail): OttCut[] {
+  const category: OttCutCategory =
+    rail === "films" ? "films" : rail === "community" ? "community" : "ads";
+
+  return HOME_WATCH_TITLES.filter((t) => t.rail === rail).map((item, index) => {
+    const aspect: OttCutAspect = item.aspect === "poster" ? "portrait" : "landscape";
+    const media_url = item.youtubeId
+      ? `https://www.youtube.com/watch?v=${item.youtubeId}`
+      : item.video ?? item.poster ?? "";
+    return {
+      id: `home-watch-${item.slug}`,
+      slug: item.slug,
+      caption: item.title,
+      description: item.description,
+      category,
+      media_type: item.video || item.youtubeId ? "video" : "image",
+      media_url,
+      poster_url: item.poster ?? null,
+      aspect_ratio: aspect,
+      published: true,
+      homepage_feature: false,
+      homepage_hero: false,
+      hero_slot: null,
+      sort_order: index,
+      created_at: "2020-01-01T00:00:00.000Z",
+    };
+  });
+}
 
 export function getHomeWatch(slug: string) {
   return HOME_WATCH_TITLES.find((t) => t.slug === slug) ?? null;
