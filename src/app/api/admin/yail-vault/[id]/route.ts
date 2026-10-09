@@ -7,6 +7,8 @@ import { createServiceRoleClient } from "@/lib/supabase/admin";
 import {
   adminGetAllVaultEntries,
   clearOtherFeatured,
+  parseAvatarIds,
+  setEntryAvatars,
   setEntryTags,
   uniqueVaultSlug,
 } from "@/lib/yail-vault/load";
@@ -74,11 +76,6 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
     else if (isYailVaultAiModelId(raw)) patch.ai_model = raw;
     else return NextResponse.json({ error: "Pick a model from the AI Model list" }, { status: 400 });
   }
-  if ("avatar_id" in b) {
-    const raw = typeof b.avatar_id === "string" ? b.avatar_id.trim() : "";
-    patch.avatar_id = raw || null;
-  }
-
   if (Object.keys(patch).length) {
     const { error } = await db.from("yail_vault_entries").update(patch).eq("id", id);
     if (error) {
@@ -96,6 +93,24 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
 
   if ("genre" in b || "subject" in b || "labels" in b || "avatar" in b) {
     await setEntryTags(db, id, parseTagInputs(b));
+  }
+
+  const avatarIds = parseAvatarIds(b);
+  if (avatarIds !== undefined) {
+    try {
+      await setEntryAvatars(db, id, avatarIds);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Avatar link failed";
+      const missing = /does not exist|schema cache|yail_vault_entry_avatars/i.test(msg);
+      return NextResponse.json(
+        {
+          error: missing
+            ? "Run supabase/migrations/079_yail_vault_entry_avatars.sql in the Supabase SQL editor first."
+            : msg,
+        },
+        { status: 400 }
+      );
+    }
   }
 
   revalidateVault();

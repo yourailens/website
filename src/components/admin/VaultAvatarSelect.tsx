@@ -8,9 +8,9 @@ const FIELD =
 
 type Props = {
   label?: string;
-  value: string;
+  values: string[];
   avatars: YailVaultAvatar[];
-  onChange: (avatarId: string) => void;
+  onChange: (avatarIds: string[]) => void;
 };
 
 function Row({ avatar, active }: { avatar: YailVaultAvatar; active?: boolean }) {
@@ -36,10 +36,10 @@ function Row({ avatar, active }: { avatar: YailVaultAvatar; active?: boolean }) 
   );
 }
 
-/** Picks from the vault avatar directory (maps to entry.avatar_id). */
+/** Multi-select from the vault avatar directory (maps to entry.avatar_ids). */
 export default function VaultAvatarSelect({
-  label = "AI Avatar",
-  value,
+  label = "AI Avatars",
+  values,
   avatars,
   onChange,
 }: Props) {
@@ -48,7 +48,11 @@ export default function VaultAvatarSelect({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
 
-  const selected = avatars.find((a) => a.id === value) ?? null;
+  const selected = useMemo(
+    () => values.map((id) => avatars.find((a) => a.id === id)).filter((a): a is YailVaultAvatar => Boolean(a)),
+    [values, avatars]
+  );
+  const selectedSet = useMemo(() => new Set(values), [values]);
   const published = useMemo(() => avatars.filter((a) => a.published), [avatars]);
 
   useEffect(() => {
@@ -75,17 +79,41 @@ export default function VaultAvatarSelect({
     );
   }, [published, query]);
 
-  function pick(id: string) {
-    onChange(id);
-    setOpen(false);
-    setQuery("");
+  function toggle(id: string) {
+    if (selectedSet.has(id)) onChange(values.filter((v) => v !== id));
+    else onChange([...values, id]);
+  }
+
+  function remove(id: string) {
+    onChange(values.filter((v) => v !== id));
   }
 
   return (
-    <div ref={rootRef} className="relative block">
+    <div ref={rootRef} className="relative block sm:col-span-2">
       <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45">
         {label}
       </span>
+
+      {selected.length ? (
+        <div className="mb-2 flex flex-wrap gap-1.5">
+          {selected.map((avatar) => (
+            <button
+              key={avatar.id}
+              type="button"
+              onClick={() => remove(avatar.id)}
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.06] px-2.5 py-1 text-[11px] text-white/75 transition hover:border-rose-300/40 hover:text-rose-200"
+              title="Remove"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={avatar.portrait_url} alt="" className="h-4 w-4 rounded-full object-cover" />
+              {avatar.name}
+              <span aria-hidden className="text-white/35">
+                ×
+              </span>
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       <button
         type="button"
@@ -94,13 +122,13 @@ export default function VaultAvatarSelect({
         onClick={() => setOpen((o) => !o)}
         className={`${FIELD} flex items-center justify-between gap-3 text-left`}
       >
-        {selected ? (
-          <Row avatar={selected} active />
-        ) : (
-          <span className="text-white/40">
-            {published.length ? "Pick an avatar…" : "Add avatars in the AI Avatars tab first"}
-          </span>
-        )}
+        <span className="text-white/40">
+          {published.length
+            ? selected.length
+              ? `Add another avatar… (${selected.length} tagged)`
+              : "Tag one or more avatars…"
+            : "Add avatars in the AI Avatars tab first"}
+        </span>
         <svg
           width="12"
           height="12"
@@ -118,6 +146,7 @@ export default function VaultAvatarSelect({
         <div
           id={listId}
           role="listbox"
+          aria-multiselectable
           className="absolute left-0 right-0 z-40 mt-1.5 overflow-hidden rounded-2xl border border-white/15 bg-[#101014] shadow-[0_24px_48px_-20px_rgba(0,0,0,0.9)]"
         >
           <div className="border-b border-white/10 p-2">
@@ -131,26 +160,26 @@ export default function VaultAvatarSelect({
                 if (e.key === "Escape") setOpen(false);
                 if (e.key === "Enter" && items[0]) {
                   e.preventDefault();
-                  pick(items[0].id);
+                  toggle(items[0].id);
                 }
               }}
             />
           </div>
           <ul className="max-h-64 overflow-y-auto p-1.5">
-            {selected ? (
+            {selected.length ? (
               <li>
                 <button
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => pick("")}
+                  onClick={() => onChange([])}
                   className="mb-1 flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-white/45 transition hover:bg-white/[0.06] hover:text-white/70"
                 >
-                  Clear selection
+                  Clear all
                 </button>
               </li>
             ) : null}
             {items.map((avatar) => {
-              const active = avatar.id === value;
+              const active = selectedSet.has(avatar.id);
               return (
                 <li key={avatar.id}>
                   <button
@@ -158,12 +187,17 @@ export default function VaultAvatarSelect({
                     role="option"
                     aria-selected={active}
                     onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => pick(avatar.id)}
-                    className={`flex w-full items-center rounded-xl px-3 py-2.5 transition ${
+                    onClick={() => toggle(avatar.id)}
+                    className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 transition ${
                       active ? "bg-white/[0.12]" : "hover:bg-white/[0.07]"
                     }`}
                   >
                     <Row avatar={avatar} active={active} />
+                    {active ? (
+                      <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-300/80">
+                        Tagged
+                      </span>
+                    ) : null}
                   </button>
                 </li>
               );

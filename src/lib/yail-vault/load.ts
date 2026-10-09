@@ -21,7 +21,6 @@ type EntryRow = {
   media_url: string;
   poster_url: string | null;
   ai_model: string | null;
-  avatar_id: string | null;
   featured: boolean;
   published: boolean;
   sort_order: number;
@@ -80,7 +79,11 @@ function rowToAvatar(row: AvatarRow): YailVaultAvatar {
   };
 }
 
-function rowToEntry(row: EntryRow, tags: YailVaultTag[]): YailVaultEntry | null {
+function rowToEntry(
+  row: EntryRow,
+  tags: YailVaultTag[],
+  avatarIds: string[]
+): YailVaultEntry | null {
   if (!isYailVaultCategory(row.category)) return null;
   if (row.media_type !== "image" && row.media_type !== "video") return null;
   return {
@@ -94,7 +97,7 @@ function rowToEntry(row: EntryRow, tags: YailVaultTag[]): YailVaultEntry | null 
     media_url: row.media_url,
     poster_url: row.poster_url,
     ai_model: row.ai_model ?? null,
-    avatar_id: row.avatar_id ?? null,
+    avatar_ids: avatarIds,
     featured: row.featured,
     published: row.published,
     sort_order: row.sort_order,
@@ -129,13 +132,42 @@ async function loadTagsForEntries(
   return map;
 }
 
+async function loadAvatarsForEntries(
+  db: SupabaseClient,
+  entryIds: string[]
+): Promise<Map<string, string[]>> {
+  const map = new Map<string, string[]>();
+  if (!entryIds.length) return map;
+  const { data, error } = await db
+    .from("yail_vault_entry_avatars")
+    .select("entry_id, avatar_id")
+    .in("entry_id", entryIds);
+  if (error) {
+    // Junction missing before migration 079 — fail soft
+    if (/does not exist|schema cache/i.test(error.message)) return map;
+    throw new Error(error.message);
+  }
+  for (const row of data ?? []) {
+    const entryId = (row as { entry_id: string }).entry_id;
+    const avatarId = (row as { avatar_id: string }).avatar_id;
+    if (!entryId || !avatarId) continue;
+    const list = map.get(entryId) ?? [];
+    list.push(avatarId);
+    map.set(entryId, list);
+  }
+  return map;
+}
+
 async function hydrateEntries(db: SupabaseClient, rows: EntryRow[]): Promise<YailVaultEntry[]> {
-  const tagsByEntry = await loadTagsForEntries(
-    db,
-    rows.map((r) => r.id)
-  );
+  const ids = rows.map((r) => r.id);
+  const [tagsByEntry, avatarsByEntry] = await Promise.all([
+    loadTagsForEntries(db, ids),
+    loadAvatarsForEntries(db, ids),
+  ]);
   return rows
-    .map((row) => rowToEntry(row, tagsByEntry.get(row.id) ?? []))
+    .map((row) =>
+      rowToEntry(row, tagsByEntry.get(row.id) ?? [], avatarsByEntry.get(row.id) ?? [])
+    )
     .filter((e): e is YailVaultEntry => Boolean(e));
 }
 
@@ -203,6 +235,32 @@ export async function setEntryTags(
     if (error) throw new Error(error.message);
   }
   return unique;
+}
+
+/** Replace avatar links on a cut. Empty array clears all. */
+export async function setEntryAvatars(db: SupabaseClient, entryId: string, avatarIds: string[]) {
+  const unique = [...new Set(avatarIds.map((id) => id.trim()).filter(Boolean))];
+  await db.from("yail_vault_entry_avatars").delete().eq("entry_id", entryId);
+  if (!unique.length) return [];
+  const { error } = await db.from("yail_vault_entry_avatars").insert(
+    unique.map((avatar_id) => ({ entry_id: entryId, avatar_id }))
+  );
+  if (error) throw new Error(error.message);
+  return unique;
+}
+
+/** Parse avatar_ids from admin body (array, or legacy single avatar_id). */
+export function parseAvatarIds(b: Record<string, unknown>): string[] | undefined {
+  if ("avatar_ids" in b) {
+    const raw = b.avatar_ids;
+    if (!Array.isArray(raw)) return [];
+    return [...new Set(raw.map((v) => String(v ?? "").trim()).filter(Boolean))];
+  }
+  if ("avatar_id" in b) {
+    const raw = typeof b.avatar_id === "string" ? b.avatar_id.trim() : "";
+    return raw ? [raw] : [];
+  }
+  return undefined;
 }
 
 export async function clearOtherFeatured(db: SupabaseClient, exceptId?: string) {
@@ -332,4 +390,14 @@ export async function getVaultAvatarById(id: string): Promise<YailVaultAvatar | 
   const { data, error } = await db.from("yail_vault_avatars").select("*").eq("id", id).maybeSingle();
   if (error || !data) return null;
   return rowToAvatar(data as AvatarRow);
+}
+
+export async function getVaultAvatarsByIds(ids: string[]): Promise<YailVaultAvatar[]> {
+  const unique = [...new Set(ids.filter(Boolean))];
+  if (!unique.length) return [];
+  const db = createServiceRoleClient();
+  const { data, error } = await db.from("yail_vault_avatars").select("*").in("id", unique);
+  if (error || !data) return [];
+  const byId = new Map(((data ?? []) as AvatarRow[]).map((row) => [row.id, rowToAvatar(row)]));
+  return unique.map((id) => byId.get(id)).filter((a): a is YailVaultAvatar => Boolean(a));
 }

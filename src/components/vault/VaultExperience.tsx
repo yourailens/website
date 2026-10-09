@@ -377,7 +377,7 @@ function EmptyAvatars() {
         Directory coming soon
       </h1>
       <p className="mt-4 max-w-md text-sm leading-relaxed text-white/55">
-        Publish avatars from the vault admin desk — each one gets a jumbotron here and shows up in the cut dropdown.
+        Publish avatars from the vault admin desk — each one gets a jumbotron here and can be tagged on multiple cuts.
       </p>
     </section>
   );
@@ -450,10 +450,11 @@ export default function VaultExperience({
   const cutsByAvatar = useMemo(() => {
     const map = new Map<string, YailVaultEntry[]>();
     for (const e of all) {
-      if (!e.avatar_id) continue;
-      const list = map.get(e.avatar_id) ?? [];
-      list.push(e);
-      map.set(e.avatar_id, list);
+      for (const avatarId of e.avatar_ids ?? []) {
+        const list = map.get(avatarId) ?? [];
+        list.push(e);
+        map.set(avatarId, list);
+      }
     }
     return map;
   }, [all]);

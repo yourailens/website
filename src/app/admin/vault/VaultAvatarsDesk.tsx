@@ -367,7 +367,7 @@ export default function VaultAvatarsDesk({ avatars, onChange }: Props) {
         ))}
         {!avatars.length ? (
           <div className={`${BUBBLE} text-center text-sm text-white/45`}>
-            No avatars yet. Add the first personality above — it will show on the vault page and in cut dropdowns.
+            No avatars yet. Add the first personality above — it will show on the vault page and can be tagged on cuts.
           </div>
         ) : null}
       </div>

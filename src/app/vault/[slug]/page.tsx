@@ -4,7 +4,7 @@ import VaultCutExperience from "@/components/vault/VaultCutExperience";
 import {
   getPublishedVaultAvatars,
   getPublishedVaultEntries,
-  getVaultAvatarById,
+  getVaultAvatarsByIds,
   getVaultEntryBySlug,
 } from "@/lib/yail-vault/load";
 
@@ -48,8 +48,8 @@ export default async function VaultEntryPage({ params }: Props) {
   const entry = await getVaultEntryBySlug(slug);
   if (!entry) notFound();
 
-  const [avatar, filmmaking, ads, avatars] = await Promise.all([
-    entry.avatar_id ? getVaultAvatarById(entry.avatar_id) : Promise.resolve(null),
+  const [taggedAvatars, filmmaking, ads, directory] = await Promise.all([
+    getVaultAvatarsByIds(entry.avatar_ids ?? []),
     getPublishedVaultEntries("filmmaking"),
     getPublishedVaultEntries("ads"),
     getPublishedVaultAvatars(),
@@ -60,12 +60,17 @@ export default async function VaultEntryPage({ params }: Props) {
     all: allIds.size,
     filmmaking: filmmaking.length,
     ads: ads.length,
-    avatars: avatars.length,
+    avatars: directory.length,
   };
 
   const shareUrl = `${siteOrigin()}/vault/${encodeURIComponent(entry.slug)}`;
 
   return (
-    <VaultCutExperience entry={entry} avatar={avatar} counts={counts} shareUrl={shareUrl} />
+    <VaultCutExperience
+      entry={entry}
+      avatars={taggedAvatars}
+      counts={counts}
+      shareUrl={shareUrl}
+    />
   );
 }

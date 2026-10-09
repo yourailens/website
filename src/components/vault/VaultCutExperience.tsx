@@ -15,12 +15,12 @@ import {
 
 type Props = {
   entry: YailVaultEntry;
-  avatar: YailVaultAvatar | null;
+  avatars: YailVaultAvatar[];
   counts: VaultShellCounts;
   shareUrl: string;
 };
 
-export default function VaultCutExperience({ entry, avatar, counts, shareUrl }: Props) {
+export default function VaultCutExperience({ entry, avatars, counts, shareUrl }: Props) {
   const [copied, setCopied] = useState(false);
   const genre = tagsOfKind(entry, "genre")[0]?.name;
   const subject = tagsOfKind(entry, "subject")[0]?.name;
@@ -124,13 +124,16 @@ export default function VaultCutExperience({ entry, avatar, counts, shareUrl }: 
 
               <div className="mt-6 flex flex-wrap items-center gap-2">
                 <AiModelBadge modelId={entry.ai_model} size="md" />
-                {avatar ? (
-                  <span className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5 text-xs text-white/80">
+                {avatars.map((avatar) => (
+                  <span
+                    key={avatar.id}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5 text-xs text-white/80"
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={avatar.portrait_url} alt="" className="h-5 w-5 rounded-full object-cover" />
                     {avatar.name}
                   </span>
-                ) : null}
+                ))}
                 {subject ? (
                   <span className="rounded-full border border-white/12 px-3 py-1.5 text-xs text-white/60">
                     Subject · {subject}

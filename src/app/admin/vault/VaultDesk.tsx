@@ -30,7 +30,7 @@ type Draft = {
   category: YailVaultCategory;
   genre: string;
   subject: string;
-  avatar_id: string;
+  avatar_ids: string[];
   labels: string[];
   ai_model: string;
   media_type: "image" | "video" | null;
@@ -49,7 +49,7 @@ const emptyDraft = (): Draft => ({
   category: "filmmaking",
   genre: "",
   subject: "",
-  avatar_id: "",
+  avatar_ids: [],
   labels: [],
   ai_model: "",
   media_type: null,
@@ -69,7 +69,7 @@ function entryToDraft(entry: YailVaultEntry): Draft {
     category: entry.category,
     genre: tagsOfKind(entry, "genre")[0]?.name ?? "",
     subject: tagsOfKind(entry, "subject")[0]?.name ?? "",
-    avatar_id: entry.avatar_id ?? "",
+    avatar_ids: entry.avatar_ids ?? [],
     labels: tagsOfKind(entry, "label").map((t) => t.name),
     ai_model: entry.ai_model ?? "",
     media_type: entry.media_type,
@@ -244,7 +244,7 @@ export default function VaultDesk() {
         category: draft.category,
         genre: draft.genre.trim(),
         subject: draft.subject.trim(),
-        avatar_id: draft.avatar_id.trim() || null,
+        avatar_ids: draft.avatar_ids,
         labels: draft.labels,
         ai_model: draft.ai_model.trim() || null,
         media_type,
@@ -465,9 +465,9 @@ export default function VaultDesk() {
                 placeholder="Pick or type a subject"
               />
               <VaultAvatarSelect
-                value={draft.avatar_id}
+                values={draft.avatar_ids}
                 avatars={avatars}
-                onChange={(v) => patch({ avatar_id: v })}
+                onChange={(v) => patch({ avatar_ids: v })}
               />
               <div className="sm:col-span-2">
                 <VaultModelSelect
@@ -601,7 +601,9 @@ export default function VaultDesk() {
           const labels = tagsOfKind(entry, "label");
           const genre = tagsOfKind(entry, "genre")[0]?.name;
           const subject = tagsOfKind(entry, "subject")[0]?.name;
-          const avatar = entry.avatar_id ? avatarById.get(entry.avatar_id) : null;
+          const entryAvatars = (entry.avatar_ids ?? [])
+            .map((id) => avatarById.get(id))
+            .filter((a): a is YailVaultAvatar => Boolean(a));
           const thumb = entry.poster_url || entry.media_url;
           return (
             <div key={entry.id} className={`${BUBBLE} !p-3 sm:!p-4`}>
@@ -698,13 +700,16 @@ export default function VaultDesk() {
                         Subject · {subject}
                       </span>
                     ) : null}
-                    {avatar ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-2.5 py-1 text-[10px] text-emerald-200/90">
+                    {entryAvatars.map((avatar) => (
+                      <span
+                        key={avatar.id}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-2.5 py-1 text-[10px] text-emerald-200/90"
+                      >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={avatar.portrait_url} alt="" className="h-3.5 w-3.5 rounded-full object-cover" />
                         {avatar.name}
                       </span>
-                    ) : null}
+                    ))}
                     <AiModelBadge modelId={entry.ai_model} />
                     {labels.map((t) => (
                       <span

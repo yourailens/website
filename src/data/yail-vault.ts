@@ -27,8 +27,8 @@ export type YailVaultEntry = {
   poster_url: string | null;
   /** Catalog id from YAIL_VAULT_AI_MODELS */
   ai_model: string | null;
-  /** FK to yail_vault_avatars */
-  avatar_id: string | null;
+  /** FKs to yail_vault_avatars (many-to-many) */
+  avatar_ids: string[];
   featured: boolean;
   published: boolean;
   sort_order: number;

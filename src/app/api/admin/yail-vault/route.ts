@@ -8,6 +8,8 @@ import {
   adminGetAllVaultEntries,
   clearOtherFeatured,
   listVaultTags,
+  parseAvatarIds,
+  setEntryAvatars,
   setEntryTags,
   uniqueVaultSlug,
 } from "@/lib/yail-vault/load";
@@ -98,8 +100,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Pick a model from the AI Model list" }, { status: 400 });
   }
 
-  const avatarIdRaw = typeof b.avatar_id === "string" ? b.avatar_id.trim() : "";
-  const avatar_id = avatarIdRaw || null;
+  const avatarIds = parseAvatarIds(b) ?? [];
 
   const { data, error } = await db
     .from("yail_vault_entries")
@@ -113,7 +114,6 @@ export async function POST(req: NextRequest) {
       media_url,
       poster_url: String(b.poster_url ?? "").trim() || null,
       ai_model,
-      avatar_id,
       featured,
       published: b.published !== false,
       sort_order,
@@ -134,6 +134,20 @@ export async function POST(req: NextRequest) {
   }
 
   await setEntryTags(db, data.id, parseTagInputs(b));
+  try {
+    await setEntryAvatars(db, data.id, avatarIds);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Avatar link failed";
+    const missing = /does not exist|schema cache|yail_vault_entry_avatars/i.test(msg);
+    return NextResponse.json(
+      {
+        error: missing
+          ? "Run supabase/migrations/079_yail_vault_entry_avatars.sql in the Supabase SQL editor first."
+          : msg,
+      },
+      { status: 400 }
+    );
+  }
   revalidateVault();
   const entries = await adminGetAllVaultEntries();
   return NextResponse.json({ entry: entries.find((e) => e.id === data.id) ?? data, entries });
