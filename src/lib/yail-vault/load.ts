@@ -25,6 +25,8 @@ type EntryRow = {
   aspect_height?: number | null;
   ai_model: string | null;
   featured: boolean;
+  category_hero?: boolean | null;
+  genre_hero?: boolean | null;
   published: boolean;
   sort_order: number;
   created_at: string;
@@ -108,7 +110,9 @@ function rowToEntry(
       typeof row.aspect_height === "number" && row.aspect_height > 0 ? row.aspect_height : null,
     ai_model: row.ai_model ?? null,
     avatar_ids: avatarIds,
-    featured: row.featured,
+    featured: Boolean(row.featured),
+    category_hero: Boolean(row.category_hero),
+    genre_hero: Boolean(row.genre_hero),
     published: row.published,
     sort_order: row.sort_order,
     created_at: row.created_at,
@@ -277,6 +281,47 @@ export async function clearOtherFeatured(db: SupabaseClient, exceptId?: string) 
   let q = db.from("yail_vault_entries").update({ featured: false }).eq("featured", true);
   if (exceptId) q = q.neq("id", exceptId);
   await q;
+}
+
+/** Only one category-page hero per filmmaking / ads rail. */
+export async function clearOtherCategoryHero(
+  db: SupabaseClient,
+  category: YailVaultCategory,
+  exceptId?: string
+) {
+  let q = db
+    .from("yail_vault_entries")
+    .update({ category_hero: false })
+    .eq("category", category)
+    .eq("category_hero", true);
+  if (exceptId) q = q.neq("id", exceptId);
+  await q;
+}
+
+/** Only one genre-page hero among cuts sharing the same genre tag slug. */
+export async function clearOtherGenreHero(
+  db: SupabaseClient,
+  genreSlug: string,
+  exceptId?: string
+) {
+  const { data: tag } = await db
+    .from("yail_vault_tags")
+    .select("id")
+    .eq("kind", "genre")
+    .eq("slug", genreSlug)
+    .maybeSingle();
+  if (!tag?.id) return;
+
+  const { data: links } = await db
+    .from("yail_vault_entry_tags")
+    .select("entry_id")
+    .eq("tag_id", tag.id);
+  const ids = (links ?? [])
+    .map((r) => String(r.entry_id))
+    .filter((id) => id && id !== exceptId);
+  if (!ids.length) return;
+
+  await db.from("yail_vault_entries").update({ genre_hero: false }).in("id", ids).eq("genre_hero", true);
 }
 
 export async function listVaultTags(kind?: YailVaultTagKind): Promise<YailVaultTag[]> {

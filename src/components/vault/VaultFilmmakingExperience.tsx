@@ -3,7 +3,7 @@
 import VaultShell from "@/components/vault/VaultShell";
 import { EmptyVault, VaultOttHero, VaultRail } from "@/components/vault/vault-browse-ui";
 import type { YailVaultAvatar } from "@/data/yail-vault-avatars";
-import { YAIL_VAULT_CATEGORIES, type YailVaultEntry } from "@/data/yail-vault";
+import { YAIL_VAULT_CATEGORIES, pickVaultHero, type YailVaultEntry } from "@/data/yail-vault";
 import {
   collectFilmmakingGenres,
   filmmakingHubHref,
@@ -48,7 +48,9 @@ export default function VaultFilmmakingExperience({
       }
     : null;
 
-  const hero = genreSlug ? genreEntries[0] ?? null : filmmaking[0] ?? null;
+  const hero = genreSlug
+    ? pickVaultHero(genreEntries, "genre")
+    : pickVaultHero(filmmaking, "category");
   const railEntries = genreSlug
     ? genreEntries.filter((e) => e.id !== hero?.id)
     : filmmaking.filter((e) => e.id !== hero?.id);

@@ -40,6 +40,8 @@ type Draft = {
   aspect_width: number | null;
   aspect_height: number | null;
   featured: boolean;
+  category_hero: boolean;
+  genre_hero: boolean;
   published: boolean;
   localBlob: Blob | null;
   previewUrl: string;
@@ -61,6 +63,8 @@ const emptyDraft = (): Draft => ({
   aspect_width: null,
   aspect_height: null,
   featured: false,
+  category_hero: false,
+  genre_hero: false,
   published: true,
   localBlob: null,
   previewUrl: "",
@@ -83,6 +87,8 @@ function entryToDraft(entry: YailVaultEntry): Draft {
     aspect_width: entry.aspect_width,
     aspect_height: entry.aspect_height,
     featured: entry.featured,
+    category_hero: entry.category_hero,
+    genre_hero: entry.genre_hero,
     published: entry.published,
     localBlob: null,
     previewUrl: entry.poster_url || entry.media_url,
@@ -307,6 +313,8 @@ export default function VaultDesk() {
         aspect_width,
         aspect_height,
         featured: draft.featured,
+        category_hero: draft.category_hero,
+        genre_hero: draft.genre_hero,
         published: draft.published,
       };
 
@@ -550,25 +558,58 @@ export default function VaultDesk() {
                 />
               </div>
             </div>
-            <div className="flex flex-wrap gap-3 pt-1">
-              <label className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-3.5 py-2 text-sm text-white/80">
-                <input
-                  type="checkbox"
-                  checked={draft.featured}
-                  onChange={(e) => patch({ featured: e.target.checked })}
-                  className="accent-emerald-400"
-                />
-                Hero
-              </label>
-              <label className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-3.5 py-2 text-sm text-white/80">
-                <input
-                  type="checkbox"
-                  checked={draft.published}
-                  onChange={(e) => patch({ published: e.target.checked })}
-                  className="accent-emerald-400"
-                />
-                Published
-              </label>
+            <div className="space-y-2 pt-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45">
+                Page heroes
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <label className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-3.5 py-2 text-sm text-white/80">
+                  <input
+                    type="checkbox"
+                    checked={draft.featured}
+                    onChange={(e) => patch({ featured: e.target.checked })}
+                    className="accent-emerald-400"
+                  />
+                  All labs
+                </label>
+                <label className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-3.5 py-2 text-sm text-white/80">
+                  <input
+                    type="checkbox"
+                    checked={draft.category_hero}
+                    onChange={(e) => patch({ category_hero: e.target.checked })}
+                    className="accent-emerald-400"
+                  />
+                  {draft.category === "ads" ? "AI Ads page" : "AI Filmmaking page"}
+                </label>
+                {draft.category === "filmmaking" ? (
+                  <label
+                    className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm ${
+                      draft.genre.trim()
+                        ? "border-white/15 bg-white/[0.04] text-white/80"
+                        : "border-white/10 bg-white/[0.02] text-white/35"
+                    }`}
+                    title={draft.genre.trim() ? undefined : "Pick a Genre first"}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={draft.genre_hero}
+                      disabled={!draft.genre.trim()}
+                      onChange={(e) => patch({ genre_hero: e.target.checked })}
+                      className="accent-emerald-400"
+                    />
+                    {draft.genre.trim() ? `${draft.genre.trim()} genre page` : "Genre page"}
+                  </label>
+                ) : null}
+                <label className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-3.5 py-2 text-sm text-white/80">
+                  <input
+                    type="checkbox"
+                    checked={draft.published}
+                    onChange={(e) => patch({ published: e.target.checked })}
+                    className="accent-emerald-400"
+                  />
+                  Published
+                </label>
+              </div>
             </div>
           </div>
 
@@ -708,7 +749,9 @@ export default function VaultDesk() {
                     <div className="min-w-0">
                       <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-emerald-300/70">
                         {yailVaultCategoryLabel(entry.category)}
-                        {entry.featured ? " · Hero" : ""}
+                        {entry.featured ? " · All hero" : ""}
+                        {entry.category_hero ? " · Page hero" : ""}
+                        {entry.genre_hero ? " · Genre hero" : ""}
                         {!entry.published ? " · Draft" : ""}
                         {entry.og_image_url ? " · Share thumb ready" : " · Share thumb missing"}
                       </p>
@@ -746,9 +789,32 @@ export default function VaultDesk() {
                         disabled={busy}
                         onClick={() => void patchEntry(entry.id, { featured: !entry.featured })}
                         className="rounded-full border border-white/15 px-3 py-1.5 text-[11px] text-white/70"
+                        title="Hero on All labs"
                       >
-                        {entry.featured ? "Unhero" : "Make hero"}
+                        {entry.featured ? "All ✓" : "All"}
                       </button>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() =>
+                          void patchEntry(entry.id, { category_hero: !entry.category_hero })
+                        }
+                        className="rounded-full border border-white/15 px-3 py-1.5 text-[11px] text-white/70"
+                        title={`Hero on ${yailVaultCategoryLabel(entry.category)} page`}
+                      >
+                        {entry.category_hero ? "Page ✓" : "Page"}
+                      </button>
+                      {entry.category === "filmmaking" && tagsOfKind(entry, "genre")[0] ? (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => void patchEntry(entry.id, { genre_hero: !entry.genre_hero })}
+                          className="rounded-full border border-white/15 px-3 py-1.5 text-[11px] text-white/70"
+                          title={`Hero on ${tagsOfKind(entry, "genre")[0]?.name} genre page`}
+                        >
+                          {entry.genre_hero ? "Genre ✓" : "Genre"}
+                        </button>
+                      ) : null}
                       <button
                         type="button"
                         disabled={busy}

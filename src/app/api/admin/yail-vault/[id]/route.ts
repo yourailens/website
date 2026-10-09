@@ -6,12 +6,15 @@ import { isYailVaultAiModelId } from "@/data/yail-vault-models";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
 import {
   adminGetAllVaultEntries,
+  clearOtherCategoryHero,
   clearOtherFeatured,
+  clearOtherGenreHero,
   parseAvatarIds,
   setEntryAvatars,
   setEntryTags,
   uniqueVaultSlug,
 } from "@/lib/yail-vault/load";
+import { tagsOfKind } from "@/data/yail-vault";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +22,17 @@ function revalidateVault() {
   revalidatePath("/vault");
   revalidatePath("/vault/[slug]", "page");
   revalidatePath("/vault/avatars/[slug]", "page");
+  revalidatePath("/vault/filmmaking");
+  revalidatePath("/vault/filmmaking/[genre]", "page");
+}
+
+function slugifyGenre(name: string) {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 72);
 }
 
 function parseTagInputs(b: Record<string, unknown>) {
@@ -83,6 +97,48 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
     patch.featured = b.featured;
     if (b.featured) await clearOtherFeatured(db, id);
   }
+  if (typeof b.category_hero === "boolean") {
+    patch.category_hero = b.category_hero;
+    if (b.category_hero) {
+      const category =
+        isYailVaultCategory(patch.category)
+          ? patch.category
+          : isYailVaultCategory(b.category)
+            ? b.category
+            : null;
+      if (category) await clearOtherCategoryHero(db, category, id);
+      else {
+        const { data: current } = await db
+          .from("yail_vault_entries")
+          .select("category")
+          .eq("id", id)
+          .maybeSingle();
+        if (isYailVaultCategory(current?.category)) {
+          await clearOtherCategoryHero(db, current.category, id);
+        }
+      }
+    }
+  }
+  if (typeof b.genre_hero === "boolean") {
+    patch.genre_hero = b.genre_hero;
+    if (b.genre_hero) {
+      const genreFromBody = String(b.genre ?? "").trim();
+      let genreSlug = genreFromBody ? slugifyGenre(genreFromBody) : "";
+      if (!genreSlug) {
+        const entries = await adminGetAllVaultEntries();
+        const current = entries.find((e) => e.id === id);
+        const tag = current ? tagsOfKind(current, "genre")[0] : null;
+        genreSlug = tag?.slug || (tag?.name ? slugifyGenre(tag.name) : "");
+      }
+      if (!genreSlug) {
+        return NextResponse.json(
+          { error: "Pick a Genre before setting Genre page hero" },
+          { status: 400 }
+        );
+      }
+      await clearOtherGenreHero(db, genreSlug, id);
+    }
+  }
   if ("ai_model" in b) {
     const raw = typeof b.ai_model === "string" ? b.ai_model.trim() : "";
     if (!raw) patch.ai_model = null;
@@ -97,11 +153,13 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
   if (Object.keys(patch).length) {
     const { error } = await db.from("yail_vault_entries").update(patch).eq("id", id);
     if (error) {
-      const missing = /ai_model|aspect_|og_image_url|schema cache/i.test(error.message);
+      const missing = /ai_model|aspect_|og_image_url|category_hero|genre_hero|schema cache/i.test(
+        error.message
+      );
       return NextResponse.json(
         {
           error: missing
-            ? "Run supabase/migrations/077_yail_vault_ai_models.sql, 080_yail_vault_aspect.sql, and 082_vault_ott_og_images.sql in the Supabase SQL editor first."
+            ? "Run supabase/migrations/077–083 (incl. 083_yail_vault_page_heroes.sql) in the Supabase SQL editor first."
             : error.message,
         },
         { status: 400 }
@@ -111,6 +169,16 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
 
   if ("genre" in b || "subject" in b || "labels" in b || "avatar" in b) {
     await setEntryTags(db, id, parseTagInputs(b));
+  }
+
+  // After tags settle, keep a single genre-page hero per genre slug.
+  if (b.genre_hero === true || typeof b.genre === "string") {
+    const refreshed = (await adminGetAllVaultEntries()).find((e) => e.id === id);
+    if (refreshed?.genre_hero) {
+      const tag = tagsOfKind(refreshed, "genre")[0];
+      const slug = tag?.slug || (tag?.name ? slugifyGenre(tag.name) : "");
+      if (slug) await clearOtherGenreHero(db, slug, id);
+    }
   }
 
   const avatarIds = parseAvatarIds(b);

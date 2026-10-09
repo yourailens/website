@@ -7,6 +7,7 @@ import { EmptyVault, VaultOttHero, VaultRail } from "@/components/vault/vault-br
 import type { YailVaultAvatar } from "@/data/yail-vault-avatars";
 import {
   YAIL_VAULT_CATEGORIES,
+  pickVaultHero,
   type YailVaultCategory,
   type YailVaultEntry,
 } from "@/data/yail-vault";
@@ -233,8 +234,8 @@ export default function VaultExperience({
 
   const hero = useMemo(() => {
     if (filter === "avatars") return null;
-    if (filter === "ads") return ads[0] ?? null;
-    return featured ?? all[0] ?? null;
+    if (filter === "ads") return pickVaultHero(ads, "category");
+    return featured ?? pickVaultHero(all, "featured");
   }, [filter, featured, ads, all]);
 
   const filmmakingRail = useMemo(() => {

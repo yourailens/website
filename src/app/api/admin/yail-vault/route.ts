@@ -6,7 +6,9 @@ import { isYailVaultAiModelId } from "@/data/yail-vault-models";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
 import {
   adminGetAllVaultEntries,
+  clearOtherCategoryHero,
   clearOtherFeatured,
+  clearOtherGenreHero,
   listVaultTags,
   parseAvatarIds,
   setEntryAvatars,
@@ -20,6 +22,17 @@ function revalidateVault() {
   revalidatePath("/vault");
   revalidatePath("/vault/[slug]", "page");
   revalidatePath("/vault/avatars/[slug]", "page");
+  revalidatePath("/vault/filmmaking");
+  revalidatePath("/vault/filmmaking/[genre]", "page");
+}
+
+function slugifyGenre(name: string) {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 72);
 }
 
 function parseTagInputs(b: Record<string, unknown>) {
@@ -80,7 +93,15 @@ export async function POST(req: NextRequest) {
 
   const db = createServiceRoleClient();
   const featured = b.featured === true;
+  const category_hero = b.category_hero === true;
+  const genre_hero = b.genre_hero === true;
+  const genreName = String(b.genre ?? "").trim();
+  if (genre_hero && !genreName) {
+    return NextResponse.json({ error: "Pick a Genre before setting Genre page hero" }, { status: 400 });
+  }
   if (featured) await clearOtherFeatured(db);
+  if (category_hero) await clearOtherCategoryHero(db, category);
+  if (genre_hero) await clearOtherGenreHero(db, slugifyGenre(genreName));
 
   const { data: last } = await db
     .from("yail_vault_entries")
@@ -129,6 +150,8 @@ export async function POST(req: NextRequest) {
       aspect_height,
       ai_model,
       featured,
+      category_hero,
+      genre_hero,
       published: b.published !== false,
       sort_order,
     })
@@ -136,11 +159,13 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) {
-    const missing = /does not exist|schema cache|ai_model|aspect_|og_image_url/i.test(error.message);
+    const missing = /does not exist|schema cache|ai_model|aspect_|og_image_url|category_hero|genre_hero/i.test(
+      error.message
+    );
     return NextResponse.json(
       {
         error: missing
-          ? "Run supabase/migrations/074_yail_vault.sql, 077_yail_vault_ai_models.sql, 080_yail_vault_aspect.sql, and 082_vault_ott_og_images.sql in the Supabase SQL editor first."
+          ? "Run supabase/migrations/074_yail_vault.sql through 083_yail_vault_page_heroes.sql in the Supabase SQL editor first."
           : error.message,
       },
       { status: 400 }

@@ -34,7 +34,12 @@ export type YailVaultEntry = {
   ai_model: string | null;
   /** FKs to yail_vault_avatars (many-to-many) */
   avatar_ids: string[];
+  /** Hero on All labs (/vault). */
   featured: boolean;
+  /** Hero on this cut’s category page (Filmmaking or Ads). */
+  category_hero: boolean;
+  /** Hero on this cut’s Genre page under Filmmaking. */
+  genre_hero: boolean;
   published: boolean;
   sort_order: number;
   created_at: string;
@@ -56,4 +61,19 @@ export function yailVaultCategoryLabel(category: YailVaultCategory) {
 
 export function tagsOfKind(entry: YailVaultEntry, kind: YailVaultTagKind) {
   return entry.tags.filter((t) => t.kind === kind);
+}
+
+/** Pick the flagged hero for a page, else fall back to the first cut. */
+export function pickVaultHero(
+  entries: YailVaultEntry[],
+  kind: "featured" | "category" | "genre"
+): YailVaultEntry | null {
+  if (!entries.length) return null;
+  if (kind === "featured") {
+    return entries.find((e) => e.featured) ?? entries[0] ?? null;
+  }
+  if (kind === "category") {
+    return entries.find((e) => e.category_hero) ?? entries[0] ?? null;
+  }
+  return entries.find((e) => e.genre_hero) ?? entries[0] ?? null;
 }
