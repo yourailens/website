@@ -3,7 +3,7 @@ import { getVaultEntryBySlug } from "@/lib/yail-vault/load";
 import {
   ensureVaultEntryOgImage,
   mediaSourceForOg,
-  renderOgJpegFromSource,
+  renderOgImageFromSource,
 } from "@/lib/seo/bake-og-image";
 
 export const runtime = "nodejs";
@@ -12,7 +12,6 @@ export const maxDuration = 60;
 
 type Ctx = { params: Promise<{ slug: string }> };
 
-/** Always returns JPEG bytes (never redirect) — WhatsApp often drops redirected og:image. */
 export async function GET(_req: Request, ctx: Ctx) {
   const { slug } = await ctx.params;
   const entry = await getVaultEntryBySlug(slug);
@@ -21,16 +20,17 @@ export async function GET(_req: Request, ctx: Ctx) {
   if (stored) {
     try {
       const upstream = await fetch(stored, {
-        headers: { Accept: "image/jpeg,image/*" },
+        headers: { Accept: "image/png,image/jpeg,image/*" },
         cache: "no-store",
         signal: AbortSignal.timeout(20_000),
       });
       if (upstream.ok) {
         const buf = Buffer.from(await upstream.arrayBuffer());
+        const type = upstream.headers.get("content-type") || "image/png";
         return new NextResponse(new Uint8Array(buf), {
           status: 200,
           headers: {
-            "Content-Type": "image/jpeg",
+            "Content-Type": type,
             "Content-Length": String(buf.byteLength),
             "Cache-Control": "public, max-age=86400, s-maxage=604800",
           },
@@ -48,12 +48,12 @@ export async function GET(_req: Request, ctx: Ctx) {
         media_type: entry.media_type,
       })
     : null;
-  const jpeg = await renderOgJpegFromSource(source);
-  return new NextResponse(new Uint8Array(jpeg), {
+  const png = await renderOgImageFromSource(source);
+  return new NextResponse(new Uint8Array(png), {
     status: 200,
     headers: {
-      "Content-Type": "image/jpeg",
-      "Content-Length": String(jpeg.byteLength),
+      "Content-Type": "image/png",
+      "Content-Length": String(png.byteLength),
       "Cache-Control": "public, max-age=3600, s-maxage=86400",
     },
   });

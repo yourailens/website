@@ -1,16 +1,15 @@
 import { getVaultAvatarBySlug } from "@/lib/yail-vault/load";
 import { OG_THUMB_HEIGHT, OG_THUMB_WIDTH } from "@/lib/seo/og-thumbnail";
-import { ensureVaultAvatarOgImage, renderVaultAvatarOgJpeg } from "@/lib/seo/vault-avatar-og";
+import { ensureVaultAvatarOgImage, renderOgImageFromSource } from "@/lib/seo/bake-og-image";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const alt = "YAIL Vault AI Avatar";
 export const size = { width: OG_THUMB_WIDTH, height: OG_THUMB_HEIGHT };
-export const contentType = "image/jpeg";
+export const contentType = "image/png";
 
 type Props = { params: Promise<{ slug: string }> };
 
-/** Always return JPEG bytes — do not redirect (WhatsApp drops redirected og:image). */
 export default async function Image({ params }: Props) {
   const { slug } = await params;
   const avatar = await getVaultAvatarBySlug(slug);
@@ -19,7 +18,7 @@ export default async function Image({ params }: Props) {
   if (stored) {
     try {
       const upstream = await fetch(stored, {
-        headers: { Accept: "image/jpeg,image/*" },
+        headers: { Accept: "image/png,image/jpeg,image/*" },
         cache: "no-store",
         signal: AbortSignal.timeout(20_000),
       });
@@ -27,7 +26,7 @@ export default async function Image({ params }: Props) {
         const buf = Buffer.from(await upstream.arrayBuffer());
         return new Response(new Uint8Array(buf), {
           headers: {
-            "Content-Type": "image/jpeg",
+            "Content-Type": upstream.headers.get("content-type") || "image/png",
             "Content-Length": String(buf.byteLength),
             "Cache-Control": "public, max-age=86400, s-maxage=604800",
           },
@@ -38,11 +37,11 @@ export default async function Image({ params }: Props) {
     }
   }
 
-  const jpeg = await renderVaultAvatarOgJpeg(avatar?.portrait_url);
-  return new Response(new Uint8Array(jpeg), {
+  const png = await renderOgImageFromSource(avatar?.portrait_url);
+  return new Response(new Uint8Array(png), {
     headers: {
-      "Content-Type": "image/jpeg",
-      "Content-Length": String(jpeg.byteLength),
+      "Content-Type": "image/png",
+      "Content-Length": String(png.byteLength),
       "Cache-Control": "public, max-age=3600, s-maxage=86400",
     },
   });

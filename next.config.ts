@@ -62,33 +62,43 @@ const nextConfig: NextConfig = {
   // Keep huge static media + unused native binaries out of serverless function traces
   // (homepage was packing ~1GB of public/videos into the index function via fs tracing).
   // ffmpeg-static alone is ~70MB+; sharp ships multi-platform libvips (~200MB+).
+  // OG / most APIs must not ship sharp+ffmpeg (~300MB). Only poster upload routes re-include them.
   outputFileTracingExcludes: {
     "*": [
       "./public/videos/**/*.mp4",
       "./public/videos/**/*.mov",
       "./public/videos/**/*.webm",
-      // Native binaries — keep only linux-x64 sharp/libvips for Vercel; ffmpeg only on upload routes.
       "**/node_modules/ffmpeg-static/**",
-      "**/node_modules/@img/sharp-libvips-darwin-*/**",
-      "**/node_modules/@img/sharp-libvips-linux-arm*/**",
-      "**/node_modules/@img/sharp-libvips-linuxmusl-*/**",
-      "**/node_modules/@img/sharp-darwin-*/**",
-      "**/node_modules/@img/sharp-win32-*/**",
-      "**/node_modules/@img/sharp-wasm32*/**",
-      "**/node_modules/@img/sharp-linux-arm*/**",
-      "**/node_modules/@img/sharp-linuxmusl-*/**",
+      "**/node_modules/sharp/**",
+      "**/node_modules/@img/**",
     ],
-    // Admin rebuild helpers must stay tiny — they proxy to /api/og/* instead of bundling sharp.
-    "/api/admin/ott-cuts/rebuild-og": ["**/node_modules/sharp/**", "**/node_modules/@img/**"],
-    "/api/admin/yail-vault/rebuild-og": ["**/node_modules/sharp/**", "**/node_modules/@img/**"],
-    "/api/admin/yail-vault/avatars/rebuild-og": ["**/node_modules/sharp/**", "**/node_modules/@img/**"],
   },
-  // Only poster-extraction routes need the ffmpeg binary traced in.
+  // Video poster extraction still needs ffmpeg + linux sharp/libvips only.
   outputFileTracingIncludes: {
-    "/api/admin/ott-cuts/upload-media": ["**/node_modules/ffmpeg-static/**"],
-    "/api/admin/yail-vault/upload-media": ["**/node_modules/ffmpeg-static/**"],
-    "/api/admin/upload-film": ["**/node_modules/ffmpeg-static/**"],
-    "/api/admin/regenerate-film-poster": ["**/node_modules/ffmpeg-static/**"],
+    "/api/admin/ott-cuts/upload-media": [
+      "**/node_modules/ffmpeg-static/**",
+      "**/node_modules/sharp/**",
+      "**/node_modules/@img/sharp-linux-x64/**",
+      "**/node_modules/@img/sharp-libvips-linux-x64/**",
+    ],
+    "/api/admin/yail-vault/upload-media": [
+      "**/node_modules/ffmpeg-static/**",
+      "**/node_modules/sharp/**",
+      "**/node_modules/@img/sharp-linux-x64/**",
+      "**/node_modules/@img/sharp-libvips-linux-x64/**",
+    ],
+    "/api/admin/upload-film": [
+      "**/node_modules/ffmpeg-static/**",
+      "**/node_modules/sharp/**",
+      "**/node_modules/@img/sharp-linux-x64/**",
+      "**/node_modules/@img/sharp-libvips-linux-x64/**",
+    ],
+    "/api/admin/regenerate-film-poster": [
+      "**/node_modules/ffmpeg-static/**",
+      "**/node_modules/sharp/**",
+      "**/node_modules/@img/sharp-linux-x64/**",
+      "**/node_modules/@img/sharp-libvips-linux-x64/**",
+    ],
   },
   images: {
     remotePatterns,

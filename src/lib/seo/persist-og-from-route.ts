@@ -31,7 +31,9 @@ export async function persistOgJpegFromApiRoute(args: {
 
   const safe = args.slug.replace(/[^a-z0-9\-]/gi, "").toLowerCase() || "cut";
   const prefix = args.s3Prefix.replace(/\/+$/, "") || "yail-vault";
-  const key = `${prefix}/og-${safe}.jpg`;
-  const { publicUrl } = await uploadObjectToS3(key, jpeg, "image/jpeg");
+  const type = res.headers.get("content-type") || "image/png";
+  const ext = type.includes("jpeg") || type.includes("jpg") ? "jpg" : "png";
+  const key = `${prefix}/og-${safe}.${ext}`;
+  const { publicUrl } = await uploadObjectToS3(key, jpeg, type.startsWith("image/") ? type : "image/png");
   return publicUrl;
 }
