@@ -19,6 +19,7 @@ export const dynamic = "force-dynamic";
 function revalidateVault() {
   revalidatePath("/vault");
   revalidatePath("/vault/[slug]", "page");
+  revalidatePath("/vault/avatars/[slug]", "page");
 }
 
 function parseTagInputs(b: Record<string, unknown>) {

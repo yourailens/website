@@ -125,14 +125,15 @@ export default function VaultCutExperience({ entry, avatars, counts, shareUrl }:
               <div className="mt-6 flex flex-wrap items-center gap-2">
                 <AiModelBadge modelId={entry.ai_model} size="md" />
                 {avatars.map((avatar) => (
-                  <span
+                  <Link
                     key={avatar.id}
-                    className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5 text-xs text-white/80"
+                    href={`/vault/avatars/${avatar.slug}`}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5 text-xs text-white/80 transition hover:border-white/30 hover:text-white"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={avatar.portrait_url} alt="" className="h-5 w-5 rounded-full object-cover" />
                     {avatar.name}
-                  </span>
+                  </Link>
                 ))}
                 {subject ? (
                   <span className="rounded-full border border-white/12 px-3 py-1.5 text-xs text-white/60">

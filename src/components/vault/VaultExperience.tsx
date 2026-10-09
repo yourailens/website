@@ -298,12 +298,15 @@ function AvatarJumbotron({
       >
         {/* Portrait stage — single frame, no overlapping deco cards */}
         <div className={`relative shrink-0 ${flip ? "lg:pl-10" : "lg:pr-10"}`}>
-          <div className="relative overflow-hidden rounded-[1.15rem] bg-zinc-900 ring-1 ring-white/10 shadow-[0_32px_80px_-28px_rgba(0,0,0,0.95)]">
+          <Link
+            href={`/vault/avatars/${avatar.slug}`}
+            className="group relative block overflow-hidden rounded-[1.15rem] bg-zinc-900 ring-1 ring-white/10 shadow-[0_32px_80px_-28px_rgba(0,0,0,0.95)] transition hover:ring-white/25"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={avatar.portrait_url}
               alt={avatar.name}
-              className="aspect-[3/4] w-[min(100%,19rem)] object-cover object-top sm:w-[22rem] lg:w-[25rem]"
+              className="aspect-[3/4] w-[min(100%,19rem)] object-cover object-top transition duration-500 group-hover:scale-[1.02] sm:w-[22rem] lg:w-[25rem]"
             />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 to-transparent" />
             <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
@@ -316,7 +319,7 @@ function AvatarJumbotron({
                 </span>
               ) : null}
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Copy */}
@@ -335,7 +338,9 @@ function AvatarJumbotron({
           </div>
 
           <h2 className="font-body text-[clamp(2.6rem,6vw,4.6rem)] font-semibold leading-[0.92] tracking-tight text-white">
-            {avatar.name}
+            <Link href={`/vault/avatars/${avatar.slug}`} className="transition hover:text-sky-100">
+              {avatar.name}
+            </Link>
           </h2>
 
           {avatar.tagline ? (
@@ -357,6 +362,15 @@ function AvatarJumbotron({
               {avatar.bio}
             </p>
           ) : null}
+
+          <div className={`mt-8 ${flip ? "lg:flex lg:justify-end" : ""}`}>
+            <Link
+              href={`/vault/avatars/${avatar.slug}`}
+              className="inline-flex items-center gap-2 rounded-md bg-[#fafafa] px-5 py-2.5 text-sm font-semibold text-black shadow-[0_8px_24px_-8px_rgba(0,0,0,0.65)] transition hover:bg-sky-100"
+            >
+              Open profile
+            </Link>
+          </div>
         </div>
       </div>
 

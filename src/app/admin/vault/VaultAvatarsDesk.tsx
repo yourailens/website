@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { YailVaultAvatar } from "@/data/yail-vault-avatars";
 
@@ -333,6 +334,15 @@ export default function VaultAvatarsDesk({ avatars, onChange }: Props) {
                     ) : null}
                   </div>
                   <div className="flex flex-wrap gap-1.5">
+                    {a.published ? (
+                      <Link
+                        href={`/vault/avatars/${a.slug}`}
+                        target="_blank"
+                        className="rounded-full border border-white/15 px-3 py-1.5 text-[11px] text-white/70 transition hover:border-white/40 hover:text-white"
+                      >
+                        View
+                      </Link>
+                    ) : null}
                     <button
                       type="button"
                       onClick={() => startEdit(a)}

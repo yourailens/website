@@ -3,7 +3,7 @@ import { getGalleryFilms, getGalleryImages } from "@/lib/gallery/load";
 import { galleryRouteId } from "@/lib/gallery/route-id";
 import { loadPublicServices } from "@/lib/services/load";
 import { getPublishedTeamMembers } from "@/lib/team/load";
-import { getPublishedVaultEntries } from "@/lib/yail-vault/load";
+import { getPublishedVaultAvatars, getPublishedVaultEntries } from "@/lib/yail-vault/load";
 import { HOME_WATCH_TITLES } from "@/data/home-watch";
 
 function siteOrigin(): string {
@@ -38,12 +38,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const [images, films, packages, team, vault] = await Promise.all([
+    const [images, films, packages, team, vault, vaultAvatars] = await Promise.all([
       getGalleryImages(),
       getGalleryFilms(),
       loadPublicServices(),
       getPublishedTeamMembers(),
       getPublishedVaultEntries(),
+      getPublishedVaultAvatars(),
     ]);
 
     const imageUrls: MetadataRoute.Sitemap = images.map((img, i) => ({
@@ -71,7 +72,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(entry.updated_at),
     }));
 
-    return [...staticUrls, ...packageUrls, ...imageUrls, ...filmUrls, ...teamUrls, ...vaultUrls];
+    const vaultAvatarUrls: MetadataRoute.Sitemap = vaultAvatars.map((avatar) => ({
+      url: `${base}/vault/avatars/${encodeURIComponent(avatar.slug)}`,
+      lastModified: new Date(avatar.updated_at),
+    }));
+
+    return [
+      ...staticUrls,
+      ...packageUrls,
+      ...imageUrls,
+      ...filmUrls,
+      ...teamUrls,
+      ...vaultUrls,
+      ...vaultAvatarUrls,
+    ];
   } catch {
     return staticUrls;
   }

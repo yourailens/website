@@ -392,6 +392,22 @@ export async function getVaultAvatarById(id: string): Promise<YailVaultAvatar | 
   return rowToAvatar(data as AvatarRow);
 }
 
+export async function getVaultAvatarBySlug(slug: string): Promise<YailVaultAvatar | null> {
+  const db = createServiceRoleClient();
+  const { data, error } = await db
+    .from("yail_vault_avatars")
+    .select("*")
+    .eq("slug", slug)
+    .eq("published", true)
+    .maybeSingle();
+  if (error) {
+    if (/does not exist|schema cache/i.test(error.message)) return null;
+    throw new Error(error.message);
+  }
+  if (!data) return null;
+  return rowToAvatar(data as AvatarRow);
+}
+
 export async function getVaultAvatarsByIds(ids: string[]): Promise<YailVaultAvatar[]> {
   const unique = [...new Set(ids.filter(Boolean))];
   if (!unique.length) return [];
@@ -400,4 +416,31 @@ export async function getVaultAvatarsByIds(ids: string[]): Promise<YailVaultAvat
   if (error || !data) return [];
   const byId = new Map(((data ?? []) as AvatarRow[]).map((row) => [row.id, rowToAvatar(row)]));
   return unique.map((id) => byId.get(id)).filter((a): a is YailVaultAvatar => Boolean(a));
+}
+
+/** Published cuts tagged with this avatar (junction). */
+export async function getPublishedVaultEntriesForAvatar(
+  avatarId: string
+): Promise<YailVaultEntry[]> {
+  const db = createServiceRoleClient();
+  const { data: links, error } = await db
+    .from("yail_vault_entry_avatars")
+    .select("entry_id")
+    .eq("avatar_id", avatarId);
+  if (error) {
+    if (/does not exist|schema cache/i.test(error.message)) return [];
+    throw new Error(error.message);
+  }
+  const entryIds = [...new Set((links ?? []).map((r) => (r as { entry_id: string }).entry_id).filter(Boolean))];
+  if (!entryIds.length) return [];
+
+  const { data, error: entriesError } = await db
+    .from("yail_vault_entries")
+    .select("*")
+    .in("id", entryIds)
+    .eq("published", true)
+    .order("sort_order", { ascending: false })
+    .order("created_at", { ascending: false });
+  if (entriesError) throw new Error(entriesError.message);
+  return hydrateEntries(db, (data ?? []) as EntryRow[]);
 }
