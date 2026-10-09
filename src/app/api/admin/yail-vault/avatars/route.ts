@@ -6,10 +6,8 @@ import {
   adminGetAllVaultAvatars,
   uniqueAvatarSlug,
 } from "@/lib/yail-vault/load";
-import { bakeVaultAvatarOgToS3 } from "@/lib/seo/vault-avatar-og";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
 
 function revalidateVault() {
   revalidatePath("/vault");
@@ -51,13 +49,7 @@ export async function POST(req: NextRequest) {
     .limit(1);
   const sort_order = (last?.[0]?.sort_order ?? 0) + 1;
 
-  let og_image_url: string | null = null;
-  try {
-    og_image_url = await bakeVaultAvatarOgToS3(slug, portrait_url);
-  } catch {
-    /* portrait still saves; OG can be rebuilt later */
-  }
-
+  // Share thumbs bake on avatar page view / rebuild-og (keeps this function under Vercel size limits).
   const { data, error } = await db
     .from("yail_vault_avatars")
     .insert({
@@ -66,7 +58,6 @@ export async function POST(req: NextRequest) {
       tagline: String(b.tagline ?? "").trim() || null,
       bio: String(b.bio ?? "").trim() || null,
       portrait_url,
-      og_image_url,
       accent: String(b.accent ?? "").trim() || null,
       published: b.published !== false,
       sort_order,

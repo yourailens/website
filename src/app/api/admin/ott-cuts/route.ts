@@ -12,8 +12,6 @@ import {
   isOttCutMediaType,
   uniqueOttCutSlug,
 } from "@/lib/ott-cuts/load";
-import { ottCutYoutubeId } from "@/data/ott-cuts";
-import { bakeOgJpegToS3, mediaSourceForOg } from "@/lib/seo/bake-og-image";
 
 export const dynamic = "force-dynamic";
 
@@ -69,21 +67,6 @@ export async function POST(req: NextRequest) {
   const sort_order = (last?.[0]?.sort_order ?? 0) + 1;
   const slug = await uniqueOttCutSlug(db, caption);
   const poster_url = String(b.poster_url ?? "").trim() || null;
-  const yt = ottCutYoutubeId(media_url);
-  const ogSource = mediaSourceForOg({
-    poster_url,
-    media_url,
-    media_type,
-    youtubeThumb: yt ? `https://i.ytimg.com/vi/${yt}/hqdefault.jpg` : null,
-  });
-  let og_image_url: string | null = null;
-  if (ogSource) {
-    try {
-      og_image_url = await bakeOgJpegToS3("ott-cuts", slug, ogSource);
-    } catch {
-      /* page ensure will retry */
-    }
-  }
 
   const { data, error } = await db
     .from("ott_cuts")
@@ -95,7 +78,6 @@ export async function POST(req: NextRequest) {
       media_type,
       media_url,
       poster_url,
-      og_image_url,
       aspect_ratio,
       published: b.published !== false,
       homepage_feature,

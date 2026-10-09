@@ -3,10 +3,8 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/api/admin-auth";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
 import { adminGetAllVaultAvatars, uniqueAvatarSlug } from "@/lib/yail-vault/load";
-import { bakeVaultAvatarOgToS3 } from "@/lib/seo/vault-avatar-og";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
 
 function revalidateVault() {
   revalidatePath("/vault");
@@ -46,23 +44,9 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
     return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
   }
 
-  // Re-bake share thumb whenever the portrait (or slug) changes.
-  if (typeof patch.portrait_url === "string" || typeof patch.slug === "string" || b.rebuild_og === true) {
-    const { data: current } = await db
-      .from("yail_vault_avatars")
-      .select("slug, portrait_url")
-      .eq("id", id)
-      .maybeSingle();
-    const nextSlug = typeof patch.slug === "string" ? patch.slug : current?.slug;
-    const nextPortrait =
-      typeof patch.portrait_url === "string" ? patch.portrait_url : current?.portrait_url;
-    if (nextSlug && nextPortrait) {
-      try {
-        patch.og_image_url = await bakeVaultAvatarOgToS3(nextSlug, nextPortrait);
-      } catch {
-        /* keep previous og_image_url */
-      }
-    }
+  // Clear stale share thumb when portrait/slug changes — bake on page view or rebuild-og.
+  if (typeof patch.portrait_url === "string" || typeof patch.slug === "string") {
+    patch.og_image_url = null;
   }
 
   const { error } = await db.from("yail_vault_avatars").update(patch).eq("id", id);

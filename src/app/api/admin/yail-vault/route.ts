@@ -13,7 +13,6 @@ import {
   setEntryTags,
   uniqueVaultSlug,
 } from "@/lib/yail-vault/load";
-import { bakeOgJpegToS3, mediaSourceForOg } from "@/lib/seo/bake-og-image";
 
 export const dynamic = "force-dynamic";
 
@@ -114,15 +113,6 @@ export async function POST(req: NextRequest) {
       : null;
 
   const poster_url = String(b.poster_url ?? "").trim() || null;
-  let og_image_url: string | null = null;
-  const ogSource = mediaSourceForOg({ poster_url, media_url, media_type });
-  if (ogSource) {
-    try {
-      og_image_url = await bakeOgJpegToS3("yail-vault", slug, ogSource);
-    } catch {
-      /* page ensure will retry */
-    }
-  }
 
   const { data, error } = await db
     .from("yail_vault_entries")
@@ -135,7 +125,6 @@ export async function POST(req: NextRequest) {
       media_type,
       media_url,
       poster_url,
-      og_image_url,
       aspect_width,
       aspect_height,
       ai_model,

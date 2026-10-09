@@ -4,8 +4,6 @@ import { requireAdmin } from "@/lib/api/admin-auth";
 import { isHeroSlot } from "@/data/ott-cuts";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
 import { isOttCutAspect, isOttCutCategory, isOttCutMediaType, clearOtherHomepageFeatures, clearHeroSlot } from "@/lib/ott-cuts/load";
-import { ottCutYoutubeId } from "@/data/ott-cuts";
-import { bakeOgJpegToS3, mediaSourceForOg } from "@/lib/seo/bake-og-image";
 
 export const dynamic = "force-dynamic";
 
@@ -47,35 +45,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     patch.homepage_hero = Boolean(hero_slot);
   }
 
-  const mediaTouched = "media_url" in patch || "poster_url" in patch || "media_type" in patch;
-  if (mediaTouched) {
-    const { data: current } = await db
-      .from("ott_cuts")
-      .select("slug, media_type, media_url, poster_url")
-      .eq("id", id)
-      .maybeSingle();
-    if (current) {
-      const nextType = String(patch.media_type ?? current.media_type);
-      const nextMedia = String(patch.media_url ?? current.media_url);
-      const nextPoster =
-        "poster_url" in patch
-          ? (typeof patch.poster_url === "string" ? patch.poster_url : null)
-          : (current.poster_url as string | null);
-      const yt = ottCutYoutubeId(nextMedia);
-      const source = mediaSourceForOg({
-        poster_url: nextPoster,
-        media_url: nextMedia,
-        media_type: nextType,
-        youtubeThumb: yt ? `https://i.ytimg.com/vi/${yt}/hqdefault.jpg` : null,
-      });
-      if (source) {
-        try {
-          patch.og_image_url = await bakeOgJpegToS3("ott-cuts", String(current.slug), source);
-        } catch {
-          /* keep previous */
-        }
-      }
-    }
+  // Clear stale share thumb when media changes — bake on /cut/[slug] view or rebuild-og.
+  if ("media_url" in patch || "poster_url" in patch || "media_type" in patch) {
+    patch.og_image_url = null;
   }
 
   const { error } = await db.from("ott_cuts").update(patch).eq("id", id);

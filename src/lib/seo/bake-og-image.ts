@@ -2,7 +2,10 @@ import sharp from "sharp";
 import { readFile } from "fs/promises";
 import path from "path";
 import { uploadObjectToS3 } from "@/lib/s3/client";
+import { mediaSourceForOg } from "@/lib/seo/bake-og-source";
 import { OG_THUMB_HEIGHT, OG_THUMB_WIDTH, isS3ImageUrlAllowedForOgProxy } from "@/lib/seo/og-thumbnail";
+
+export { mediaSourceForOg } from "@/lib/seo/bake-og-source";
 
 const MAX_INPUT_BYTES = 25 * 1024 * 1024;
 
@@ -128,18 +131,6 @@ export async function ensureBakedOgImage(args: EnsureArgs): Promise<string | nul
     console.error(`[bake-og] bake ${args.table}`, e);
     return existing || null;
   }
-}
-
-export function mediaSourceForOg(opts: {
-  poster_url?: string | null;
-  media_url?: string | null;
-  media_type?: string | null;
-  youtubeThumb?: string | null;
-}): string {
-  if (opts.poster_url?.trim()) return opts.poster_url.trim();
-  if (opts.youtubeThumb?.trim()) return opts.youtubeThumb.trim();
-  if (opts.media_type === "image" && opts.media_url?.trim()) return opts.media_url.trim();
-  return "";
 }
 
 export async function ensureVaultEntryOgImage(entry: {

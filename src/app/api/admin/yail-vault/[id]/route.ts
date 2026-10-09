@@ -12,7 +12,6 @@ import {
   setEntryTags,
   uniqueVaultSlug,
 } from "@/lib/yail-vault/load";
-import { bakeOgJpegToS3, mediaSourceForOg } from "@/lib/seo/bake-og-image";
 
 export const dynamic = "force-dynamic";
 
@@ -90,35 +89,9 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
     else if (isYailVaultAiModelId(raw)) patch.ai_model = raw;
     else return NextResponse.json({ error: "Pick a model from the AI Model list" }, { status: 400 });
   }
-  const mediaTouched =
-    "media_url" in patch || "poster_url" in patch || "media_type" in patch || "slug" in patch;
-  if (mediaTouched) {
-    const { data: current } = await db
-      .from("yail_vault_entries")
-      .select("slug, media_type, media_url, poster_url")
-      .eq("id", id)
-      .maybeSingle();
-    if (current) {
-      const nextSlug = String(patch.slug ?? current.slug);
-      const nextType = String(patch.media_type ?? current.media_type);
-      const nextMedia = String(patch.media_url ?? current.media_url);
-      const nextPoster =
-        "poster_url" in patch
-          ? (typeof patch.poster_url === "string" ? patch.poster_url : null)
-          : (current.poster_url as string | null);
-      const source = mediaSourceForOg({
-        poster_url: nextPoster,
-        media_url: nextMedia,
-        media_type: nextType,
-      });
-      if (source) {
-        try {
-          patch.og_image_url = await bakeOgJpegToS3("yail-vault", nextSlug, source);
-        } catch {
-          /* keep previous */
-        }
-      }
-    }
+  // Clear stale share thumb when media changes — bake on cut page view or rebuild-og.
+  if ("media_url" in patch || "poster_url" in patch || "media_type" in patch || "slug" in patch) {
+    patch.og_image_url = null;
   }
 
   if (Object.keys(patch).length) {
