@@ -27,10 +27,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description =
     avatar.tagline ?? avatar.bio ?? `${avatar.name} — AI Avatar character file from YAIL Vault.`;
 
-  // Prefer the colocated Next opengraph-image route (same path as the page).
-  const ogImage = `${origin}/vault/avatars/${encodeURIComponent(avatar.slug)}/opengraph-image?v=${bust}`;
-  // Keep API path as a second candidate for crawlers that retry.
-  const ogImageApi = `${origin}/api/og/vault-avatar/${encodeURIComponent(avatar.slug)}?v=${bust}`;
+  // Prefer the pre-baked S3 JPEG (static, fast — WhatsApp-friendly).
+  // Fall back to colocated opengraph-image / API only if bake hasn't run yet.
+  const stored = avatar.og_image_url?.trim();
+  const ogImage = stored
+    ? `${stored}${stored.includes("?") ? "&" : "?"}v=${bust}`
+    : `${origin}/vault/avatars/${encodeURIComponent(avatar.slug)}/opengraph-image?v=${bust}`;
 
   return {
     title,
@@ -46,14 +48,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         {
           url: ogImage,
           secureUrl: ogImage,
-          alt: `${avatar.name} — YAIL Vault AI Avatar`,
-          type: "image/jpeg",
-          width: OG_THUMB_WIDTH,
-          height: OG_THUMB_HEIGHT,
-        },
-        {
-          url: ogImageApi,
-          secureUrl: ogImageApi,
           alt: `${avatar.name} — YAIL Vault AI Avatar`,
           type: "image/jpeg",
           width: OG_THUMB_WIDTH,

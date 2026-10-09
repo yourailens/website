@@ -6,8 +6,10 @@ import {
   adminGetAllVaultAvatars,
   uniqueAvatarSlug,
 } from "@/lib/yail-vault/load";
+import { bakeVaultAvatarOgToS3 } from "@/lib/seo/vault-avatar-og";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 function revalidateVault() {
   revalidatePath("/vault");
@@ -49,6 +51,13 @@ export async function POST(req: NextRequest) {
     .limit(1);
   const sort_order = (last?.[0]?.sort_order ?? 0) + 1;
 
+  let og_image_url: string | null = null;
+  try {
+    og_image_url = await bakeVaultAvatarOgToS3(slug, portrait_url);
+  } catch {
+    /* portrait still saves; OG can be rebuilt later */
+  }
+
   const { data, error } = await db
     .from("yail_vault_avatars")
     .insert({
@@ -57,6 +66,7 @@ export async function POST(req: NextRequest) {
       tagline: String(b.tagline ?? "").trim() || null,
       bio: String(b.bio ?? "").trim() || null,
       portrait_url,
+      og_image_url,
       accent: String(b.accent ?? "").trim() || null,
       published: b.published !== false,
       sort_order,
@@ -65,11 +75,11 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) {
-    const missing = /does not exist|schema cache/i.test(error.message);
+    const missing = /does not exist|schema cache|og_image_url/i.test(error.message);
     return NextResponse.json(
       {
         error: missing
-          ? "Run supabase/migrations/078_yail_vault_avatar_directory.sql in the Supabase SQL editor first."
+          ? "Run supabase/migrations/078_yail_vault_avatar_directory.sql and 081_yail_vault_avatar_og.sql in the Supabase SQL editor first."
           : error.message,
       },
       { status: 400 }

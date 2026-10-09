@@ -1,6 +1,7 @@
 import sharp from "sharp";
 import { readFile } from "fs/promises";
 import path from "path";
+import { uploadObjectToS3 } from "@/lib/s3/client";
 import { OG_THUMB_HEIGHT, OG_THUMB_WIDTH, isS3ImageUrlAllowedForOgProxy } from "@/lib/seo/og-thumbnail";
 
 const MAX_INPUT_BYTES = 25 * 1024 * 1024;
@@ -70,4 +71,16 @@ export async function renderVaultAvatarOgJpeg(portraitUrl: string | null | undef
   } catch {
     return fallbackOgJpeg();
   }
+}
+
+/**
+ * Bake a WhatsApp-safe JPEG to S3 and return its public URL.
+ * Stable key per slug so share cards stay predictable; bust with ?v=updated_at in metadata.
+ */
+export async function bakeVaultAvatarOgToS3(slug: string, portraitUrl: string): Promise<string> {
+  const jpeg = await renderVaultAvatarOgJpeg(portraitUrl);
+  const safe = slug.replace(/[^a-z0-9\-]/gi, "").toLowerCase() || "avatar";
+  const key = `yail-vault/og/avatars/${safe}.jpg`;
+  const { publicUrl } = await uploadObjectToS3(key, jpeg, "image/jpeg");
+  return publicUrl;
 }

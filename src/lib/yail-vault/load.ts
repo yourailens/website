@@ -37,6 +37,7 @@ type AvatarRow = {
   tagline: string | null;
   bio: string | null;
   portrait_url: string;
+  og_image_url?: string | null;
   accent: string | null;
   sort_order: number;
   published: boolean;
@@ -73,6 +74,7 @@ function rowToAvatar(row: AvatarRow): YailVaultAvatar {
     tagline: row.tagline,
     bio: row.bio,
     portrait_url: row.portrait_url,
+    og_image_url: row.og_image_url?.trim() || null,
     accent: row.accent,
     sort_order: row.sort_order,
     published: row.published,

@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { getVaultAvatarBySlug } from "@/lib/yail-vault/load";
 import { OG_THUMB_HEIGHT, OG_THUMB_WIDTH } from "@/lib/seo/og-thumbnail";
 import { renderVaultAvatarOgJpeg } from "@/lib/seo/vault-avatar-og";
@@ -10,10 +11,15 @@ export const contentType = "image/jpeg";
 
 type Props = { params: Promise<{ slug: string }> };
 
-/** Colocated OG image — WhatsApp scrapes this more reliably than /api routes. */
+/** Prefer the stored S3 share thumb; otherwise bake on the fly. */
 export default async function Image({ params }: Props) {
   const { slug } = await params;
   const avatar = await getVaultAvatarBySlug(slug);
+
+  if (avatar?.og_image_url) {
+    return NextResponse.redirect(avatar.og_image_url, 307);
+  }
+
   const jpeg = await renderVaultAvatarOgJpeg(avatar?.portrait_url);
   return new Response(new Uint8Array(jpeg), {
     headers: {

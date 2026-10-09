@@ -10,12 +10,16 @@ type Ctx = { params: Promise<{ slug: string }> };
 
 /**
  * GET /api/og/vault-avatar/[slug]
- * Compressed 1200×630 JPEG from the avatar DP for WhatsApp / OG crawlers.
- * Always returns a JPEG (site fallback if portrait missing) so previews never blank out.
+ * Prefer the pre-baked S3 share thumb; otherwise compress on the fly.
  */
 export async function GET(_req: Request, ctx: Ctx) {
   const { slug } = await ctx.params;
   const avatar = await getVaultAvatarBySlug(slug);
+
+  if (avatar?.og_image_url) {
+    return NextResponse.redirect(avatar.og_image_url, 307);
+  }
+
   const jpeg = await renderVaultAvatarOgJpeg(avatar?.portrait_url);
 
   return new NextResponse(new Uint8Array(jpeg), {

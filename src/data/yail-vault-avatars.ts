@@ -5,6 +5,8 @@ export type YailVaultAvatar = {
   tagline: string | null;
   bio: string | null;
   portrait_url: string;
+  /** Pre-baked 1200×630 JPEG on S3 for WhatsApp / OG. */
+  og_image_url: string | null;
   accent: string | null;
   sort_order: number;
   published: boolean;
