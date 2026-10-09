@@ -42,16 +42,16 @@ export function SampleBrandMediaSlotFields({
     onChange({ ...value, [key]: v });
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-      <p className="text-xs font-bold text-slate-800">{label}</p>
-      {hint ? <p className="mt-0.5 text-[10px] text-slate-500">{hint}</p> : null}
+    <div className="rounded-xl border border-white/15 bg-transparent/60 p-4">
+      <p className="text-xs font-bold text-white">{label}</p>
+      {hint ? <p className="mt-0.5 text-[10px] text-white/45">{hint}</p> : null}
 
-      <label className="mt-3 block text-[10px] font-medium text-slate-600">
+      <label className="mt-3 block text-[10px] font-medium text-white/55">
         Media URL
         <input
           value={value.url}
           onChange={(e) => set("url", e.target.value)}
-          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-lg border border-white/15 bg-white/[0.06] px-3 py-2 text-sm"
         />
       </label>
 
@@ -72,7 +72,7 @@ export function SampleBrandMediaSlotFields({
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <fieldset>
-          <legend className="text-[10px] font-medium text-slate-600">Type</legend>
+          <legend className="text-[10px] font-medium text-white/55">Type</legend>
           <div className="mt-1 flex flex-wrap gap-2">
             {MEDIA_TYPES.map((opt) => (
               <label
@@ -80,7 +80,7 @@ export function SampleBrandMediaSlotFields({
                 className={`cursor-pointer rounded-lg border px-3 py-1.5 text-xs font-semibold ${
                   value.mediaType === opt.value
                     ? "border-slate-900 bg-slate-900 text-white"
-                    : "border-slate-200 bg-white text-slate-700"
+                    : "border-white/15 bg-white/[0.06] text-white/70"
                 }`}
               >
                 <input
@@ -96,7 +96,7 @@ export function SampleBrandMediaSlotFields({
         </fieldset>
 
         <fieldset>
-          <legend className="text-[10px] font-medium text-slate-600">Aspect ratio</legend>
+          <legend className="text-[10px] font-medium text-white/55">Aspect ratio</legend>
           <div className="mt-1 flex flex-wrap gap-2">
             {SAMPLE_BRAND_ASPECT_RATIOS.map((opt) => (
               <label
@@ -104,7 +104,7 @@ export function SampleBrandMediaSlotFields({
                 className={`cursor-pointer rounded-lg border px-2.5 py-1.5 text-xs font-semibold ${
                   value.aspectRatio === opt.value
                     ? "border-slate-900 bg-slate-900 text-white"
-                    : "border-slate-200 bg-white text-slate-700"
+                    : "border-white/15 bg-white/[0.06] text-white/70"
                 }`}
               >
                 <input
@@ -122,23 +122,23 @@ export function SampleBrandMediaSlotFields({
       </div>
 
       {value.mediaType === "video" ? (
-        <label className="mt-3 block text-[10px] font-medium text-slate-600">
+        <label className="mt-3 block text-[10px] font-medium text-white/55">
           Poster frame URL
           <input
             value={value.posterUrl}
             onChange={(e) => set("posterUrl", e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-white/15 bg-white/[0.06] px-3 py-2 text-sm"
           />
         </label>
       ) : null}
 
       {showCaption ? (
-        <label className="mt-3 block text-[10px] font-medium text-slate-600">
+        <label className="mt-3 block text-[10px] font-medium text-white/55">
           Caption (optional, subtle on site)
           <input
             value={value.caption}
             onChange={(e) => set("caption", e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-white/15 bg-white/[0.06] px-3 py-2 text-sm"
           />
         </label>
       ) : null}

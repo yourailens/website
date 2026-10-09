@@ -77,33 +77,33 @@ export default function FutureInlineTimelineEditor({ frames, onChange, uploadSlu
         {frames.map((frame, i) => (
           <li key={i} className="relative md:pl-14">
             <span
-              className="absolute left-0 top-0 z-10 flex h-9 w-9 items-center justify-center rounded-full border-2 border-blue-600 bg-white font-mono text-[11px] font-black text-blue-700 shadow-sm"
+              className="absolute left-0 top-0 z-10 flex h-9 w-9 items-center justify-center rounded-full border-2 border-blue-600 bg-white/[0.06] font-mono text-[11px] font-black text-emerald-300 "
               aria-hidden
             >
               {i + 1}
             </span>
 
-            <article className="overflow-hidden rounded-2xl border-2 border-dashed border-blue-200/90 bg-white shadow-sm ring-1 ring-blue-50">
-              <div className="border-b border-blue-50 bg-blue-50/40 px-4 py-2 flex flex-wrap items-center justify-between gap-2">
-                <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-blue-600">
+            <article className="overflow-hidden rounded-2xl border-2 border-dashed border-white/20/90 bg-white/[0.06]  ring-1 ring-blue-50">
+              <div className="border-b border-blue-50 bg-white/[0.06]/40 px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+                <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-300/80">
                   Frame {i + 1}
                 </span>
                 <div className="flex gap-1">
-                  <button type="button" disabled={i === 0} onClick={() => move(i, -1)} className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-600 disabled:opacity-30">
+                  <button type="button" disabled={i === 0} onClick={() => move(i, -1)} className="rounded-lg border border-white/15 bg-white/[0.06] px-2 py-1 text-xs font-bold text-white/55 disabled:opacity-30">
                     ↑
                   </button>
                   <button
                     type="button"
                     disabled={i === frames.length - 1}
                     onClick={() => move(i, 1)}
-                    className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-600 disabled:opacity-30"
+                    className="rounded-lg border border-white/15 bg-white/[0.06] px-2 py-1 text-xs font-bold text-white/55 disabled:opacity-30"
                   >
                     ↓
                   </button>
                   <button
                     type="button"
                     onClick={() => onChange(frames.filter((_, idx) => idx !== i))}
-                    className="rounded-lg border border-red-200 bg-white px-2 py-1 text-xs font-bold text-red-600"
+                    className="rounded-lg border border-red-200 bg-white/[0.06] px-2 py-1 text-xs font-bold text-red-600"
                   >
                     Remove
                   </button>
@@ -118,7 +118,7 @@ export default function FutureInlineTimelineEditor({ frames, onChange, uploadSlu
                       type="button"
                       onClick={() => patch(i, { aspect_ratio: a.id })}
                       className={`rounded-full px-3 py-1 text-xs font-bold ${
-                        frame.aspect_ratio === a.id ? "bg-blue-600 text-white" : "border border-slate-200 text-slate-600"
+                        frame.aspect_ratio === a.id ? "bg-white text-white" : "border border-white/15 text-white/55"
                       }`}
                     >
                       {a.label}
@@ -143,7 +143,7 @@ export default function FutureInlineTimelineEditor({ frames, onChange, uploadSlu
                       setCropIndex(i);
                       setTimeout(() => imageRef.current?.click(), 0);
                     }}
-                    className="rounded-full bg-blue-600 px-4 py-2 text-xs font-bold text-white disabled:opacity-60"
+                    className="rounded-full bg-white px-4 py-2 text-xs font-bold text-white disabled:opacity-60"
                   >
                     {frame.media_type === "image" && frame.image_url ? "Replace image (crop)" : "Add image (crop)"}
                   </button>
@@ -154,26 +154,26 @@ export default function FutureInlineTimelineEditor({ frames, onChange, uploadSlu
                       setCropIndex(i);
                       setTimeout(() => videoRef.current?.click(), 0);
                     }}
-                    className="rounded-full border border-blue-200 px-4 py-2 text-xs font-bold text-blue-800"
+                    className="rounded-full border border-white/20 px-4 py-2 text-xs font-bold text-emerald-200"
                   >
                     {frame.video_url ? "Replace video" : "Add video"}
                   </button>
                 </div>
 
-                <div className="mt-5 space-y-3 border-t border-slate-100 pt-5">
+                <div className="mt-5 space-y-3 border-t border-white/10 pt-5">
                   <label className="block">
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">
                       Label (public headline)
                     </span>
                     <input
                       value={frame.label}
                       onChange={(e) => patch(i, { label: e.target.value })}
                       placeholder="e.g. First light on the horizon"
-                      className="mt-1 w-full border-0 border-b-2 border-dashed border-slate-200 bg-transparent py-2 font-heading text-lg font-bold text-slate-900 placeholder:text-slate-300 focus:border-blue-400 focus:outline-none"
+                      className="mt-1 w-full border-0 border-b-2 border-dashed border-white/15 bg-transparent py-2 font-heading text-lg font-bold text-white placeholder:text-white/25 focus:border-white/40 focus:outline-none"
                     />
                   </label>
                   <label className="block">
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">
                       Caption
                     </span>
                     <textarea
@@ -181,16 +181,16 @@ export default function FutureInlineTimelineEditor({ frames, onChange, uploadSlu
                       onChange={(e) => patch(i, { caption: e.target.value })}
                       rows={3}
                       placeholder="Supporting line shown under the media on the live page."
-                      className="mt-1 w-full resize-y rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm leading-relaxed text-slate-700 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                      className="mt-1 w-full resize-y rounded-xl border border-white/15 bg-transparent/80 px-3 py-2 text-sm leading-relaxed text-white/70 focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/15"
                     />
                   </label>
                   {frame.media_type === "video" ? (
-                    <label className="block text-xs font-bold text-slate-600">
+                    <label className="block text-xs font-bold text-white/55">
                       Video poster URL (optional)
                       <input
                         value={frame.poster_url}
                         onChange={(e) => patch(i, { poster_url: e.target.value })}
-                        className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-normal"
+                        className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm font-normal"
                       />
                     </label>
                   ) : null}
@@ -204,7 +204,7 @@ export default function FutureInlineTimelineEditor({ frames, onChange, uploadSlu
       <button
         type="button"
         onClick={() => onChange([...frames, emptyFrame()])}
-        className="mt-10 w-full rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50/50 py-8 text-sm font-bold text-blue-700 transition hover:bg-blue-50"
+        className="mt-10 w-full rounded-2xl border-2 border-dashed border-blue-300 bg-white/[0.06]/50 py-8 text-sm font-bold text-emerald-300 transition hover:bg-white/[0.06]"
       >
         + {FUTURE_COPY.addMoment}
       </button>

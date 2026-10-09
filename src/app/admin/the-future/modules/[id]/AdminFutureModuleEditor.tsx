@@ -24,11 +24,11 @@ function framesToDrafts(frames: FutureModuleWithFrames["frames"]): FutureFrameDr
 }
 
 const headlineInput =
-  "w-full border-0 bg-transparent font-heading text-[clamp(1.75rem,4vw,2.65rem)] font-black leading-tight text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-0";
+  "w-full border-0 bg-transparent font-heading text-[clamp(1.75rem,4vw,2.65rem)] font-black leading-tight text-white placeholder:text-white/25 focus:outline-none focus:ring-0";
 const subInput =
-  "mt-3 w-full border-0 border-b border-dashed border-slate-200 bg-transparent text-lg font-medium text-slate-600 placeholder:text-slate-300 focus:border-blue-400 focus:outline-none";
+  "mt-3 w-full border-0 border-b border-dashed border-white/15 bg-transparent text-lg font-medium text-white/55 placeholder:text-white/25 focus:border-white/40 focus:outline-none";
 const introInput =
-  "mt-4 w-full resize-y rounded-xl border border-slate-200/80 bg-white/80 px-4 py-3 text-base leading-relaxed text-slate-600 placeholder:text-slate-400 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100";
+  "mt-4 w-full resize-y rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-base leading-relaxed text-white/55 placeholder:text-white/35 focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/15";
 
 export default function AdminFutureModuleEditor() {
   const { id } = useParams<{ id: string }>();
@@ -126,24 +126,24 @@ export default function AdminFutureModuleEditor() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f4f7fc]">
+      <div className="flex items-center justify-center bg-transparent">
         <span className="h-9 w-9 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f7fc]">
-      <div className="sticky top-0 z-40 border-b border-blue-100/90 bg-white/95 backdrop-blur-md">
+    <div className="bg-transparent">
+      <div className="sticky top-0 z-40 border-b border-white/12/90 bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 px-6 py-3">
           <Link
             href={field ? `/admin/the-future/fields/${field.id}` : "/admin/the-future"}
-            className="text-xs font-bold text-slate-500 hover:text-blue-700"
+            className="text-xs font-bold text-white/45 hover:text-emerald-300"
           >
             ← Back
           </Link>
           <div className="flex flex-wrap items-center gap-2">
-            <label className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700">
+            <label className="flex items-center gap-2 rounded-full border border-white/15 bg-transparent px-3 py-1.5 text-xs font-bold text-white/70">
               <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} />
               Published
             </label>
@@ -151,7 +151,7 @@ export default function AdminFutureModuleEditor() {
               <Link
                 href={previewHref}
                 target="_blank"
-                className="rounded-full border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 hover:border-blue-200"
+                className="rounded-full border border-white/15 px-4 py-2 text-xs font-bold text-white/70 hover:border-white/20"
               >
                 Preview ↗
               </Link>
@@ -160,7 +160,7 @@ export default function AdminFutureModuleEditor() {
               type="button"
               onClick={save}
               disabled={saving}
-              className="rounded-full bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-md disabled:opacity-60"
+              className="rounded-full bg-white px-5 py-2 text-xs font-bold text-white shadow-md disabled:opacity-60"
             >
               {saving ? "Saving…" : "Save"}
             </button>
@@ -176,13 +176,13 @@ export default function AdminFutureModuleEditor() {
       </div>
 
       {/* Mirrors public module page — inputs in place of static copy */}
-      <article className="bg-[#f4f7fc]">
-        <section className="border-b border-blue-100/80 bg-gradient-to-b from-white to-[#f4f7fc]">
+      <article className="bg-transparent">
+        <section className="border-b border-white/12/80 bg-gradient-to-b from-white to-[#f4f7fc]">
           <div className="mx-auto w-[92%] max-w-3xl py-10 md:py-12">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-blue-600">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-300/80">
               {FUTURE_COPY.editingModule} · {field?.title ?? "Field"}
             </p>
-            <p className="mt-2 font-mono text-[10px] text-slate-400">
+            <p className="mt-2 font-mono text-[10px] text-white/35">
               /{field?.slug}/{slug || "…"}
             </p>
 
@@ -209,7 +209,7 @@ export default function AdminFutureModuleEditor() {
               className={introInput}
             />
 
-            <div className="mt-6 flex flex-wrap gap-4 text-xs font-bold text-slate-500">
+            <div className="mt-6 flex flex-wrap gap-4 text-xs font-bold text-white/45">
               <label>
                 URL slug
                 <input
@@ -218,7 +218,7 @@ export default function AdminFutureModuleEditor() {
                     setSlugTouched(true);
                     setSlug(e.target.value);
                   }}
-                  className="mt-1 block w-48 rounded-lg border border-slate-200 px-2 py-1.5 font-mono text-sm text-slate-800"
+                  className="mt-1 block w-48 rounded-lg border border-white/15 px-2 py-1.5 font-mono text-sm text-white"
                 />
               </label>
               <label>
@@ -227,7 +227,7 @@ export default function AdminFutureModuleEditor() {
                   type="number"
                   value={sortOrder}
                   onChange={(e) => setSortOrder(Number(e.target.value))}
-                  className="mt-1 block w-20 rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                  className="mt-1 block w-20 rounded-lg border border-white/15 px-2 py-1.5 text-sm"
                 />
               </label>
             </div>
@@ -235,7 +235,7 @@ export default function AdminFutureModuleEditor() {
         </section>
 
         <div className="mx-auto w-[92%] max-w-3xl py-12 pb-28 md:py-16">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-slate-400">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-white/35">
             {FUTURE_COPY.framesHeading} (scroll to edit each moment)
           </p>
           <div className="mt-8">
@@ -250,7 +250,7 @@ export default function AdminFutureModuleEditor() {
         </div>
       </article>
 
-      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-blue-100 bg-white/95 px-6 py-4 backdrop-blur-md">
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/12 bg-white/95 px-6 py-4 backdrop-blur-md">
         <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3">
           <button type="button" onClick={remove} className="text-xs font-bold text-red-600 hover:text-red-800">
             Delete module
@@ -259,7 +259,7 @@ export default function AdminFutureModuleEditor() {
             type="button"
             onClick={save}
             disabled={saving}
-            className="rounded-full bg-blue-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-blue-200/50 disabled:opacity-60"
+            className="rounded-full bg-white px-8 py-3 text-sm font-bold text-white shadow-lg shadow-blue-200/50 disabled:opacity-60"
           >
             {saving ? "Saving…" : "Save entire page"}
           </button>

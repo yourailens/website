@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef, useEffect, useRef, useState } from "react";
+import { attachPlaybackHold } from "@/components/media/playback-hold";
 
 type DeferredVideoProps = {
   src: string;
@@ -15,12 +16,29 @@ type DeferredVideoProps = {
   rootMargin?: string;
 };
 
+function shellClass(className: string) {
+  const positioned = /(^|\s)(absolute|relative|fixed|sticky)(\s|$)/.test(className);
+  const hasZ = /(^|\s)z-/.test(className);
+  const base = positioned ? className : `relative block ${className}`.trim();
+  return hasZ ? base : `${base} z-0`;
+}
+
+function mediaClass(className: string) {
+  const fit = className.includes("object-contain")
+    ? "object-contain"
+    : className.includes("object-cover") || className.includes("h-full")
+      ? "object-cover"
+      : "";
+  if (className.includes("h-auto")) return `block h-auto w-full bg-black ${fit}`.trim();
+  return `h-full w-full bg-black ${fit}`.trim();
+}
+
 export const DeferredVideo = forwardRef<HTMLVideoElement, DeferredVideoProps>(
   function DeferredVideo(
     {
       src,
       poster,
-      className,
+      className = "",
       eager = false,
       loop = true,
       controls = false,
@@ -30,20 +48,43 @@ export const DeferredVideo = forwardRef<HTMLVideoElement, DeferredVideoProps>(
     forwardedRef
   ) {
     const nodeRef = useRef<HTMLVideoElement>(null);
+    const stillRef = useRef<HTMLCanvasElement>(null);
     const inViewRef = useRef(eager);
     const [shouldLoad, setShouldLoad] = useState(eager);
+    const [dropPoster, setDropPoster] = useState(false);
+
+    useEffect(() => {
+      setDropPoster(false);
+    }, [src]);
 
     useEffect(() => {
       const node = nodeRef.current;
-      if (!node) return;
+      const still = stillRef.current;
+      if (!node || !still) return;
 
       if (typeof forwardedRef === "function") forwardedRef(node);
       else if (forwardedRef) forwardedRef.current = node;
 
+      const onScreen = () => {
+        const box = node.getBoundingClientRect();
+        return box.width > 0 && box.bottom > 0 && box.top < window.innerHeight;
+      };
+
       const playIfReady = () => {
+        if (!inViewRef.current && !onScreen()) return;
+        if (onScreen()) inViewRef.current = true;
         if (!inViewRef.current) return;
         void node.play().catch(() => {});
       };
+
+      const releaseHold = attachPlaybackHold(node, still, {
+        controls,
+        onPainted: () => {
+          if (!node.getAttribute("poster")) return;
+          node.removeAttribute("poster");
+          setDropPoster(true);
+        },
+      });
 
       const loadObserver = new IntersectionObserver(
         ([entry]) => {
@@ -55,72 +96,65 @@ export const DeferredVideo = forwardRef<HTMLVideoElement, DeferredVideoProps>(
       const playObserver = new IntersectionObserver(
         ([entry]) => {
           const visible = Boolean(entry?.isIntersecting);
-          inViewRef.current = visible;
           if (visible) {
+            inViewRef.current = true;
             setShouldLoad(true);
             playIfReady();
             return;
           }
 
-          // While the tab/window is hidden, IntersectionObserver often falsely
-          // reports out-of-view. Pausing then clears the decoded frame and
-          // shows a grey/blue flash when you come back. Only pause on real scroll-away.
-          if (document.visibilityState === "visible") {
-            node.pause();
-          }
+          // A window swipe makes IntersectionObserver report the hero as
+          // off-screen, and pausing then is what clears the picture.
+          const windowGone = document.visibilityState !== "visible" || !document.hasFocus();
+          if (windowGone || onScreen()) return;
+
+          inViewRef.current = false;
+          node.pause();
         },
         { rootMargin: "120px", threshold: 0 }
       );
 
-      const onVisibility = () => {
-        if (document.visibilityState === "visible") {
-          playIfReady();
-        }
-      };
-
-      // Some window switches pause media without flipping visibility, or pause
-      // before visibilitychange fires. If we still want playback, resume immediately
-      // so the cleared frame never sits on screen.
-      const onPause = () => {
-        if (document.visibilityState !== "visible") return;
-        if (!inViewRef.current) return;
-        void node.play().catch(() => {});
-      };
-
       loadObserver.observe(node);
       playObserver.observe(node);
       node.addEventListener("canplay", playIfReady);
-      node.addEventListener("pause", onPause);
-      document.addEventListener("visibilitychange", onVisibility);
       if (eager) playIfReady();
 
       return () => {
+        releaseHold();
         loadObserver.disconnect();
         playObserver.disconnect();
         node.removeEventListener("canplay", playIfReady);
-        node.removeEventListener("pause", onPause);
-        document.removeEventListener("visibilitychange", onVisibility);
         if (typeof forwardedRef === "function") forwardedRef(null);
         else if (forwardedRef) forwardedRef.current = null;
       };
-    }, [forwardedRef, rootMargin, eager]);
+    }, [forwardedRef, rootMargin, eager, controls]);
+
+    const fit = mediaClass(className);
 
     return (
-      <video
-        ref={nodeRef}
-        src={shouldLoad ? src : undefined}
-        poster={poster ?? undefined}
-        className={className}
-        muted={muted}
-        loop={loop}
-        controls={controls}
-        autoPlay={eager}
-        playsInline
-        preload={shouldLoad ? "auto" : "none"}
-        controlsList="nodownload noplaybackrate noremoteplayback"
-        disablePictureInPicture
-        onContextMenu={(event) => event.preventDefault()}
-      />
+      <span className={shellClass(className)}>
+        <video
+          ref={nodeRef}
+          src={shouldLoad ? src : undefined}
+          poster={dropPoster ? undefined : poster ?? undefined}
+          className={fit}
+          muted={muted}
+          loop={loop}
+          controls={controls}
+          autoPlay={eager}
+          playsInline
+          preload={shouldLoad ? "auto" : "none"}
+          controlsList="nodownload noplaybackrate noremoteplayback"
+          disablePictureInPicture
+          onContextMenu={(event) => event.preventDefault()}
+        />
+        <canvas
+          ref={stillRef}
+          aria-hidden
+          className={`pointer-events-none absolute inset-0 h-full w-full ${fit.includes("object-contain") ? "object-contain" : "object-cover"}`}
+          style={{ opacity: 0 }}
+        />
+      </span>
     );
   }
 );

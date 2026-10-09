@@ -98,37 +98,37 @@ export default function FutureSequenceFrameFields({
       ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-slate-500">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-white/45">
           Moments ({frames.length})
         </p>
         <button
           type="button"
           onClick={() => onChange([...frames, emptyFrame()])}
-          className="rounded-full bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700"
+          className="rounded-full bg-white px-4 py-2 text-xs font-bold text-white hover:bg-blue-700"
         >
           + Add frame
         </button>
       </div>
 
       {frames.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-200 py-10 text-center text-sm text-slate-500">
+        <p className="rounded-xl border border-dashed border-white/15 py-10 text-center text-sm text-white/45">
           No moments yet. Add image or video steps visitors will scroll through.
         </p>
       ) : null}
 
       {frames.map((frame, i) => (
-        <div key={i} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div key={i} className="rounded-2xl border border-white/15 bg-white/[0.06] p-4 ">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <span className="font-mono text-xs font-bold text-slate-400">#{String(i + 1).padStart(2, "0")}</span>
+            <span className="font-mono text-xs font-bold text-white/35">#{String(i + 1).padStart(2, "0")}</span>
             <div className="flex gap-2">
-              <button type="button" onClick={() => moveFrame(i, -1)} disabled={i === 0} className="rounded-lg border px-2 py-1 text-xs font-bold text-slate-600 disabled:opacity-30">
+              <button type="button" onClick={() => moveFrame(i, -1)} disabled={i === 0} className="rounded-lg border px-2 py-1 text-xs font-bold text-white/55 disabled:opacity-30">
                 ↑
               </button>
               <button
                 type="button"
                 onClick={() => moveFrame(i, 1)}
                 disabled={i === frames.length - 1}
-                className="rounded-lg border px-2 py-1 text-xs font-bold text-slate-600 disabled:opacity-30"
+                className="rounded-lg border px-2 py-1 text-xs font-bold text-white/55 disabled:opacity-30"
               >
                 ↓
               </button>
@@ -140,26 +140,26 @@ export default function FutureSequenceFrameFields({
 
           <div className="grid gap-4 lg:grid-cols-2">
             <div className="space-y-3">
-              <label className="block text-xs font-bold text-slate-700">
+              <label className="block text-xs font-bold text-white/70">
                 Label
                 <input
                   value={frame.label}
                   onChange={(e) => updateFrame(i, { label: e.target.value })}
                   placeholder="e.g. Opening hypothesis"
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium"
+                  className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm font-medium"
                 />
               </label>
-              <label className="block text-xs font-bold text-slate-700">
+              <label className="block text-xs font-bold text-white/70">
                 Caption
                 <textarea
                   value={frame.caption}
                   onChange={(e) => updateFrame(i, { caption: e.target.value })}
                   rows={3}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
                 />
               </label>
               <fieldset>
-                <legend className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Aspect ratio</legend>
+                <legend className="text-[10px] font-bold uppercase tracking-widest text-white/45">Aspect ratio</legend>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {MODULE_COVER_ASPECTS.map((a) => (
                     <button
@@ -167,7 +167,7 @@ export default function FutureSequenceFrameFields({
                       type="button"
                       onClick={() => updateFrame(i, { aspect_ratio: a.id })}
                       className={`rounded-full px-3 py-1 text-xs font-bold ${
-                        frame.aspect_ratio === a.id ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-600"
+                        frame.aspect_ratio === a.id ? "bg-slate-900 text-white" : "border border-white/15 text-white/55"
                       }`}
                     >
                       {a.label}
@@ -183,7 +183,7 @@ export default function FutureSequenceFrameFields({
                     setCropIndex(i);
                     setTimeout(() => imageRef.current?.click(), 0);
                   }}
-                  className="rounded-full bg-blue-600 px-4 py-2 text-xs font-bold text-white disabled:opacity-60"
+                  className="rounded-full bg-white px-4 py-2 text-xs font-bold text-white disabled:opacity-60"
                 >
                   {frame.media_type === "image" && frame.image_url ? "Re-crop image" : "Upload + crop image"}
                 </button>
@@ -194,18 +194,18 @@ export default function FutureSequenceFrameFields({
                     setCropIndex(i);
                     videoRef.current?.click();
                   }}
-                  className="rounded-full border border-blue-200 px-4 py-2 text-xs font-bold text-blue-800 disabled:opacity-60"
+                  className="rounded-full border border-white/20 px-4 py-2 text-xs font-bold text-emerald-200 disabled:opacity-60"
                 >
                   Upload video
                 </button>
               </div>
               {frame.media_type === "video" ? (
-                <label className="block text-xs font-bold text-slate-700">
+                <label className="block text-xs font-bold text-white/70">
                   Poster URL (optional)
                   <input
                     value={frame.poster_url}
                     onChange={(e) => updateFrame(i, { poster_url: e.target.value })}
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
                   />
                 </label>
               ) : null}

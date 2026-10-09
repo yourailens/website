@@ -108,41 +108,41 @@ export default function AdminSampleBrandsManager() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="bg-transparent p-6">
       <div className="mx-auto max-w-4xl">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <Link href="/admin" className="text-xs font-semibold text-slate-500 hover:text-slate-800">
+            <Link href="/admin" className="text-xs font-semibold text-white/45 hover:text-white">
               ← Admin
             </Link>
-            <h1 className="mt-2 font-heading text-2xl font-black text-slate-900">Sample brands</h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <h1 className="mt-2 font-heading text-2xl font-black text-white">Sample brands</h1>
+            <p className="mt-1 text-sm text-white/45">
               Multimedia brand worlds per industry — images &amp; videos tagged by ratio and category.
             </p>
           </div>
           <Link
             href="/industries"
             target="_blank"
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            className="rounded-2xl border border-white/12 bg-gradient-to-br from-white/[0.08] to-white/[0.02] px-4 py-2 text-sm font-semibold text-white/70 hover:bg-transparent"
           >
             Preview industries →
           </Link>
         </div>
 
         {msg ? (
-          <p className="mb-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">{msg}</p>
+          <p className="mb-4 rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-blue-900">{msg}</p>
         ) : null}
 
-        <div className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-bold text-slate-900">New sample brand</h2>
-          <p className="mt-1 text-xs text-slate-500">Run migration 036 in Supabase if the table is missing.</p>
+        <div className="mb-8 rounded-2xl border border-white/15 bg-white/[0.06] p-5 ">
+          <h2 className="text-sm font-bold text-white">New sample brand</h2>
+          <p className="mt-1 text-xs text-white/45">Run migration 036 in Supabase if the table is missing.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <label className="text-[10px] font-medium text-slate-600">
+            <label className="text-[10px] font-medium text-white/55">
               Industry
               <select
                 value={newIndustryId}
                 onChange={(e) => setNewIndustryId(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
               >
                 {industries.map((i) => (
                   <option key={i.id} value={i.id}>
@@ -151,22 +151,22 @@ export default function AdminSampleBrandsManager() {
                 ))}
               </select>
             </label>
-            <label className="text-[10px] font-medium text-slate-600">
+            <label className="text-[10px] font-medium text-white/55">
               Slug
               <input
                 value={newSlug}
                 onChange={(e) => setNewSlug(e.target.value)}
                 placeholder="luna-botanica"
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
               />
             </label>
-            <label className="text-[10px] font-medium text-slate-600">
+            <label className="text-[10px] font-medium text-white/55">
               Name
               <input
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="Luna Botanica"
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
               />
             </label>
           </div>
@@ -180,12 +180,12 @@ export default function AdminSampleBrandsManager() {
           </button>
         </div>
 
-        <label className="mb-4 flex items-center gap-2 text-sm text-slate-600">
+        <label className="mb-4 flex items-center gap-2 text-sm text-white/55">
           Filter industry
           <select
             value={filterIndustry}
             onChange={(e) => setFilterIndustry(e.target.value)}
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm"
+            className="rounded-lg border border-white/15 px-3 py-1.5 text-sm"
           >
             <option value="all">All</option>
             {industries.map((i) => (
@@ -213,20 +213,20 @@ export default function AdminSampleBrandsManager() {
               return (
                 <div
                   key={brand.id}
-                  className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                  className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/15 bg-white/[0.06] p-5 "
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">
                       {brand.industry_name ?? "Industry"}
                     </p>
-                    <h2 className="mt-1 font-heading text-lg font-black text-slate-900">{brand.name}</h2>
-                    <p className="mt-1 text-sm text-slate-500">
+                    <h2 className="mt-1 font-heading text-lg font-black text-white">{brand.name}</h2>
+                    <p className="mt-1 text-sm text-white/45">
                       {brand.media.length} assets ({pubMedia} published) · slug: {brand.slug}
                       {path ? (
                         <>
                           {" "}
                           ·{" "}
-                          <a href={path} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                          <a href={path} target="_blank" rel="noreferrer" className="text-emerald-300/80 hover:underline">
                             {path}
                           </a>
                         </>
@@ -236,7 +236,7 @@ export default function AdminSampleBrandsManager() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span
                       className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${
-                        brand.published ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"
+                        brand.published ? "bg-emerald-100 text-emerald-800" : "bg-black/40 text-white/45"
                       }`}
                     >
                       {brand.published ? "Live" : "Draft"}
@@ -244,7 +244,7 @@ export default function AdminSampleBrandsManager() {
                     <button
                       type="button"
                       onClick={() => togglePublish(brand)}
-                      className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-50"
+                      className="rounded-lg border border-white/15 px-3 py-1.5 text-xs font-bold text-white/55 hover:bg-transparent"
                     >
                       {brand.published ? "Unpublish" : "Publish"}
                     </button>
@@ -258,7 +258,7 @@ export default function AdminSampleBrandsManager() {
                       type="button"
                       disabled={deletingId === brand.id}
                       onClick={() => deleteBrand(brand)}
-                      className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-red-600 hover:border-red-200 hover:bg-red-50 disabled:opacity-50"
+                      className="rounded-lg border border-white/15 px-3 py-1.5 text-xs font-bold text-rose-300 hover:border-rose-400/30 hover:bg-rose-400/10 disabled:opacity-50"
                     >
                       {deletingId === brand.id ? "Deleting…" : "Delete"}
                     </button>
@@ -267,7 +267,7 @@ export default function AdminSampleBrandsManager() {
               );
             })}
             {filtered.length === 0 ? (
-              <p className="text-center text-sm text-slate-500">No brands yet — create one above or run migration 036.</p>
+              <p className="text-center text-sm text-white/45">No brands yet — create one above or run migration 036.</p>
             ) : null}
           </div>
         )}

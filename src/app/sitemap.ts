@@ -1,11 +1,9 @@
 import type { MetadataRoute } from "next";
 import { getGalleryFilms, getGalleryImages } from "@/lib/gallery/load";
 import { galleryRouteId } from "@/lib/gallery/route-id";
-import { getAvatarSummaries } from "@/lib/avatars/load";
-import { getPublishedStudioModules } from "@/lib/studio-modules/load";
-import { STUDIO_MODULE_TYPE_SLUGS } from "@/data/studio-modules";
 import { loadPublicServices } from "@/lib/services/load";
 import { getPublishedTeamMembers } from "@/lib/team/load";
+import { getPublishedVaultEntries } from "@/lib/yail-vault/load";
 import { HOME_WATCH_TITLES } from "@/data/home-watch";
 
 function siteOrigin(): string {
@@ -19,6 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/`, lastModified: new Date() },
     { url: `${base}/images`, lastModified: new Date() },
     { url: `${base}/films`, lastModified: new Date() },
+    { url: `${base}/vault`, lastModified: new Date() },
     { url: `${base}/ai-verse`, lastModified: new Date() },
     { url: `${base}/ai-filmmaking`, lastModified: new Date() },
     { url: `${base}/ai-ads`, lastModified: new Date() },
@@ -27,7 +26,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/events/ai-creator-workshop`, lastModified: new Date() },
     { url: `${base}/events/ai-creator-workshop/day-1`, lastModified: new Date() },
     { url: `${base}/events/ai-creator-workshop/day-2`, lastModified: new Date() },
-    { url: `${base}/avatars`, lastModified: new Date() },
     { url: `${base}/pricing`, lastModified: new Date() },
     { url: `${base}/pricing/estimator`, lastModified: new Date() },
     { url: `${base}/contact`, lastModified: new Date() },
@@ -35,32 +33,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${base}/watch/${t.slug}`,
       lastModified: new Date(),
     })),
-    { url: `${base}/resources`, lastModified: new Date() },
-    { url: `${base}/modules`, lastModified: new Date() },
-    { url: `${base}/modules/prompt-playbooks`, lastModified: new Date() },
-    { url: `${base}/modules/client-showcases`, lastModified: new Date() },
-    { url: `${base}/modules/subjects-visuals`, lastModified: new Date() },
-    { url: `${base}/prompts`, lastModified: new Date() },
-    { url: `${base}/outfits`, lastModified: new Date() },
-    { url: `${base}/character-sheets`, lastModified: new Date() },
-    { url: `${base}/scenarios`, lastModified: new Date() },
-    { url: `${base}/locations`, lastModified: new Date() },
-    { url: `${base}/props`, lastModified: new Date() },
-    { url: `${base}/lighting-presets`, lastModified: new Date() },
-    { url: `${base}/color-grades`, lastModified: new Date() },
-    { url: `${base}/mood-boards`, lastModified: new Date() },
     { url: `${base}/instagram`, lastModified: new Date() },
     { url: `${base}/youtube`, lastModified: new Date() },
   ];
 
   try {
-    const [images, films, avatars, modules, packages, team] = await Promise.all([
+    const [images, films, packages, team, vault] = await Promise.all([
       getGalleryImages(),
       getGalleryFilms(),
-      getAvatarSummaries(),
-      getPublishedStudioModules({ limit: 500 }),
       loadPublicServices(),
       getPublishedTeamMembers(),
+      getPublishedVaultEntries(),
     ]);
 
     const imageUrls: MetadataRoute.Sitemap = images.map((img, i) => ({
@@ -73,16 +56,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
     }));
 
-    const avatarUrls: MetadataRoute.Sitemap = avatars.map((a) => ({
-      url: `${base}/avatars/${encodeURIComponent(a.slug)}`,
-      lastModified: new Date(),
-    }));
-
-    const moduleUrls: MetadataRoute.Sitemap = modules.map((m) => ({
-      url: `${base}/modules/${encodeURIComponent(STUDIO_MODULE_TYPE_SLUGS[m.module_type])}/${encodeURIComponent(m.slug)}`,
-      lastModified: new Date(m.updated_at),
-    }));
-
     const packageUrls: MetadataRoute.Sitemap = packages.map((s) => ({
       url: `${base}/pricing/${encodeURIComponent(s.slug)}`,
       lastModified: new Date(s.updated_at || s.created_at),
@@ -93,7 +66,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(m.updated_at),
     }));
 
-    return [...staticUrls, ...packageUrls, ...imageUrls, ...filmUrls, ...avatarUrls, ...moduleUrls, ...teamUrls];
+    const vaultUrls: MetadataRoute.Sitemap = vault.map((entry) => ({
+      url: `${base}/vault/${encodeURIComponent(entry.slug)}`,
+      lastModified: new Date(entry.updated_at),
+    }));
+
+    return [...staticUrls, ...packageUrls, ...imageUrls, ...filmUrls, ...teamUrls, ...vaultUrls];
   } catch {
     return staticUrls;
   }

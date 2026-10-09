@@ -10,9 +10,11 @@ import {
 } from "@/data/studio-events";
 
 const FIELD =
-  "mt-2 w-full border border-white/20 bg-white/[0.07] px-3.5 py-2.5 text-sm text-white placeholder:text-white/45 caret-white outline-none transition focus:border-white/55 [color-scheme:dark]";
-const BTN = "bg-[#fafafa] px-5 py-2.5 text-sm font-semibold text-black hover:bg-blue-100 disabled:opacity-40";
-const PANEL = "border border-white/15 bg-black/45 p-6";
+  "mt-2 w-full rounded-2xl border border-white/15 bg-white/[0.06] px-3.5 py-2.5 text-sm text-white placeholder:text-white/45 caret-white outline-none transition focus:border-white/40 focus:bg-white/[0.09] [color-scheme:dark]";
+const BTN =
+  "rounded-full bg-[#fafafa] px-5 py-2.5 text-sm font-semibold text-black hover:bg-blue-100 disabled:opacity-40";
+const PANEL =
+  "rounded-[1.35rem] border border-white/12 bg-gradient-to-br from-white/[0.09] to-white/[0.02] p-5 shadow-[0_18px_40px_-28px_rgba(0,0,0,0.9)] sm:p-6";
 
 type Draft = {
   id: string | null;
@@ -219,30 +221,18 @@ export default function AdminEventsDesk() {
   }
 
   return (
-    <main className="ott-home relative min-h-screen overflow-x-hidden bg-black px-5 py-10 font-body text-white sm:px-8 sm:py-12">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-40"
-        style={{
-          background:
-            "radial-gradient(ellipse 70% 45% at 12% 0%, rgba(37,99,235,0.32), transparent 55%), radial-gradient(ellipse 40% 30% at 90% 0%, rgba(29,78,216,0.18), transparent 50%)",
-        }}
-        aria-hidden
-      />
+    <div className="relative mx-auto max-w-6xl space-y-10 font-body text-white">
       <div className="relative mx-auto max-w-4xl space-y-8">
         <header className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="font-mono text-[10px] tracking-[0.32em] text-blue-400">CONTROL ROOM</p>
-            <h1 className="mt-2 font-heading text-[clamp(2rem,5vw,3rem)] leading-none">Events</h1>
-            <p className="mt-2 text-sm text-white/65">Titles, venues, dates, and links for the OTT events page.</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link href="/admin" className="border border-white/30 px-4 py-2 text-sm text-white hover:border-white">
-              Desk
-            </Link>
-            <Link href="/events" className="border border-white/30 px-4 py-2 text-sm text-white hover:border-white">
-              View page
-            </Link>
-          </div>
+          <p className="max-w-lg text-sm leading-relaxed text-white/55">
+            Titles, venues, dates, and links for the public events page.
+          </p>
+          <Link
+            href="/events"
+            className="rounded-full border border-white/20 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70 transition hover:border-white/40 hover:text-white"
+          >
+            View page
+          </Link>
         </header>
 
         <section className={PANEL}>
@@ -373,7 +363,10 @@ export default function AdminEventsDesk() {
           ) : null}
           <ul className="space-y-3">
             {events.map((ev) => (
-              <li key={ev.id} className="flex flex-wrap items-center justify-between gap-3 border border-white/15 bg-black/40 px-4 py-4">
+              <li
+                key={ev.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/12 bg-gradient-to-br from-white/[0.08] to-white/[0.02] px-4 py-4"
+              >
                 <div className="min-w-0">
                   <p className="font-mono text-[9px] tracking-[0.2em] text-blue-400">
                     {String(ev.sort_order).padStart(2, "0")} · {studioEventTypeLabel(ev.event_type).toUpperCase()}
@@ -383,13 +376,25 @@ export default function AdminEventsDesk() {
                   {ev.subtitle ? <p className="mt-0.5 text-sm text-white/55">{ev.subtitle}</p> : null}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button type="button" onClick={() => edit(ev)} className="border border-white/30 px-3 py-1.5 text-xs hover:border-white">
+                  <button
+                    type="button"
+                    onClick={() => edit(ev)}
+                    className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-black"
+                  >
                     Edit
                   </button>
-                  <button type="button" onClick={() => void togglePublished(ev)} className="border border-white/30 px-3 py-1.5 text-xs hover:border-white">
+                  <button
+                    type="button"
+                    onClick={() => void togglePublished(ev)}
+                    className="rounded-full border border-white/20 px-3 py-1.5 text-xs text-white/70 hover:border-white/40 hover:text-white"
+                  >
                     {ev.published ? "Unpublish" : "Publish"}
                   </button>
-                  <button type="button" onClick={() => void remove(ev)} className="border border-red-400/40 px-3 py-1.5 text-xs text-red-300 hover:border-red-300">
+                  <button
+                    type="button"
+                    onClick={() => void remove(ev)}
+                    className="rounded-full border border-rose-400/30 px-3 py-1.5 text-xs text-rose-300"
+                  >
                     Delete
                   </button>
                 </div>
@@ -398,6 +403,6 @@ export default function AdminEventsDesk() {
           </ul>
         </section>
       </div>
-    </main>
+    </div>
   );
 }

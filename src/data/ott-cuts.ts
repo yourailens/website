@@ -1,6 +1,17 @@
 export type OttCutCategory = "ads" | "films" | "community";
 export type OttCutMediaType = "image" | "video";
 export type OttCutAspect = "natural" | "portrait" | "square" | "landscape" | "wide" | "story";
+export type HeroSlot = "hero1" | "hero2" | "hero3";
+
+export const HERO_SLOTS: { id: HeroSlot; label: string }[] = [
+  { id: "hero1", label: "Hero 1" },
+  { id: "hero2", label: "Hero 2" },
+  { id: "hero3", label: "Hero 3" },
+];
+
+export function isHeroSlot(value: unknown): value is HeroSlot {
+  return value === "hero1" || value === "hero2" || value === "hero3";
+}
 
 export const OTT_CUT_CATEGORIES: { id: OttCutCategory; scene: string; label: string }[] = [
   { id: "ads", scene: "01", label: "AI ads" },
@@ -29,6 +40,8 @@ export type OttCut = {
   aspect_ratio: OttCutAspect;
   published: boolean;
   homepage_feature: boolean;
+  homepage_hero: boolean;
+  hero_slot: HeroSlot | null;
   sort_order: number;
   created_at: string;
 };

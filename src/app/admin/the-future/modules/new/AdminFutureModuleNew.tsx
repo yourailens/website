@@ -10,11 +10,11 @@ import type { FutureField } from "@/data/the-future";
 import { slugifyFuture, uploadFutureCropBlob, uploadFutureMedia } from "@/lib/the-future/admin-media";
 
 const headlineInput =
-  "w-full border-0 bg-transparent font-heading text-[clamp(1.75rem,4vw,2.65rem)] font-black leading-tight text-slate-900 placeholder:text-slate-300 focus:outline-none";
+  "w-full border-0 bg-transparent font-heading text-[clamp(1.75rem,4vw,2.65rem)] font-black leading-tight text-white placeholder:text-white/25 focus:outline-none";
 const subInput =
-  "mt-3 w-full border-0 border-b border-dashed border-slate-200 bg-transparent text-lg font-medium text-slate-600 placeholder:text-slate-300 focus:border-blue-400 focus:outline-none";
+  "mt-3 w-full border-0 border-b border-dashed border-white/15 bg-transparent text-lg font-medium text-white/55 placeholder:text-white/25 focus:border-white/40 focus:outline-none";
 const introInput =
-  "mt-4 w-full resize-y rounded-xl border border-slate-200/80 bg-white/80 px-4 py-3 text-base leading-relaxed text-slate-600 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100";
+  "mt-4 w-full resize-y rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-base leading-relaxed text-white/55 focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/15";
 
 export default function AdminFutureModuleNew() {
   const router = useRouter();
@@ -108,7 +108,7 @@ export default function AdminFutureModuleNew() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f4f7fc]">
+      <div className="flex items-center justify-center bg-transparent">
         <span className="h-9 w-9 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
       </div>
     );
@@ -117,8 +117,8 @@ export default function AdminFutureModuleNew() {
   if (!fieldId || !field) {
     return (
       <div className="mx-auto max-w-lg px-6 py-20 text-center">
-        <p className="text-slate-600">Pick a field first.</p>
-        <Link href="/admin/the-future" className="mt-4 inline-block font-bold text-blue-600">
+        <p className="text-white/55">Pick a field first.</p>
+        <Link href="/admin/the-future" className="mt-4 inline-block font-bold text-emerald-300/80">
           ← The Future admin
         </Link>
       </div>
@@ -126,17 +126,17 @@ export default function AdminFutureModuleNew() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f7fc]">
-      <div className="sticky top-0 z-40 border-b border-blue-100/90 bg-white/95 backdrop-blur-md">
+    <div className="bg-transparent">
+      <div className="sticky top-0 z-40 border-b border-white/12/90 bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-6 py-3">
-          <Link href={`/admin/the-future/fields/${field.id}`} className="text-xs font-bold text-slate-500 hover:text-blue-700">
+          <Link href={`/admin/the-future/fields/${field.id}`} className="text-xs font-bold text-white/45 hover:text-emerald-300">
             ← {field.title}
           </Link>
           <button
             type="button"
             onClick={save}
             disabled={saving}
-            className="rounded-full bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-md disabled:opacity-60"
+            className="rounded-full bg-white px-5 py-2 text-xs font-bold text-white shadow-md disabled:opacity-60"
           >
             {saving ? "Creating…" : "Create & save"}
           </button>
@@ -145,9 +145,9 @@ export default function AdminFutureModuleNew() {
       </div>
 
       <article>
-        <section className="border-b border-blue-100/80 bg-gradient-to-b from-white to-[#f4f7fc]">
+        <section className="border-b border-white/12/80 bg-gradient-to-b from-white to-[#f4f7fc]">
           <div className="mx-auto w-[92%] max-w-3xl py-10 md:py-12">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-blue-600">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-300/80">
               {FUTURE_COPY.newModule} · {field.title}
             </p>
             <input
@@ -167,7 +167,7 @@ export default function AdminFutureModuleNew() {
               rows={3}
               className={introInput}
             />
-            <label className="mt-6 flex items-center gap-2 text-sm font-bold text-slate-600">
+            <label className="mt-6 flex items-center gap-2 text-sm font-bold text-white/55">
               <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} />
               Publish when ready
             </label>
@@ -178,7 +178,7 @@ export default function AdminFutureModuleNew() {
                 setSlug(e.target.value);
               }}
               placeholder="slug"
-              className="mt-4 block w-full max-w-xs rounded-lg border border-slate-200 px-3 py-2 font-mono text-sm"
+              className="mt-4 block w-full max-w-xs rounded-lg border border-white/15 px-3 py-2 font-mono text-sm"
             />
           </div>
         </section>

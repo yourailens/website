@@ -1,10 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import ModuleGalleryEditor, {
   type ModuleGalleryItemDraft,
 } from "@/components/admin/ModuleGalleryEditor";
+import {
+  ADMIN_BTN,
+  ADMIN_BTN_DANGER,
+  ADMIN_BTN_GHOST,
+  ADMIN_BUBBLE_PAD,
+  ADMIN_FIELD,
+  ADMIN_KICKER,
+  ADMIN_LABEL,
+  ADMIN_PAGE,
+  ADMIN_PILL,
+  ADMIN_ROW,
+} from "@/components/admin/admin-ui";
 import type { StudioTeamLink, StudioTeamMemberPublic } from "@/data/studio-team";
 
 function slugify(s: string) {
@@ -170,248 +181,238 @@ export default function AdminTeamManager() {
   const uploadSlug = form.slug.trim() || slugify(form.name) || "member";
 
   return (
-    <main className="relative min-h-screen bg-[#f6f2ea] px-6 py-16 text-slate-900">
-      <div className="mx-auto max-w-4xl space-y-8">
-        <header className="flex flex-wrap items-end justify-between gap-4">
+    <div className={`${ADMIN_PAGE} max-w-4xl`}>
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className={ADMIN_KICKER}>Studio</p>
+          <p className="mt-2 max-w-lg text-sm leading-relaxed text-white/50">
+            Profiles, roles, work (any ratio), and pasted or uploaded links.
+          </p>
+        </div>
+        <button type="button" onClick={openNew} className={ADMIN_BTN}>
+          Add member
+        </button>
+      </header>
+
+      {msg ? (
+        <p className={`${ADMIN_ROW} text-sm text-emerald-200`}>{msg}</p>
+      ) : null}
+
+      {showing ? (
+        <form onSubmit={onSubmit} className={`${ADMIN_BUBBLE_PAD} space-y-6`}>
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-slate-500">Admin → Team</p>
-            <h1 className="mt-2 font-heading text-3xl font-bold">Studio team</h1>
-            <p className="mt-1 text-sm text-slate-600">Profiles, roles, work (any ratio), and pasted or uploaded links.</p>
+            <p className={ADMIN_KICKER}>{editing ? "Edit member" : "New member"}</p>
+            <h2 className="mt-1.5 font-heading text-2xl leading-none tracking-tight">
+              {editing ? editing.name : "Add to the roster"}
+            </h2>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/admin" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
-              Dashboard
-            </Link>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block">
+              <span className={ADMIN_LABEL}>Name</span>
+              <input
+                required
+                value={form.name}
+                onChange={(e) => sf("name", e.target.value)}
+                className={ADMIN_FIELD}
+              />
+            </label>
+            <label className="block">
+              <span className={ADMIN_LABEL}>Role</span>
+              <input
+                value={form.role}
+                onChange={(e) => sf("role", e.target.value)}
+                placeholder="Director / Producer"
+                className={ADMIN_FIELD}
+              />
+            </label>
+            <label className="block">
+              <span className={ADMIN_LABEL}>Slug</span>
+              <input
+                value={form.slug}
+                onChange={(e) => sf("slug", e.target.value)}
+                placeholder={slugify(form.name) || "name"}
+                className={`${ADMIN_FIELD} font-mono`}
+              />
+            </label>
+            <label className="block">
+              <span className={ADMIN_LABEL}>Sort order</span>
+              <input
+                type="number"
+                value={form.sort_order}
+                onChange={(e) => sf("sort_order", Number(e.target.value))}
+                className={ADMIN_FIELD}
+              />
+            </label>
+          </div>
+
+          <label className="block">
+            <span className={ADMIN_LABEL}>Short bio (listing card)</span>
+            <textarea
+              value={form.short_bio}
+              onChange={(e) => sf("short_bio", e.target.value)}
+              rows={2}
+              className={ADMIN_FIELD}
+            />
+          </label>
+          <label className="block">
+            <span className={ADMIN_LABEL}>Full bio (profile page)</span>
+            <textarea
+              value={form.bio}
+              onChange={(e) => sf("bio", e.target.value)}
+              rows={6}
+              className={ADMIN_FIELD}
+            />
+          </label>
+
+          <div>
+            <span className={ADMIN_LABEL}>Portrait</span>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <input
+                type="url"
+                value={form.portrait_url}
+                onChange={(e) => sf("portrait_url", e.target.value)}
+                placeholder="Paste image URL or upload"
+                className={`min-w-[16rem] flex-1 ${ADMIN_FIELD}`}
+              />
+              <button type="button" onClick={() => portraitRef.current?.click()} className={ADMIN_BTN_GHOST}>
+                Upload
+              </button>
+              <input
+                ref={portraitRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  if (!file) return;
+                  setBusy(true);
+                  try {
+                    sf("portrait_url", await uploadPortrait(file, uploadSlug));
+                  } catch (err) {
+                    setMsg(err instanceof Error ? err.message : "Upload failed");
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+              />
+            </div>
+            {form.portrait_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={form.portrait_url} alt="" className="mt-3 h-32 w-24 rounded-2xl object-cover" />
+            ) : null}
+          </div>
+
+          <label className={`${ADMIN_PILL} inline-flex items-center gap-2`}>
+            <input
+              type="checkbox"
+              checked={form.published}
+              onChange={(e) => sf("published", e.target.checked)}
+              className="accent-emerald-400"
+            />
+            Published
+          </label>
+
+          <div>
+            <p className={ADMIN_LABEL}>Profile links</p>
+            <div className="mt-2 space-y-2">
+              {form.links.map((link, i) => (
+                <div key={i} className="grid gap-2 sm:grid-cols-[1fr_2fr_auto]">
+                  <input
+                    value={link.label}
+                    onChange={(e) => {
+                      const next = [...form.links];
+                      next[i] = { ...next[i], label: e.target.value };
+                      sf("links", next);
+                    }}
+                    placeholder="Label"
+                    className={ADMIN_FIELD}
+                  />
+                  <input
+                    type="url"
+                    value={link.url}
+                    onChange={(e) => {
+                      const next = [...form.links];
+                      next[i] = { ...next[i], url: e.target.value };
+                      sf("links", next);
+                    }}
+                    placeholder="https://"
+                    className={ADMIN_FIELD}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => sf("links", form.links.filter((_, idx) => idx !== i))}
+                    className={ADMIN_BTN_DANGER}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
             <button
               type="button"
-              onClick={openNew}
-              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+              onClick={() => sf("links", [...form.links, { label: "", url: "", sort_order: form.links.length }])}
+              className={`mt-3 ${ADMIN_BTN_GHOST} text-xs`}
             >
-              Add member
+              + Add link
             </button>
           </div>
-        </header>
 
-        {msg ? <p className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-700">{msg}</p> : null}
+          <div>
+            <p className={ADMIN_LABEL}>Work gallery</p>
+            <p className="mb-3 text-xs text-white/40">Images, videos, any ratio — upload or paste URL. Prompt field = work title.</p>
+            <ModuleGalleryEditor
+              items={form.items}
+              onChange={(items) => sf("items", items)}
+              uploadSlug={uploadSlug}
+              showPromptField
+              allowUrlPaste
+              uploadPath="/api/admin/team/upload-media"
+            />
+          </div>
 
-        {showing ? (
-          <form onSubmit={onSubmit} className="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block text-sm font-medium">
-                Name
-                <input
-                  required
-                  value={form.name}
-                  onChange={(e) => sf("name", e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
-                />
-              </label>
-              <label className="block text-sm font-medium">
-                Role
-                <input
-                  value={form.role}
-                  onChange={(e) => sf("role", e.target.value)}
-                  placeholder="Director / Producer"
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
-                />
-              </label>
-              <label className="block text-sm font-medium">
-                Slug
-                <input
-                  value={form.slug}
-                  onChange={(e) => sf("slug", e.target.value)}
-                  placeholder={slugify(form.name) || "name"}
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 font-mono text-sm"
-                />
-              </label>
-              <label className="block text-sm font-medium">
-                Sort order
-                <input
-                  type="number"
-                  value={form.sort_order}
-                  onChange={(e) => sf("sort_order", Number(e.target.value))}
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
-                />
-              </label>
-            </div>
+          <div className="flex flex-wrap gap-3">
+            <button type="submit" disabled={busy} className={ADMIN_BTN}>
+              {busy ? "Saving…" : "Save member"}
+            </button>
+            <button type="button" onClick={() => setShowing(false)} className={ADMIN_BTN_GHOST}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      ) : null}
 
-            <label className="block text-sm font-medium">
-              Short bio (listing card)
-              <textarea
-                value={form.short_bio}
-                onChange={(e) => sf("short_bio", e.target.value)}
-                rows={2}
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
-              />
-            </label>
-            <label className="block text-sm font-medium">
-              Full bio (profile page)
-              <textarea
-                value={form.bio}
-                onChange={(e) => sf("bio", e.target.value)}
-                rows={6}
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
-              />
-            </label>
-
-            <div>
-              <p className="text-sm font-medium">Portrait</p>
-              <div className="mt-2 flex flex-wrap items-center gap-3">
-                <input
-                  type="url"
-                  value={form.portrait_url}
-                  onChange={(e) => sf("portrait_url", e.target.value)}
-                  placeholder="Paste image URL or upload"
-                  className="min-w-[16rem] flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"
-                />
+      {loading ? (
+        <p className="text-sm text-white/45">Loading…</p>
+      ) : (
+        <ul className="space-y-3">
+          {members.map((m) => (
+            <li key={m.id} className={`flex flex-wrap items-center justify-between gap-3 ${ADMIN_ROW}`}>
+              <div>
+                <p className="font-heading text-lg leading-tight">{m.name}</p>
+                <p className="mt-1 text-sm text-white/45">
+                  {m.role || "No role"} · /team/{m.slug} · {m.published ? "Published" : "Draft"} · {m.work.length}{" "}
+                  work
+                </p>
+              </div>
+              <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => portraitRef.current?.click()}
-                  className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold"
+                  onClick={() => openEdit(m)}
+                  className="rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-semibold text-black"
                 >
-                  Upload
+                  Edit
                 </button>
-                <input
-                  ref={portraitRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    e.target.value = "";
-                    if (!file) return;
-                    setBusy(true);
-                    try {
-                      sf("portrait_url", await uploadPortrait(file, uploadSlug));
-                    } catch (err) {
-                      setMsg(err instanceof Error ? err.message : "Upload failed");
-                    } finally {
-                      setBusy(false);
-                    }
-                  }}
-                />
+                <button type="button" onClick={() => onDelete(m)} className={ADMIN_BTN_DANGER}>
+                  Delete
+                </button>
               </div>
-              {form.portrait_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={form.portrait_url} alt="" className="mt-3 h-32 w-24 rounded-xl object-cover" />
-              ) : null}
-            </div>
-
-            <label className="flex items-center gap-2 text-sm font-medium">
-              <input
-                type="checkbox"
-                checked={form.published}
-                onChange={(e) => sf("published", e.target.checked)}
-              />
-              Published
-            </label>
-
-            <div>
-              <p className="mb-3 text-sm font-medium">Profile links (site, Instagram, LinkedIn…)</p>
-              <div className="space-y-2">
-                {form.links.map((link, i) => (
-                  <div key={i} className="grid gap-2 sm:grid-cols-[1fr_2fr_auto]">
-                    <input
-                      value={link.label}
-                      onChange={(e) => {
-                        const next = [...form.links];
-                        next[i] = { ...next[i], label: e.target.value };
-                        sf("links", next);
-                      }}
-                      placeholder="Label"
-                      className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
-                    />
-                    <input
-                      type="url"
-                      value={link.url}
-                      onChange={(e) => {
-                        const next = [...form.links];
-                        next[i] = { ...next[i], url: e.target.value };
-                        sf("links", next);
-                      }}
-                      placeholder="https://"
-                      className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => sf("links", form.links.filter((_, idx) => idx !== i))}
-                      className="rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-500"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={() => sf("links", [...form.links, { label: "", url: "", sort_order: form.links.length }])}
-                className="mt-3 rounded-full border border-slate-200 px-4 py-2 text-xs font-bold"
-              >
-                + Add link
-              </button>
-            </div>
-
-            <div>
-              <p className="mb-3 text-sm font-medium">Work gallery — images, videos, any ratio, upload or paste URL</p>
-              <ModuleGalleryEditor
-                items={form.items}
-                onChange={(items) => sf("items", items)}
-                uploadSlug={uploadSlug}
-                showPromptField
-                allowUrlPaste
-                uploadPath="/api/admin/team/upload-media"
-              />
-              <p className="mt-2 text-xs text-slate-500">The prompt field here is stored as the work title.</p>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                disabled={busy}
-                className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white disabled:opacity-60"
-              >
-                {busy ? "Saving…" : "Save member"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowing(false)}
-                className="rounded-full border border-slate-200 px-5 py-2 text-sm font-medium"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        ) : null}
-
-        {loading ? (
-          <p className="text-sm text-slate-500">Loading…</p>
-        ) : (
-          <ul className="space-y-3">
-            {members.map((m) => (
-              <li
-                key={m.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4"
-              >
-                <div>
-                  <p className="font-heading text-lg font-bold">{m.name}</p>
-                  <p className="text-sm text-slate-500">
-                    {m.role || "No role"} · /team/{m.slug} · {m.published ? "Published" : "Draft"} · {m.work.length} work
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button type="button" onClick={() => openEdit(m)} className="rounded-full border border-slate-200 px-4 py-1.5 text-sm font-semibold">
-                    Edit
-                  </button>
-                  <button type="button" onClick={() => onDelete(m)} className="rounded-full border border-red-200 px-4 py-1.5 text-sm font-semibold text-red-600">
-                    Delete
-                  </button>
-                </div>
-              </li>
-            ))}
-            {members.length === 0 ? <p className="text-sm text-slate-500">No members yet.</p> : null}
-          </ul>
-        )}
-      </div>
-    </main>
+            </li>
+          ))}
+          {members.length === 0 ? <p className="text-sm text-white/45">No members yet.</p> : null}
+        </ul>
+      )}
+    </div>
   );
 }

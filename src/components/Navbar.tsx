@@ -4,111 +4,9 @@ import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { NavLinkPendingSpinner } from "@/components/NavLinkWithPending";
-import type { IndustryMediaType } from "@/data/industries";
-import { resolveMediaType } from "@/lib/industries/media";
-import {
-  CREATIONS_CHANNEL_LINKS,
-  CREATIONS_MOBILE_LINKS,
-  CREATIONS_PORTFOLIO_LINKS,
-  CREATIONS_TALENT_LINKS,
-  MODULES_NAV_CATEGORIES,
-  NAV_LABELS,
-  WORLD_OF_AI_NAV_LINKS,
-  RESOURCES_NAV_CATEGORIES,
-  STUDIO_MOBILE_LINKS,
-} from "@/data/studio-nav";
+import { BROWSE_SECTIONS, NAV_LABELS, WORLD_OF_AI_NAV_LINKS } from "@/data/studio-nav";
 import { isOttOverlayPath, isOttPath } from "@/lib/ott-theme";
 import OttSearchOverlay, { SearchGlyph } from "@/components/OttSearchOverlay";
-
-const MODULES_CATEGORIES = MODULES_NAV_CATEGORIES;
-const RESOURCES_CATEGORIES = RESOURCES_NAV_CATEGORIES;
-
-type NavIndustry = {
-  slug: string;
-  name: string;
-  tagline: string | null;
-  description: string | null;
-  coverUrl: string | null;
-};
-
-type NavIndustryApi = {
-  slug: string;
-  name: string;
-  tagline?: string | null;
-  description?: string | null;
-  cover_image_url?: string | null;
-  cover_media_type?: IndustryMediaType | null;
-  cover_poster_url?: string | null;
-  hero_image_url?: string | null;
-  hero_media_type?: IndustryMediaType | null;
-  hero_poster_url?: string | null;
-};
-
-/** Nav thumbnails need a still image — skip raw video URLs unless a poster exists. */
-function resolveIndustryNavStill(
-  url: string | null | undefined,
-  mediaType: IndustryMediaType | null | undefined,
-  posterUrl: string | null | undefined
-): string | null {
-  const trimmed = url?.trim();
-  if (!trimmed) return null;
-  if (resolveMediaType(mediaType, trimmed) === "video") {
-    return posterUrl?.trim() || null;
-  }
-  return trimmed;
-}
-
-function resolveIndustryNavCover(ind: NavIndustryApi): string | null {
-  return (
-    resolveIndustryNavStill(ind.cover_image_url, ind.cover_media_type, ind.cover_poster_url) ??
-    resolveIndustryNavStill(ind.hero_image_url, ind.hero_media_type, ind.hero_poster_url) ??
-    null
-  );
-}
-
-let navIndustriesCache: NavIndustry[] | null = null;
-let navIndustriesInflight: Promise<NavIndustry[]> | null = null;
-
-/** Navbar-only order tweaks (does not change DB / hub sort_order). */
-function swapNavbarIndustries(list: NavIndustry[], slugA: string, slugB: string) {
-  const a = list.findIndex((i) => i.slug === slugA);
-  const b = list.findIndex((i) => i.slug === slugB);
-  if (a < 0 || b < 0) return;
-  [list[a], list[b]] = [list[b], list[a]];
-}
-
-function applyNavbarIndustryOrder(industries: NavIndustry[]): NavIndustry[] {
-  const list = [...industries];
-  swapNavbarIndustries(list, "d2c-ecommerce", "food-beverage");
-  swapNavbarIndustries(list, "saas-b2b", "healthcare-wellness");
-  return list;
-}
-
-function fetchNavIndustries(): Promise<NavIndustry[]> {
-  if (navIndustriesCache) return Promise.resolve(navIndustriesCache);
-  if (!navIndustriesInflight) {
-    navIndustriesInflight = fetch("/api/industries")
-      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("fetch failed"))))
-      .then((data: { industries?: NavIndustryApi[] }) => {
-        const list = applyNavbarIndustryOrder(
-          (data.industries ?? []).map((ind) => ({
-            slug: ind.slug,
-            name: ind.name,
-            tagline: ind.tagline ?? null,
-            description: ind.description ?? null,
-            coverUrl: resolveIndustryNavCover(ind),
-          }))
-        );
-        navIndustriesCache = list;
-        return list;
-      })
-      .catch(() => [] as NavIndustry[])
-      .finally(() => {
-        navIndustriesInflight = null;
-      });
-  }
-  return navIndustriesInflight;
-}
 
 function DesktopLogoLink() {
   return (
@@ -393,23 +291,10 @@ type DesktopMegaMenuId = "explore" | "worldOfAi";
 
 function isExploreNavActive(pathname: string) {
   return (
-    pathname.startsWith("/industries") ||
     pathname.startsWith("/images") ||
     pathname.startsWith("/films") ||
-    pathname.startsWith("/avatars") ||
     pathname.startsWith("/instagram") ||
-    pathname.startsWith("/youtube") ||
-    pathname.startsWith("/resources") ||
-    pathname.startsWith("/modules") ||
-    pathname.startsWith("/prompts") ||
-    pathname.startsWith("/outfits") ||
-    pathname.startsWith("/character-sheets") ||
-    pathname.startsWith("/scenarios") ||
-    pathname.startsWith("/locations") ||
-    pathname.startsWith("/props") ||
-    pathname.startsWith("/lighting-presets") ||
-    pathname.startsWith("/color-grades") ||
-    pathname.startsWith("/mood-boards")
+    pathname.startsWith("/youtube")
   );
 }
 
@@ -425,20 +310,55 @@ function isCommunityNavActive(pathname: string) {
   return pathname.startsWith("/ai-verse") || pathname.startsWith("/world-of-ai");
 }
 
-function isTeamNavActive(pathname: string) {
-  return pathname.startsWith("/team");
-}
-
 function isPricingNavActive(pathname: string) {
   return pathname.startsWith("/pricing");
 }
 
-function isEventsNavActive(pathname: string) {
-  return pathname.startsWith("/events");
+function isVaultNavActive(pathname: string) {
+  return pathname === "/vault" || pathname.startsWith("/vault/");
 }
 
-function isAboutNavActive(pathname: string) {
-  return pathname === "/about" || pathname.startsWith("/about/");
+function VaultNavLink({ compact = false }: { compact?: boolean }) {
+  const pathname = usePathname();
+  const active = isVaultNavActive(pathname);
+  return (
+    <Link
+      href="/vault"
+      prefetch
+      aria-label="YAIL Vault"
+      className={
+        compact
+          ? `group relative inline-flex items-center gap-1.5 overflow-hidden rounded-full border px-2 py-1 transition ${
+              active
+                ? "border-sky-400/55 bg-[#071018] shadow-[0_0_24px_-6px_rgba(56,189,248,0.55)]"
+                : "border-sky-500/25 bg-[#050a12]/90 hover:border-sky-400/45"
+            }`
+          : `group relative inline-flex items-center gap-2 overflow-hidden rounded-full border px-2.5 py-1.5 transition ${
+              active
+                ? "border-sky-400/50 bg-[#071018] shadow-[0_0_32px_-8px_rgba(56,189,248,0.6)]"
+                : "border-sky-500/30 bg-[#050a12]/85 hover:border-sky-400/50 hover:bg-[#081422]"
+            }`
+      }
+    >
+      <span
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(56,189,248,0.22),transparent_55%),linear-gradient(135deg,rgba(8,18,36,0.95),rgba(2,6,14,0.98))]"
+        aria-hidden
+      />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/images/logo_yail.png"
+        alt=""
+        className={`relative z-[1] w-auto object-contain ${compact ? "h-3.5" : "h-4"}`}
+      />
+      <span
+        className={`relative z-[1] font-mono uppercase tracking-[0.28em] text-sky-200/85 ${
+          compact ? "text-[8px]" : "text-[9px]"
+        }`}
+      >
+        Vault
+      </span>
+    </Link>
+  );
 }
 
 /** Full-width professional mega menu — text grid, no imagery */
@@ -535,106 +455,24 @@ function DesktopWorldOfAiMegaPanel({ onLinkClick }: { onLinkClick: () => void })
   );
 }
 
-function DesktopExploreMegaPanel({
-  industries,
-  loading,
-  onLinkClick,
-}: {
-  industries: NavIndustry[];
-  loading: boolean;
-  onLinkClick: () => void;
-}) {
-  const moduleLinks: { href: string; label: string }[] = MODULES_CATEGORIES.flatMap((cat) => [
-    ...cat.items,
-  ]);
-  const libraryLinks: { href: string; label: string }[] = RESOURCES_CATEGORIES.flatMap((cat) => [
-    ...cat.items,
-  ]);
-
+function DesktopExploreMegaPanel({ onLinkClick }: { onLinkClick: () => void }) {
   return (
     <MegaPanelShell>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <nav aria-label="Portfolio">
-          <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.26em] text-blue-400/80">
-            Portfolio
-          </p>
-          <ul className="space-y-0.5">
-            {CREATIONS_PORTFOLIO_LINKS.map((item) => (
-              <li key={item.href}>
-                <MegaTextLink href={item.href} label={item.label} onClick={onLinkClick} />
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <nav aria-label="Talent and channels">
-          <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.26em] text-blue-400/80">
-            Talent & channels
-          </p>
-          <ul className="space-y-0.5">
-            {[...CREATIONS_TALENT_LINKS, ...CREATIONS_CHANNEL_LINKS].map((item) => (
-              <li key={item.href}>
-                <MegaTextLink href={item.href} label={item.label} onClick={onLinkClick} />
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <nav aria-label="Industries">
-          <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.26em] text-blue-400/80">
-            Industries
-          </p>
-          <ul className="space-y-0.5">
-            <li>
-              <MegaTextLink href="/industries" label="All industries" onClick={onLinkClick} />
-            </li>
-            {loading
-              ? Array.from({ length: 5 }).map((_, i) => (
-                  <li key={i} className="my-1 h-3 w-24 bg-white/10" aria-hidden />
-                ))
-              : industries.map((ind) => (
-                  <li key={ind.slug}>
-                    <MegaTextLink
-                      href={`/industries/${ind.slug}`}
-                      label={ind.name}
-                      onClick={onLinkClick}
-                    />
-                  </li>
-                ))}
-          </ul>
-        </nav>
-
-        <nav aria-label="Modules">
-          <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.26em] text-blue-400/80">
-            Modules
-          </p>
-          <ul className="space-y-0.5">
-            <li>
-              <MegaTextLink href="/modules" label="All modules" onClick={onLinkClick} />
-            </li>
-            {moduleLinks.map((item) => (
-              <li key={item.href}>
-                <MegaTextLink href={item.href} label={item.label} onClick={onLinkClick} />
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <nav aria-label="Libraries">
-          <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.26em] text-blue-400/80">
-            Libraries
-          </p>
-          <ul className="space-y-0.5">
-            <li>
-              <MegaTextLink href="/resources" label="All libraries" onClick={onLinkClick} />
-            </li>
-            {libraryLinks.map((item) => (
-              <li key={item.href}>
-                <MegaTextLink href={item.href} label={item.label} onClick={onLinkClick} />
-              </li>
-            ))}
-          </ul>
-        </nav>
+      <div className="grid gap-6 sm:grid-cols-2">
+        {BROWSE_SECTIONS.map((section) => (
+          <nav key={section.id} aria-label={section.label}>
+            <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.26em] text-blue-400/80">
+              {section.label}
+            </p>
+            <ul className="space-y-0.5">
+              {section.items.map((item) => (
+                <li key={item.href}>
+                  <MegaTextLink href={item.href} label={item.label} onClick={onLinkClick} />
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))}
       </div>
     </MegaPanelShell>
   );
@@ -659,7 +497,11 @@ export default function Navbar() {
   useLayoutEffect(() => {
     const el = headerRef.current;
     if (!el) return;
-    const update = () => setHeaderOffsetPx(el.getBoundingClientRect().height);
+    const update = () => {
+      const height = el.getBoundingClientRect().height;
+      setHeaderOffsetPx(height);
+      document.documentElement.style.setProperty("--nav-h", `${height}px`);
+    };
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
@@ -726,21 +568,6 @@ export default function Navbar() {
 
   const closeIfSamePath = () => setMenuOpen(false);
 
-  const [navIndustries, setNavIndustries] = useState<NavIndustry[]>([]);
-  const [industriesLoading, setIndustriesLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchNavIndustries().then((list) => {
-      if (!cancelled) setNavIndustries(list);
-    }).finally(() => {
-      if (!cancelled) setIndustriesLoading(false);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   const exploreMega = useDesktopMegaMenu(pathname);
   const worldOfAiMega = useDesktopMegaMenu(pathname);
 
@@ -783,7 +610,7 @@ export default function Navbar() {
     return () => document.removeEventListener("keydown", onKey);
   }, [ott, openSearch, searchOpen]);
 
-  const navSolid = ott && (scrolled || !overlay || exploreMega.open);
+  const navSolid = ott && (!overlay || exploreMega.open || worldOfAiMega.open);
 
   return (
     <OttNavContext.Provider value={ott}>
@@ -817,16 +644,14 @@ export default function Navbar() {
       {/* Main navbar */}
         <nav className={`relative overflow-visible ${ott ? "bg-transparent" : "border-b border-slate-200/80 bg-white"}`}>
         <div className="px-4 sm:px-6 lg:px-10">
-          <div className={`flex items-center justify-between gap-4 ${ott ? "h-16" : "h-[4.25rem]"}`}>
+          <div className={`relative flex items-center justify-between gap-4 ${ott ? "h-16" : "h-[4.25rem]"}`}>
               <DesktopLogoLink />
 
               {ott ? (
                 <div className="hidden min-w-0 flex-1 items-center gap-5 lg:flex">
-                  <DesktopNavTextLink href="/about" label="About" active={isAboutNavActive(pathname)} />
                   <DesktopNavTextLink href="/ai-ads" label="Ads" active={isAdsNavActive(pathname)} />
                   <DesktopNavTextLink href="/ai-filmmaking" label="Films" active={isFilmsChannelActive(pathname)} />
                   <DesktopNavTextLink href="/ai-verse" label="Community" active={isCommunityNavActive(pathname)} />
-                  <DesktopNavTextLink href="/team" label="Team" active={isTeamNavActive(pathname)} />
                   <div key="nav-explore" ref={exploreMega.triggerRef} className="relative">
                     <DesktopMegaMenuTrigger
                       menuId="explore"
@@ -838,12 +663,6 @@ export default function Navbar() {
                     />
                   </div>
                   <DesktopNavTextLink href="/pricing" label="Pricing" active={isPricingNavActive(pathname)} />
-                  <DesktopNavTextLink href="/events" label="Events" active={isEventsNavActive(pathname)} />
-                  <DesktopNavTextLink
-                    href="/web-dev"
-                    label="Web Dev"
-                    active={pathname === "/web-dev" || pathname.startsWith("/web-dev/")}
-                  />
                 </div>
               ) : (
               <div className="hidden flex-1 items-center justify-center lg:flex">
@@ -859,11 +678,6 @@ export default function Navbar() {
                   />
                 </div>
                 <DesktopNavTextLink
-                  href="/team"
-                  label={NAV_LABELS.team}
-                  active={isTeamNavActive(pathname)}
-                />
-                <DesktopNavTextLink
                   href="/pricing"
                   label={NAV_LABELS.pricing}
                   active={isPricingNavActive(pathname)}
@@ -878,19 +692,21 @@ export default function Navbar() {
                     active={isExploreNavActive(pathname)}
                   />
                 </div>
-                <DesktopNavTextLink
-                  href="/events"
-                  label="Events"
-                  active={isEventsNavActive(pathname)}
-                />
-                <DesktopNavTextLink
-                  href="/web-dev"
-                  label="Web Dev"
-                  active={pathname === "/web-dev" || pathname.startsWith("/web-dev/")}
-                />
                 </div>
               </div>
               )}
+
+            {/* YAIL Vault — dead-center on desktop + mobile (OTT chrome) */}
+            {ott ? (
+              <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
+                <div className="pointer-events-auto hidden lg:block">
+                  <VaultNavLink />
+                </div>
+                <div className="pointer-events-auto lg:hidden">
+                  <VaultNavLink compact />
+                </div>
+              </div>
+            ) : null}
 
             <div className="ml-auto hidden shrink-0 items-center gap-2 lg:flex">
                 {ott ? (
@@ -908,17 +724,6 @@ export default function Navbar() {
               </div>
 
             <div className="ml-auto flex items-center gap-1.5 lg:hidden">
-            {ott ? (
-              <button
-                type="button"
-                onClick={openSearch}
-                aria-label="Search"
-                className="inline-flex h-10 items-center gap-1.5 rounded-md border border-white/25 bg-white/10 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-200"
-              >
-                <SearchGlyph />
-                <span>Search</span>
-              </button>
-            ) : null}
             <button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
@@ -966,11 +771,7 @@ export default function Navbar() {
                 : "pointer-events-none invisible opacity-0"
             }`}
           >
-            <DesktopExploreMegaPanel
-              industries={navIndustries}
-              loading={industriesLoading}
-              onLinkClick={() => exploreMega.setOpen(false)}
-            />
+            <DesktopExploreMegaPanel onLinkClick={() => exploreMega.setOpen(false)} />
           </div>
         </nav>
       </header>
@@ -1000,13 +801,28 @@ export default function Navbar() {
             </div>
 
             <div className="flex min-h-[calc(100dvh-6rem)] flex-col">
+              {ott ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    openSearch();
+                  }}
+                  className="mb-8 flex w-full items-center gap-3 rounded-2xl border border-white/15 bg-white/[0.06] px-4 py-3.5 text-left text-white/80 transition hover:border-white/35 hover:text-white"
+                >
+                  <SearchGlyph />
+                  <span className="flex-1 font-heading text-sm uppercase tracking-[0.18em]">Search</span>
+                  <span className="font-mono text-[10px] tracking-[0.2em] text-white/35">/</span>
+                </button>
+              ) : null}
               <nav className="flex flex-col">
-                <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.32em] text-blue-400/70">Channels</p>
-                <MobileNavLink href="/about" label="About" pathname={pathname} onSamePathClose={closeIfSamePath} />
+                <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.32em] text-emerald-300/70">Labs</p>
+                <MobileNavLink href="/vault" label={NAV_LABELS.vault} pathname={pathname} onSamePathClose={closeIfSamePath} />
+
+                <p className="mb-2 mt-6 font-mono text-[10px] uppercase tracking-[0.32em] text-blue-400/70">Channels</p>
                 <MobileNavLink href="/ai-ads" label="Ads" pathname={pathname} onSamePathClose={closeIfSamePath} />
                 <MobileNavLink href="/ai-filmmaking" label="Films" pathname={pathname} onSamePathClose={closeIfSamePath} />
                 <MobileNavLink href="/ai-verse" label="Community" pathname={pathname} onSamePathClose={closeIfSamePath} />
-                <MobileNavLink href="/team" label="Team" pathname={pathname} onSamePathClose={closeIfSamePath} />
 
                 <div className="mt-6">
                   <button
@@ -1044,59 +860,29 @@ export default function Navbar() {
                     hidden={!exploreOpen}
                     className={exploreOpen ? "mt-3 flex flex-col gap-1" : undefined}
                   >
-                    <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.28em] text-blue-400/70">
-                      {NAV_LABELS.creations}
-                    </p>
-                    {CREATIONS_MOBILE_LINKS.map((link) => (
-                      <MobileNavLink
-                        key={link.href}
-                        href={link.href}
-                        label={link.label}
-                        pathname={pathname}
-                        onSamePathClose={closeIfSamePath}
-                      />
-                    ))}
-
-                    <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-blue-400/70">
-                      {NAV_LABELS.industries}
-                    </p>
-                    <MobileNavLink
-                      href="/industries"
-                      label="All industries"
-                      pathname={pathname}
-                      onSamePathClose={closeIfSamePath}
-                    />
-                    {industriesLoading ? (
-                      <p className="px-5 py-2 text-sm font-medium text-white/55">Loading…</p>
-                    ) : (
-                      navIndustries.map((ind) => (
-                        <MobileNavLink
-                          key={ind.slug}
-                          href={`/industries/${ind.slug}`}
-                          label={ind.name}
-                          pathname={pathname}
-                          onSamePathClose={closeIfSamePath}
-                        />
-                      ))
-                    )}
-
-                    <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-blue-400/70">
-                      {NAV_LABELS.studio}
-                    </p>
-                    {STUDIO_MOBILE_LINKS.map((link) => (
-                      <MobileNavLink
-                        key={link.href}
-                        href={link.href}
-                        label={link.label}
-                        pathname={pathname}
-                        onSamePathClose={closeIfSamePath}
-                      />
+                    {BROWSE_SECTIONS.map((section, index) => (
+                      <div key={section.id}>
+                        <p
+                          className={`font-mono text-[10px] uppercase tracking-[0.28em] text-blue-400/70 ${
+                            index === 0 ? "mt-4" : "mt-6"
+                          }`}
+                        >
+                          {section.label}
+                        </p>
+                        {section.items.map((link) => (
+                          <MobileNavLink
+                            key={link.href}
+                            href={link.href}
+                            label={link.label}
+                            pathname={pathname}
+                            onSamePathClose={closeIfSamePath}
+                          />
+                        ))}
+                      </div>
                     ))}
                   </div>
                 </div>
                 <MobileNavLink href="/pricing" label="Pricing" pathname={pathname} onSamePathClose={closeIfSamePath} />
-                <MobileNavLink href="/events" label="Events" pathname={pathname} onSamePathClose={closeIfSamePath} />
-                <MobileNavLink href="/web-dev" label="Web Dev" pathname={pathname} onSamePathClose={closeIfSamePath} />
       </nav>
 
               <div className="mt-10 flex flex-col gap-4">
@@ -1110,11 +896,7 @@ export default function Navbar() {
         </div>
       </div>
       {ott ? (
-        <OttSearchOverlay
-          open={searchOpen}
-          onClose={() => setSearchOpen(false)}
-          industries={navIndustries}
-        />
+        <OttSearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
       ) : null}
     </>
     </OttNavContext.Provider>

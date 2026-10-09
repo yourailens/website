@@ -77,11 +77,11 @@ function Select<T extends string>({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</label>
+      <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">{label}</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as T)}
-        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
+        className="w-full rounded-2xl border border-white/12 bg-gradient-to-br from-white/[0.08] to-white/[0.02] px-4 py-3 text-sm text-white outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
       >
         {options.map((o) => (
           <option key={o} value={o}>{labels[o]}</option>
@@ -226,19 +226,19 @@ export default function AdminCharacterSheetsManager() {
 
   if (isCreating) {
     return (
-      <div className="min-h-screen bg-slate-50">
-        <div className="border-b border-slate-200 bg-white px-6 py-4">
+      <div className="bg-transparent">
+        <div className="border-b border-white/15 bg-white/[0.06] px-6 py-4">
           <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
             <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-blue-600">Admin → Character Sheets</p>
-              <h1 className="mt-0.5 font-heading text-xl font-black text-slate-900">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-300/80">Admin → Character Sheets</p>
+              <h1 className="mt-0.5 font-heading text-xl font-black text-white">
                 {editing ? `Edit: ${editing.title}` : "New Character Sheet"}
               </h1>
             </div>
             <button
               type="button"
               onClick={() => setIsCreating(false)}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              className="rounded-xl border border-white/15 px-4 py-2 text-sm font-semibold text-white/55 hover:bg-transparent"
             >
               ← Back to list
             </button>
@@ -252,9 +252,9 @@ export default function AdminCharacterSheetsManager() {
             <div className="space-y-6">
               {/* Image upload */}
               <div>
-                <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">Character Sheet Image</p>
+                <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">Character Sheet Image</p>
                 <div
-                  className="relative cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 transition hover:border-blue-300 hover:bg-blue-50/40"
+                  className="relative cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed border-white/15 bg-transparent transition hover:border-blue-300 hover:bg-white/[0.08]/40"
                   onClick={() => imageInputRef.current?.click()}
                 >
                   {imagePreview ? (
@@ -273,11 +273,11 @@ export default function AdminCharacterSheetsManager() {
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-16 text-center">
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mb-3 text-slate-300">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mb-3 text-white/25">
                         <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
                       </svg>
-                      <p className="text-sm font-semibold text-slate-500">Click to upload character sheet image</p>
-                      <p className="mt-1 text-xs text-slate-400">PNG, JPG, WebP · Portrait recommended</p>
+                      <p className="text-sm font-semibold text-white/45">Click to upload character sheet image</p>
+                      <p className="mt-1 text-xs text-white/35">PNG, JPG, WebP · Portrait recommended</p>
                     </div>
                   )}
                 </div>
@@ -300,7 +300,7 @@ export default function AdminCharacterSheetsManager() {
                       type="button"
                       onClick={() => setField("aspect_ratio", a)}
                       className={`rounded-full px-3 py-1 text-[11px] font-bold transition ${
-                        form.aspect_ratio === a ? "bg-blue-600 text-white" : "border border-slate-200 bg-white text-slate-500 hover:border-blue-200"
+                        form.aspect_ratio === a ? "bg-white text-white" : "border border-white/15 bg-white/[0.06] text-white/45 hover:border-white/20"
                       }`}
                     >
                       {a}
@@ -311,25 +311,25 @@ export default function AdminCharacterSheetsManager() {
 
               {/* Title */}
               <div>
-                <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">Title *</label>
+                <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">Title *</label>
                 <input
                   required
                   value={form.title}
                   onChange={(e) => setField("title", e.target.value)}
                   placeholder="e.g. Zara — South Asian Young Adult"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
+                  className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">Description</label>
+                <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">Description</label>
                 <textarea
                   value={form.description}
                   onChange={(e) => setField("description", e.target.value)}
                   rows={3}
                   placeholder="Brief description of the character…"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
+                  className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
                 />
               </div>
 
@@ -345,79 +345,79 @@ export default function AdminCharacterSheetsManager() {
               {/* Free-form descriptors */}
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">Nationality</label>
+                  <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">Nationality</label>
                   <input
                     value={form.nationality}
                     onChange={(e) => setField("nationality", e.target.value)}
                     placeholder="e.g. Indian"
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 outline-none focus:border-blue-400"
+                    className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white outline-none focus:border-blue-400"
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">Hair Color</label>
+                  <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">Hair Color</label>
                   <input
                     value={form.hair_color}
                     onChange={(e) => setField("hair_color", e.target.value)}
                     placeholder="e.g. Black wavy"
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 outline-none focus:border-blue-400"
+                    className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white outline-none focus:border-blue-400"
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">Eye Color</label>
+                  <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">Eye Color</label>
                   <input
                     value={form.eye_color}
                     onChange={(e) => setField("eye_color", e.target.value)}
                     placeholder="e.g. Deep brown"
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 outline-none focus:border-blue-400"
+                    className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white outline-none focus:border-blue-400"
                   />
                 </div>
               </div>
 
               {/* Style tags */}
               <div>
-                <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">Style Tags <span className="normal-case text-slate-400">(comma-separated)</span></label>
+                <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">Style Tags <span className="normal-case text-white/35">(comma-separated)</span></label>
                 <input
                   value={form.style_tags}
                   onChange={(e) => setField("style_tags", e.target.value)}
                   placeholder="e.g. glam, editorial, traditional, minimal"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
+                  className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50"
                 />
               </div>
             </div>
 
             {/* Right sidebar */}
             <div className="space-y-4">
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <p className="mb-4 font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">Publishing</p>
+              <div className="rounded-2xl border border-white/15 bg-white/[0.06] p-5 ">
+                <p className="mb-4 font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">Publishing</p>
 
                 <div className="space-y-3">
                   <label className="flex cursor-pointer items-center justify-between gap-3">
-                    <span className="text-sm font-semibold text-slate-700">Published</span>
+                    <span className="text-sm font-semibold text-white/70">Published</span>
                     <div
                       onClick={() => setField("published", !form.published)}
-                      className={`relative h-6 w-10 rounded-full transition-colors ${form.published ? "bg-blue-600" : "bg-slate-200"}`}
+                      className={`relative h-6 w-10 rounded-full transition-colors ${form.published ? "bg-white" : "bg-slate-200"}`}
                     >
-                      <span className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-all ${form.published ? "left-5" : "left-1"}`} />
+                      <span className={`absolute top-1 h-4 w-4 rounded-full bg-white/[0.06] shadow transition-all ${form.published ? "left-5" : "left-1"}`} />
                     </div>
                   </label>
 
                   <label className="flex cursor-pointer items-center justify-between gap-3">
-                    <span className="text-sm font-semibold text-slate-700">Featured</span>
+                    <span className="text-sm font-semibold text-white/70">Featured</span>
                     <div
                       onClick={() => setField("featured", !form.featured)}
-                      className={`relative h-6 w-10 rounded-full transition-colors ${form.featured ? "bg-blue-600" : "bg-slate-200"}`}
+                      className={`relative h-6 w-10 rounded-full transition-colors ${form.featured ? "bg-white" : "bg-slate-200"}`}
                     >
-                      <span className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-all ${form.featured ? "left-5" : "left-1"}`} />
+                      <span className={`absolute top-1 h-4 w-4 rounded-full bg-white/[0.06] shadow transition-all ${form.featured ? "left-5" : "left-1"}`} />
                     </div>
                   </label>
 
                   <div>
-                    <label className="mb-1 block text-xs font-semibold text-slate-500">Sort Order</label>
+                    <label className="mb-1 block text-xs font-semibold text-white/45">Sort Order</label>
                     <input
                       type="number"
                       value={form.sort_order}
                       onChange={(e) => setField("sort_order", Number(e.target.value))}
-                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
+                      className="w-full rounded-lg border border-white/15 px-3 py-2 text-sm outline-none focus:border-blue-400"
                     />
                   </div>
                 </div>
@@ -425,7 +425,7 @@ export default function AdminCharacterSheetsManager() {
 
               {msg && (
                 <div className={`rounded-xl border px-4 py-3 text-sm font-semibold ${
-                  msg.includes("!") ? "border-green-200 bg-green-50 text-green-700" : "border-red-200 bg-red-50 text-red-700"
+                  msg.includes("!") ? "border-green-200 bg-green-50 text-green-700" : "border-rose-400/30 bg-rose-400/10 text-rose-200"
                 }`}>
                   {msg}
                 </div>
@@ -434,7 +434,7 @@ export default function AdminCharacterSheetsManager() {
               <button
                 type="submit"
                 disabled={busy}
-                className="w-full rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-md shadow-blue-200 transition hover:bg-blue-700 disabled:opacity-60"
+                className="w-full rounded-2xl bg-white px-6 py-3.5 text-sm font-semibold text-black  shadow-blue-200 transition hover:bg-emerald-100 disabled:opacity-60"
               >
                 {busy ? "Saving…" : editing ? "Save Changes" : "Create Sheet"}
               </button>
@@ -448,17 +448,17 @@ export default function AdminCharacterSheetsManager() {
   // ── List view ─────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="border-b border-slate-200 bg-white px-6 py-4">
+    <div className="bg-transparent">
+      <div className="border-b border-white/15 bg-white/[0.06] px-6 py-4">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-blue-600">Admin</p>
-            <h1 className="mt-0.5 font-heading text-xl font-black text-slate-900">Character Sheets</h1>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-300/80">Admin</p>
+            <h1 className="mt-0.5 font-heading text-xl font-black text-white">Character Sheets</h1>
           </div>
           <button
             type="button"
             onClick={startCreate}
-            className="rounded-2xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-200 hover:bg-blue-700"
+            className="rounded-2xl bg-white px-5 py-2.5 text-sm font-semibold text-black  shadow-blue-200 hover:bg-emerald-100"
           >
             + New Sheet
           </button>
@@ -476,14 +476,14 @@ export default function AdminCharacterSheetsManager() {
           </div>
         ) : sheets.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <p className="font-heading text-lg font-bold text-slate-700">No character sheets yet</p>
-            <p className="mt-1 text-sm text-slate-400">Add your first one using the button above</p>
+            <p className="font-heading text-lg font-bold text-white/70">No character sheets yet</p>
+            <p className="mt-1 text-sm text-white/35">Add your first one using the button above</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {sheets.map((s) => (
-              <div key={s.id} className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="relative aspect-[3/4] overflow-hidden bg-slate-100">
+              <div key={s.id} className="group relative overflow-hidden rounded-2xl border border-white/15 bg-white/[0.06] ">
+                <div className="relative aspect-[3/4] overflow-hidden bg-black/40">
                   <Image
                     src={s.image_url}
                     alt={s.title}
@@ -498,15 +498,15 @@ export default function AdminCharacterSheetsManager() {
                   )}
                 </div>
                 <div className="p-3">
-                  <p className="truncate text-xs font-bold text-slate-800">{s.title}</p>
-                  <p className="mt-0.5 text-[10px] text-slate-400">
+                  <p className="truncate text-xs font-bold text-white">{s.title}</p>
+                  <p className="mt-0.5 text-[10px] text-white/35">
                     {ETHNICITY_LABELS[s.ethnicity]} · {AGE_GROUP_LABELS[s.age_group]}
                   </p>
                   <div className="mt-2.5 flex gap-2">
                     <button
                       type="button"
                       onClick={() => startEdit(s)}
-                      className="flex-1 rounded-lg border border-slate-200 py-1 text-[10px] font-bold text-slate-600 hover:border-blue-200 hover:text-blue-700"
+                      className="flex-1 rounded-lg border border-white/15 py-1 text-[10px] font-bold text-white/55 hover:border-white/20 hover:text-emerald-300"
                     >
                       Edit
                     </button>
@@ -514,7 +514,7 @@ export default function AdminCharacterSheetsManager() {
                       type="button"
                       onClick={() => togglePublish(s)}
                       className={`flex-1 rounded-lg py-1 text-[10px] font-bold transition ${
-                        s.published ? "border border-slate-200 text-slate-500 hover:border-red-200 hover:text-red-600" : "bg-blue-600 text-white hover:bg-blue-700"
+                        s.published ? "border border-white/15 text-white/45 hover:border-rose-400/30 hover:text-rose-300" : "bg-white text-white hover:bg-emerald-100"
                       }`}
                     >
                       {s.published ? "Unpublish" : "Publish"}
@@ -522,7 +522,7 @@ export default function AdminCharacterSheetsManager() {
                     <button
                       type="button"
                       onClick={() => doDelete(s)}
-                      className="rounded-lg border border-slate-200 px-2 py-1 text-[10px] font-bold text-red-400 hover:border-red-200 hover:bg-red-50"
+                      className="rounded-lg border border-white/15 px-2 py-1 text-[10px] font-bold text-red-400 hover:border-rose-400/30 hover:bg-rose-400/10"
                     >
                       ✕
                     </button>

@@ -40,6 +40,8 @@ html {
 
 html:has(.ott-home),
 html:has(.ott-home) body,
+html:has(.vault-shell),
+html:has(.vault-shell) body,
 html.ott-theme,
 html.ott-theme body {
   background: #000000 !important;
@@ -191,6 +193,8 @@ textarea {
   }
   html:has(.ott-home),
   html:has(.ott-home) body,
+  html:has(.vault-shell),
+  html:has(.vault-shell) body,
   html.ott-theme,
   html.ott-theme body {
     background: #000000 !important;

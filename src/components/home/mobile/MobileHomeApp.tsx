@@ -2,29 +2,53 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import HeroSoundBanner from "@/components/home/HeroSoundBanner";
 import GlossyPlayCard from "./GlossyPlayCard";
 import type { MobileClip, MobileHomeData } from "./types";
 
 export default function MobileHomeApp({ data }: { data: MobileHomeData }) {
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [leadMuted, setLeadMuted] = useState(true);
   const pause = () => setPlayingId(null);
+  const toggleLeadSound = () => setLeadMuted((muted) => !muted);
+  const lead = data.heroes[0] ?? data.hero;
+  const followingHeroes = data.heroes[0] ? data.heroes.slice(1) : [];
 
   return (
     <div className="relative min-h-[100svh] bg-black font-body text-white">
-      <main className="space-y-10 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-[calc(4.5rem+env(safe-area-inset-top))]">
-        {/* Same order as laptop: Opening film → Ads → Films → Community → Pricing */}
-        {data.mattress ? (
-          <section aria-label="The mattress ad">
+      <main className="space-y-10 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+        <div className="relative -mx-4">
+          <HeroSoundBanner muted={leadMuted} onToggle={toggleLeadSound} />
+          <section id={lead.id === data.hero.id ? "lens" : undefined} aria-label={lead.section} className="px-4">
+            {lead.id === data.hero.id ? <h1 className="sr-only">YourAILens Studios</h1> : null}
             <GlossyPlayCard
-              clip={data.mattress}
+              clip={lead}
               playingId={playingId}
               onPlay={setPlayingId}
               onPause={pause}
               large
+              autoPlay
+              soundMuted={leadMuted}
+              hideSoundButton
+              onPictureClick={toggleLeadSound}
             />
+            {lead.id === data.hero.id ? (
+              <a href="#ads" className="mt-4 flex flex-col items-center gap-1 text-white/70">
+                <span className="text-[10px] font-medium uppercase tracking-[0.32em]">Explore</span>
+                <svg viewBox="0 0 24 24" className="h-5 w-5 animate-bounce" fill="none" aria-hidden>
+                  <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </a>
+            ) : null}
           </section>
-        ) : null}
-
+        </div>
+        {followingHeroes.map((clip) => (
+          <section key={clip.id} aria-label={clip.section}>
+            <p className="mb-3 font-mono text-[10px] tracking-[0.28em] text-white/45">{clip.section.toUpperCase()}</p>
+            <GlossyPlayCard clip={clip} playingId={playingId} onPlay={setPlayingId} onPause={pause} large />
+          </section>
+        ))}
+        {data.heroes[0] ? (
         <section id="lens" aria-label="Opening film">
           <h1 className="sr-only">YourAILens Studios</h1>
           <GlossyPlayCard
@@ -44,6 +68,7 @@ export default function MobileHomeApp({ data }: { data: MobileHomeData }) {
             </svg>
           </a>
         </section>
+        ) : null}
 
         <section id="ads">
           <div className="mb-4 flex items-end justify-between gap-3">

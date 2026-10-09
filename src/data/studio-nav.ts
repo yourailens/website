@@ -1,17 +1,16 @@
-/** Shared site navigation — navbar mega menus + footer */
+/** Shared site navigation — navbar Browse mega + footer */
 
 export const NAV_LABELS = {
-  explore: "Explore",
+  explore: "Browse",
   aiVerse: "AI Verse",
   worldOfAi: "World of AI",
   aiFilmmaking: "AI Filmmaking",
   aiAds: "AI Ads",
+  vault: "YAIL Vault",
   pricing: "Pricing",
   team: "Team",
-  /** Group headings inside Explore (desktop sidebar / mobile / footer) */
-  creations: "Creations",
-  industries: "Industries",
-  studio: "Studio",
+  portfolio: "Portfolio",
+  channels: "Channels",
 } as const;
 
 /** Desktop / mobile World of AI dropdown */
@@ -36,245 +35,61 @@ export const WORLD_OF_AI_NAV_LINKS = [
   },
 ] as const;
 
-export const MODULES_NAV_CATEGORIES = [
+/** Flat Browse sections — Portfolio, Talent, Channels sit side by side (no nest). */
+export const BROWSE_SECTIONS = [
   {
-    label: "Browse",
+    id: "portfolio" as const,
+    label: NAV_LABELS.portfolio,
     items: [
-      { href: "/modules/prompt-playbooks", label: "Prompt Playbooks" },
-      { href: "/modules/client-showcases", label: "Client Showcases" },
-      { href: "/modules/subjects-visuals", label: "Subjects & Visuals" },
-    ],
-  },
-] as const;
-
-export const RESOURCES_NAV_CATEGORIES = [
-  {
-    label: "Characters & style",
-    items: [
-      { href: "/character-sheets", label: "Models" },
-      { href: "/outfits", label: "Outfit Sheets" },
-      { href: "/props", label: "Props Library" },
-    ],
-  },
-  {
-    label: "Scenes & world",
-    items: [
-      { href: "/scenarios", label: "Reference Scenarios" },
-      { href: "/locations", label: "Locations" },
-      { href: "/mood-boards", label: "Mood Boards" },
-    ],
-  },
-  {
-    label: "Production",
-    items: [
-      { href: "/prompts", label: "Workflows" },
-      { href: "/lighting-presets", label: "Lighting Presets" },
-      { href: "/color-grades", label: "Color Grading" },
-    ],
-  },
-] as const;
-
-export type CreationsMegaSection = "portfolio" | "talent" | "channels";
-
-export type IndustryMegaSection = "property-commerce" | "commerce-tech" | "brands-services";
-
-export type StudioMegaSection = "modules" | "libraries";
-
-export type ExploreMegaSection = CreationsMegaSection | IndustryMegaSection | StudioMegaSection;
-
-export const EXPLORE_MEGA_GROUPS: {
-  label: string;
-  items: { id: ExploreMegaSection; label: string }[];
-}[] = [
-  {
-    label: NAV_LABELS.creations,
-    items: [
-      { id: "portfolio", label: "Portfolio" },
-      { id: "talent", label: "AI talent & events" },
-      { id: "channels", label: "Channels" },
+      {
+        href: "/ai-filmmaking",
+        label: "AI Filmmaking",
+        description: "Longer stories, returning characters, worlds that hold.",
+        image: "/images/img2.jpeg",
+      },
+      {
+        href: "/ai-ads",
+        label: "AI Ads",
+        description: "Product commercials and launch films that feel shot.",
+        image: "/images/img1.jpeg",
+      },
+      {
+        href: "/images",
+        label: "Stills & visuals",
+        description: "Campaign imagery, product shots, and key art.",
+        image: "/images/img1.jpeg",
+      },
+      {
+        href: "/films",
+        label: "Films & motion",
+        description: "Launch films, ads, and motion-led stories.",
+        image: "/images/img2.jpeg",
+      },
     ],
   },
   {
-    label: NAV_LABELS.industries,
+    id: "channels" as const,
+    label: NAV_LABELS.channels,
     items: [
-      { id: "commerce-tech", label: "Commerce & tech" },
-      { id: "brands-services", label: "Brands & services" },
-      { id: "property-commerce", label: "Property & Lifestyle" },
+      {
+        href: "/instagram",
+        label: "Instagram",
+        description: "Reels, stills, and behind the scenes.",
+        image: "/images/otshirt1.png",
+      },
+      {
+        href: "/youtube",
+        label: "YouTube",
+        description: "Long-form films and breakdowns.",
+        image: "/images/img3.jpeg",
+      },
     ],
   },
-  {
-    label: NAV_LABELS.studio,
-    items: [
-      { id: "modules", label: "Modules" },
-      { id: "libraries", label: "Reference libraries" },
-    ],
-  },
-];
-
-export const CREATIONS_PORTFOLIO_LINKS = [
-  {
-    href: "/ai-filmmaking",
-    label: "AI Filmmaking",
-    description: "Longer stories, returning characters, worlds that hold.",
-    image: "/images/img2.jpeg",
-  },
-  {
-    href: "/ai-ads",
-    label: "AI Ads",
-    description: "Product commercials and launch films that feel shot.",
-    image: "/images/img1.jpeg",
-  },
-  {
-    href: "/images",
-    label: "Stills & visuals",
-    description: "Campaign imagery, product shots, and key art.",
-    image: "/images/img1.jpeg",
-  },
-  {
-    href: "/films",
-    label: "Films & motion",
-    description: "Launch films, ads, and motion-led stories.",
-    image: "/images/img2.jpeg",
-  },
-] as const;
-
-export const CREATIONS_TALENT_LINKS = [
-  {
-    href: "/avatars",
-    label: "AI avatars",
-    description: "Consistent on-camera talent for any brief.",
-    image: "/images/ai_avatar1.jpeg",
-  },
-  {
-    href: "/events",
-    label: "Events",
-    description: "Workshops, launches, and studio gatherings.",
-    image: "/images/img4.jpeg",
-  },
-] as const;
-
-export const CREATIONS_CHANNEL_LINKS = [
-  {
-    href: "/instagram",
-    label: "Instagram",
-    description: "Reels, stills, and behind the scenes.",
-    icon: "instagram" as const,
-    image: "/images/otshirt1.png",
-  },
-  {
-    href: "/youtube",
-    label: "YouTube",
-    description: "Long-form films and breakdowns.",
-    icon: "youtube" as const,
-    image: "/images/img3.jpeg",
-  },
-] as const;
-
-/** Hero visuals for desktop mega menus (section keys match sidebar ids). */
-export const NAV_MEGA_VISUALS = {
-  creations: {
-    portfolio: {
-      src: "/images/b3.jpeg",
-      alt: "Campaign stills and motion from YourAILens",
-      caption: "Portfolio",
-    },
-    talent: {
-      src: "/images/ai_avatar1.jpeg",
-      alt: "AI avatar talent",
-      caption: "AI talent & events",
-    },
-    channels: {
-      src: "/images/c1.png",
-      alt: "Social and channel content",
-      caption: "Channels",
-    },
-  },
-  industries: {
-    "property-commerce": {
-      src: "/images/r1.png",
-      alt: "Property and lifestyle brand imagery",
-      caption: "Property & Lifestyle",
-    },
-    "commerce-tech": {
-      src: "/images/i2.png",
-      alt: "Commerce and technology brand imagery",
-      caption: "Commerce & tech",
-    },
-    "brands-services": {
-      src: "/images/i3.png",
-      alt: "Brands and services imagery",
-      caption: "Brands & services",
-    },
-  },
-  studio: {
-    modules: {
-      src: "/images/shoe.png",
-      alt: "Studio modules gallery",
-      caption: "Modules",
-    },
-    libraries: {
-      src: "/images/ws3.png",
-      alt: "Reference libraries for production",
-      caption: "Reference libraries",
-    },
-  },
-} as const;
-
-export function exploreMegaVisual(section: ExploreMegaSection) {
-  if (section === "portfolio" || section === "talent" || section === "channels") {
-    return NAV_MEGA_VISUALS.creations[section];
-  }
-  if (section === "modules" || section === "libraries") {
-    return NAV_MEGA_VISUALS.studio[section];
-  }
-  return NAV_MEGA_VISUALS.industries[section];
-}
-
-/** Which third of the sorted industry list each section owned before the sidebar reorder */
-export const INDUSTRY_MEGA_LEGACY_SLICE: Record<IndustryMegaSection, number> = {
-  "property-commerce": 0,
-  "commerce-tech": 1,
-  "brands-services": 2,
-};
-
-export const INDUSTRY_MEGA_SIDEBAR: { id: IndustryMegaSection; label: string }[] = [
-  { id: "commerce-tech", label: "Commerce & tech" },
-  { id: "brands-services", label: "Brands & services" },
-  { id: "property-commerce", label: "Property & Lifestyle" },
-];
-
-/** Mobile Explore — hub links only (no deep library lists in nav) */
-export const CREATIONS_MOBILE_LINKS = [
-  { href: "/images", label: "Stills & visuals" },
-  { href: "/films", label: "Films & motion" },
-  { href: "/avatars", label: "AI avatars" },
-  { href: "/events", label: "Events" },
-  { href: "/instagram", label: "Instagram" },
-  { href: "/youtube", label: "YouTube" },
-] as const;
-
-export const STUDIO_MOBILE_LINKS = [
-  { href: "/modules", label: "Modules" },
-  { href: "/resources", label: "Reference library" },
-] as const;
-
-export const EXPLORE_GALLERY_LINKS = [
-  { href: "/images", label: "Images" },
-  { href: "/films", label: "Films" },
 ] as const;
 
 export const WORLD_OF_AI_FOOTER_LINKS = [
+  { href: "/vault", label: "YAIL Vault" },
   { href: "/ai-verse", label: "AI Verse" },
   { href: "/ai-filmmaking", label: "AI Filmmaking" },
   { href: "/ai-ads", label: "AI Ads" },
-] as const;
-
-export const EXPLORE_FOOTER_LINKS = [
-  { href: "/industries", label: "Industries" },
-  { href: "/images", label: "Stills" },
-  { href: "/films", label: "Films" },
-  { href: "/avatars", label: "Avatars" },
-  { href: "/events", label: "Events" },
-  { href: "/instagram", label: "Instagram" },
-  { href: "/youtube", label: "YouTube" },
 ] as const;

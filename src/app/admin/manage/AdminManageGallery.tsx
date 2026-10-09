@@ -2,6 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import {
+  ADMIN_BTN,
+  ADMIN_BTN_DANGER,
+  ADMIN_BTN_GHOST,
+  ADMIN_BUBBLE_PAD,
+  ADMIN_KICKER,
+  ADMIN_PAGE,
+  ADMIN_ROW,
+} from "@/components/admin/admin-ui";
 import { createBrowserSupabase } from "@/lib/supabase/client";
 
 type Row = { id: string; title: string; public_url: string; poster_url?: string | null; sort_order: number };
@@ -38,11 +47,11 @@ function GalleryDragHandle({
         e.dataTransfer.setData(GALLERY_DND_MIME, JSON.stringify({ gallery, id }));
         e.dataTransfer.effectAllowed = "move";
       }}
-      className={`mb-2 flex items-center gap-2 rounded-lg border border-dashed border-slate-300 bg-white/80 px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-600 ${
+      className={`mb-2 flex items-center gap-2 rounded-2xl border border-dashed border-white/20 bg-white/[0.04] px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-white/55 ${
         disabled ? "cursor-not-allowed opacity-50" : "cursor-grab active:cursor-grabbing"
       }`}
     >
-      <span className="select-none text-slate-400" aria-hidden>
+      <span className="select-none text-white/35" aria-hidden>
         ⋮⋮
       </span>
       Drag to reorder
@@ -104,11 +113,6 @@ export default function AdminManageGallery() {
       cancelled = true;
     };
   }, [loadLists]);
-
-  async function signOut() {
-    await fetch("/api/admin/logout", { method: "POST" });
-    window.location.href = "/admin/login";
-  }
 
   function onGalleryDrop(
     e: React.DragEvent,
@@ -245,224 +249,209 @@ export default function AdminManageGallery() {
 
   if (sessionOk === false) {
     return (
-      <main className="relative min-h-screen bg-[#f6f2ea] px-6 py-24 text-slate-900">
-        <div className="mx-auto max-w-lg text-center">
-          <h1 className="font-heading text-2xl font-bold">Not authorized</h1>
-          <p className="mt-3 text-sm text-slate-600">Sign in with the admin password to manage uploads.</p>
-          <Link href="/admin/login" className="mt-6 inline-block rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white">
-            Go to admin login
-          </Link>
-        </div>
-      </main>
+      <div className="py-16 text-center">
+        <h2 className="font-heading text-2xl leading-none">Not authorized</h2>
+        <p className="mt-3 text-sm text-white/50">Sign in with the admin password to manage uploads.</p>
+        <Link href="/admin/login" className={`mt-6 inline-flex ${ADMIN_BTN}`}>
+          Go to admin login
+        </Link>
+      </div>
     );
   }
 
   if (sessionOk === null) {
-    return (
-      <main className="relative min-h-screen bg-[#f6f2ea] px-6 py-24 text-slate-900">
-        <div className="mx-auto max-w-lg text-center text-sm text-slate-600">Loading...</div>
-      </main>
-    );
+    return <div className="py-16 text-center text-sm text-white/45">Loading…</div>;
   }
 
   return (
-    <main className="relative min-h-screen bg-[#f6f2ea] px-6 py-16 text-slate-900">
-      <div className="mx-auto max-w-6xl space-y-10">
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-slate-500">Admin</p>
-            <h1 className="mt-2 font-heading text-3xl font-bold">Manage uploaded items</h1>
-            <p className="mt-1 text-sm text-slate-600">Reorder, delete, and manage gallery items</p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/admin" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
-              Back to upload page
-            </Link>
-            <Link href="/admin/avatars" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
-              Avatar images
-            </Link>
-            <Link href="/" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
-              View site
-            </Link>
-            <button type="button" onClick={signOut} className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
-              Sign out
-            </button>
-          </div>
-        </header>
+    <div className={ADMIN_PAGE}>
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className={ADMIN_KICKER}>Stage</p>
+          <p className="mt-2 max-w-lg text-sm leading-relaxed text-white/50">
+            Reorder, delete, and manage gallery items.
+          </p>
+        </div>
+        <Link href="/admin" className={ADMIN_BTN_GHOST}>
+          Upload on desk
+        </Link>
+      </header>
 
-        {msg ? <p className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800">{msg}</p> : null}
+      {msg ? <p className={`${ADMIN_ROW} text-sm text-emerald-200`}>{msg}</p> : null}
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="font-heading text-xl font-bold">Images</h2>
-          <p className="mt-1 text-xs text-slate-500">Order on the site: top / left = first. Drag cards by the handle to reorder.</p>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {loading ? (
-              <p className="text-sm text-slate-500">Loading...</p>
-            ) : images.length === 0 ? (
-              <p className="text-sm text-slate-500">No images found.</p>
-            ) : (
-              images.map((row) => (
-                <article
-                  key={row.id}
-                  className="rounded-xl border border-slate-200 bg-slate-50 p-3"
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = "move";
-                  }}
-                  onDrop={(e) => onGalleryDrop(e, "images", row.id)}
+      <section className={ADMIN_BUBBLE_PAD}>
+        <h2 className="font-heading text-xl leading-none">Images</h2>
+        <p className="mt-2 text-xs text-white/40">Order on the site: top / left = first. Drag cards by the handle to reorder.</p>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {loading ? (
+            <p className="text-sm text-white/45">Loading…</p>
+          ) : images.length === 0 ? (
+            <p className="text-sm text-white/45">No images found.</p>
+          ) : (
+            images.map((row) => (
+              <article
+                key={row.id}
+                className={ADMIN_ROW}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "move";
+                }}
+                onDrop={(e) => onGalleryDrop(e, "images", row.id)}
+              >
+                <GalleryDragHandle id={row.id} gallery="images" disabled={busyReorder === "images"} />
+                <div className="relative h-44 overflow-hidden rounded-2xl bg-black/50">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={row.public_url} alt={row.title} className="h-full w-full object-cover" draggable={false} />
+                </div>
+                <p className="mt-3 truncate font-semibold text-white">{row.title}</p>
+                <p className="mt-1 break-all font-mono text-[11px] text-white/35">{row.public_url}</p>
+                <button
+                  type="button"
+                  onClick={() => deleteImage(row.id)}
+                  disabled={busyDeleteId === row.id || busyReorder === "images"}
+                  className={`mt-2 ${ADMIN_BTN_DANGER} disabled:opacity-50`}
                 >
-                  <GalleryDragHandle id={row.id} gallery="images" disabled={busyReorder === "images"} />
-                  <div className="relative h-44 overflow-hidden rounded-lg bg-white">
+                  {busyDeleteId === row.id ? "Deleting…" : "Delete"}
+                </button>
+              </article>
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className={ADMIN_BUBBLE_PAD}>
+        <h2 className="font-heading text-xl leading-none">Films</h2>
+        <p className="mt-2 text-xs text-white/40">
+          Order on the site: top / left = first. Drag cards by the handle to reorder (not the video).
+        </p>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {loading ? (
+            <p className="text-sm text-white/45">Loading…</p>
+          ) : films.length === 0 ? (
+            <p className="text-sm text-white/45">No films found.</p>
+          ) : (
+            films.map((row) => (
+              <article
+                key={row.id}
+                className={ADMIN_ROW}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "move";
+                }}
+                onDrop={(e) => onGalleryDrop(e, "films", row.id)}
+              >
+                <GalleryDragHandle id={row.id} gallery="films" disabled={busyReorder === "films"} />
+                <video
+                  src={row.public_url}
+                  className="h-44 w-full rounded-2xl bg-black object-cover"
+                  controls
+                  playsInline
+                  draggable={false}
+                />
+                <p className="mt-3 truncate font-semibold text-white">{row.title}</p>
+                <p className="mt-1 break-all font-mono text-[11px] text-white/35">{row.public_url}</p>
+                {row.poster_url ? (
+                  <p className="mt-2 truncate font-mono text-[10px] text-white/30" title={row.poster_url}>
+                    Poster: {row.poster_url}
+                  </p>
+                ) : (
+                  <p className="mt-2 text-[11px] text-amber-200/80">
+                    No poster URL yet — regenerate after deploy, or check video URL is a direct file.
+                  </p>
+                )}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => regenerateFilmPoster(row.id)}
+                    disabled={busyPosterId === row.id || busyDeleteId === row.id || busyReorder === "films"}
+                    className={`${ADMIN_BTN_GHOST} !py-1.5 text-xs disabled:opacity-50`}
+                  >
+                    {busyPosterId === row.id ? "Regenerating…" : "Regenerate poster"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteFilm(row.id)}
+                    disabled={busyDeleteId === row.id || busyPosterId === row.id || busyReorder === "films"}
+                    className={`${ADMIN_BTN_DANGER} disabled:opacity-50`}
+                  >
+                    {busyDeleteId === row.id ? "Deleting…" : "Delete"}
+                  </button>
+                </div>
+              </article>
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className={ADMIN_BUBBLE_PAD}>
+        <h2 className="font-heading text-xl leading-none">Instagram links</h2>
+        <div className="mt-5 space-y-3">
+          {loading ? (
+            <p className="text-sm text-white/45">Loading…</p>
+          ) : instagramLinks.length === 0 ? (
+            <p className="text-sm text-white/45">No Instagram links found.</p>
+          ) : (
+            instagramLinks.map((row) => (
+              <div key={row.id} className={ADMIN_ROW}>
+                {row.thumbnail_url ? (
+                  <div className="relative mb-3 h-36 w-full overflow-hidden rounded-2xl bg-black/50 sm:w-56">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={row.public_url}
-                      alt={row.title}
-                      className="h-full w-full object-cover"
-                      draggable={false}
-                    />
+                    <img src={row.thumbnail_url} alt={row.title} className="h-full w-full object-cover" />
                   </div>
-                  <p className="mt-3 truncate font-semibold text-slate-900">{row.title}</p>
-                  <p className="mt-1 break-all font-mono text-[11px] text-slate-500">{row.public_url}</p>
-                  <button
-                    type="button"
-                    onClick={() => deleteImage(row.id)}
-                    disabled={busyDeleteId === row.id || busyReorder === "images"}
-                    className="mt-2 rounded-full border border-red-300 bg-white px-4 py-1.5 text-xs font-semibold text-red-800 disabled:opacity-50"
-                  >
-                    {busyDeleteId === row.id ? "Deleting..." : "Delete"}
-                  </button>
-                </article>
-              ))
-            )}
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="font-heading text-xl font-bold">Films</h2>
-          <p className="mt-1 text-xs text-slate-500">Order on the site: top / left = first. Drag cards by the handle to reorder (not the video).</p>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {loading ? (
-              <p className="text-sm text-slate-500">Loading...</p>
-            ) : films.length === 0 ? (
-              <p className="text-sm text-slate-500">No films found.</p>
-            ) : (
-              films.map((row) => (
-                <article
-                  key={row.id}
-                  className="rounded-xl border border-slate-200 bg-slate-50 p-3"
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = "move";
-                  }}
-                  onDrop={(e) => onGalleryDrop(e, "films", row.id)}
+                ) : null}
+                <p className="font-semibold text-white">{row.title}</p>
+                {row.tag ? (
+                  <p className="mt-1 text-xs font-medium uppercase tracking-wide text-emerald-300/80">Tag: {row.tag}</p>
+                ) : null}
+                <p className="mt-1 break-all font-mono text-[11px] text-white/35">{row.url}</p>
+                <button
+                  type="button"
+                  onClick={() => deleteInstagramLink(row.id)}
+                  disabled={busyDeleteId === row.id}
+                  className={`mt-3 ${ADMIN_BTN_DANGER} disabled:opacity-50`}
                 >
-                  <GalleryDragHandle id={row.id} gallery="films" disabled={busyReorder === "films"} />
-                  <video
-                    src={row.public_url}
-                    className="h-44 w-full rounded-lg bg-black object-cover"
-                    controls
-                    playsInline
-                    draggable={false}
-                  />
-                  <p className="mt-3 truncate font-semibold text-slate-900">{row.title}</p>
-                  <p className="mt-1 break-all font-mono text-[11px] text-slate-500">{row.public_url}</p>
-                  {row.poster_url ? (
-                    <p className="mt-2 truncate font-mono text-[10px] text-slate-400" title={row.poster_url}>
-                      Poster: {row.poster_url}
-                    </p>
-                  ) : (
-                    <p className="mt-2 text-[11px] text-amber-800">No poster URL yet — regenerate after deploy, or check video URL is a direct file.</p>
-                  )}
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => regenerateFilmPoster(row.id)}
-                      disabled={busyPosterId === row.id || busyDeleteId === row.id || busyReorder === "films"}
-                      className="rounded-full border border-slate-300 bg-white px-4 py-1.5 text-xs font-semibold text-slate-800 disabled:opacity-50"
-                    >
-                      {busyPosterId === row.id ? "Regenerating…" : "Regenerate poster"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => deleteFilm(row.id)}
-                      disabled={busyDeleteId === row.id || busyPosterId === row.id || busyReorder === "films"}
-                      className="rounded-full border border-red-300 bg-white px-4 py-1.5 text-xs font-semibold text-red-800 disabled:opacity-50"
-                    >
-                      {busyDeleteId === row.id ? "Deleting..." : "Delete"}
-                    </button>
+                  {busyDeleteId === row.id ? "Deleting…" : "Delete"}
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className={ADMIN_BUBBLE_PAD}>
+        <h2 className="font-heading text-xl leading-none">YouTube links</h2>
+        <div className="mt-5 space-y-3">
+          {loading ? (
+            <p className="text-sm text-white/45">Loading…</p>
+          ) : youtubeLinks.length === 0 ? (
+            <p className="text-sm text-white/45">No YouTube links found.</p>
+          ) : (
+            youtubeLinks.map((row) => (
+              <div key={row.id} className={ADMIN_ROW}>
+                {row.thumbnail_url ? (
+                  <div className="relative mb-3 h-36 w-full overflow-hidden rounded-2xl bg-black/50 sm:w-56">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={row.thumbnail_url} alt={row.title} className="h-full w-full object-cover" />
                   </div>
-                </article>
-              ))
-            )}
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="font-heading text-xl font-bold">Instagram links</h2>
-          <div className="mt-4 space-y-3">
-            {loading ? (
-              <p className="text-sm text-slate-500">Loading...</p>
-            ) : instagramLinks.length === 0 ? (
-              <p className="text-sm text-slate-500">No Instagram links found.</p>
-            ) : (
-              instagramLinks.map((row) => (
-                <div key={row.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  {row.thumbnail_url ? (
-                    <div className="mb-3 relative h-36 w-full overflow-hidden rounded-lg bg-white sm:w-56">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={row.thumbnail_url} alt={row.title} className="h-full w-full object-cover" />
-                    </div>
-                  ) : null}
-                  <p className="font-semibold text-slate-900">{row.title}</p>
-                  {row.tag ? <p className="mt-1 text-xs font-medium uppercase tracking-wide text-blue-700">Tag: {row.tag}</p> : null}
-                  <p className="mt-1 break-all font-mono text-[11px] text-slate-500">{row.url}</p>
-                  <button
-                    type="button"
-                    onClick={() => deleteInstagramLink(row.id)}
-                    disabled={busyDeleteId === row.id}
-                    className="mt-3 rounded-full border border-red-300 bg-white px-4 py-1.5 text-xs font-semibold text-red-800 disabled:opacity-50"
-                  >
-                    {busyDeleteId === row.id ? "Deleting..." : "Delete"}
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="font-heading text-xl font-bold">YouTube links</h2>
-          <div className="mt-4 space-y-3">
-            {loading ? (
-              <p className="text-sm text-slate-500">Loading...</p>
-            ) : youtubeLinks.length === 0 ? (
-              <p className="text-sm text-slate-500">No YouTube links found.</p>
-            ) : (
-              youtubeLinks.map((row) => (
-                <div key={row.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  {row.thumbnail_url ? (
-                    <div className="mb-3 relative h-36 w-full overflow-hidden rounded-lg bg-white sm:w-56">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={row.thumbnail_url} alt={row.title} className="h-full w-full object-cover" />
-                    </div>
-                  ) : null}
-                  <p className="font-semibold text-slate-900">{row.title}</p>
-                  {row.tag ? <p className="mt-1 text-xs font-medium uppercase tracking-wide text-blue-700">Tag: {row.tag}</p> : null}
-                  <p className="mt-1 break-all font-mono text-[11px] text-slate-500">{row.url}</p>
-                  <button
-                    type="button"
-                    onClick={() => deleteYoutubeLink(row.id)}
-                    disabled={busyDeleteId === row.id}
-                    className="mt-3 rounded-full border border-red-300 bg-white px-4 py-1.5 text-xs font-semibold text-red-800 disabled:opacity-50"
-                  >
-                    {busyDeleteId === row.id ? "Deleting..." : "Delete"}
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-        </section>
-      </div>
-    </main>
+                ) : null}
+                <p className="font-semibold text-white">{row.title}</p>
+                {row.tag ? (
+                  <p className="mt-1 text-xs font-medium uppercase tracking-wide text-emerald-300/80">Tag: {row.tag}</p>
+                ) : null}
+                <p className="mt-1 break-all font-mono text-[11px] text-white/35">{row.url}</p>
+                <button
+                  type="button"
+                  onClick={() => deleteYoutubeLink(row.id)}
+                  disabled={busyDeleteId === row.id}
+                  className={`mt-3 ${ADMIN_BTN_DANGER} disabled:opacity-50`}
+                >
+                  {busyDeleteId === row.id ? "Deleting…" : "Delete"}
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+    </div>
   );
 }

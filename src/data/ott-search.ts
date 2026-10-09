@@ -1,4 +1,4 @@
-export type OttSearchKind = "Channel" | "Film" | "Still" | "Industry" | "Library" | "Page";
+export type OttSearchKind = "Channel" | "Film" | "Still" | "Page";
 
 export type OttSearchHit = {
   href: string;
@@ -8,19 +8,24 @@ export type OttSearchHit = {
   subtitle?: string;
 };
 
-export const OTT_SEARCH_HINTS = ["ads", "films", "headphones", "community", "avatars", "events", "team"];
+export const OTT_SEARCH_HINTS = ["vault", "ads", "films", "community", "events", "team"];
 
 export const OTT_SEARCH_CHIPS: { label: string; query: string }[] = [
+  { label: "Vault", query: "vault" },
   { label: "Ads", query: "ads" },
   { label: "Films", query: "films" },
   { label: "Community", query: "community" },
-  { label: "Avatars", query: "avatar" },
   { label: "Events", query: "events" },
-  { label: "Team", query: "team" },
   { label: "Pricing", query: "pricing" },
 ];
 
 export const OTT_SEARCH_CATALOG: OttSearchHit[] = [
+  {
+    href: "/vault",
+    title: "YAIL Vault",
+    kind: "Channel",
+    subtitle: "GenAI labs for filmmaking and ads",
+  },
   {
     href: "/about",
     title: "About",
@@ -81,13 +86,6 @@ export const OTT_SEARCH_CATALOG: OttSearchHit[] = [
     subtitle: "Commission a world",
   },
   {
-    href: "/avatars",
-    title: "AI avatars",
-    kind: "Page",
-    image: "/images/ai_avatar1.jpeg",
-    subtitle: "On-camera talent for any brief",
-  },
-  {
     href: "/images",
     title: "Stills & visuals",
     kind: "Still",
@@ -115,41 +113,11 @@ export const OTT_SEARCH_CATALOG: OttSearchHit[] = [
     image: "/images/img3.jpeg",
     subtitle: "Long-form films and breakdowns",
   },
-  {
-    href: "/industries",
-    title: "Industries",
-    kind: "Industry",
-    image: "/images/i2.png",
-    subtitle: "Every vertical we serve",
-  },
-  {
-    href: "/modules",
-    title: "Modules",
-    kind: "Library",
-    image: "/images/shoe.png",
-    subtitle: "Playbooks, showcases, subjects",
-  },
-  {
-    href: "/resources",
-    title: "Reference libraries",
-    kind: "Library",
-    image: "/images/ws3.png",
-    subtitle: "Models, outfits, locations, grades",
-  },
-  { href: "/character-sheets", title: "Models", kind: "Library", subtitle: "Character sheets" },
-  { href: "/outfits", title: "Outfit Sheets", kind: "Library" },
-  { href: "/props", title: "Props Library", kind: "Library" },
-  { href: "/scenarios", title: "Reference Scenarios", kind: "Library" },
-  { href: "/locations", title: "Locations", kind: "Library" },
-  { href: "/mood-boards", title: "Mood Boards", kind: "Library" },
-  { href: "/prompts", title: "Workflows", kind: "Library" },
-  { href: "/lighting-presets", title: "Lighting Presets", kind: "Library" },
-  { href: "/color-grades", title: "Color Grading", kind: "Library" },
   { href: "/events", title: "YAIL 01: AI Creators Meetup", kind: "Page", subtitle: "The Theatre Showcase" },
   { href: "/events/ai-creator-workshop", title: "AI Creator Workshop", kind: "Page", subtitle: "Hands-on studio session" },
 ];
 
-const KIND_ORDER: OttSearchKind[] = ["Channel", "Film", "Still", "Industry", "Library", "Page"];
+const KIND_ORDER: OttSearchKind[] = ["Channel", "Film", "Still", "Page"];
 
 export function matchOttSearch(hits: OttSearchHit[], query: string): OttSearchHit[] {
   const q = query.trim().toLowerCase();

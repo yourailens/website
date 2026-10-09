@@ -4,10 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import AvatarCropModal from "@/components/avatars/AvatarCropModal";
 import { coverAspectClass } from "@/data/module-covers";
 import {
+  HERO_SLOTS,
   OTT_CUT_ASPECTS,
   OTT_CUT_CATEGORIES,
   guessOttCutMediaType,
   ottCutYoutubeId,
+  type HeroSlot,
   type OttCut,
   type OttCutAspect,
   type OttCutCategory,
@@ -15,8 +17,9 @@ import {
 } from "@/data/ott-cuts";
 
 const FIELD =
-  "mt-2 w-full border border-white/20 bg-white/[0.07] px-3.5 py-2.5 text-sm text-white placeholder:text-white/45 caret-white outline-none transition focus:border-white/55";
-const BTN = "bg-[#fafafa] px-5 py-2.5 text-sm font-semibold text-black hover:bg-blue-100 disabled:opacity-40";
+  "mt-2 w-full rounded-2xl border border-white/15 bg-white/[0.06] px-3.5 py-2.5 text-sm text-white placeholder:text-white/45 caret-white outline-none transition focus:border-white/40 focus:bg-white/[0.09]";
+const BTN =
+  "rounded-full bg-[#fafafa] px-5 py-2.5 text-sm font-semibold text-black hover:bg-blue-100 disabled:opacity-40";
 
 type Draft = {
   id: string | null;
@@ -29,8 +32,10 @@ type Draft = {
   remoteUrl: string;
   linkInput: string;
   localBlob: Blob | null;
+  posterUrl: string | null;
   published: boolean;
   homepage_feature: boolean;
+  hero_slot: HeroSlot | "";
 };
 
 const emptyDraft = (category: OttCutCategory = "ads"): Draft => ({
@@ -44,8 +49,10 @@ const emptyDraft = (category: OttCutCategory = "ads"): Draft => ({
   remoteUrl: "",
   linkInput: "",
   localBlob: null,
+  posterUrl: null,
   published: true,
   homepage_feature: false,
+  hero_slot: "",
 });
 
 function aspectLock(id: OttCutAspect): number | undefined {
@@ -66,8 +73,15 @@ export default function OttCutsDesk() {
     const res = await fetch("/api/admin/ott-cuts");
     const j = (await res.json().catch(() => ({}))) as { cuts?: OttCut[]; error?: string };
     if (!res.ok) {
+      const missingHero = /hero_slot|homepage_hero/i.test(j.error ?? "");
       const missing = /does not exist|schema cache/i.test(j.error ?? "");
-      setErr(missing ? "Run supabase/migrations/066_ott_cuts.sql in the Supabase SQL editor first." : j.error || "Could not load cuts.");
+      setErr(
+        missingHero
+          ? "Run supabase/migrations/071_ott_cuts_hero_slots.sql in the Supabase SQL editor first."
+          : missing
+            ? "Run supabase/migrations/066_ott_cuts.sql in the Supabase SQL editor first."
+            : j.error || "Could not load cuts."
+      );
       return;
     }
     setCuts(j.cuts ?? []);
@@ -158,13 +172,13 @@ export default function OttCutsDesk() {
     });
   }
 
-  async function uploadMedia(blob: Blob, filename: string): Promise<string> {
+  async function uploadMedia(blob: Blob, filename: string): Promise<{ url: string; posterUrl: string | null }> {
     const fd = new FormData();
     fd.append("file", blob, filename);
     const res = await fetch("/api/admin/ott-cuts/upload-media", { method: "POST", body: fd });
-    const j = (await res.json().catch(() => ({}))) as { url?: string; error?: string; hint?: string };
+    const j = (await res.json().catch(() => ({}))) as { url?: string; poster_url?: string | null; error?: string; hint?: string };
     if (!res.ok || !j.url) throw new Error(j.error || "Upload failed");
-    return j.url;
+    return { url: j.url, posterUrl: j.poster_url ?? null };
   }
 
   async function save() {
@@ -183,12 +197,15 @@ export default function OttCutsDesk() {
     try {
       let mediaType = draft.mediaType;
       let media_url = draft.remoteUrl || draft.linkInput.trim();
+      let poster_url = draft.posterUrl;
       if (draft.localBlob) {
         const name =
           mediaType === "video"
             ? `cut-${Date.now()}.mp4`
             : `cut-${Date.now()}.jpg`;
-        media_url = await uploadMedia(draft.localBlob, name);
+        const uploaded = await uploadMedia(draft.localBlob, name);
+        media_url = uploaded.url;
+        poster_url = mediaType === "video" ? uploaded.posterUrl : null;
       } else if (media_url) {
         mediaType = mediaType ?? guessOttCutMediaType(media_url);
       }
@@ -203,9 +220,11 @@ export default function OttCutsDesk() {
         category: draft.category,
         media_type: mediaType,
         media_url,
+        poster_url,
         aspect_ratio: draft.aspect,
         published: draft.published,
         homepage_feature: draft.homepage_feature,
+        hero_slot: draft.hero_slot || null,
       };
       const res = await fetch(draft.id ? `/api/admin/ott-cuts/${draft.id}` : "/api/admin/ott-cuts", {
         method: draft.id ? "PATCH" : "POST",
@@ -237,8 +256,10 @@ export default function OttCutsDesk() {
       remoteUrl: cut.media_url,
       linkInput: cut.media_url,
       localBlob: null,
+      posterUrl: cut.poster_url,
       published: cut.published,
       homepage_feature: cut.homepage_feature,
+      hero_slot: cut.hero_slot ?? "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -283,7 +304,7 @@ export default function OttCutsDesk() {
         />
       ) : null}
 
-      <div className="border border-white/15 bg-black/45 p-6">
+      <div className="rounded-[1.35rem] border border-white/12 bg-gradient-to-br from-white/[0.09] to-white/[0.02] p-5 shadow-[0_18px_40px_-28px_rgba(0,0,0,0.9)] sm:p-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="font-mono text-[10px] tracking-[0.28em] text-blue-400">NEW CUT</p>
@@ -486,6 +507,24 @@ export default function OttCutsDesk() {
             {draft.homepage_feature ? (
               <p className="text-xs text-white/45">Only one cut can be the homepage trailer. This replaces any previous one.</p>
             ) : null}
+            <label className="block text-xs font-medium text-white/70">
+              Homepage hero
+              <select
+                value={draft.hero_slot}
+                onChange={(e) => patch({ hero_slot: e.target.value as HeroSlot | "" })}
+                className={FIELD}
+              >
+                <option value="">Off</option>
+                {HERO_SLOTS.map((slot) => (
+                  <option key={slot.id} value={slot.id}>
+                    {slot.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {draft.hero_slot ? (
+              <p className="text-xs text-white/45">Plays above the opening film. Hero 1, then Hero 2, then Hero 3. Each name holds one video.</p>
+            ) : null}
             <button type="button" onClick={() => void save()} disabled={busy} className={BTN}>
               {busy ? "Saving…" : draft.id ? "Update cut" : "Save cut"}
             </button>
@@ -528,7 +567,7 @@ export default function OttCutsDesk() {
         ) : (
           <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {visible.map((cut) => (
-              <li key={cut.id} className="border border-white/15 bg-black/40">
+              <li key={cut.id} className="overflow-hidden rounded-2xl border border-white/12 bg-gradient-to-br from-white/[0.08] to-white/[0.02]">
                 <div className={`overflow-hidden bg-black ${coverAspectClass(cut.aspect_ratio) || "aspect-video"}`}>
                   {ottCutYoutubeId(cut.media_url) ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -545,6 +584,7 @@ export default function OttCutsDesk() {
                     {OTT_CUT_CATEGORIES.find((c) => c.id === cut.category)?.label.toUpperCase()} · {cut.aspect_ratio}
                     {cut.published ? "" : " · DRAFT"}
                     {cut.homepage_feature ? " · TRAILER" : ""}
+                    {cut.hero_slot ? ` · ${cut.hero_slot === "hero1" ? "HERO 1" : cut.hero_slot === "hero2" ? "HERO 2" : "HERO 3"}` : ""}
                   </p>
                   <p className="mt-1 font-heading text-lg leading-none">{cut.caption}</p>
                   {cut.description ? <p className="mt-2 line-clamp-2 text-xs text-white/55">{cut.description}</p> : null}

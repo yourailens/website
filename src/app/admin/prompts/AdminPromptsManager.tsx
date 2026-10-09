@@ -167,10 +167,10 @@ export default function AdminPromptsManager() {
   }
 
   // ── Guards ──
-  if (sessionOk === null) return <div className="p-8 text-sm text-slate-500">Checking session…</div>;
+  if (sessionOk === null) return <div className="p-8 text-sm text-white/45">Checking session…</div>;
   if (!sessionOk) return (
     <div className="flex min-h-screen items-center justify-center">
-      <p className="text-sm text-slate-500">Not authorised. <Link href="/admin/login" className="text-blue-600 underline">Log in</Link></p>
+      <p className="text-sm text-white/45">Not authorised. <Link href="/admin/login" className="text-emerald-300/80 underline">Log in</Link></p>
     </div>
   );
 
@@ -197,14 +197,14 @@ export default function AdminPromptsManager() {
         {/* Header */}
         <div className="mb-8 flex items-center justify-between gap-4">
           <div>
-            <Link href="/admin" className="text-xs text-slate-400 hover:text-blue-600">← Dashboard</Link>
-            <h1 className="mt-1 font-heading text-3xl font-black text-slate-900">Prompt Library</h1>
-            <p className="mt-1 text-sm text-slate-500">{prompts.length} prompt{prompts.length !== 1 ? "s" : ""} total</p>
+            <Link href="/admin" className="text-xs text-white/35 hover:text-emerald-300/80">← Dashboard</Link>
+            <h1 className="mt-1 font-heading text-3xl font-black text-white">Prompt Library</h1>
+            <p className="mt-1 text-sm text-white/45">{prompts.length} prompt{prompts.length !== 1 ? "s" : ""} total</p>
           </div>
           <button
             type="button"
             onClick={startCreate}
-            className="rounded-2xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700"
+            className="rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-black shadow-lg shadow-blue-200 transition hover:bg-emerald-100"
           >
             + New prompt
           </button>
@@ -213,14 +213,14 @@ export default function AdminPromptsManager() {
         {/* List */}
         {prompts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" className="text-slate-300">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/15 bg-white/[0.06] ">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" className="text-white/25">
                 <path d="M12 2L19 6V12C19 15.87 15.87 20.27 12 21C8.13 20.27 5 15.87 5 12V6L12 2Z" />
                 <circle cx="12" cy="12" r="2" />
               </svg>
             </div>
-            <p className="text-base font-semibold text-slate-700">No prompts yet</p>
-            <p className="mt-2 text-sm text-slate-400">Click "New prompt" to create your first workflow.</p>
+            <p className="text-base font-semibold text-white/70">No prompts yet</p>
+            <p className="mt-2 text-sm text-white/35">Click "New prompt" to create your first workflow.</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -229,11 +229,11 @@ export default function AdminPromptsManager() {
               return (
                 <div
                   key={p.id}
-                  className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md"
+                  className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/15 bg-white/[0.06] p-4  transition hover:"
                 >
                   <div className="flex min-w-0 items-start gap-4">
                     {/* Thumbnail */}
-                    <div className={`relative shrink-0 overflow-hidden rounded-xl bg-slate-100 ${
+                    <div className={`relative shrink-0 overflow-hidden rounded-xl bg-black/40 ${
                       p.cover_aspect === "portrait" ? "h-16 w-11" : p.cover_aspect === "square" ? "h-14 w-14" : "h-14 w-24"
                     }`}>
                       {p.cover_image_url ? (
@@ -241,7 +241,7 @@ export default function AdminPromptsManager() {
                         <img src={p.cover_image_url} alt={p.title} className="h-full w-full object-cover" />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-slate-300">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white/25">
                             <path d="M12 2L19 6V12C19 15.87 15.87 20.27 12 21C8.13 20.27 5 15.87 5 12V6L12 2Z" /><circle cx="12" cy="12" r="2" />
                           </svg>
                         </div>
@@ -254,16 +254,16 @@ export default function AdminPromptsManager() {
                         <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${accent.bg} ${accent.text} ${accent.border}`}>
                           {p.media_type}
                         </span>
-                        <span className="rounded border border-slate-100 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                        <span className="rounded border border-white/10 bg-transparent px-2 py-0.5 text-[10px] font-semibold text-white/45">
                           {promptCategoryLabel(p)}
                         </span>
                         {p.featured && <span className="text-[10px] font-bold text-amber-500">✦</span>}
-                        <span className={`rounded px-2 py-0.5 text-[10px] font-bold ${p.published ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
+                        <span className={`rounded px-2 py-0.5 text-[10px] font-bold ${p.published ? "bg-emerald-400/10 text-emerald-700" : "bg-black/40 text-white/45"}`}>
                           {p.published ? "Published" : "Draft"}
                         </span>
                       </div>
-                      <p className="mt-1 truncate font-heading text-sm font-bold text-slate-900">{p.title}</p>
-                      <p className="font-mono text-[11px] text-slate-400">/prompts/{p.slug}</p>
+                      <p className="mt-1 truncate font-heading text-sm font-bold text-white">{p.title}</p>
+                      <p className="font-mono text-[11px] text-white/35">/prompts/{p.slug}</p>
                     </div>
                   </div>
 
@@ -273,7 +273,7 @@ export default function AdminPromptsManager() {
                       type="button"
                       onClick={() => togglePublish(p)}
                       className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition ${
-                        p.published ? "border-slate-200 text-slate-600 hover:border-red-200 hover:text-red-600" : "border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                        p.published ? "border-white/15 text-white/55 hover:border-rose-400/30 hover:text-rose-300" : "border-emerald-400/30 text-emerald-700 hover:bg-emerald-400/10"
                       }`}
                     >
                       {p.published ? "Unpublish" : "Publish"}
@@ -281,24 +281,24 @@ export default function AdminPromptsManager() {
                     <button
                       type="button"
                       onClick={() => startEdit(p)}
-                      className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+                      className="rounded-xl border border-white/20 bg-white/[0.06] px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-white/[0.1]"
                     >
                       Edit
                     </button>
                     {p.published && (
                       <a href={`/prompts/${p.slug}`} target="_blank" rel="noopener noreferrer"
-                        className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+                        className="rounded-xl border border-white/15 px-3 py-1.5 text-xs font-semibold text-white/55 hover:bg-transparent">
                         View ↗
                       </a>
                     )}
                     {deleteConfirm === p.id ? (
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-red-600">Delete?</span>
-                        <button type="button" onClick={() => doDelete(p.id)} className="rounded-xl border border-red-300 bg-red-50 px-3 py-1.5 text-xs font-bold text-red-700">Yes</button>
-                        <button type="button" onClick={() => setDeleteConfirm(null)} className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600">No</button>
+                        <span className="text-xs font-semibold text-rose-300">Delete?</span>
+                        <button type="button" onClick={() => doDelete(p.id)} className="rounded-xl border border-rose-400/30 bg-rose-400/10 px-3 py-1.5 text-xs font-bold text-rose-200">Yes</button>
+                        <button type="button" onClick={() => setDeleteConfirm(null)} className="rounded-xl border border-white/15 px-3 py-1.5 text-xs font-semibold text-white/55">No</button>
                       </div>
                     ) : (
-                      <button type="button" onClick={() => setDeleteConfirm(p.id)} className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-500 hover:border-red-200 hover:text-red-600">
+                      <button type="button" onClick={() => setDeleteConfirm(p.id)} className="rounded-xl border border-white/15 px-3 py-1.5 text-xs font-semibold text-white/45 hover:border-rose-400/30 hover:text-rose-300">
                         Delete
                       </button>
                     )}

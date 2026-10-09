@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/api/admin-auth";
+import { isHeroSlot } from "@/data/ott-cuts";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
 import {
   adminGetAllOttCuts,
+  clearHeroSlot,
   clearOtherHomepageFeatures,
   isOttCutAspect,
   isOttCutCategory,
@@ -52,6 +54,8 @@ export async function POST(req: NextRequest) {
   if (homepage_feature) {
     await clearOtherHomepageFeatures(db);
   }
+  const hero_slot = isHeroSlot(b.hero_slot) ? b.hero_slot : null;
+  if (hero_slot) await clearHeroSlot(db, hero_slot);
 
   const { data: last } = await db
     .from("ott_cuts")
@@ -75,6 +79,8 @@ export async function POST(req: NextRequest) {
       aspect_ratio,
       published: b.published !== false,
       homepage_feature,
+      homepage_hero: Boolean(hero_slot),
+      hero_slot,
       sort_order,
     })
     .select("id, slug")

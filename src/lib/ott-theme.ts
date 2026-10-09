@@ -4,7 +4,7 @@ export function isOttPath(pathname: string | null | undefined): boolean {
   return !pathname.startsWith("/admin");
 }
 
-/** Full-bleed overlay nav (no spacer) — homepage hero only. */
+/** Homepage hero nav is a transparent overlay on the hero. Vault uses its own sidebar shell. */
 export function isOttOverlayPath(pathname: string | null | undefined): boolean {
   return pathname === "/";
 }

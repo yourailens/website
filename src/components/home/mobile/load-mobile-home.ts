@@ -1,6 +1,6 @@
 import { HOME_WATCH_TITLES, type HomeWatchTitle } from "@/data/home-watch";
-import { ottCutYoutubeId, type OttCut } from "@/data/ott-cuts";
-import { getHomepageFeatureOttCut, getMattressAdOttCut, getPublishedOttCuts, isMattressAdCaption } from "@/lib/ott-cuts/load";
+import { HERO_SLOTS, ottCutYoutubeId, type OttCut } from "@/data/ott-cuts";
+import { getHomepageFeatureOttCut, getHomepageHeroSlots, getPublishedOttCuts, isHomepageHeroCut } from "@/lib/ott-cuts/load";
 import type { MobileClip, MobileHomeData } from "./types";
 
 const LOCAL_POSTER_ALIASES: Record<string, string> = {
@@ -58,15 +58,15 @@ function fromCut(cut: OttCut, path: string, section: string): MobileClip {
 }
 
 export async function loadMobileHomeData(): Promise<MobileHomeData> {
-  const [adsCuts, filmCuts, homepageFeature, mattressCut] = await Promise.all([
+  const [adsCuts, filmCuts, homepageFeature, heroCuts] = await Promise.all([
     getPublishedOttCuts("ads"),
     getPublishedOttCuts("films"),
     getHomepageFeatureOttCut(),
-    getMattressAdOttCut(),
+    getHomepageHeroSlots(),
   ]);
 
   const landed = [...adsCuts]
-    .filter((cut) => !isMattressAdCaption(cut.caption))
+    .filter((cut) => !isHomepageHeroCut(cut))
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
     .slice(0, 12)
     .map((cut) => fromCut(cut, "/ai-ads", "Just landed"));
@@ -76,7 +76,7 @@ export async function loadMobileHomeData(): Promise<MobileHomeData> {
   const feature = homepageFeature ? fromCut(homepageFeature, "/ai-filmmaking", "Feature") : null;
 
   const lot = [...filmCuts]
-    .filter((cut) => !cut.homepage_feature && !isMattressAdCaption(cut.caption))
+    .filter((cut) => !cut.homepage_feature && !isHomepageHeroCut(cut))
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
     .slice(0, 12)
     .map((cut) => fromCut(cut, "/ai-filmmaking", "On the lot"));
@@ -86,9 +86,13 @@ export async function loadMobileHomeData(): Promise<MobileHomeData> {
   );
 
   return {
-    mattress: mattressCut
-      ? fromCut(mattressCut, mattressCut.category === "films" ? "/ai-filmmaking" : mattressCut.category === "community" ? "/ai-verse" : "/ai-ads", "The mattress ad")
-      : null,
+    heroes: heroCuts.map((cut) =>
+      fromCut(
+        cut,
+        cut.category === "films" ? "/ai-filmmaking" : cut.category === "community" ? "/ai-verse" : "/ai-ads",
+        HERO_SLOTS.find((slot) => slot.id === cut.hero_slot)?.label ?? "Hero"
+      )
+    ),
     hero: {
       id: "hero-opening",
       title: "YourAILens Studios",

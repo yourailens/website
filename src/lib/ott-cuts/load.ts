@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import type { OttCut, OttCutAspect, OttCutCategory, OttCutMediaType } from "@/data/ott-cuts";
+import { isHeroSlot, type HeroSlot, type OttCut, type OttCutAspect, type OttCutCategory, type OttCutMediaType } from "@/data/ott-cuts";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
 
 function anonClient() {
@@ -30,13 +30,15 @@ function rowToCut(row: Record<string, unknown>): OttCut {
     aspect_ratio: (row.aspect_ratio as OttCutAspect) ?? "natural",
     published: Boolean(row.published),
     homepage_feature: Boolean(row.homepage_feature),
+    homepage_hero: Boolean(row.homepage_hero) || isHeroSlot(row.hero_slot),
+    hero_slot: isHeroSlot(row.hero_slot) ? row.hero_slot : null,
     sort_order: Number(row.sort_order ?? 0),
     created_at: String(row.created_at ?? ""),
   };
 }
 
 const SELECT =
-  "id,slug,caption,description,category,media_type,media_url,poster_url,aspect_ratio,published,homepage_feature,sort_order,created_at";
+  "id,slug,caption,description,category,media_type,media_url,poster_url,aspect_ratio,published,homepage_feature,homepage_hero,hero_slot,sort_order,created_at";
 
 export async function getPublishedOttCuts(category?: OttCutCategory): Promise<OttCut[]> {
   const supabase = readClient();
@@ -48,13 +50,16 @@ export async function getPublishedOttCuts(category?: OttCutCategory): Promise<Ot
   return data.map((row) => rowToCut(row as Record<string, unknown>));
 }
 
-/** Caption that places a published cut as the film above the homepage hero. */
-export function isMattressAdCaption(caption: string) {
+function isMattressCaption(caption: string) {
   return caption.trim().toLowerCase().replace(/\s+/g, " ") === "the mattress ad";
 }
 
-/** Published cut uploaded in admin with the caption "The mattress ad". */
-export async function getMattressAdOttCut(): Promise<OttCut | null> {
+/** True when this cut is assigned to Hero 1, Hero 2, or Hero 3. */
+export function isHomepageHeroCut(cut: Pick<OttCut, "hero_slot">) {
+  return isHeroSlot(cut.hero_slot);
+}
+
+async function getMattressCaptionCut(): Promise<OttCut | null> {
   const supabase = readClient();
   if (!supabase) return null;
   const { data, error } = await supabase
@@ -65,8 +70,37 @@ export async function getMattressAdOttCut(): Promise<OttCut | null> {
     .order("updated_at", { ascending: false })
     .limit(8);
   if (error || !data?.length) return null;
-  const match = data.map((row) => rowToCut(row as Record<string, unknown>)).find((cut) => isMattressAdCaption(cut.caption));
-  return match ?? null;
+  return data.map((row) => rowToCut(row as Record<string, unknown>)).find((cut) => isMattressCaption(cut.caption)) ?? null;
+}
+
+const HERO_ORDER: HeroSlot[] = ["hero1", "hero2", "hero3"];
+
+/** Published cuts for Hero 1, Hero 2, and Hero 3, in that order. */
+export async function getHomepageHeroSlots(): Promise<OttCut[]> {
+  const supabase = readClient();
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("ott_cuts")
+    .select(SELECT)
+    .eq("published", true)
+    .in("hero_slot", HERO_ORDER);
+  if (error) {
+    const mattress = await getMattressCaptionCut();
+    return mattress ? [{ ...mattress, hero_slot: "hero1" }] : [];
+  }
+  const cuts = (data ?? []).map((row) => rowToCut(row as Record<string, unknown>));
+  return HERO_ORDER.flatMap((slot) => cuts.filter((cut) => cut.hero_slot === slot));
+}
+
+/** Frees a hero slot so the cut being saved can take it. */
+export async function clearHeroSlot(
+  db: ReturnType<typeof createServiceRoleClient>,
+  slot: HeroSlot,
+  exceptId?: string
+) {
+  let q = db.from("ott_cuts").update({ hero_slot: null, homepage_hero: false }).eq("hero_slot", slot);
+  if (exceptId) q = q.neq("id", exceptId);
+  await q;
 }
 
 /** The single published cut marked for the homepage films trailer. */

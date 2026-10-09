@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { attachPlaybackHold } from "@/components/media/playback-hold";
 import type { MobileClip } from "./types";
 
 type GlossyPlayCardProps = {
@@ -9,6 +10,13 @@ type GlossyPlayCardProps = {
   onPlay: (id: string) => void;
   onPause: () => void;
   large?: boolean;
+  loop?: boolean;
+  onEnded?: () => void;
+  /** Lead hero: start muted, and let the sound strip own the volume. */
+  autoPlay?: boolean;
+  soundMuted?: boolean;
+  hideSoundButton?: boolean;
+  onPictureClick?: () => void;
 };
 
 export default function GlossyPlayCard({
@@ -17,10 +25,17 @@ export default function GlossyPlayCard({
   onPlay,
   onPause,
   large = false,
+  loop = true,
+  onEnded,
+  autoPlay = false,
+  soundMuted,
+  hideSoundButton = false,
+  onPictureClick,
 }: GlossyPlayCardProps) {
   const isPlaying = playingId === clip.id;
   const cardRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const stillRef = useRef<HTMLCanvasElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   /** Warm-load media while the card is on screen so tap can play immediately. */
   const [warm, setWarm] = useState(false);
@@ -35,6 +50,49 @@ export default function GlossyPlayCard({
   useEffect(() => {
     if (large && canPlay) setWarm(true);
   }, [large, canPlay]);
+
+  useEffect(() => {
+    if (!autoPlay || !canPlay) return;
+    setWarm(true);
+    onPlay(clip.id);
+  }, [autoPlay, canPlay, clip.id, onPlay]);
+
+  useEffect(() => {
+    if (soundMuted === undefined) return;
+    setMuted(soundMuted);
+    const node = videoRef.current;
+    if (node) {
+      node.muted = soundMuted;
+      if (!soundMuted) {
+        node.volume = 1;
+        onPlay(clip.id);
+        void node.play().catch(() => {});
+      }
+    }
+    const iframe = iframeRef.current;
+    if (iframe?.contentWindow) {
+      iframe.contentWindow.postMessage(
+        JSON.stringify({ event: "command", func: soundMuted ? "mute" : "unMute", args: [] }),
+        "*"
+      );
+    }
+  }, [soundMuted, clip.id, onPlay]);
+
+  useEffect(() => {
+    if (!autoPlay || !isPlaying) return;
+    const node = videoRef.current;
+    if (!node) return;
+    node.muted = soundMuted ?? true;
+    void node.play().catch(() => {});
+  }, [autoPlay, isPlaying, soundMuted]);
+
+  useEffect(() => {
+    if (!isPlaying) return;
+    const node = videoRef.current;
+    const still = stillRef.current;
+    if (!node || !still) return;
+    return attachPlaybackHold(node, still, { controls: false });
+  }, [isPlaying, mediaMounted]);
 
   useEffect(() => {
     const node = cardRef.current;
@@ -238,6 +296,12 @@ export default function GlossyPlayCard({
   return (
     <article
       ref={cardRef}
+      onClick={(event) => {
+        if (!onPictureClick) return;
+        const target = event.target as HTMLElement | null;
+        if (target?.closest("a, button")) return;
+        onPictureClick();
+      }}
       className={`relative overflow-hidden ${
         isFullscreen
           ? "flex h-full w-full items-center justify-center bg-black"
@@ -284,9 +348,10 @@ export default function GlossyPlayCard({
           className={`${
             isFullscreen ? "relative h-full w-full" : "absolute inset-0 h-full w-full"
           } ${fitClass} [&::-webkit-media-controls-download-button]:hidden [&::-internal-media-controls-download-button]:hidden`}
-          muted
+          muted={soundMuted ?? muted}
           playsInline
-          loop
+          loop={loop}
+          onEnded={onEnded}
           controls={false}
           controlsList="nodownload noplaybackrate"
           disablePictureInPicture
@@ -306,6 +371,15 @@ export default function GlossyPlayCard({
           onWaiting={() => {
             /* keep last frame; poster only before first play */
           }}
+        />
+      ) : null}
+
+      {mediaMounted && clip.video && !clip.youtubeId ? (
+        <canvas
+          ref={stillRef}
+          aria-hidden
+          className={`pointer-events-none absolute inset-0 z-[2] h-full w-full ${fitClass}`}
+          style={{ opacity: 0 }}
         />
       ) : null}
 
@@ -359,7 +433,7 @@ export default function GlossyPlayCard({
         </button>
       ) : null}
 
-      {isPlaying || isFullscreen ? (
+      {(isPlaying || isFullscreen) && !hideSoundButton ? (
         <button
           type="button"
           onClick={toggleMute}

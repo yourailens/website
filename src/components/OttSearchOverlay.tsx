@@ -12,8 +12,6 @@ import {
   type OttSearchHit,
 } from "@/data/ott-search";
 
-type IndustryHit = { slug: string; name: string; tagline: string | null; coverUrl: string | null };
-
 export function SearchGlyph({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -64,11 +62,9 @@ function ResultCard({ hit, onPick }: { hit: OttSearchHit; onPick: () => void }) 
 export default function OttSearchOverlay({
   open,
   onClose,
-  industries,
 }: {
   open: boolean;
   onClose: () => void;
-  industries: IndustryHit[];
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
@@ -135,14 +131,7 @@ export default function OttSearchOverlay({
   }, [open]);
 
   const catalog = useMemo(() => {
-    const industryHits: OttSearchHit[] = industries.map((ind) => ({
-      href: `/industries/${ind.slug}`,
-      title: ind.name,
-      kind: "Industry",
-      image: ind.coverUrl,
-      subtitle: ind.tagline ?? "Industry",
-    }));
-    const merged = [...OTT_SEARCH_CATALOG, ...industryHits, ...remoteHits];
+    const merged = [...OTT_SEARCH_CATALOG, ...remoteHits];
     const seen = new Set<string>();
     return merged.filter((hit) => {
       const key = `${hit.kind}:${hit.href}:${hit.title}`;
@@ -150,7 +139,7 @@ export default function OttSearchOverlay({
       seen.add(key);
       return true;
     });
-  }, [industries, remoteHits]);
+  }, [remoteHits]);
 
   const results = useMemo(() => matchOttSearch(catalog, query), [catalog, query]);
   const grouped = useMemo(() => groupOttSearch(results), [results]);
@@ -191,7 +180,7 @@ export default function OttSearchOverlay({
 
       <div className="relative mx-auto w-full max-w-5xl flex-1 overflow-y-auto px-5 pb-16 sm:px-8">
         <label className="block">
-          <span className="sr-only">Search titles, channels, industries</span>
+          <span className="sr-only">Search titles and channels</span>
           <div className="flex items-end gap-4 border-b border-white/20 pb-3 focus-within:border-blue-400">
             <span className="mb-1 text-white/50">
               <SearchGlyph size={28} />
@@ -206,7 +195,7 @@ export default function OttSearchOverlay({
           </div>
         </label>
         <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.24em] text-white/35">
-          Titles, channels, industries, libraries
+          Titles, channels, stills, films
         </p>
 
         {!searching ? (

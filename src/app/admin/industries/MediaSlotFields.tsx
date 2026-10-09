@@ -31,16 +31,16 @@ export function MediaSlotFields({
     onChange({ ...value, [key]: v });
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-      <p className="text-xs font-bold text-slate-800">{label}</p>
-      {hint ? <p className="mt-0.5 text-[10px] text-slate-500">{hint}</p> : null}
+    <div className="rounded-xl border border-white/15 bg-transparent/60 p-4">
+      <p className="text-xs font-bold text-white">{label}</p>
+      {hint ? <p className="mt-0.5 text-[10px] text-white/45">{hint}</p> : null}
 
-      <label className="mt-3 block text-[10px] font-medium text-slate-600">
+      <label className="mt-3 block text-[10px] font-medium text-white/55">
         Media URL
         <input
           value={value.url}
           onChange={(e) => set("url", e.target.value)}
-          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-lg border border-white/15 bg-white/[0.06] px-3 py-2 text-sm"
         />
       </label>
 
@@ -61,7 +61,7 @@ export function MediaSlotFields({
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <fieldset>
-          <legend className="text-[10px] font-medium text-slate-600">Type</legend>
+          <legend className="text-[10px] font-medium text-white/55">Type</legend>
           <div className="mt-1 flex flex-wrap gap-2">
             {MEDIA_TYPE_OPTIONS.map((opt) => (
               <label
@@ -69,7 +69,7 @@ export function MediaSlotFields({
                 className={`cursor-pointer rounded-lg border px-3 py-1.5 text-xs font-semibold ${
                   value.mediaType === opt.value
                     ? "border-slate-900 bg-slate-900 text-white"
-                    : "border-slate-200 bg-white text-slate-700"
+                    : "border-white/15 bg-white/[0.06] text-white/70"
                 }`}
               >
                 <input
@@ -86,7 +86,7 @@ export function MediaSlotFields({
         </fieldset>
 
         <fieldset>
-          <legend className="text-[10px] font-medium text-slate-600">Aspect ratio</legend>
+          <legend className="text-[10px] font-medium text-white/55">Aspect ratio</legend>
           <div className="mt-1 flex flex-wrap gap-2">
             {ASPECT_RATIO_OPTIONS.map((opt) => (
               <label
@@ -94,7 +94,7 @@ export function MediaSlotFields({
                 className={`cursor-pointer rounded-lg border px-2.5 py-1.5 text-xs font-semibold ${
                   value.aspectRatio === opt.value
                     ? "border-slate-900 bg-slate-900 text-white"
-                    : "border-slate-200 bg-white text-slate-700"
+                    : "border-white/15 bg-white/[0.06] text-white/70"
                 }`}
               >
                 <input
@@ -113,25 +113,25 @@ export function MediaSlotFields({
       </div>
 
       {value.mediaType === "video" ? (
-        <label className="mt-3 block text-[10px] font-medium text-slate-600">
+        <label className="mt-3 block text-[10px] font-medium text-white/55">
           Video poster image URL (optional)
           <input
             value={value.posterUrl}
             onChange={(e) => set("posterUrl", e.target.value)}
             placeholder="Thumbnail before play"
-            className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-white/15 bg-white/[0.06] px-3 py-2 text-sm"
           />
         </label>
       ) : null}
 
-      <label className="mt-3 block text-[10px] font-medium text-slate-600">
+      <label className="mt-3 block text-[10px] font-medium text-white/55">
         Caption / description (shown under the visual on the live page)
         <textarea
           value={value.caption}
           onChange={(e) => set("caption", e.target.value)}
           rows={2}
           placeholder="What should the client notice in this visual?"
-          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-lg border border-white/15 bg-white/[0.06] px-3 py-2 text-sm"
         />
       </label>
     </div>
@@ -154,7 +154,7 @@ export function MediaTypeAspectPickers({
   return (
     <div className="grid gap-2 sm:grid-cols-2">
       <fieldset>
-        <legend className="text-[10px] font-medium text-slate-600">Type</legend>
+        <legend className="text-[10px] font-medium text-white/55">Type</legend>
         <div className="mt-1 flex flex-wrap gap-1.5">
           {MEDIA_TYPE_OPTIONS.map((opt) => (
             <label
@@ -162,7 +162,7 @@ export function MediaTypeAspectPickers({
               className={`cursor-pointer rounded-md border px-2 py-1 text-[10px] font-bold ${
                 mediaType === opt.value
                   ? "border-slate-800 bg-slate-800 text-white"
-                  : "border-slate-200 bg-white text-slate-600"
+                  : "border-white/15 bg-white/[0.06] text-white/55"
               }`}
             >
               <input
@@ -178,7 +178,7 @@ export function MediaTypeAspectPickers({
         </div>
       </fieldset>
       <fieldset>
-        <legend className="text-[10px] font-medium text-slate-600">Ratio</legend>
+        <legend className="text-[10px] font-medium text-white/55">Ratio</legend>
         <div className="mt-1 flex flex-wrap gap-1.5">
           {ASPECT_RATIO_OPTIONS.map((opt) => (
             <label
@@ -186,7 +186,7 @@ export function MediaTypeAspectPickers({
               className={`cursor-pointer rounded-md border px-2 py-1 text-[10px] font-bold ${
                 aspectRatio === opt.value
                   ? "border-slate-800 bg-slate-800 text-white"
-                  : "border-slate-200 bg-white text-slate-600"
+                  : "border-white/15 bg-white/[0.06] text-white/55"
               }`}
             >
               <input

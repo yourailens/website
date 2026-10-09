@@ -235,7 +235,7 @@ export default function AdminIndustryEditor() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 text-sm text-slate-500">
+      <div className="flex min-h-screen items-center justify-center bg-transparent text-sm text-white/45">
         Loading…
       </div>
     );
@@ -243,9 +243,9 @@ export default function AdminIndustryEditor() {
 
   if (!industry) {
     return (
-      <div className="min-h-screen bg-slate-50 p-6 text-center">
-        <p className="text-slate-600">Industry not found.</p>
-        <Link href="/admin/industries" className="mt-4 inline-block text-sm font-bold text-blue-600">
+      <div className="bg-transparent p-6 text-center">
+        <p className="text-white/55">Industry not found.</p>
+        <Link href="/admin/industries" className="mt-4 inline-block text-sm font-bold text-emerald-300/80">
           ← Back
         </Link>
       </div>
@@ -253,14 +253,14 @@ export default function AdminIndustryEditor() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6">
+    <div className="bg-transparent px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-3xl space-y-8">
         <header>
-          <Link href="/admin/industries" className="text-xs font-semibold text-slate-500 hover:text-slate-800">
+          <Link href="/admin/industries" className="text-xs font-semibold text-white/45 hover:text-white">
             ← Industries
           </Link>
-          <h1 className="mt-2 font-heading text-2xl font-black text-slate-900">{industry.name}</h1>
-          <p className="mt-1 text-sm text-slate-500">/industries/{industry.slug}</p>
+          <h1 className="mt-2 font-heading text-2xl font-black text-white">{industry.name}</h1>
+          <p className="mt-1 text-sm text-white/45">/industries/{industry.slug}</p>
           <Link
             href="/admin/sample-brands"
             className="mt-3 inline-block text-xs font-bold text-teal-700 hover:underline"
@@ -270,52 +270,52 @@ export default function AdminIndustryEditor() {
         </header>
 
         {msg ? (
-          <p className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">{msg}</p>
+          <p className="rounded-2xl border border-white/12 bg-gradient-to-br from-white/[0.08] to-white/[0.02] px-4 py-3 text-sm text-white/70">{msg}</p>
         ) : null}
 
-        <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="font-heading text-lg font-bold text-slate-900">Industry details</h2>
-          <label className="block text-xs font-medium text-slate-600">
+        <section className="space-y-4 rounded-2xl border border-white/15 bg-white/[0.06] p-6 ">
+          <h2 className="font-heading text-lg font-bold text-white">Industry details</h2>
+          <label className="block text-xs font-medium text-white/55">
             Name
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
             />
           </label>
-          <label className="block text-xs font-medium text-slate-600">
+          <label className="block text-xs font-medium text-white/55">
             Main question (industry page hero)
             <input
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="Where can I use AI in real estate?"
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
             />
           </label>
-          <label className="block text-xs font-medium text-slate-600">
+          <label className="block text-xs font-medium text-white/55">
             Main answer
             <textarea
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               rows={4}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
             />
           </label>
-          <label className="block text-xs font-medium text-slate-600">
+          <label className="block text-xs font-medium text-white/55">
             Tagline
             <input
               value={tagline}
               onChange={(e) => setTagline(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
             />
           </label>
-          <label className="block text-xs font-medium text-slate-600">
+          <label className="block text-xs font-medium text-white/55">
             Description
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
             />
           </label>
           <MediaSlotFields
@@ -336,13 +336,13 @@ export default function AdminIndustryEditor() {
             }}
           />
           {hero.url ? (
-            <p className="text-[10px] text-slate-500">
+            <p className="text-[10px] text-white/45">
               Live preview:{" "}
               <a
                 href={`/industries/${industry.slug}`}
                 target="_blank"
                 rel="noreferrer"
-                className="font-bold text-blue-600 hover:underline"
+                className="font-bold text-emerald-300/80 hover:underline"
               >
                 Open industry page →
               </a>
@@ -365,21 +365,21 @@ export default function AdminIndustryEditor() {
                 setSaving(false);
               }
             }}
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            className="rounded-lg border border-white/20 bg-white/[0.06] px-4 py-2 text-xs font-bold text-white/70 hover:bg-transparent disabled:opacity-50"
           >
             Save main visual again
           </button>
           <div className="flex flex-wrap gap-4">
-            <label className="text-xs font-medium text-slate-600">
+            <label className="text-xs font-medium text-white/55">
               Sort
               <input
                 type="number"
                 value={sortOrder}
                 onChange={(e) => setSortOrder(Number(e.target.value))}
-                className="mt-1 block w-20 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-1 block w-20 rounded-lg border border-white/15 px-3 py-2 text-sm"
               />
             </label>
-            <label className="flex items-center gap-2 pt-5 text-sm font-medium text-slate-700">
+            <label className="flex items-center gap-2 pt-5 text-sm font-medium text-white/70">
               <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} />
               Published
             </label>
@@ -395,21 +395,21 @@ export default function AdminIndustryEditor() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="font-heading text-lg font-bold text-slate-900">Playbook Q&amp;A modules</h2>
-          <p className="text-sm text-slate-500">
+          <h2 className="font-heading text-lg font-bold text-white">Playbook Q&amp;A modules</h2>
+          <p className="text-sm text-white/45">
             Each module is one question + answer. Visuals you add here show in the <strong>rows below</strong> the main
             question — not in the big slot at the top (use Main page visual above for that).
           </p>
           {industry.playbooks.map((pb) => (
-            <div key={pb.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div key={pb.id} className="overflow-hidden rounded-2xl border border-white/15 bg-white/[0.06] ">
               <div className="flex w-full items-center justify-between gap-3 px-5 py-4">
                 <button
                   type="button"
                   onClick={() => setExpandedPlaybook(expandedPlaybook === pb.id ? null : pb.id)}
-                  className="min-w-0 flex-1 rounded-lg text-left transition hover:bg-slate-50"
+                  className="min-w-0 flex-1 rounded-lg text-left transition hover:bg-transparent"
                 >
-                  <p className="font-semibold text-slate-900">{pb.question ?? pb.name}</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="font-semibold text-white">{pb.question ?? pb.name}</p>
+                  <p className="text-xs text-white/45">
                     {pb.examples.length} visuals · /industries/{industry.slug}/{pb.slug}
                   </p>
                 </button>
@@ -418,7 +418,7 @@ export default function AdminIndustryEditor() {
                     type="button"
                     onClick={() => togglePlaybook(pb.id, pb.published)}
                     className={`rounded-lg px-2 py-1 text-[10px] font-bold ${
-                      pb.published ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"
+                      pb.published ? "bg-emerald-100 text-emerald-800" : "bg-black/40 text-white/45"
                     }`}
                   >
                     {pb.published ? "Live" : "Off"}
@@ -426,7 +426,7 @@ export default function AdminIndustryEditor() {
                   <button
                     type="button"
                     onClick={() => setExpandedPlaybook(expandedPlaybook === pb.id ? null : pb.id)}
-                    className="rounded-lg px-2 py-1 text-slate-400 hover:bg-slate-50"
+                    className="rounded-lg px-2 py-1 text-white/35 hover:bg-transparent"
                     aria-expanded={expandedPlaybook === pb.id}
                     aria-label={expandedPlaybook === pb.id ? "Collapse playbook" : "Expand playbook"}
                   >
@@ -442,13 +442,13 @@ export default function AdminIndustryEditor() {
                     industrySlug={industry.slug}
                     onSave={(fields) => savePlaybook(pb.id, fields)}
                   />
-                  <div className="border-t border-slate-100 px-5 py-4">
-                    <p className="text-xs font-medium text-slate-500">Playbook gallery visuals</p>
-                    <p className="mt-1 text-[10px] text-slate-400">
+                  <div className="border-t border-white/10 px-5 py-4">
+                    <p className="text-xs font-medium text-white/45">Playbook gallery visuals</p>
+                    <p className="mt-1 text-[10px] text-white/35">
                       Shown in &quot;What this looks like in practice&quot; on the playbook page. Add a caption for each.
                     </p>
-                    <div className="mt-3 rounded-xl border border-dashed border-slate-200 bg-slate-50/80 p-3">
-                      <label className="block text-[10px] font-medium text-slate-600">
+                    <div className="mt-3 rounded-xl border border-dashed border-white/15 bg-transparent/80 p-3">
+                      <label className="block text-[10px] font-medium text-white/55">
                         Title (optional label above visual)
                         <input
                           value={getExampleDraft(pb.id).title}
@@ -458,10 +458,10 @@ export default function AdminIndustryEditor() {
                               [pb.id]: { ...getExampleDraft(pb.id), title: e.target.value },
                             }))
                           }
-                          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm"
+                          className="mt-1 w-full rounded-lg border border-white/15 bg-white/[0.06] px-2 py-1.5 text-sm"
                         />
                       </label>
-                      <label className="mt-2 block text-[10px] font-medium text-slate-600">
+                      <label className="mt-2 block text-[10px] font-medium text-white/55">
                         Caption / description (shown under visual on playbook page)
                         <textarea
                           value={getExampleDraft(pb.id).caption}
@@ -472,7 +472,7 @@ export default function AdminIndustryEditor() {
                             }))
                           }
                           rows={2}
-                          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm"
+                          className="mt-1 w-full rounded-lg border border-white/15 bg-white/[0.06] px-2 py-1.5 text-sm"
                         />
                       </label>
                       <div className="mt-2">
@@ -495,7 +495,7 @@ export default function AdminIndustryEditor() {
                         />
                       </div>
                       {getExampleDraft(pb.id).mediaType === "video" ? (
-                        <label className="mt-2 block text-[10px] font-medium text-slate-600">
+                        <label className="mt-2 block text-[10px] font-medium text-white/55">
                           Poster URL
                           <input
                             value={getExampleDraft(pb.id).posterUrl}
@@ -505,7 +505,7 @@ export default function AdminIndustryEditor() {
                                 [pb.id]: { ...getExampleDraft(pb.id), posterUrl: e.target.value },
                               }))
                             }
-                            className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm"
+                            className="mt-1 w-full rounded-lg border border-white/15 bg-white/[0.06] px-2 py-1.5 text-sm"
                           />
                         </label>
                       ) : null}
@@ -540,7 +540,7 @@ export default function AdminIndustryEditor() {
                         />
                       ))}
                       {pb.examples.length === 0 ? (
-                        <p className="text-xs text-slate-400">No visuals yet — shown on industry + playbook pages.</p>
+                        <p className="text-xs text-white/35">No visuals yet — shown on industry + playbook pages.</p>
                       ) : null}
                     </ul>
                   </div>
@@ -600,7 +600,7 @@ function ExampleVisualRow({
   };
 
   return (
-    <li className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+    <li className="rounded-xl border border-white/10 bg-transparent p-3">
       <div className="flex flex-wrap gap-3">
         <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-200">
           {mediaType === "video" ? (
@@ -614,14 +614,14 @@ function ExampleVisualRow({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Title (optional)"
-            className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm font-semibold"
+            className="w-full rounded-lg border border-white/15 bg-white/[0.06] px-2 py-1 text-sm font-semibold"
           />
           <textarea
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
             placeholder="Caption / description for playbook page"
             rows={2}
-            className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs"
+            className="w-full rounded-lg border border-white/15 bg-white/[0.06] px-2 py-1 text-xs"
           />
           <MediaTypeAspectPickers
             namePrefix={namePrefix}
@@ -635,20 +635,20 @@ function ExampleVisualRow({
               value={posterUrl}
               onChange={(e) => setPosterUrl(e.target.value)}
               placeholder="Poster URL"
-              className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs"
+              className="w-full rounded-lg border border-white/15 bg-white/[0.06] px-2 py-1 text-xs"
             />
           ) : null}
           <button
             type="button"
             disabled={saving}
             onClick={save}
-            className="text-[10px] font-bold text-blue-600 hover:underline disabled:opacity-50"
+            className="text-[10px] font-bold text-emerald-300/80 hover:underline disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save visual settings"}
           </button>
         </div>
         <div className="flex shrink-0 flex-col gap-1">
-          <button type="button" onClick={onTogglePublish} className="text-[10px] font-bold text-slate-500">
+          <button type="button" onClick={onTogglePublish} className="text-[10px] font-bold text-white/45">
             {published ? "Unpublish" : "Publish"}
           </button>
           <button type="button" onClick={onDelete} className="text-[10px] font-bold text-red-500">
@@ -683,47 +683,47 @@ function PlaybookQAEditor({
   }, [playbook]);
 
   return (
-    <div className="border-t border-slate-100 px-5 py-4">
+    <div className="border-t border-white/10 px-5 py-4">
       <Link
         href={`/industries/${industrySlug}/${playbook.slug}`}
         target="_blank"
-        className="text-xs font-bold text-blue-600 hover:underline"
+        className="text-xs font-bold text-emerald-300/80 hover:underline"
       >
         Preview playbook page →
       </Link>
       <div className="mt-4 space-y-3">
-        <label className="block text-xs font-medium text-slate-600">
+        <label className="block text-xs font-medium text-white/55">
           Question
           <input
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-slate-600">
+        <label className="block text-xs font-medium text-white/55">
           Answer
           <textarea
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
             rows={5}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-slate-600">
+        <label className="block text-xs font-medium text-white/55">
           Short tagline (optional)
           <input
             value={tagline}
             onChange={(e) => setTagline(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-slate-600">
+        <label className="block text-xs font-medium text-white/55">
           Call notes (optional)
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
           />
         </label>
         <button

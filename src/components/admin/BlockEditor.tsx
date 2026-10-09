@@ -235,7 +235,7 @@ function defaultBlock(type: Block["type"]): Block {
 
 function InlineToolbar({ onAdd }: { onAdd: (type: Block["type"]) => void }) {
   return (
-    <div className="flex items-center gap-0.5 rounded-xl border border-slate-200 bg-white px-1.5 py-1 shadow-md">
+    <div className="flex items-center gap-0.5 rounded-2xl border border-white/12 bg-gradient-to-br from-white/[0.08] to-white/[0.02] px-1.5 py-1 ">
       {TOOLBAR_ITEMS.map((item) => (
         <button
           key={item.type}
@@ -245,7 +245,7 @@ function InlineToolbar({ onAdd }: { onAdd: (type: Block["type"]) => void }) {
           className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${
             item.isCode
               ? "bg-slate-900 text-slate-200 hover:bg-slate-700"
-              : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+              : "text-white/45 hover:bg-black/40 hover:text-white"
           }`}
         >
           {item.icon}
@@ -259,8 +259,8 @@ function InlineToolbar({ onAdd }: { onAdd: (type: Block["type"]) => void }) {
 
 function MainToolbar({ onAdd }: { onAdd: (type: Block["type"]) => void }) {
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-      <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-slate-300 select-none shrink-0">
+    <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-white/15 bg-transparent px-4 py-3">
+      <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-white/25 select-none shrink-0">
         Add block
       </span>
       <div className="mx-1 h-3 w-px bg-slate-200 shrink-0" />
@@ -272,7 +272,7 @@ function MainToolbar({ onAdd }: { onAdd: (type: Block["type"]) => void }) {
           className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${
             item.isCode
               ? "border border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-700 hover:text-white"
-              : "border border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 shadow-sm"
+              : "border border-white/15 bg-white/[0.06] text-white/55 hover:border-white/20 hover:bg-white/[0.08] hover:text-emerald-300 "
           }`}
         >
           <span className="flex items-center justify-center">{item.icon}</span>
@@ -366,7 +366,7 @@ function MediaUploadField({
       {/* Upload / preview area */}
       <div
         className={`relative cursor-pointer transition ${
-          isImage ? "bg-slate-50 hover:bg-slate-100" : "bg-[#0a0f1e] hover:bg-[#111827]"
+          isImage ? "bg-transparent hover:bg-black/40" : "bg-[#0a0f1e] hover:bg-[#111827]"
         }`}
         onClick={() => !url && inputRef.current?.click()}
       >
@@ -378,7 +378,7 @@ function MediaUploadField({
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
-                className="absolute right-2 top-2 rounded-lg border border-slate-200 bg-white/90 px-2.5 py-1 text-[11px] font-bold text-slate-600 shadow hover:bg-white"
+                className="absolute right-2 top-2 rounded-lg border border-white/15 bg-white/90 px-2.5 py-1 text-[11px] font-bold text-white/55 shadow hover:bg-white/[0.06]"
               >
                 Replace
               </button>
@@ -397,7 +397,7 @@ function MediaUploadField({
           )
         ) : (
           <div
-            className={`flex flex-col items-center justify-center gap-2 py-10 ${isImage ? "text-slate-400" : "text-slate-500"}`}
+            className={`flex flex-col items-center justify-center gap-2 py-10 ${isImage ? "text-white/35" : "text-white/45"}`}
             onClick={() => inputRef.current?.click()}
           >
             {uploading ? (
@@ -431,18 +431,18 @@ function MediaUploadField({
       />
 
       {/* Caption + URL row */}
-      <div className={`flex items-center gap-3 px-4 py-2.5 ${isImage ? "border-t border-slate-200" : "border-t border-white/10"}`}>
+      <div className={`flex items-center gap-3 px-4 py-2.5 ${isImage ? "border-t border-white/15" : "border-t border-white/10"}`}>
         <input
           value={caption}
           onChange={(e) => onCaptionChange(e.target.value)}
           placeholder="Caption (optional)"
-          className={`flex-1 bg-transparent text-xs outline-none placeholder:opacity-50 ${isImage ? "text-slate-700" : "text-slate-300"}`}
+          className={`flex-1 bg-transparent text-xs outline-none placeholder:opacity-50 ${isImage ? "text-white/70" : "text-white/25"}`}
         />
         {url && (
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className={`shrink-0 text-[10px] font-bold transition ${isImage ? "text-slate-400 hover:text-blue-600" : "text-slate-500 hover:text-white"}`}
+            className={`shrink-0 text-[10px] font-bold transition ${isImage ? "text-white/35 hover:text-emerald-300/80" : "text-white/45 hover:text-white"}`}
           >
             {uploading ? "Uploading…" : "↑ Replace"}
           </button>
@@ -476,11 +476,11 @@ function BlockControls({
       }`}
     >
       <button type="button" title="Move up" disabled={isFirst} onClick={onMoveUp}
-        className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200 bg-white text-[10px] text-slate-400 shadow-sm hover:text-blue-600 disabled:opacity-25">↑</button>
+        className="flex h-6 w-6 items-center justify-center rounded-md border border-white/15 bg-white/[0.06] text-[10px] text-white/35  hover:text-emerald-300/80 disabled:opacity-25">↑</button>
       <button type="button" title="Move down" disabled={isLast} onClick={onMoveDown}
-        className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200 bg-white text-[10px] text-slate-400 shadow-sm hover:text-blue-600 disabled:opacity-25">↓</button>
+        className="flex h-6 w-6 items-center justify-center rounded-md border border-white/15 bg-white/[0.06] text-[10px] text-white/35  hover:text-emerald-300/80 disabled:opacity-25">↓</button>
       <button type="button" title="Delete" onClick={onDelete}
-        className="flex h-6 w-6 items-center justify-center rounded-md border border-red-100 bg-white text-[10px] text-slate-300 shadow-sm hover:border-red-200 hover:text-red-500">✕</button>
+        className="flex h-6 w-6 items-center justify-center rounded-md border border-red-100 bg-white/[0.06] text-[10px] text-white/25  hover:border-rose-400/30 hover:text-red-500">✕</button>
     </div>
   );
 }
@@ -510,13 +510,13 @@ function BlockField({
 
   const wrap = (label: string, children: React.ReactNode) => (
     <div
-      className="group relative pr-9 rounded-xl border border-transparent p-3 transition-all hover:border-slate-200 hover:bg-white focus-within:border-blue-200 focus-within:bg-white"
+      className="group relative pr-9 rounded-xl border border-transparent p-3 transition-all hover:border-white/15 hover:bg-white/[0.06] focus-within:border-white/20 focus-within:bg-white/[0.06]"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
     >
-      <p className="mb-1 font-mono text-[9px] font-bold uppercase tracking-widest text-slate-300 select-none">{label}</p>
+      <p className="mb-1 font-mono text-[9px] font-bold uppercase tracking-widest text-white/25 select-none">{label}</p>
       {children}
       <BlockControls
         visible={showControls}
@@ -534,16 +534,16 @@ function BlockField({
       return wrap("Heading 1", (
         <AutoTextarea value={block.text} onChange={(v) => onChange({ ...block, text: v })}
           placeholder="Section title…"
-          className="font-heading text-2xl font-black leading-tight tracking-tight text-slate-900 placeholder:text-slate-300" />
+          className="font-heading text-2xl font-black leading-tight tracking-tight text-white placeholder:text-white/25" />
       ));
 
     case "heading2":
       return wrap("Heading 2", (
         <div className="flex items-center gap-2">
-          <span className="h-0.5 w-5 rounded-full bg-blue-500 shrink-0" />
+          <span className="h-0.5 w-5 rounded-full bg-white/[0.06]0 shrink-0" />
           <AutoTextarea value={block.text} onChange={(v) => onChange({ ...block, text: v })}
             placeholder="Sub-section…"
-            className="font-heading text-lg font-black tracking-tight text-slate-900 placeholder:text-slate-300" />
+            className="font-heading text-lg font-black tracking-tight text-white placeholder:text-white/25" />
         </div>
       ));
 
@@ -551,14 +551,14 @@ function BlockField({
       return wrap("Heading 3", (
         <AutoTextarea value={block.text} onChange={(v) => onChange({ ...block, text: v })}
           placeholder="Step label…"
-          className="font-heading text-base font-bold text-slate-800 placeholder:text-slate-300" />
+          className="font-heading text-base font-bold text-white placeholder:text-white/25" />
       ));
 
     case "paragraph":
       return wrap("Paragraph", (
         <AutoTextarea value={block.text} onChange={(v) => onChange({ ...block, text: v })}
           placeholder="Write something… (supports **bold** and `code`)"
-          className="text-sm leading-[1.8] text-slate-700 placeholder:text-slate-300" />
+          className="text-sm leading-[1.8] text-white/70 placeholder:text-white/25" />
       ));
 
     case "code":
@@ -574,7 +574,7 @@ function BlockField({
           <div className="flex items-center gap-3 border-b border-white/10 bg-white/5 px-4 py-2.5">
             {/* traffic light dots */}
             <span className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-red-500/70" />
+              <span className="h-2.5 w-2.5 rounded-full bg-rose-400/100/70" />
               <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/70" />
               <span className="h-2.5 w-2.5 rounded-full bg-green-500/70" />
             </span>
@@ -583,9 +583,9 @@ function BlockField({
               value={block.lang}
               onChange={(e) => onChange({ ...block, lang: e.target.value })}
               placeholder="language (e.g. prompt, python, bash)"
-              className="flex-1 bg-transparent font-mono text-[11px] text-slate-400 outline-none placeholder:text-slate-600"
+              className="flex-1 bg-transparent font-mono text-[11px] text-white/35 outline-none placeholder:text-white/55"
             />
-            <span className="rounded-md bg-slate-800 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            <span className="rounded-md bg-slate-800 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-white/45">
               {block.lang || "code"}
             </span>
           </div>
@@ -596,7 +596,7 @@ function BlockField({
             onChange={(e) => onChange({ ...block, code: e.target.value })}
             rows={Math.max(4, block.code.split("\n").length + 1)}
             placeholder="Paste your prompt, code, or command here…"
-            className="w-full resize-none bg-transparent p-4 font-mono text-[13px] leading-relaxed text-slate-200 outline-none placeholder:text-slate-600"
+            className="w-full resize-none bg-transparent p-4 font-mono text-[13px] leading-relaxed text-slate-200 outline-none placeholder:text-white/55"
           />
 
           <div
@@ -605,11 +605,11 @@ function BlockField({
             }`}
           >
             <button type="button" title="Move up" disabled={isFirst} onClick={onMoveUp}
-              className="flex h-6 w-6 items-center justify-center rounded-md border border-white/10 bg-white/10 text-[10px] text-slate-400 hover:text-white disabled:opacity-25">↑</button>
+              className="flex h-6 w-6 items-center justify-center rounded-md border border-white/10 bg-white/10 text-[10px] text-white/35 hover:text-white disabled:opacity-25">↑</button>
             <button type="button" title="Move down" disabled={isLast} onClick={onMoveDown}
-              className="flex h-6 w-6 items-center justify-center rounded-md border border-white/10 bg-white/10 text-[10px] text-slate-400 hover:text-white disabled:opacity-25">↓</button>
+              className="flex h-6 w-6 items-center justify-center rounded-md border border-white/10 bg-white/10 text-[10px] text-white/35 hover:text-white disabled:opacity-25">↓</button>
             <button type="button" title="Delete" onClick={onDelete}
-              className="flex h-6 w-6 items-center justify-center rounded-md border border-red-900/40 bg-white/10 text-[10px] text-slate-500 hover:text-red-400">✕</button>
+              className="flex h-6 w-6 items-center justify-center rounded-md border border-red-900/40 bg-white/10 text-[10px] text-white/45 hover:text-red-400">✕</button>
           </div>
         </div>
       );
@@ -617,7 +617,7 @@ function BlockField({
     case "blockquote":
       return (
         <div
-          className="group relative pr-9 rounded-r-xl border-l-4 border-blue-500 bg-blue-50/60 px-5 py-4"
+          className="group relative pr-9 rounded-r-xl border-l-4 border-blue-500 bg-white/[0.06]/60 px-5 py-4"
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
           onFocus={() => setFocused(true)}
@@ -626,7 +626,7 @@ function BlockField({
           <p className="mb-1 font-mono text-[9px] font-bold uppercase tracking-widest text-blue-300 select-none">Pro tip / Note</p>
           <AutoTextarea value={block.text} onChange={(v) => onChange({ ...block, text: v })}
             placeholder="Add a pro tip, warning, or note…"
-            className="text-sm italic leading-relaxed text-slate-700 placeholder:text-blue-200" />
+            className="text-sm italic leading-relaxed text-white/70 placeholder:text-blue-200" />
           <BlockControls
             visible={showControls}
             isFirst={isFirst}
@@ -641,17 +641,17 @@ function BlockField({
     case "bullet_list":
       return (
         <div
-          className="group relative pr-9 rounded-xl border border-transparent p-3 transition-all hover:border-slate-200 hover:bg-white focus-within:border-blue-200 focus-within:bg-white"
+          className="group relative pr-9 rounded-xl border border-transparent p-3 transition-all hover:border-white/15 hover:bg-white/[0.06] focus-within:border-white/20 focus-within:bg-white/[0.06]"
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
         >
-          <p className="mb-2 font-mono text-[9px] font-bold uppercase tracking-widest text-slate-300 select-none">Bullet list</p>
+          <p className="mb-2 font-mono text-[9px] font-bold uppercase tracking-widest text-white/25 select-none">Bullet list</p>
           <div className="space-y-1.5">
             {block.items.map((item, idx) => (
               <div key={idx} className="flex items-start gap-2.5">
-                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-white/[0.06]0" />
                 <input
                   value={item}
                   onChange={(e) => {
@@ -672,13 +672,13 @@ function BlockField({
                     }
                   }}
                   placeholder="List item… (Enter adds next, Backspace removes)"
-                  className="flex-1 bg-transparent text-sm leading-relaxed text-slate-700 outline-none placeholder:text-slate-300"
+                  className="flex-1 bg-transparent text-sm leading-relaxed text-white/70 outline-none placeholder:text-white/25"
                 />
               </div>
             ))}
           </div>
           <button type="button" onClick={() => onChange({ ...block, items: [...block.items, ""] })}
-            className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 hover:text-blue-600">
+            className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-white/35 hover:text-emerald-300/80">
             <span className="text-base leading-none">+</span> Add item
           </button>
           <BlockControls
@@ -695,17 +695,17 @@ function BlockField({
     case "numbered_list":
       return (
         <div
-          className="group relative pr-9 rounded-xl border border-transparent p-3 transition-all hover:border-slate-200 hover:bg-white focus-within:border-blue-200 focus-within:bg-white"
+          className="group relative pr-9 rounded-xl border border-transparent p-3 transition-all hover:border-white/15 hover:bg-white/[0.06] focus-within:border-white/20 focus-within:bg-white/[0.06]"
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
         >
-          <p className="mb-2 font-mono text-[9px] font-bold uppercase tracking-widest text-slate-300 select-none">Numbered list</p>
+          <p className="mb-2 font-mono text-[9px] font-bold uppercase tracking-widest text-white/25 select-none">Numbered list</p>
           <div className="space-y-1.5">
             {block.items.map((item, idx) => (
               <div key={idx} className="flex items-start gap-2.5">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">{idx + 1}</span>
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white text-[10px] font-bold text-white">{idx + 1}</span>
                 <input
                   value={item}
                   onChange={(e) => {
@@ -726,13 +726,13 @@ function BlockField({
                     }
                   }}
                   placeholder="Step… (Enter adds next, Backspace removes)"
-                  className="flex-1 bg-transparent text-sm leading-relaxed text-slate-700 outline-none placeholder:text-slate-300"
+                  className="flex-1 bg-transparent text-sm leading-relaxed text-white/70 outline-none placeholder:text-white/25"
                 />
               </div>
             ))}
           </div>
           <button type="button" onClick={() => onChange({ ...block, items: [...block.items, ""] })}
-            className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 hover:text-blue-600">
+            className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-white/35 hover:text-emerald-300/80">
             <span className="text-base leading-none">+</span> Add step
           </button>
           <BlockControls
@@ -749,7 +749,7 @@ function BlockField({
     case "image":
       return (
         <div
-          className="group relative pr-9 rounded-2xl border border-slate-200 overflow-hidden bg-slate-50 transition focus-within:border-blue-200"
+          className="group relative pr-9 rounded-2xl border border-white/15 overflow-hidden bg-transparent transition focus-within:border-white/20"
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
           onFocus={() => setFocused(true)}
@@ -809,9 +809,9 @@ function BlockField({
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
-          <hr className="flex-1 border-slate-200" />
-          <span className="shrink-0 font-mono text-[9px] text-slate-300 select-none">divider</span>
-          <hr className="flex-1 border-slate-200" />
+          <hr className="flex-1 border-white/15" />
+          <span className="shrink-0 font-mono text-[9px] text-white/25 select-none">divider</span>
+          <hr className="flex-1 border-white/15" />
           <BlockControls
             visible={showControls}
             isFirst={isFirst}
@@ -837,9 +837,9 @@ function BlockGap({ onAdd }: { onAdd: (type: Block["type"]) => void }) {
       onMouseLeave={() => setShow(false)}
     >
       <div className={`flex w-full items-center gap-2 transition-opacity duration-150 ${show ? "opacity-100" : "opacity-0"}`}>
-        <div className="flex-1 border-t border-dashed border-slate-200" />
+        <div className="flex-1 border-t border-dashed border-white/15" />
         <InlineToolbar onAdd={(type) => { onAdd(type); setShow(false); }} />
-        <div className="flex-1 border-t border-dashed border-slate-200" />
+        <div className="flex-1 border-t border-dashed border-white/15" />
       </div>
       {!show && <div className="w-full border-t border-transparent" />}
     </div>
@@ -900,9 +900,9 @@ export default function BlockEditor({
   return (
     <div className="space-y-0">
       {blocks.length === 0 && (
-        <div className="mb-3 rounded-2xl border-2 border-dashed border-slate-200 py-10 text-center">
-          <p className="text-sm font-semibold text-slate-400">Start building your workflow</p>
-          <p className="mt-1 text-xs text-slate-300">Use the toolbar below to add your first block</p>
+        <div className="mb-3 rounded-2xl border-2 border-dashed border-white/15 py-10 text-center">
+          <p className="text-sm font-semibold text-white/35">Start building your workflow</p>
+          <p className="mt-1 text-xs text-white/25">Use the toolbar below to add your first block</p>
         </div>
       )}
 

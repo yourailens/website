@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ADMIN_QUICK_ACTIONS } from "@/data/admin-nav";
 import { CHARACTER_TAGS, GALLERY_CATEGORY_TABS, type CharacterTag, type FilmCategory } from "@/data/gallery";
 import OttCutsDesk from "./OttCutsDesk";
 
@@ -16,50 +17,6 @@ const FIELD =
 const BTN =
   "bg-[#fafafa] px-5 py-2.5 text-sm font-semibold text-black hover:bg-blue-100 disabled:opacity-40";
 const PANEL = "border border-white/15 bg-black/45 p-6";
-
-const ADMIN_CHANNELS: { scene: string; title: string; links: { href: string; label: string }[] }[] = [
-  {
-    scene: "01",
-    title: "Studio",
-    links: [
-      { href: "/admin/team", label: "Team" },
-      { href: "/admin/services", label: "Pricing" },
-      { href: "/admin/events", label: "Events" },
-      { href: "/admin/workshops", label: "Workshop bookings" },
-      { href: "/admin/avatars", label: "Avatars" },
-    ],
-  },
-  {
-    scene: "02",
-    title: "Libraries",
-    links: [
-      { href: "/admin/prompts", label: "Workflows" },
-      { href: "/admin/outfits", label: "Outfits" },
-      { href: "/admin/character-sheets", label: "Characters" },
-      { href: "/admin/scenarios", label: "Scenarios" },
-      { href: "/admin/locations", label: "Locations" },
-      { href: "/admin/props", label: "Props" },
-      { href: "/admin/lighting-presets", label: "Lighting" },
-      { href: "/admin/color-grades", label: "Color" },
-      { href: "/admin/mood-boards", label: "Mood boards" },
-    ],
-  },
-  {
-    scene: "03",
-    title: "World",
-    links: [
-      { href: "/admin/industries", label: "Industries" },
-      { href: "/admin/sample-brands", label: "Sample brands" },
-      { href: "/admin/modules", label: "Modules" },
-      { href: "/admin/the-future", label: "The Future" },
-    ],
-  },
-  {
-    scene: "04",
-    title: "Desk",
-    links: [{ href: "/admin/manage", label: "Manage uploads" }],
-  },
-];
 
 export default function AdminDashboard() {
   const [sessionOk, setSessionOk] = useState<boolean | null>(null);
@@ -167,11 +124,6 @@ export default function AdminDashboard() {
     setSelected: (updater: (prev: CharacterTag[]) => CharacterTag[]) => void
   ) {
     setSelected((prev) => (prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]));
-  }
-
-  async function signOut() {
-    await fetch("/api/admin/logout", { method: "POST" });
-    window.location.href = "/admin/login";
   }
 
   async function uploadImage(e: React.FormEvent) {
@@ -385,77 +337,75 @@ export default function AdminDashboard() {
 
   if (sessionOk === false) {
     return (
-      <main className="ott-home relative min-h-screen bg-black px-6 py-24 font-body text-white">
-        <div className="mx-auto max-w-lg text-center">
-          <p className="font-mono text-[10px] tracking-[0.32em] text-blue-400">CONTROL ROOM</p>
-          <h1 className="mt-3 font-heading text-3xl leading-none">Not authorized</h1>
-          <p className="mt-3 text-sm text-white/70">Sign in to manage the studio desk.</p>
-          <Link href="/admin/login" className={`mt-6 inline-flex ${BTN}`}>
-            Go to admin login
-          </Link>
-        </div>
-      </main>
+      <div className="flex min-h-[50vh] flex-col items-center justify-center px-6 py-16 text-center">
+        <p className="font-mono text-[10px] tracking-[0.32em] text-blue-400">AUTH</p>
+        <h2 className="mt-3 font-heading text-3xl leading-none">Not authorized</h2>
+        <p className="mt-3 text-sm text-white/70">Sign in to manage the studio desk.</p>
+        <Link href="/admin/login" className={`mt-6 inline-flex ${BTN}`}>
+          Go to admin login
+        </Link>
+      </div>
     );
   }
 
   if (sessionOk === null) {
-    return (
-      <main className="ott-home relative min-h-screen bg-black px-6 py-24 font-body text-white">
-        <div className="mx-auto max-w-lg text-center text-sm text-white/60">Loading desk…</div>
-      </main>
-    );
+    return <div className="px-6 py-24 text-center text-sm text-white/55">Loading desk…</div>;
   }
 
   return (
-    <main className="ott-home relative min-h-screen overflow-x-hidden bg-black px-5 py-10 font-body text-white sm:px-8 sm:py-12">
+    <div className="relative">
       <div
-        className="pointer-events-none absolute inset-0 opacity-40"
+        className="pointer-events-none absolute inset-0 opacity-50"
         style={{
-          background:
-            "radial-gradient(ellipse 70% 45% at 12% 0%, rgba(37,99,235,0.32), transparent 55%), radial-gradient(ellipse 40% 30% at 90% 0%, rgba(29,78,216,0.18), transparent 50%)",
+          background: "radial-gradient(ellipse 55% 40% at 8% 0%, rgba(37,99,235,0.22), transparent 55%)",
         }}
         aria-hidden
       />
-      <div className="relative mx-auto max-w-5xl space-y-10">
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="font-mono text-[10px] tracking-[0.32em] text-blue-400">CONTROL ROOM</p>
-            <h1 className="mt-2 font-heading text-[clamp(2rem,5vw,3.4rem)] leading-none">Studio desk</h1>
-            <p className="mt-2 text-sm text-white/70">Signed in. Add cuts for AI ads, films, and community.</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link href="/" className="border border-white/30 px-4 py-2 text-sm font-semibold text-white hover:border-white">
-              View site
+      <div className="relative mx-auto max-w-6xl space-y-10">
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {ADMIN_QUICK_ACTIONS.map((action) => (
+            <Link
+              key={action.href + action.label}
+              href={action.href}
+              className="group relative overflow-hidden rounded-2xl border border-white/12 bg-gradient-to-br from-white/[0.09] to-white/[0.02] px-4 py-4 shadow-[0_18px_40px_-28px_rgba(0,0,0,0.9)] transition hover:border-white/30 hover:from-white/[0.12]"
+            >
+              <span
+                className="pointer-events-none absolute left-0 top-0 h-full w-px bg-blue-500/0 transition group-hover:bg-blue-400"
+                aria-hidden
+              />
+              <div className="flex items-start justify-between gap-3">
+                <p className="font-mono text-[10px] tracking-[0.28em] text-blue-400/80">{action.kicker}</p>
+                <span className="text-white/25 transition group-hover:text-white/60" aria-hidden>
+                  →
+                </span>
+              </div>
+              <p className="mt-2 font-heading text-xl leading-none tracking-tight">{action.label}</p>
+              <p className="mt-2 text-xs leading-relaxed text-white/45">{action.blurb}</p>
             </Link>
-            <button type="button" onClick={signOut} className={BTN}>
-              Sign out
-            </button>
-          </div>
-        </header>
-
-        <nav className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {ADMIN_CHANNELS.map((ch) => (
-            <div key={ch.scene} className="border border-white/15 bg-black/40 p-4">
-              <p className="font-heading text-2xl leading-none text-blue-400">{ch.scene}</p>
-              <p className="mt-1 font-mono text-[10px] tracking-[0.22em] text-white/45">{ch.title.toUpperCase()}</p>
-              <ul className="mt-3 space-y-1.5">
-                {ch.links.map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-white/80 hover:text-white">
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
           ))}
-        </nav>
+        </section>
 
-        <OttCutsDesk />
+        <section className="space-y-3">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="font-mono text-[10px] tracking-[0.28em] text-blue-400">PRIMARY</p>
+              <h2 className="mt-1 font-heading text-2xl leading-none tracking-tight">Homepage cuts</h2>
+            </div>
+            <p className="max-w-sm text-xs text-white/40">Hero slots, ads, films, and community reels live here.</p>
+          </div>
+          <OttCutsDesk />
+        </section>
 
-        <details className="border border-white/15 bg-black/30">
-          <summary className="cursor-pointer px-5 py-4 text-sm text-white/70 hover:text-white">
-            Classic gallery — images, films, Instagram, YouTube
+        <details className="group border border-white/12 bg-white/[0.02] open:bg-black/30">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm text-white/70 marker:content-none hover:text-white [&::-webkit-details-marker]:hidden">
+            <span>
+              <span className="font-mono text-[10px] tracking-[0.24em] text-white/35">SECONDARY</span>
+              <span className="mt-1 block font-medium text-white/85">Classic gallery uploads</span>
+              <span className="mt-0.5 block text-xs text-white/40">Images, films, Instagram, YouTube</span>
+            </span>
+            <span className="shrink-0 font-mono text-[10px] tracking-[0.2em] text-white/35 transition group-open:rotate-90">
+              ›
+            </span>
           </summary>
           <div className="space-y-6 border-t border-white/10 px-5 pb-6 pt-5">
         {uploadErr ? (
@@ -879,6 +829,6 @@ export default function AdminDashboard() {
           </div>
         </details>
       </div>
-    </main>
+    </div>
   );
 }

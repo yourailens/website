@@ -11,8 +11,8 @@ export type MobileClip = {
 };
 
 export type MobileHomeData = {
-  /** Published admin cut captioned "The mattress ad", above the opening film */
-  mattress: MobileClip | null;
+  /** Hero 1, Hero 2, Hero 3 — above the opening film */
+  heroes: MobileClip[];
   /** Same opening film as laptop hero — poster until tap */
   hero: MobileClip;
   /** SC. 2 · Just landed */

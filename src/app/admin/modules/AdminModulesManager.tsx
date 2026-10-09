@@ -255,7 +255,7 @@ export default function AdminModulesManager() {
 
   if (showing) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="bg-transparent">
         {coverCropSrc ? (
           <AvatarCropModal
             imageSrc={coverCropSrc}
@@ -287,20 +287,20 @@ export default function AdminModulesManager() {
           />
         ) : null}
 
-        <div className="border-b border-slate-200 bg-white px-6 py-4">
+        <div className="border-b border-white/15 bg-white/[0.06] px-6 py-4">
           <div className="mx-auto flex max-w-4xl items-center justify-between">
             <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-blue-600">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-300/80">
                 Admin → Modules
               </p>
-              <h1 className="font-heading text-xl font-black text-slate-900">
+              <h1 className="font-heading text-xl font-black text-white">
                 {editing ? `Edit: ${editing.title}` : "New module"}
               </h1>
             </div>
             <button
               type="button"
               onClick={() => setShowing(false)}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              className="rounded-xl border border-white/15 px-4 py-2 text-sm font-semibold text-white/55 hover:bg-transparent"
             >
               ← Back
             </button>
@@ -310,24 +310,24 @@ export default function AdminModulesManager() {
         <form onSubmit={onSubmit} className="mx-auto max-w-4xl space-y-8 px-6 py-8">
           <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">
                 Title *
               </label>
               <input
                 required
                 value={form.title}
                 onChange={(e) => sf("title", e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-400"
+                className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm outline-none focus:border-blue-400"
               />
             </div>
             <div>
-              <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">
                 Type *
               </label>
               <select
                 value={form.module_type}
                 onChange={(e) => handleTypeChange(e.target.value as StudioModuleType)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-blue-400"
+                className="w-full rounded-2xl border border-white/12 bg-gradient-to-br from-white/[0.08] to-white/[0.02] px-4 py-3 text-sm outline-none focus:border-blue-400"
               >
                 {ALL_STUDIO_MODULE_TYPES.map((t) => (
                   <option key={t} value={t}>
@@ -339,34 +339,34 @@ export default function AdminModulesManager() {
           </div>
 
           <div>
-            <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">
               Description
             </label>
             <textarea
               value={form.description}
               onChange={(e) => sf("description", e.target.value)}
               rows={3}
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-400"
+              className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm outline-none focus:border-blue-400"
             />
           </div>
 
           <div>
-            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">
               Cover image
             </p>
-            <p className="mb-3 text-xs text-slate-500">
+            <p className="mb-3 text-xs text-white/45">
               Uploads keep original ratio. Shown as 3:4 on listing cards. Crop optional — first gallery image used if empty.
             </p>
             <div className="flex flex-wrap items-start gap-4">
               <div
-                className="relative max-w-xs min-w-[140px] flex-1 cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 hover:border-blue-300"
+                className="relative max-w-xs min-w-[140px] flex-1 cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed border-white/15 bg-transparent hover:border-blue-300"
                 onClick={() => coverRef.current?.click()}
               >
                 {form.cover_image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={form.cover_image_url} alt="Cover" className="block max-h-64 w-full object-contain" />
                 ) : (
-                  <div className="flex h-40 flex-col items-center justify-center text-sm font-semibold text-slate-500">
+                  <div className="flex h-40 flex-col items-center justify-center text-sm font-semibold text-white/45">
                     Click to upload cover
                   </div>
                 )}
@@ -375,7 +375,7 @@ export default function AdminModulesManager() {
                 <button
                   type="button"
                   onClick={() => setCoverCropSrc(form.cover_image_url)}
-                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 hover:border-blue-200"
+                  className="rounded-lg border border-white/15 px-3 py-1.5 text-xs font-bold text-white/55 hover:border-white/20"
                 >
                   Crop cover (3:4)
                 </button>
@@ -413,32 +413,32 @@ export default function AdminModulesManager() {
 
           <div className="flex flex-wrap items-center gap-6">
             <label className="flex items-center gap-3">
-              <span className="text-sm font-semibold text-slate-700">Sort order</span>
+              <span className="text-sm font-semibold text-white/70">Sort order</span>
               <input
                 type="number"
                 value={form.sort_order}
                 onChange={(e) => sf("sort_order", Number(e.target.value))}
-                className="w-20 rounded-lg border border-slate-200 px-2 py-1 text-sm"
+                className="w-20 rounded-lg border border-white/15 px-2 py-1 text-sm"
               />
             </label>
             {(["published", "featured"] as const).map((k) => (
               <label key={k} className="flex cursor-pointer items-center gap-3">
                 <div
                   onClick={() => sf(k, !form[k])}
-                  className={`relative h-6 w-10 rounded-full transition-colors ${form[k] ? "bg-blue-600" : "bg-slate-200"}`}
+                  className={`relative h-6 w-10 rounded-full transition-colors ${form[k] ? "bg-white" : "bg-slate-200"}`}
                 >
                   <span
-                    className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-all ${form[k] ? "left-5" : "left-1"}`}
+                    className={`absolute top-1 h-4 w-4 rounded-full bg-white/[0.06] shadow transition-all ${form[k] ? "left-5" : "left-1"}`}
                   />
                 </div>
-                <span className="text-sm font-semibold capitalize text-slate-700">{k}</span>
+                <span className="text-sm font-semibold capitalize text-white/70">{k}</span>
               </label>
             ))}
           </div>
 
           {msg ? (
             <p
-              className={`rounded-xl px-4 py-3 text-sm font-semibold ${msg.includes("!") ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}
+              className={`rounded-xl px-4 py-3 text-sm font-semibold ${msg.includes("!") ? "bg-green-50 text-green-700" : "bg-rose-400/10 text-rose-200"}`}
             >
               {msg}
             </p>
@@ -447,7 +447,7 @@ export default function AdminModulesManager() {
           <button
             type="submit"
             disabled={busy}
-            className="w-full rounded-2xl bg-blue-600 py-3.5 text-sm font-bold text-white disabled:opacity-60"
+            className="w-full rounded-2xl bg-white py-3.5 text-sm font-bold text-white disabled:opacity-60"
           >
             {busy ? "Saving…" : editing ? "Save changes" : "Create module"}
           </button>
@@ -457,12 +457,12 @@ export default function AdminModulesManager() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="border-b border-slate-200 bg-white px-6 py-4">
+    <div className="bg-transparent">
+      <div className="border-b border-white/15 bg-white/[0.06] px-6 py-4">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-blue-600">Admin</p>
-            <h1 className="font-heading text-xl font-black text-slate-900">Modules</h1>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-300/80">Admin</p>
+            <h1 className="font-heading text-xl font-black text-white">Modules</h1>
           </div>
           <div className="flex flex-wrap gap-2">
             {ALL_STUDIO_MODULE_TYPES.map((t) => (
@@ -470,7 +470,7 @@ export default function AdminModulesManager() {
                 key={t}
                 type="button"
                 onClick={() => openNew(t)}
-                className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-800 hover:bg-blue-100"
+                className="rounded-xl border border-white/20 bg-white/[0.06] px-3 py-2 text-xs font-bold text-emerald-200 hover:bg-white/[0.1]"
               >
                 + {STUDIO_MODULE_TYPE_LABELS[t]}
               </button>
@@ -484,7 +484,7 @@ export default function AdminModulesManager() {
           <button
             type="button"
             onClick={() => setFilter("all")}
-            className={`rounded-full px-4 py-2 text-xs font-bold ${filter === "all" ? "bg-blue-600 text-white" : "border border-slate-200 bg-white text-slate-600"}`}
+            className={`rounded-full px-4 py-2 text-xs font-bold ${filter === "all" ? "bg-white text-white" : "border border-white/15 bg-white/[0.06] text-white/55"}`}
           >
             All
           </button>
@@ -493,7 +493,7 @@ export default function AdminModulesManager() {
               key={t}
               type="button"
               onClick={() => setFilter(t)}
-              className={`rounded-full px-4 py-2 text-xs font-bold ${filter === t ? "bg-blue-600 text-white" : "border border-slate-200 bg-white text-slate-600"}`}
+              className={`rounded-full px-4 py-2 text-xs font-bold ${filter === t ? "bg-white text-white" : "border border-white/15 bg-white/[0.06] text-white/55"}`}
             >
               {STUDIO_MODULE_TYPE_LABELS[t]}
             </button>
@@ -506,13 +506,13 @@ export default function AdminModulesManager() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-24 text-center">
-            <p className="font-heading text-lg font-bold text-slate-700">No modules yet</p>
+            <p className="font-heading text-lg font-bold text-white/70">No modules yet</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((item) => (
-              <div key={item.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="relative aspect-[3/4] bg-slate-100">
+              <div key={item.id} className="overflow-hidden rounded-2xl border border-white/15 bg-white/[0.06] ">
+                <div className="relative aspect-[3/4] bg-black/40">
                   {moduleListCover(item) ? (
                     <Image src={moduleListCover(item)!} alt={item.title} fill className="object-cover" unoptimized />
                   ) : null}
@@ -523,18 +523,18 @@ export default function AdminModulesManager() {
                   )}
                 </div>
                 <div className="p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-blue-600">
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-300/80">
                     {STUDIO_MODULE_TYPE_LABELS[item.module_type]}
                   </p>
-                  <p className="mt-1 truncate font-bold text-slate-800">{item.title}</p>
-                  <p className="mt-0.5 text-[10px] text-slate-400">
+                  <p className="mt-1 truncate font-bold text-white">{item.title}</p>
+                  <p className="mt-0.5 text-[10px] text-white/35">
                     {item.items.length} items · order {item.sort_order}
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={() => openEdit(item)}
-                      className="rounded-lg border border-slate-200 px-3 py-1 text-[10px] font-bold text-slate-600"
+                      className="rounded-lg border border-white/15 px-3 py-1 text-[10px] font-bold text-white/55"
                     >
                       Edit
                     </button>
@@ -542,21 +542,21 @@ export default function AdminModulesManager() {
                       href={studioModuleDetailPath(item.module_type, item.slug)}
                       target="_blank"
                       rel="noreferrer"
-                      className="rounded-lg border border-slate-200 px-3 py-1 text-[10px] font-bold text-slate-600"
+                      className="rounded-lg border border-white/15 px-3 py-1 text-[10px] font-bold text-white/55"
                     >
                       View
                     </a>
                     <button
                       type="button"
                       onClick={() => togglePublish(item)}
-                      className={`rounded-lg px-3 py-1 text-[10px] font-bold ${item.published ? "border border-slate-200 text-slate-500" : "bg-blue-600 text-white"}`}
+                      className={`rounded-lg px-3 py-1 text-[10px] font-bold ${item.published ? "border border-white/15 text-white/45" : "bg-white text-white"}`}
                     >
                       {item.published ? "Unpublish" : "Publish"}
                     </button>
                     <button
                       type="button"
                       onClick={() => doDelete(item)}
-                      className="rounded-lg border border-red-200 px-2 py-1 text-[10px] font-bold text-red-400"
+                      className="rounded-lg border border-rose-400/30 px-2 py-1 text-[10px] font-bold text-red-400"
                     >
                       ✕
                     </button>

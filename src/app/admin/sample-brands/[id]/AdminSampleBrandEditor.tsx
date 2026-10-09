@@ -237,7 +237,7 @@ export default function AdminSampleBrandEditor() {
   const MediaThumb = ({ item }: { item: SampleBrandMedia }) => {
     const type = resolveMediaType(item.media_type, item.media_url);
     return (
-      <div className={`relative w-20 shrink-0 overflow-hidden rounded-lg bg-slate-100 ${aspectRatioClass(item.aspect_ratio)}`}>
+      <div className={`relative w-20 shrink-0 overflow-hidden rounded-lg bg-black/40 ${aspectRatioClass(item.aspect_ratio)}`}>
         {type === "video" ? (
           <video src={item.media_url} className="h-full w-full object-cover" muted playsInline />
         ) : (
@@ -249,19 +249,19 @@ export default function AdminSampleBrandEditor() {
 
   const renderMediaList = (items: SampleBrandMedia[], title: string) => (
     <div className="mt-6">
-      <h3 className="text-sm font-bold text-slate-800">{title}</h3>
+      <h3 className="text-sm font-bold text-white">{title}</h3>
       {items.length === 0 ? (
-        <p className="mt-2 text-xs text-slate-500">No {title.toLowerCase()} yet.</p>
+        <p className="mt-2 text-xs text-white/45">No {title.toLowerCase()} yet.</p>
       ) : (
         <ul className="mt-3 space-y-3">
           {items.map((item) => (
             <li
               key={item.id}
-              className="flex flex-wrap items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/50 p-3"
+              className="flex flex-wrap items-start gap-3 rounded-xl border border-white/15 bg-transparent/50 p-3"
             >
               <MediaThumb item={item} />
               <div className="min-w-0 flex-1 space-y-2">
-                <p className="text-xs font-semibold text-slate-700">
+                <p className="text-xs font-semibold text-white/70">
                   {categoryLabel(item.category)} · {aspectRatioLabel(item.aspect_ratio)}
                   {!item.published ? (
                     <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-800">Draft</span>
@@ -273,7 +273,7 @@ export default function AdminSampleBrandEditor() {
                     onChange={(e) =>
                       patchMedia(item.id, { category: e.target.value as SampleBrandMediaCategory })
                     }
-                    className="rounded border border-slate-200 px-2 py-1 text-xs"
+                    className="rounded border border-white/15 px-2 py-1 text-xs"
                   >
                     {SAMPLE_BRAND_MEDIA_CATEGORIES.map((c) => (
                       <option key={c.value} value={c.value}>
@@ -286,7 +286,7 @@ export default function AdminSampleBrandEditor() {
                     onChange={(e) =>
                       patchMedia(item.id, { aspect_ratio: e.target.value as SampleBrandAspectRatio })
                     }
-                    className="rounded border border-slate-200 px-2 py-1 text-xs"
+                    className="rounded border border-white/15 px-2 py-1 text-xs"
                   >
                     {SAMPLE_BRAND_ASPECT_RATIOS.map((r) => (
                       <option key={r.value} value={r.value}>
@@ -299,26 +299,26 @@ export default function AdminSampleBrandEditor() {
                   value={item.label ?? ""}
                   onChange={(e) => patchMedia(item.id, { label: e.target.value || null })}
                   placeholder="Label (subtle)"
-                  className="w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                  className="w-full rounded border border-white/15 px-2 py-1 text-xs"
                 />
                 <input
                   value={item.caption ?? ""}
                   onChange={(e) => patchMedia(item.id, { caption: e.target.value || null })}
                   placeholder="Caption"
-                  className="w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                  className="w-full rounded border border-white/15 px-2 py-1 text-xs"
                 />
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => patchMedia(item.id, { published: !item.published })}
-                    className="rounded border border-slate-200 px-2 py-1 text-[10px] font-bold text-slate-600"
+                    className="rounded border border-white/15 px-2 py-1 text-[10px] font-bold text-white/55"
                   >
                     {item.published ? "Unpublish" : "Publish"}
                   </button>
                   <button
                     type="button"
                     onClick={() => deleteMedia(item.id)}
-                    className="rounded border border-red-200 px-2 py-1 text-[10px] font-bold text-red-700"
+                    className="rounded border border-rose-400/30 px-2 py-1 text-[10px] font-bold text-rose-200"
                   >
                     Delete
                   </button>
@@ -333,7 +333,7 @@ export default function AdminSampleBrandEditor() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 p-6">
+      <div className="bg-transparent p-6">
         <div className="mx-auto max-w-3xl animate-pulse space-y-4">
           <div className="h-8 w-48 rounded bg-slate-200" />
           <div className="h-40 rounded-2xl bg-slate-200" />
@@ -359,24 +359,24 @@ export default function AdminSampleBrandEditor() {
         : null;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 pb-24">
+    <div className="bg-transparent p-6 pb-24">
       <div className="mx-auto max-w-3xl">
-        <Link href="/admin/sample-brands" className="text-xs font-semibold text-slate-500 hover:text-slate-800">
+        <Link href="/admin/sample-brands" className="text-xs font-semibold text-white/45 hover:text-white">
           ← Sample brands
         </Link>
         <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">
               {brand.industry_name}
             </p>
-            <h1 className="font-heading text-2xl font-black text-slate-900">{name || brand.name}</h1>
+            <h1 className="font-heading text-2xl font-black text-white">{name || brand.name}</h1>
           </div>
           {previewPath ? (
             <a
               href={previewPath}
               target="_blank"
               rel="noreferrer"
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+              className="rounded-2xl border border-white/12 bg-gradient-to-br from-white/[0.08] to-white/[0.02] px-4 py-2 text-sm font-semibold text-white/70"
             >
               Preview {published ? "live" : "(draft — publish industry + brand)"} →
             </a>
@@ -384,63 +384,63 @@ export default function AdminSampleBrandEditor() {
         </div>
 
         {msg ? (
-          <p className="mt-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">{msg}</p>
+          <p className="mt-4 rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-blue-900">{msg}</p>
         ) : null}
 
-        <section className="mt-8 space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-bold text-slate-900">Identity</h2>
-          <label className="block text-[10px] font-medium text-slate-600">
+        <section className="mt-8 space-y-4 rounded-2xl border border-white/15 bg-white/[0.06] p-5 ">
+          <h2 className="text-sm font-bold text-white">Identity</h2>
+          <label className="block text-[10px] font-medium text-white/55">
             Name
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
             />
           </label>
-          <label className="block text-[10px] font-medium text-slate-600">
+          <label className="block text-[10px] font-medium text-white/55">
             Slug
             <input
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-sm"
+              className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 font-mono text-sm"
             />
           </label>
-          <label className="block text-[10px] font-medium text-slate-600">
+          <label className="block text-[10px] font-medium text-white/55">
             Tagline (one line on public page)
             <input
               value={tagline}
               onChange={(e) => setTagline(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
             />
           </label>
-          <label className="block text-[10px] font-medium text-slate-600">
+          <label className="block text-[10px] font-medium text-white/55">
             Description (optional footnote)
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
             />
           </label>
           <div className="flex flex-wrap items-center gap-4">
-            <label className="text-[10px] font-medium text-slate-600">
+            <label className="text-[10px] font-medium text-white/55">
               Sort order
               <input
                 type="number"
                 value={sortOrder}
                 onChange={(e) => setSortOrder(Number(e.target.value))}
-                className="mt-1 w-20 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-1 w-20 rounded-lg border border-white/15 px-3 py-2 text-sm"
               />
             </label>
-            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+            <label className="flex items-center gap-2 text-sm font-semibold text-white/70">
               <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} />
               Published
             </label>
           </div>
         </section>
 
-        <section className="mt-6 space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-bold text-slate-900">Hero &amp; card cover</h2>
+        <section className="mt-6 space-y-4 rounded-2xl border border-white/15 bg-white/[0.06] p-5 ">
+          <h2 className="text-sm font-bold text-white">Hero &amp; card cover</h2>
           <SampleBrandMediaSlotFields
             label="Hero (top of brand page)"
             hint="Full-bleed opening visual — any ratio."
@@ -458,9 +458,9 @@ export default function AdminSampleBrandEditor() {
           />
         </section>
 
-        <section className="mt-6 rounded-2xl border border-emerald-200/80 bg-emerald-50/40 p-5">
-          <h2 className="text-sm font-bold text-slate-900">Add gallery asset</h2>
-          <p className="mt-1 text-xs text-slate-500">
+        <section className="mt-6 rounded-2xl border border-emerald-400/30/80 bg-emerald-400/10/40 p-5">
+          <h2 className="text-sm font-bold text-white">Add gallery asset</h2>
+          <p className="mt-1 text-xs text-white/45">
             Tag type, aspect ratio, and category — the public page groups by category with ratio filters.
           </p>
 
@@ -471,7 +471,7 @@ export default function AdminSampleBrandEditor() {
                 type="button"
                 onClick={() => setDraftType(t)}
                 className={`rounded-lg px-3 py-1.5 text-xs font-bold ${
-                  draftType === t ? "bg-slate-900 text-white" : "bg-white text-slate-700 ring-1 ring-slate-200"
+                  draftType === t ? "bg-slate-900 text-white" : "bg-white/[0.06] text-white/70 ring-1 ring-slate-200"
                 }`}
               >
                 {t === "image" ? "Image" : "Video"}
@@ -486,7 +486,7 @@ export default function AdminSampleBrandEditor() {
                 type="button"
                 onClick={() => setDraftRatio(r.value)}
                 className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold ${
-                  draftRatio === r.value ? "bg-blue-600 text-white" : "bg-white text-slate-700 ring-1 ring-slate-200"
+                  draftRatio === r.value ? "bg-white text-white" : "bg-white/[0.06] text-white/70 ring-1 ring-slate-200"
                 }`}
               >
                 {r.label}
@@ -501,7 +501,7 @@ export default function AdminSampleBrandEditor() {
                 type="button"
                 onClick={() => setDraftCategory(c.value)}
                 className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold ${
-                  draftCategory === c.value ? "bg-blue-600 text-white" : "bg-white text-slate-700 ring-1 ring-slate-200"
+                  draftCategory === c.value ? "bg-white text-white" : "bg-white/[0.06] text-white/70 ring-1 ring-slate-200"
                 }`}
               >
                 {c.short}
@@ -509,12 +509,12 @@ export default function AdminSampleBrandEditor() {
             ))}
           </div>
 
-          <label className="mt-4 block text-[10px] font-medium text-slate-600">
+          <label className="mt-4 block text-[10px] font-medium text-white/55">
             Media URL
             <input
               value={draftUrl}
               onChange={(e) => setDraftUrl(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-white/15 bg-white/[0.06] px-3 py-2 text-sm"
             />
           </label>
           <input
@@ -535,30 +535,30 @@ export default function AdminSampleBrandEditor() {
             }}
           />
           {draftType === "video" ? (
-            <label className="mt-3 block text-[10px] font-medium text-slate-600">
+            <label className="mt-3 block text-[10px] font-medium text-white/55">
               Poster URL
               <input
                 value={draftPoster}
                 onChange={(e) => setDraftPoster(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border border-white/15 bg-white/[0.06] px-3 py-2 text-sm"
               />
             </label>
           ) : null}
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <label className="text-[10px] font-medium text-slate-600">
+            <label className="text-[10px] font-medium text-white/55">
               Label
               <input
                 value={draftLabel}
                 onChange={(e) => setDraftLabel(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border border-white/15 bg-white/[0.06] px-3 py-2 text-sm"
               />
             </label>
-            <label className="text-[10px] font-medium text-slate-600">
+            <label className="text-[10px] font-medium text-white/55">
               Caption
               <input
                 value={draftCaption}
                 onChange={(e) => setDraftCaption(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border border-white/15 bg-white/[0.06] px-3 py-2 text-sm"
               />
             </label>
           </div>
@@ -572,19 +572,19 @@ export default function AdminSampleBrandEditor() {
           </button>
         </section>
 
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-bold text-slate-900">Gallery library</h2>
+        <section className="mt-6 rounded-2xl border border-white/15 bg-white/[0.06] p-5 ">
+          <h2 className="text-sm font-bold text-white">Gallery library</h2>
           {renderMediaList(groupedMedia.image, "Images")}
           {renderMediaList(groupedMedia.video, "Videos")}
         </section>
 
-        <div className="fixed bottom-0 left-0 right-0 border-t border-slate-200 bg-white/95 px-6 py-4 backdrop-blur">
+        <div className="fixed bottom-0 left-0 right-0 border-t border-white/15 bg-white/95 px-6 py-4 backdrop-blur">
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
             <button
               type="button"
               onClick={deleteBrand}
               disabled={deleting || saving}
-              className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 disabled:opacity-50"
+              className="rounded-xl border border-rose-400/30 px-4 py-2.5 text-sm font-bold text-rose-300 hover:bg-rose-400/10 disabled:opacity-50"
             >
               {deleting ? "Deleting…" : "Delete brand"}
             </button>

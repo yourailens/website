@@ -1,9 +1,17 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Image from "next/image";
 import AvatarCropModal from "@/components/avatars/AvatarCropModal";
-import { MODULE_COVER_ASPECTS, type ModuleCoverAspectId } from "@/data/module-covers";
+import {
+  ADMIN_BTN,
+  ADMIN_BTN_DANGER,
+  ADMIN_BTN_GHOST,
+  ADMIN_FIELD,
+  ADMIN_KICKER,
+  ADMIN_LABEL,
+  ADMIN_ROW,
+} from "@/components/admin/admin-ui";
+import { MODULE_COVER_ASPECTS } from "@/data/module-covers";
 import type { StudioModuleAspect, StudioModuleMediaType } from "@/data/studio-modules";
 
 const DISPLAY_ASPECTS: { id: StudioModuleAspect; label: string }[] = [
@@ -140,28 +148,18 @@ export default function ModuleGalleryEditor({
       ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
-          Gallery items ({items.length})
-        </p>
+        <p className={ADMIN_KICKER}>Gallery items ({items.length})</p>
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => onChange([...items, emptyGalleryItem()])}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 hover:border-blue-200"
-          >
+          <button type="button" onClick={() => onChange([...items, emptyGalleryItem()])} className={`${ADMIN_BTN_GHOST} !py-1.5 text-xs`}>
             + Empty slot
           </button>
-          <button
-            type="button"
-            onClick={() => multiRef.current?.click()}
-            className="rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700"
-          >
+          <button type="button" onClick={() => multiRef.current?.click()} className={`${ADMIN_BTN} !py-1.5 text-xs`}>
             Upload multiple
           </button>
         </div>
       </div>
 
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-white/40">
         Uploads keep the original image/video ratio. Use display ratio chips or crop only when you want to change it.
       </p>
 
@@ -201,30 +199,28 @@ export default function ModuleGalleryEditor({
         }}
       />
 
-      {err ? <p className="rounded-xl bg-red-50 px-4 py-2 text-sm font-semibold text-red-700">{err}</p> : null}
-      {busy ? <p className="text-sm font-semibold text-blue-600">Uploading…</p> : null}
+      {err ? <p className="rounded-2xl border border-rose-400/30 bg-rose-400/10 px-4 py-2 text-sm text-rose-200">{err}</p> : null}
+      {busy ? <p className="text-sm font-semibold text-emerald-300">Uploading…</p> : null}
 
       {items.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-12 text-center">
-          <p className="text-sm text-slate-500">No gallery items yet. Upload images or videos above.</p>
+        <div className="rounded-2xl border border-dashed border-white/20 bg-white/[0.03] px-6 py-12 text-center">
+          <p className="text-sm text-white/45">No gallery items yet. Upload images or videos above.</p>
         </div>
       ) : (
         <div className="space-y-4">
           {items.map((item, i) => (
-            <div key={i} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div key={i} className={`${ADMIN_ROW} !p-4`}>
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                  Item {i + 1}
-                </p>
+                <p className={ADMIN_KICKER}>Item {i + 1}</p>
                 <div className="flex gap-1">
-                  <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-bold text-slate-500 disabled:opacity-30">↑</button>
-                  <button type="button" onClick={() => move(i, 1)} disabled={i === items.length - 1} className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-bold text-slate-500 disabled:opacity-30">↓</button>
-                  <button type="button" onClick={() => remove(i)} className="rounded-lg border border-red-200 px-2 py-1 text-xs font-bold text-red-500">✕</button>
+                  <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="rounded-full border border-white/15 px-2.5 py-1 text-xs text-white/65 disabled:opacity-30">↑</button>
+                  <button type="button" onClick={() => move(i, 1)} disabled={i === items.length - 1} className="rounded-full border border-white/15 px-2.5 py-1 text-xs text-white/65 disabled:opacity-30">↓</button>
+                  <button type="button" onClick={() => remove(i)} className={ADMIN_BTN_DANGER}>✕</button>
                 </div>
               </div>
 
               <div className="mt-3 flex flex-wrap gap-2">
-                <span className="self-center text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                <span className="self-center text-[10px] font-semibold uppercase tracking-wide text-white/40">
                   Display ratio
                 </span>
                 {DISPLAY_ASPECTS.map((a) => (
@@ -232,8 +228,10 @@ export default function ModuleGalleryEditor({
                     key={a.id}
                     type="button"
                     onClick={() => patch(i, { aspect_ratio: a.id })}
-                    className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
-                      item.aspect_ratio === a.id ? "bg-blue-600 text-white" : "border border-slate-200 text-slate-500"
+                    className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                      item.aspect_ratio === a.id
+                        ? "bg-white text-black"
+                        : "border border-white/15 text-white/55"
                     }`}
                   >
                     {a.label}
@@ -242,14 +240,14 @@ export default function ModuleGalleryEditor({
               </div>
 
               <div className="mt-4 grid gap-4 lg:grid-cols-[200px_1fr]">
-                <div className="overflow-hidden rounded-xl bg-slate-100">
+                <div className="overflow-hidden rounded-2xl bg-black/50">
                   {item.media_type === "video" && item.video_url ? (
                     <video src={item.video_url} className="max-h-56 w-full object-contain" muted playsInline controls />
                   ) : item.image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={item.image_url} alt="" className="max-h-56 w-full object-contain" />
                   ) : (
-                    <div className="flex h-32 items-center justify-center text-xs text-slate-400">No media</div>
+                    <div className="flex h-32 items-center justify-center text-xs text-white/35">No media</div>
                   )}
                 </div>
 
@@ -261,7 +259,7 @@ export default function ModuleGalleryEditor({
                         setCropIndex(i);
                         imageRef.current?.click();
                       }}
-                      className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 hover:border-blue-200"
+                      className={`${ADMIN_BTN_GHOST} !py-1.5 text-xs`}
                     >
                       {item.image_url ? "Replace image" : "Add image"}
                     </button>
@@ -272,7 +270,7 @@ export default function ModuleGalleryEditor({
                           setCropIndex(i);
                           setCropSrc(item.image_url);
                         }}
-                        className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 hover:border-blue-200"
+                        className={`${ADMIN_BTN_GHOST} !py-1.5 text-xs`}
                       >
                         Crop image
                       </button>
@@ -283,31 +281,27 @@ export default function ModuleGalleryEditor({
                         setCropIndex(i);
                         videoRef.current?.click();
                       }}
-                      className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 hover:border-blue-200"
+                      className={`${ADMIN_BTN_GHOST} !py-1.5 text-xs`}
                     >
                       {item.video_url ? "Replace video" : "Add video"}
                     </button>
                   </div>
 
                   <div>
-                    <label className="mb-1 block font-mono text-[9px] font-bold uppercase tracking-widest text-slate-400">
-                      Caption
-                    </label>
+                    <label className={ADMIN_LABEL}>Caption</label>
                     <textarea
                       value={item.caption}
                       onChange={(e) => patch(i, { caption: e.target.value })}
                       rows={2}
                       placeholder="Optional caption…"
-                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
+                      className={ADMIN_FIELD}
                     />
                   </div>
 
                   {allowUrlPaste ? (
                     <div className="grid gap-2 sm:grid-cols-2">
                       <div>
-                        <label className="mb-1 block font-mono text-[9px] font-bold uppercase tracking-widest text-slate-400">
-                          Image URL
-                        </label>
+                        <label className={ADMIN_LABEL}>Image URL</label>
                         <input
                           type="url"
                           value={item.image_url}
@@ -315,13 +309,11 @@ export default function ModuleGalleryEditor({
                             patch(i, { image_url: e.target.value, media_type: e.target.value ? "image" : item.media_type })
                           }
                           placeholder="https://…"
-                          className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
+                          className={ADMIN_FIELD}
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block font-mono text-[9px] font-bold uppercase tracking-widest text-slate-400">
-                          Video URL
-                        </label>
+                        <label className={ADMIN_LABEL}>Video URL</label>
                         <input
                           type="url"
                           value={item.video_url}
@@ -332,7 +324,7 @@ export default function ModuleGalleryEditor({
                             })
                           }
                           placeholder="https://… or pasted upload link"
-                          className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
+                          className={ADMIN_FIELD}
                         />
                       </div>
                     </div>
@@ -340,15 +332,13 @@ export default function ModuleGalleryEditor({
 
                   {showPromptField ? (
                     <div>
-                      <label className="mb-1 block font-mono text-[9px] font-bold uppercase tracking-widest text-slate-400">
-                        Prompt (optional — add anytime)
-                      </label>
+                      <label className={ADMIN_LABEL}>Prompt (optional)</label>
                       <textarea
                         value={item.prompt}
                         onChange={(e) => patch(i, { prompt: e.target.value })}
                         rows={4}
                         placeholder="Paste generation prompt here…"
-                        className="w-full rounded-xl border border-slate-200 px-3 py-2 font-mono text-[12px] leading-relaxed outline-none focus:border-blue-400"
+                        className={`${ADMIN_FIELD} font-mono text-[12px]`}
                       />
                     </div>
                   ) : null}

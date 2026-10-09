@@ -277,7 +277,7 @@ export default function AdminAvatarsManager() {
 
   if (sessionOk === false) {
     return (
-      <main className="relative min-h-screen bg-[#f6f2ea] px-6 py-24 text-slate-900">
+      <main className="relative min-h-screen bg-transparent px-6 py-24 text-white">
         <div className="mx-auto max-w-lg text-center">
           <h1 className="font-heading text-2xl font-bold">Not authorized</h1>
           <Link href="/admin/login" className="mt-6 inline-block rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white">
@@ -290,14 +290,14 @@ export default function AdminAvatarsManager() {
 
   if (sessionOk === null || loading) {
     return (
-      <main className="relative min-h-screen bg-[#f6f2ea] px-6 py-24 text-slate-900">
-        <div className="mx-auto max-w-lg text-center text-sm text-slate-600">Loading...</div>
+      <main className="relative min-h-screen bg-transparent px-6 py-24 text-white">
+        <div className="mx-auto max-w-lg text-center text-sm text-white/55">Loading...</div>
       </main>
     );
   }
 
   return (
-    <main className="relative min-h-screen bg-[#f6f2ea] px-6 py-16 text-slate-900">
+    <main className="relative min-h-screen bg-transparent px-6 py-16 text-white">
       {cropJob ? (
         <AvatarCropModal
           imageSrc={cropJob.src}
@@ -310,17 +310,17 @@ export default function AdminAvatarsManager() {
       <div className="mx-auto max-w-4xl space-y-10">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-slate-500">Admin</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-white/45">Admin</p>
             <h1 className="mt-2 font-heading text-3xl font-bold">Avatar characters</h1>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-white/55">
               Crop with drag + zoom (scroll or slider), then save. Gallery: select many files — you&apos;ll crop each in order.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/admin" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
+            <Link href="/admin" className="rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-sm font-medium text-white">
               Gallery uploads
             </Link>
-            <Link href="/avatars" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800">
+            <Link href="/avatars" className="rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-sm font-medium text-white">
               View avatars
             </Link>
             <button type="button" onClick={signOut} className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
@@ -329,8 +329,8 @@ export default function AdminAvatarsManager() {
           </div>
         </header>
 
-        {err ? <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">{err}</p> : null}
-        {msg ? <p className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800">{msg}</p> : null}
+        {err ? <p className="rounded-xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm text-red-900">{err}</p> : null}
+        {msg ? <p className="rounded-2xl border border-white/12 bg-gradient-to-br from-white/[0.08] to-white/[0.02] px-4 py-3 text-sm text-white">{msg}</p> : null}
 
         <div className="space-y-12">
           {rows.map((row) => {
@@ -338,25 +338,25 @@ export default function AdminAvatarsManager() {
             const busy = busySlug === slug;
             const gal = galleryBySlug[slug] ?? [];
             return (
-              <section key={slug} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <section key={slug} className="rounded-2xl border border-white/15 bg-white/[0.06] p-6 ">
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <h2 className="font-heading text-xl font-bold">{row.display_name}</h2>
-                  <span className="font-mono text-xs text-slate-500">/avatars/{slug}</span>
+                  <span className="font-mono text-xs text-white/45">/avatars/{slug}</span>
                 </div>
 
                 <div className="mt-4 grid gap-6 lg:grid-cols-2">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Hero image</p>
-                    <div className="mt-2 relative max-h-64 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-white/45">Hero image</p>
+                    <div className="mt-2 relative max-h-64 overflow-hidden rounded-xl border border-white/15 bg-transparent">
                       {row.hero_image_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={row.hero_image_url} alt="" className="max-h-64 w-full object-contain" />
                       ) : (
-                        <div className="flex h-48 items-center justify-center text-sm text-slate-400">No hero yet</div>
+                        <div className="flex h-48 items-center justify-center text-sm text-white/35">No hero yet</div>
                       )}
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <label className="cursor-pointer rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50">
+                      <label className="cursor-pointer rounded-full border border-white/20 bg-white/[0.06] px-4 py-2 text-xs font-semibold text-white hover:bg-transparent">
                         Crop &amp; upload hero
                         <input
                           type="file"
@@ -396,7 +396,7 @@ export default function AdminAvatarsManager() {
                           };
                           input.click();
                         }}
-                        className="rounded-full border border-dashed border-slate-300 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+                        className="rounded-full border border-dashed border-white/20 bg-transparent px-4 py-2 text-xs font-semibold text-white/55 hover:bg-black/40 disabled:opacity-50"
                       >
                         Upload original (no crop)
                       </button>
@@ -405,7 +405,7 @@ export default function AdminAvatarsManager() {
                           type="button"
                           disabled={busy || !!cropJob}
                           onClick={() => void clearHero(slug)}
-                          className="rounded-full border border-red-200 bg-white px-4 py-2 text-xs font-semibold text-red-800 hover:bg-red-50 disabled:opacity-50"
+                          className="rounded-full border border-rose-400/30 bg-white/[0.06] px-4 py-2 text-xs font-semibold text-rose-200 hover:bg-rose-400/10 disabled:opacity-50"
                         >
                           Remove hero
                         </button>
@@ -414,8 +414,8 @@ export default function AdminAvatarsManager() {
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Headline &amp; story</p>
-                    <label className="mt-2 block text-xs text-slate-600">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-white/45">Headline &amp; story</p>
+                    <label className="mt-2 block text-xs text-white/55">
                       Headline
                       <input
                         type="text"
@@ -423,10 +423,10 @@ export default function AdminAvatarsManager() {
                         onChange={(e) =>
                           setCopyDraft((prev) => ({ ...prev, [slug]: { ...prev[slug], headline: e.target.value } }))
                         }
-                        className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                        className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
                       />
                     </label>
-                    <label className="mt-3 block text-xs text-slate-600">
+                    <label className="mt-3 block text-xs text-white/55">
                       Story (paragraphs — blank lines between)
                       <textarea
                         value={copyDraft[slug].story}
@@ -434,7 +434,7 @@ export default function AdminAvatarsManager() {
                           setCopyDraft((prev) => ({ ...prev, [slug]: { ...prev[slug], story: e.target.value } }))
                         }
                         rows={6}
-                        className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                        className="mt-1 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
                       />
                     </label>
                     <button
@@ -448,11 +448,11 @@ export default function AdminAvatarsManager() {
                   </div>
                 </div>
 
-                <div className="mt-8 border-t border-slate-100 pt-6">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Gallery</p>
-                  <p className="mt-1 text-xs text-slate-500">Add as many images as you want. Multi-select files to crop them one after another.</p>
+                <div className="mt-8 border-t border-white/10 pt-6">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-white/45">Gallery</p>
+                  <p className="mt-1 text-xs text-white/45">Add as many images as you want. Multi-select files to crop them one after another.</p>
                   <div className="mt-3 flex flex-wrap gap-3">
-                    <label className="cursor-pointer rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50">
+                    <label className="cursor-pointer rounded-full border border-white/20 bg-white/[0.06] px-4 py-2 text-xs font-semibold text-white hover:bg-transparent">
                       Crop &amp; add images
                       <input
                         type="file"
@@ -466,7 +466,7 @@ export default function AdminAvatarsManager() {
                         }}
                       />
                     </label>
-                    <label className="cursor-pointer rounded-full border border-dashed border-slate-300 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100">
+                    <label className="cursor-pointer rounded-full border border-dashed border-white/20 bg-transparent px-4 py-2 text-xs font-semibold text-white/55 hover:bg-black/40">
                       Upload originals (no crop)
                       <input
                         type="file"
@@ -500,15 +500,15 @@ export default function AdminAvatarsManager() {
                   {gal.length ? (
                     <ul className="mt-4 grid list-none gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       {gal.map((g) => (
-                        <li key={g.id} className="overflow-hidden rounded-xl border border-slate-200">
+                        <li key={g.id} className="overflow-hidden rounded-xl border border-white/15">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={g.public_url} alt="" className="aspect-auto max-h-56 w-full object-contain" />
-                          <div className="border-t border-slate-100 p-2">
+                          <div className="border-t border-white/10 p-2">
                             <button
                               type="button"
                               disabled={busy || !!cropJob}
                               onClick={() => void deleteGallery(slug, g.id)}
-                              className="text-xs font-semibold text-red-700 hover:underline disabled:opacity-50"
+                              className="text-xs font-semibold text-rose-200 hover:underline disabled:opacity-50"
                             >
                               Delete
                             </button>
@@ -517,7 +517,7 @@ export default function AdminAvatarsManager() {
                       ))}
                     </ul>
                   ) : (
-                    <p className="mt-2 text-sm text-slate-500">No gallery images yet.</p>
+                    <p className="mt-2 text-sm text-white/45">No gallery images yet.</p>
                   )}
                 </div>
               </section>

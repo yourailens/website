@@ -90,8 +90,8 @@ export default function ServiceGalleryEditor({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-slate-800">Package gallery</p>
-          <p className="text-xs text-slate-500">
+          <p className="text-sm font-semibold text-white">Package gallery</p>
+          <p className="text-xs text-white/45">
             Images and videos shown on the package page. Upload multiple at once.
           </p>
         </div>
@@ -115,15 +115,15 @@ export default function ServiceGalleryEditor({
       {error ? <p className="text-xs text-red-500">{error}</p> : null}
 
       {items.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-400">
+        <div className="rounded-xl border border-dashed border-white/15 bg-transparent px-4 py-10 text-center text-sm text-white/35">
           No gallery items yet
         </div>
       ) : (
         <div className="space-y-3">
           {items.map((item, i) => (
-            <div key={i} className="rounded-xl border border-slate-200 bg-white p-3">
+            <div key={i} className="rounded-xl border border-white/15 bg-white/[0.06] p-3">
               <div className="flex gap-3">
-                <div className="h-20 w-28 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                <div className="h-20 w-28 shrink-0 overflow-hidden rounded-lg bg-black/40">
                   {item.media_type === "video" && item.video_url ? (
                     <video src={item.video_url} className="h-full w-full object-cover" muted />
                   ) : item.image_url ? (
@@ -133,21 +133,21 @@ export default function ServiceGalleryEditor({
                 </div>
                 <div className="min-w-0 flex-1 space-y-2">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-white/35">
                       {item.media_type} · #{i + 1}
                     </span>
                     <div className="flex gap-1">
                       <button
                         type="button"
                         onClick={() => move(i, -1)}
-                        className="rounded px-2 py-0.5 text-xs text-slate-500 hover:bg-slate-100"
+                        className="rounded px-2 py-0.5 text-xs text-white/45 hover:bg-black/40"
                       >
                         ↑
                       </button>
                       <button
                         type="button"
                         onClick={() => move(i, 1)}
-                        className="rounded px-2 py-0.5 text-xs text-slate-500 hover:bg-slate-100"
+                        className="rounded px-2 py-0.5 text-xs text-white/45 hover:bg-black/40"
                       >
                         ↓
                       </button>
@@ -164,7 +164,7 @@ export default function ServiceGalleryEditor({
                     value={item.caption}
                     onChange={(e) => patch(i, { caption: e.target.value })}
                     placeholder="Caption (optional)"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm"
+                    className="w-full rounded-lg border border-white/15 px-3 py-1.5 text-sm"
                   />
                 </div>
               </div>

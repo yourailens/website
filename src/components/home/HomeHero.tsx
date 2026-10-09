@@ -1,18 +1,28 @@
 "use client";
 
+import type { Ref } from "react";
 import { DeferredVideo } from "@/components/media/DeferredVideo";
 
-export default function HomeHero() {
+type HomeHeroProps = {
+  muted?: boolean;
+  onSurfaceClick?: (event: React.MouseEvent) => void;
+  videoRef?: Ref<HTMLVideoElement>;
+};
+
+export default function HomeHero({ muted = true, onSurfaceClick, videoRef }: HomeHeroProps = {}) {
   return (
     <section
       id="lens"
       aria-label="Opening film"
-      className="relative aspect-video w-full bg-black md:aspect-auto md:h-[100svh] md:min-h-[560px]"
+      onClick={onSurfaceClick}
+      className={`relative aspect-video w-full bg-black md:aspect-auto md:h-[100svh] md:min-h-[560px] ${onSurfaceClick ? "cursor-pointer" : ""}`}
     >
       <h1 className="sr-only">YourAILens Studios</h1>
       <DeferredVideo
+        ref={videoRef}
         src="/videos/hero_new.mp4"
         eager
+        muted={muted}
         className="absolute inset-0 h-full w-full object-cover"
       />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent md:h-36" />

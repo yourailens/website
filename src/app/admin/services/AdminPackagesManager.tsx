@@ -119,7 +119,7 @@ function formFromService(s: ServiceWithGallery): FormState {
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+    <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">
       {children}
     </label>
   );
@@ -147,12 +147,12 @@ function StringListEditor({
                 n[i] = e.target.value;
                 onChange(n);
               }}
-              className="flex-1 rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-blue-400"
+              className="flex-1 rounded-xl border border-white/15 px-4 py-2 text-sm outline-none focus:border-white/40"
             />
             <button
               type="button"
               onClick={() => onChange(items.filter((_, idx) => idx !== i))}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white/35 hover:bg-red-50 hover:text-red-500"
             >
               ×
             </button>
@@ -161,7 +161,7 @@ function StringListEditor({
         <button
           type="button"
           onClick={() => onChange([...items, ""])}
-          className="text-xs font-semibold text-blue-600 hover:text-blue-800"
+          className="text-xs font-semibold text-emerald-300/80 hover:text-emerald-200"
         >
           + Add item
         </button>
@@ -334,34 +334,34 @@ export default function AdminPackagesManager() {
 
   if (showing) {
     return (
-      <div className="min-h-screen bg-slate-50">
-        <div className="border-b border-slate-200 bg-white px-6 py-4">
+      <div className="">
+        <div className="mb-8 rounded-[1.35rem] border border-white/12 bg-gradient-to-br from-white/[0.09] to-white/[0.02] px-5 py-4 sm:px-6">
           <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
             <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-blue-600">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-300/80">
                 Admin → Pricing
               </p>
-              <h1 className="font-heading text-xl font-black text-slate-900">
+              <h1 className="font-heading text-xl font-heading text-white">
                 {editing ? `Edit: ${editing.name}` : "New package"}
               </h1>
             </div>
             <button
               type="button"
               onClick={() => setShowing(false)}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              className="rounded-xl border border-white/15 px-4 py-2 text-sm font-semibold text-white/55 hover:bg-white/[0.04]"
             >
               ← Back
             </button>
           </div>
         </div>
 
-        <form onSubmit={onSubmit} className="mx-auto max-w-4xl space-y-8 px-6 py-8">
+        <form onSubmit={onSubmit} className="mx-auto max-w-4xl space-y-8">
           {/* 1. Media first (matches public gallery-first page) */}
-          <div className="rounded-2xl border border-blue-100 bg-white p-5 shadow-sm">
-            <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-widest text-blue-600">
+          <div className="rounded-2xl border border-white/12 bg-white/[0.06] p-5 ">
+            <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-300/80">
               1 · Hero media
             </p>
-            <p className="mb-4 text-xs text-slate-500">
+            <p className="mb-4 text-xs text-white/45">
               Full width banner on the package page. Prefer a looping video. Keep labels short.
             </p>
             <div className="grid gap-4 md:grid-cols-2">
@@ -372,7 +372,7 @@ export default function AdminPackagesManager() {
                   onChange={(e) =>
                     sf("hero_media_type", e.target.value as FormState["hero_media_type"])
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm"
+                  className="w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-sm text-white"
                 >
                   <option value="">Auto</option>
                   <option value="video">Video</option>
@@ -385,7 +385,7 @@ export default function AdminPackagesManager() {
                   value={form.hero_label}
                   onChange={(e) => sf("hero_label", e.target.value)}
                   placeholder="Sample cut"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                  className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white"
                 />
               </div>
             </div>
@@ -400,7 +400,7 @@ export default function AdminPackagesManager() {
                     controls
                   />
                 ) : (
-                  <div className="mb-2 flex aspect-[21/9] items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-xs text-slate-400">
+                  <div className="mb-2 flex aspect-[21/9] items-center justify-center rounded-xl border border-dashed border-white/15 bg-white/[0.04] text-xs text-white/35">
                     No hero video
                   </div>
                 )}
@@ -408,7 +408,7 @@ export default function AdminPackagesManager() {
                   type="button"
                   disabled={busy}
                   onClick={() => heroVideoRef.current?.click()}
-                  className="w-full rounded-xl border border-slate-200 py-2 text-xs font-bold text-slate-700"
+                  className="w-full rounded-xl border border-white/15 py-2 text-xs font-bold text-white/70"
                 >
                   {form.hero_video_url ? "Replace hero video" : "Upload hero video"}
                 </button>
@@ -433,7 +433,7 @@ export default function AdminPackagesManager() {
                     className="mb-2 aspect-[21/9] w-full rounded-xl object-cover"
                   />
                 ) : (
-                  <div className="mb-2 flex aspect-[21/9] items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-xs text-slate-400">
+                  <div className="mb-2 flex aspect-[21/9] items-center justify-center rounded-xl border border-dashed border-white/15 bg-white/[0.04] text-xs text-white/35">
                     No hero image / poster
                   </div>
                 )}
@@ -441,7 +441,7 @@ export default function AdminPackagesManager() {
                   type="button"
                   disabled={busy}
                   onClick={() => heroImageRef.current?.click()}
-                  className="w-full rounded-xl border border-slate-200 py-2 text-xs font-bold text-slate-700"
+                  className="w-full rounded-xl border border-white/15 py-2 text-xs font-bold text-white/70"
                 >
                   {form.hero_image_url ? "Replace hero image" : "Upload hero image / poster"}
                 </button>
@@ -460,11 +460,11 @@ export default function AdminPackagesManager() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-blue-100 bg-white p-5 shadow-sm">
-            <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-widest text-blue-600">
+          <div className="rounded-2xl border border-white/12 bg-white/[0.06] p-5 ">
+            <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-300/80">
               2 · Gallery
             </p>
-            <p className="mb-4 text-xs text-slate-500">
+            <p className="mb-4 text-xs text-white/45">
               Main focus of the package page. Upload images and videos. Shown right under the hero.
             </p>
             <ServiceGalleryEditor
@@ -474,11 +474,11 @@ export default function AdminPackagesManager() {
             />
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5">
-            <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          <div className="rounded-2xl border border-white/15 bg-white/[0.06] p-5">
+            <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">
               Listing card image
             </p>
-            <p className="mb-3 text-xs text-slate-500">Used on /pricing cards only.</p>
+            <p className="mb-3 text-xs text-white/45">Used on /pricing cards only.</p>
             {form.thumbnail_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -491,7 +491,7 @@ export default function AdminPackagesManager() {
               type="button"
               disabled={busy}
               onClick={() => thumbRef.current?.click()}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700"
+              className="rounded-xl border border-white/15 px-4 py-2 text-xs font-bold text-white/70"
             >
               {form.thumbnail_url ? "Replace thumbnail" : "Upload thumbnail"}
             </button>
@@ -510,7 +510,7 @@ export default function AdminPackagesManager() {
 
           {/* 3. Basics */}
           <div>
-            <p className="mb-4 font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            <p className="mb-4 font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">
               3 · Package details
             </p>
             <div className="grid gap-6 md:grid-cols-2">
@@ -527,7 +527,7 @@ export default function AdminPackagesManager() {
                       slug: editing ? f.slug : slugify(name),
                     }));
                   }}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-400"
+                  className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white outline-none focus:border-white/40"
                 />
               </div>
               <div>
@@ -536,7 +536,7 @@ export default function AdminPackagesManager() {
                   required
                   value={form.slug}
                   onChange={(e) => sf("slug", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-400"
+                  className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white outline-none focus:border-white/40"
                 />
               </div>
               <div>
@@ -544,7 +544,7 @@ export default function AdminPackagesManager() {
                 <select
                   value={form.category_slug}
                   onChange={(e) => sf("category_slug", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-blue-400"
+                  className="w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-sm text-white outline-none focus:border-white/40"
                 >
                   <option value="videos">Films & commercials</option>
                   <option value="visuals">Images & stills</option>
@@ -555,7 +555,7 @@ export default function AdminPackagesManager() {
                 <input
                   value={form.tagline}
                   onChange={(e) => sf("tagline", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-400"
+                  className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white outline-none focus:border-white/40"
                 />
               </div>
             </div>
@@ -566,7 +566,7 @@ export default function AdminPackagesManager() {
                 value={form.description}
                 onChange={(e) => sf("description", e.target.value)}
                 rows={2}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-400"
+                className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white outline-none focus:border-white/40"
               />
             </div>
 
@@ -577,7 +577,7 @@ export default function AdminPackagesManager() {
                   type="number"
                   value={form.price}
                   onChange={(e) => sf("price", Number(e.target.value))}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-400"
+                  className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white outline-none focus:border-white/40"
                 />
               </div>
               <div>
@@ -588,7 +588,7 @@ export default function AdminPackagesManager() {
                   onChange={(e) =>
                     sf("traditional_value", e.target.value ? Number(e.target.value) : null)
                   }
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-400"
+                  className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white outline-none focus:border-white/40"
                 />
               </div>
               <div>
@@ -596,7 +596,7 @@ export default function AdminPackagesManager() {
                 <input
                   value={form.unit}
                   onChange={(e) => sf("unit", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-400"
+                  className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white outline-none focus:border-white/40"
                 />
               </div>
               <div>
@@ -605,7 +605,7 @@ export default function AdminPackagesManager() {
                   type="number"
                   value={form.delivery_days}
                   onChange={(e) => sf("delivery_days", Number(e.target.value))}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-400"
+                  className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white outline-none focus:border-white/40"
                 />
               </div>
             </div>
@@ -613,17 +613,17 @@ export default function AdminPackagesManager() {
 
           {/* 4. Scope Q&A below */}
           <div>
-            <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-widest text-white/35">
               4 · Package Q and A
             </p>
-            <p className="mb-3 text-xs text-slate-500">
+            <p className="mb-3 text-xs text-white/45">
               Shown below the gallery. Example: How many videos? → 3 videos each (40 to 45 seconds)
             </p>
             <div className="space-y-3">
               {form.includes.map((item, i) => (
-                <div key={i} className="rounded-xl border border-slate-200 bg-white p-4">
+                <div key={i} className="rounded-xl border border-white/15 bg-white/[0.06] p-4">
                   <div className="mb-2 flex justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-white/35">
                       Scope {i + 1}
                     </span>
                     <button
@@ -642,7 +642,7 @@ export default function AdminPackagesManager() {
                       sf("includes", n);
                     }}
                     placeholder="How many videos?"
-                    className="mb-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold"
+                    className="mb-2 w-full rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold"
                   />
                   <textarea
                     value={item.a}
@@ -653,14 +653,14 @@ export default function AdminPackagesManager() {
                     }}
                     placeholder="3 videos each (40 to 45 seconds)"
                     rows={2}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                    className="w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
                   />
                 </div>
               ))}
               <button
                 type="button"
                 onClick={() => sf("includes", [...form.includes, { q: "", a: "" }])}
-                className="text-xs font-semibold text-blue-600"
+                className="text-xs font-semibold text-emerald-300/80"
               >
                 + Add Q and A
               </button>
@@ -682,9 +682,9 @@ export default function AdminPackagesManager() {
             <FieldLabel>FAQs</FieldLabel>
             <div className="space-y-3">
               {form.faqs.map((faq, i) => (
-                <div key={i} className="rounded-xl border border-slate-200 bg-white p-4">
+                <div key={i} className="rounded-xl border border-white/15 bg-white/[0.06] p-4">
                   <div className="mb-2 flex justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-white/35">
                       FAQ {i + 1}
                     </span>
                     <button
@@ -703,7 +703,7 @@ export default function AdminPackagesManager() {
                       sf("faqs", n);
                     }}
                     placeholder="Question"
-                    className="mb-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                    className="mb-2 w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
                   />
                   <textarea
                     value={faq.a}
@@ -714,14 +714,14 @@ export default function AdminPackagesManager() {
                     }}
                     placeholder="Answer"
                     rows={2}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                    className="w-full rounded-lg border border-white/15 px-3 py-2 text-sm"
                   />
                 </div>
               ))}
               <button
                 type="button"
                 onClick={() => sf("faqs", [...form.faqs, { q: "", a: "" }])}
-                className="text-xs font-semibold text-blue-600"
+                className="text-xs font-semibold text-emerald-300/80"
               >
                 + Add FAQ
               </button>
@@ -734,7 +734,7 @@ export default function AdminPackagesManager() {
               <input
                 value={form.badge_label}
                 onChange={(e) => sf("badge_label", e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white"
               />
             </div>
             <div>
@@ -742,7 +742,7 @@ export default function AdminPackagesManager() {
               <select
                 value={form.badge_color}
                 onChange={(e) => sf("badge_color", e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm"
+                className="w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-sm text-white"
               >
                 {["blue", "green", "violet", "orange"].map((c) => (
                   <option key={c} value={c}>
@@ -758,12 +758,12 @@ export default function AdminPackagesManager() {
                   type="color"
                   value={form.accent_color}
                   onChange={(e) => sf("accent_color", e.target.value)}
-                  className="h-11 w-12 rounded-lg border border-slate-200"
+                  className="h-11 w-12 rounded-lg border border-white/15"
                 />
                 <input
                   value={form.accent_color}
                   onChange={(e) => sf("accent_color", e.target.value)}
-                  className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                  className="flex-1 rounded-xl border border-white/15 px-3 py-2 text-sm"
                 />
               </div>
             </div>
@@ -773,7 +773,7 @@ export default function AdminPackagesManager() {
                 type="number"
                 value={form.sort_order}
                 onChange={(e) => sf("sort_order", Number(e.target.value))}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm text-white"
               />
             </div>
           </div>
@@ -785,16 +785,16 @@ export default function AdminPackagesManager() {
                   type="button"
                   onClick={() => sf(k, !form[k])}
                   className={`relative h-6 w-10 rounded-full transition-colors ${
-                    form[k] ? "bg-blue-600" : "bg-slate-200"
+                    form[k] ? "bg-blue-600" : "bg-white/20"
                   }`}
                 >
                   <span
-                    className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-all ${
+                    className={`absolute top-1 h-4 w-4 rounded-full bg-white/[0.06] shadow transition-all ${
                       form[k] ? "left-5" : "left-1"
                     }`}
                   />
                 </button>
-                <span className="text-sm font-semibold capitalize text-slate-700">
+                <span className="text-sm font-semibold capitalize text-white/70">
                   {k.replace("is_", "")}
                 </span>
               </label>
@@ -824,7 +824,7 @@ export default function AdminPackagesManager() {
                 href={`/pricing/${editing.slug}`}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-700"
+                className="rounded-2xl border border-white/15 bg-white/[0.06] px-6 py-3.5 text-sm font-bold text-white/70"
               >
                 Preview →
               </a>
@@ -836,30 +836,22 @@ export default function AdminPackagesManager() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="border-b border-slate-200 bg-white px-6 py-4">
+    <div className="">
+      <div className="mb-8 rounded-[1.35rem] border border-white/12 bg-gradient-to-br from-white/[0.09] to-white/[0.02] px-5 py-4 sm:px-6">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4">
-          <div>
-            <Link
-              href="/admin"
-              className="font-mono text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:text-blue-800"
-            >
-              ← Admin
-            </Link>
-            <h1 className="font-heading text-xl font-black text-slate-900">Pricing packages</h1>
-          </div>
+          <p className="text-sm text-white/55">Create and edit film and stills packages.</p>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => openNew("videos")}
-              className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-800 hover:bg-blue-100"
+              className="rounded-full bg-white px-3 py-2 text-xs font-semibold text-black hover:bg-emerald-100"
             >
               + Film package
             </button>
             <button
               type="button"
               onClick={() => openNew("visuals")}
-              className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-100"
+              className="rounded-full border border-white/20 px-3 py-2 text-xs font-semibold text-white/80 hover:border-white/40 hover:text-white"
             >
               + Stills package
             </button>
@@ -867,7 +859,7 @@ export default function AdminPackagesManager() {
               href="/pricing"
               target="_blank"
               rel="noreferrer"
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600"
+              className="rounded-xl border border-white/15 bg-white/[0.06] px-3 py-2 text-xs font-bold text-white/55"
             >
               Preview site →
             </a>
@@ -875,7 +867,7 @@ export default function AdminPackagesManager() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl px-6 py-8">
+      <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-wrap gap-2">
           {(
             [
@@ -890,8 +882,8 @@ export default function AdminPackagesManager() {
               onClick={() => setFilter(id)}
               className={`rounded-full px-4 py-2 text-xs font-bold ${
                 filter === id
-                  ? "bg-blue-600 text-white"
-                  : "border border-slate-200 bg-white text-slate-600"
+                  ? "bg-white text-black"
+                  : "border border-white/15 bg-white/[0.06] text-white/55"
               }`}
             >
               {label}
@@ -905,11 +897,11 @@ export default function AdminPackagesManager() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-24 text-center">
-            <p className="font-heading text-lg font-bold text-slate-700">No packages yet</p>
+            <p className="font-heading text-lg font-bold text-white/70">No packages yet</p>
             <button
               type="button"
               onClick={() => openNew("videos")}
-              className="mt-4 text-sm font-semibold text-blue-600"
+              className="mt-4 text-sm font-semibold text-emerald-300/80"
             >
               Create your first package →
             </button>
@@ -921,10 +913,10 @@ export default function AdminPackagesManager() {
               return (
                 <div
                   key={item.id}
-                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                  className="overflow-hidden rounded-2xl border border-white/12 bg-gradient-to-br from-white/[0.08] to-white/[0.02] "
                 >
                   <div
-                    className="relative aspect-[16/10] bg-slate-100"
+                    className="relative aspect-[16/10] bg-black/40"
                     style={{
                       background: `linear-gradient(135deg, ${item.accent_color ?? "#2563eb"}22, #f8fafc)`,
                     }}
@@ -940,11 +932,11 @@ export default function AdminPackagesManager() {
                     ) : null}
                   </div>
                   <div className="p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-blue-600">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-300/80">
                       {PRICING_CATEGORY_LABELS[item.category_slug] ?? item.category_slug}
                     </p>
-                    <p className="mt-1 truncate font-bold text-slate-800">{item.name}</p>
-                    <p className="mt-0.5 text-[10px] text-slate-400">
+                    <p className="mt-1 truncate font-bold text-white">{item.name}</p>
+                    <p className="mt-0.5 text-[10px] text-white/35">
                       {formatPriceFull(item.price)} · {item.gallery?.length ?? 0} gallery · order{" "}
                       {item.sort_order}
                     </p>
@@ -952,7 +944,7 @@ export default function AdminPackagesManager() {
                       <button
                         type="button"
                         onClick={() => openEdit(item)}
-                        className="rounded-lg border border-slate-200 px-3 py-1 text-[10px] font-bold text-slate-600"
+                        className="rounded-lg border border-white/15 px-3 py-1 text-[10px] font-bold text-white/55"
                       >
                         Edit
                       </button>
@@ -960,7 +952,7 @@ export default function AdminPackagesManager() {
                         href={`/pricing/${item.slug}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="rounded-lg border border-slate-200 px-3 py-1 text-[10px] font-bold text-slate-600"
+                        className="rounded-lg border border-white/15 px-3 py-1 text-[10px] font-bold text-white/55"
                       >
                         View
                       </a>
@@ -969,8 +961,8 @@ export default function AdminPackagesManager() {
                         onClick={() => togglePublish(item)}
                         className={`rounded-lg px-3 py-1 text-[10px] font-bold ${
                           item.is_published
-                            ? "border border-slate-200 text-slate-500"
-                            : "bg-blue-600 text-white"
+                            ? "border border-white/15 text-white/45"
+                            : "bg-white text-black"
                         }`}
                       >
                         {item.is_published ? "Unpublish" : "Publish"}

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/api/admin-auth";
+import { isHeroSlot } from "@/data/ott-cuts";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
-import { isOttCutAspect, isOttCutCategory, isOttCutMediaType, clearOtherHomepageFeatures } from "@/lib/ott-cuts/load";
+import { isOttCutAspect, isOttCutCategory, isOttCutMediaType, clearOtherHomepageFeatures, clearHeroSlot } from "@/lib/ott-cuts/load";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +36,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (b.homepage_feature) {
       await clearOtherHomepageFeatures(db, id);
     }
+  }
+  if ("hero_slot" in b) {
+    const hero_slot = isHeroSlot(b.hero_slot) ? b.hero_slot : null;
+    if (hero_slot) await clearHeroSlot(db, hero_slot, id);
+    patch.hero_slot = hero_slot;
+    patch.homepage_hero = Boolean(hero_slot);
   }
 
   const { error } = await db.from("ott_cuts").update(patch).eq("id", id);
