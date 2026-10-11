@@ -16,6 +16,7 @@ import {
   type YailVaultEntry,
   type YailVaultTag,
 } from "@/data/yail-vault";
+import { captureVideoPosterBlob } from "@/lib/media/capture-video-poster";
 import { readMediaDimensions } from "@/lib/media/read-dimensions";
 import VaultAvatarsDesk from "./VaultAvatarsDesk";
 import VaultHomeTeaseDesk from "./VaultHomeTeaseDesk";
@@ -216,9 +217,12 @@ export default function VaultDesk() {
     });
   }
 
-  async function uploadMedia(blob: Blob, filename: string) {
+  async function uploadMedia(blob: Blob, filename: string, posterBlob?: Blob | null) {
     const fd = new FormData();
     fd.append("file", blob, filename);
+    if (posterBlob && posterBlob.size > 0) {
+      fd.append("poster", posterBlob, "poster.jpg");
+    }
     const res = await fetch("/api/admin/yail-vault/upload-media", { method: "POST", body: fd });
     const j = (await res.json().catch(() => ({}))) as {
       url?: string;
@@ -248,13 +252,28 @@ export default function VaultDesk() {
       let media_url = draft.media_url;
       let poster_url = draft.poster_url;
       if (draft.localBlob) {
+        const isVideo =
+          draft.media_type === "video" ||
+          draft.localBlob.type.startsWith("video/") ||
+          /\.(mp4|mov|webm|m4v|mkv)$/i.test(
+            draft.localBlob instanceof File ? draft.localBlob.name : ""
+          );
+        let posterBlob: Blob | null = null;
+        if (isVideo) {
+          try {
+            posterBlob = await captureVideoPosterBlob(draft.localBlob);
+          } catch (captureErr) {
+            console.warn("vault poster capture failed", captureErr);
+          }
+        }
         const uploaded = await uploadMedia(
           draft.localBlob,
-          draft.localBlob instanceof File ? draft.localBlob.name : "vault-media.bin"
+          draft.localBlob instanceof File ? draft.localBlob.name : "vault-media.bin",
+          posterBlob
         );
         media_url = uploaded.url!;
         media_type = uploaded.media_type ?? draft.media_type ?? "image";
-        poster_url = uploaded.poster_url ?? null;
+        poster_url = uploaded.poster_url ?? poster_url;
       }
       if (!media_type || !media_url) throw new Error("Media is required");
 

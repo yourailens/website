@@ -38,6 +38,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     label: "Lab",
     items: [
       { href: "/admin/vault", label: "YAIL Vault", hint: "GenAI labs & notes" },
+      { href: "/admin/yailians", label: "YAILIANS", hint: "45 min AI film showcase" },
       { href: "/admin/the-future", label: "The Future", hint: "Fields & modules" },
     ],
   },
@@ -56,33 +57,39 @@ export const ADMIN_QUICK_ACTIONS: {
     blurb: "GenAI labs — filmmaking, ads, notes.",
   },
   {
+    href: "/admin/yailians",
+    label: "YAILIANS",
+    kicker: "02",
+    blurb: "Trailer, voices, screenings, world.",
+  },
+  {
     href: "/admin",
     label: "OTT cuts",
-    kicker: "02",
+    kicker: "03",
     blurb: "Hero slots, ads, films, community.",
   },
   {
     href: "/admin/manage",
     label: "Gallery",
-    kicker: "03",
+    kicker: "04",
     blurb: "Reorder stills and films. Delete bad cuts.",
   },
   {
     href: "/admin/events",
     label: "Events",
-    kicker: "04",
+    kicker: "05",
     blurb: "Publish meetups and showtimes.",
   },
   {
     href: "/admin/services",
     label: "Pricing",
-    kicker: "05",
+    kicker: "06",
     blurb: "Weekly, monthly, and custom packages.",
   },
   {
     href: "/admin/team",
     label: "Team",
-    kicker: "06",
+    kicker: "07",
     blurb: "Profiles for the public team page.",
   },
 ];

@@ -132,8 +132,8 @@ export default async function HomeStudioStory() {
     ? (() => {
         const yt = ottCutYoutubeId(homepageFeature.media_url);
         return {
-          href: `${ottCutChannelPath(homepageFeature.category)}#${homepageFeature.slug}`,
-          title: homepageFeature.caption || trailerMeta?.title || "Our first 45 min AI film",
+          href: "/yailians",
+          title: homepageFeature.caption || trailerMeta?.title || "YAILIANS",
           tag: trailerMeta?.tag ?? "45 min",
           video: !yt && homepageFeature.media_type === "video" ? homepageFeature.media_url : undefined,
           image: homepageFeature.media_type === "image" ? homepageFeature.media_url : undefined,
@@ -144,7 +144,7 @@ export default async function HomeStudioStory() {
         };
       })()
     : trailerMeta
-      ? toOttCard(trailerMeta)
+      ? { ...toOttCard(trailerMeta), href: "/yailians", title: trailerMeta.title || "YAILIANS" }
       : null;
 
   return (
@@ -170,9 +170,15 @@ export default async function HomeStudioStory() {
           <div>
             <p className="font-mono text-[10px] tracking-[0.32em] text-blue-400">SC. 3 · AI FILMS</p>
             <h2 className="mt-2 font-body text-[clamp(1.7rem,3.6vw,2.8rem)] font-semibold leading-none tracking-tight">AI films</h2>
-            <p className="mt-2 max-w-lg text-sm font-light text-white/50">Our first 45 min AI film. Then the cuts from the desk.</p>
+            <p className="mt-2 max-w-lg text-sm font-light text-white/50">
+              Our first 45 min AI film —{" "}
+              <a href="/yailians" className="text-sky-300/90 transition hover:text-sky-200">
+                YAILIANS
+              </a>
+              . Then the cuts from the desk.
+            </p>
           </div>
-          <OttSeeAllLink href="/ai-filmmaking" label="All films" className="mb-0.5" />
+          <OttSeeAllLink href="/yailians" label="YAILIANS" className="mb-0.5" />
         </div>
         <div className="mt-8">
           {feature ? <FilmFeature card={feature} /> : null}
