@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import VaultBrowseNav from "@/components/vault/VaultBrowseNav";
 import VaultPendingLink from "@/components/vault/VaultPendingLink";
-import { EmptyVault, VaultOttHero, VaultRail } from "@/components/vault/vault-browse-ui";
+import { EmptyVault, VaultGallery, VaultOttHero } from "@/components/vault/vault-browse-ui";
 import type { YailVaultAvatar } from "@/data/yail-vault-avatars";
 import {
   YAIL_VAULT_CATEGORIES,
@@ -78,16 +78,16 @@ function AvatarJumbotron({
         }`}
       >
         {/* Portrait stage — single frame, no overlapping deco cards */}
-        <div className={`relative shrink-0 ${flip ? "lg:pl-10" : "lg:pr-10"}`}>
+        <div className={`relative w-full shrink-0 lg:w-auto ${flip ? "lg:pl-10" : "lg:pr-10"}`}>
           <VaultPendingLink
             href={`/vault/avatars/${avatar.slug}`}
-            className="group relative block overflow-hidden rounded-[1.15rem] bg-zinc-900 ring-1 ring-white/10 shadow-[0_32px_80px_-28px_rgba(0,0,0,0.95)] transition hover:ring-white/25"
+            className="group relative mx-auto block w-full overflow-hidden rounded-[1.15rem] bg-zinc-900 ring-1 ring-white/10 shadow-[0_32px_80px_-28px_rgba(0,0,0,0.95)] transition hover:ring-white/25 lg:mx-0 lg:w-[25rem]"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={avatar.portrait_url}
               alt={avatar.name}
-              className="aspect-[3/4] w-[min(100%,19rem)] object-cover object-top transition duration-500 group-hover:scale-[1.02] sm:w-[22rem] lg:w-[25rem]"
+              className="aspect-[3/4] w-full object-cover object-top transition duration-500 group-hover:scale-[1.02]"
             />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 to-transparent" />
             <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
@@ -160,7 +160,7 @@ function AvatarJumbotron({
 
       {cuts.length ? (
         <div className="relative z-10 border-t border-white/10 bg-black/60 py-6 backdrop-blur-sm">
-          <VaultRail title={`Labs with ${avatar.name}`} scene={scene} entries={cuts} />
+          <VaultGallery title={`Labs with ${avatar.name}`} scene={scene} entries={cuts} />
         </div>
       ) : null}
     </section>
@@ -288,48 +288,72 @@ export default function VaultExperience({
   );
 
   const brand = (
-    <div className="select-none">
-      <div className="flex items-center gap-2.5">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/logo_yail.png" alt="" className="h-7 w-auto" />
-        <div>
-          <p className="font-mono text-[9px] tracking-[0.32em] text-emerald-400">YAIL</p>
-          <p className="mt-0.5 font-heading text-xl leading-none tracking-tight">Vault</p>
-        </div>
+    <VaultPendingLink
+      href="/vault"
+      onClick={() => setMenuOpen(false)}
+      aria-label="All labs"
+      className="group flex w-full items-center gap-2.5 px-5 py-4 transition-colors hover:bg-white/[0.04]"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/images/logo_yail.png" alt="" className="h-7 w-auto transition group-hover:opacity-95" />
+      <div>
+        <p className="font-mono text-[9px] tracking-[0.32em] text-emerald-400 transition group-hover:text-emerald-300">
+          YAIL
+        </p>
+        <p className="mt-0.5 font-heading text-xl leading-none tracking-tight transition group-hover:text-white">
+          Vault
+        </p>
       </div>
-    </div>
+    </VaultPendingLink>
   );
 
   const sidebarHeader = (closeBtn?: ReactNode) => (
     <div className="shrink-0 border-b border-white/10">
-      <div className="relative flex items-center gap-1 overflow-hidden px-3 py-2.5">
+      <div className="relative overflow-hidden">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-gradient-to-r from-sky-500/[0.14] via-sky-400/[0.05] to-transparent"
         />
-        <div aria-hidden className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-sky-400/40 via-sky-400/10 to-transparent" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-sky-400/40 via-sky-400/10 to-transparent"
+        />
         <VaultPendingLink
           href="/"
-          className="group relative z-[1] flex min-w-0 flex-1 items-center gap-2.5 rounded-xl px-2 py-1.5 transition hover:bg-white/[0.04]"
+          aria-label="YOURAILens Studios home"
+          className={`group relative z-[1] flex w-full items-center gap-2.5 px-5 py-3.5 transition-colors hover:bg-white/[0.03] ${
+            closeBtn ? "pr-14" : ""
+          }`}
         >
           <span
             aria-hidden
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-sky-300/25 bg-sky-400/10 font-mono text-[11px] text-sky-200/90 transition group-hover:border-sky-300/45 group-hover:bg-sky-400/16 group-hover:text-sky-100"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-blue-600 transition group-hover:bg-blue-500"
           >
-            ←
+            <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+              <path
+                d="M9 1L16 5V13L9 17L2 13V5L9 1Z"
+                fill="white"
+                fillOpacity="0.15"
+                stroke="white"
+                strokeWidth="1.5"
+              />
+              <circle cx="9" cy="9" r="3" fill="white" />
+            </svg>
           </span>
-          <span className="min-w-0">
-            <span className="block text-[12px] font-medium tracking-tight text-sky-100/90 transition group-hover:text-white">
-              Back to Studios
+          <span className="flex min-w-0 flex-col justify-center leading-none">
+            <span className="font-heading text-[1.05rem] tracking-[0.04em] text-white">
+              YOUR<span className="text-blue-400">AI</span>LENS
             </span>
-            <span className="mt-0.5 block font-mono text-[9px] uppercase tracking-[0.2em] text-sky-200/40 transition group-hover:text-sky-200/65">
-              Studio home
+            <span className="mt-0.5 font-heading text-[0.52rem] uppercase tracking-[0.42em] text-white/55 transition group-hover:text-white/70">
+              Studios
             </span>
           </span>
         </VaultPendingLink>
-        {closeBtn ? <div className="relative z-[1] shrink-0">{closeBtn}</div> : null}
+        {closeBtn ? (
+          <div className="absolute right-3 top-1/2 z-[2] -translate-y-1/2">{closeBtn}</div>
+        ) : null}
       </div>
-      <div className="px-5 py-4">{brand}</div>
+      {brand}
     </div>
   );
 
@@ -423,17 +447,23 @@ export default function VaultExperience({
           ) : (
             <div className="pb-14">
               {hero ? <VaultOttHero entry={hero} /> : null}
-              <div className="relative z-10 -mt-6 space-y-8 sm:-mt-8 sm:space-y-10">
-                <VaultRail
-                  title={YAIL_VAULT_CATEGORIES[0].label}
-                  scene="01"
-                  entries={filmmakingRail}
-                  titleHref="/vault/filmmaking"
+              <div className="relative z-10 -mt-6 space-y-10 sm:-mt-8 sm:space-y-12">
+                {filter !== "ads" ? (
+                  <VaultGallery
+                    title={YAIL_VAULT_CATEGORIES[0].label}
+                    scene="01"
+                    entries={filmmakingRail}
+                    titleHref="/vault/filmmaking"
+                  />
+                ) : null}
+                <VaultGallery
+                  title={YAIL_VAULT_CATEGORIES[1].label}
+                  scene={filter === "ads" ? "01" : "02"}
+                  entries={adsRail}
                 />
-                <VaultRail title={YAIL_VAULT_CATEGORIES[1].label} scene="02" entries={adsRail} />
                 {!filmmakingRail.length && !adsRail.length ? (
                   <p className="px-5 text-sm text-white/40 sm:px-8 lg:px-10">
-                    More cuts will show in the rails once you publish additional labs.
+                    More cuts will show once you publish additional labs.
                   </p>
                 ) : null}
               </div>

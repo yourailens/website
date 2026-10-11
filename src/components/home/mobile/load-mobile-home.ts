@@ -1,5 +1,5 @@
 import { HOME_WATCH_TITLES, type HomeWatchTitle } from "@/data/home-watch";
-import { HERO_SLOTS, ottCutYoutubeId, type OttCut } from "@/data/ott-cuts";
+import { HERO_SLOTS, ottCutChannelPath, ottCutYoutubeId, type OttCut } from "@/data/ott-cuts";
 import { getHomepageFeatureOttCut, getHomepageHeroSlots, getPublishedOttCuts, isHomepageHeroCut } from "@/lib/ott-cuts/load";
 import type { MobileClip, MobileHomeData } from "./types";
 
@@ -32,8 +32,8 @@ function fromWatch(item: HomeWatchTitle, section: string): MobileClip {
     title: item.title,
     tag: item.tag,
     section,
-    // Open the channel’s Misc take filter.
-    href: `${channelPathForRail(item.rail)}#misc`,
+    // Open that clip in the channel’s Misc filter.
+    href: `${channelPathForRail(item.rail)}#${item.slug}`,
     poster:
       item.poster ||
       (item.youtubeId ? `https://i.ytimg.com/vi/${item.youtubeId}/hqdefault.jpg` : undefined) ||
@@ -51,7 +51,7 @@ function fromCut(cut: OttCut, section: string): MobileClip {
     title: cut.caption,
     tag: cut.aspect_ratio === "natural" ? undefined : cut.aspect_ratio.toUpperCase(),
     section,
-    href: `/cut/${encodeURIComponent(cut.slug)}`,
+    href: `${ottCutChannelPath(cut.category)}#${cut.slug}`,
     poster:
       cut.poster_url ||
       (yt ? `https://i.ytimg.com/vi/${yt}/hqdefault.jpg` : undefined) ||

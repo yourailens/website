@@ -11,16 +11,86 @@ import {
 } from "@/lib/yail-vault/genres";
 import type { VaultShellCounts, VaultView } from "@/components/vault/vault-nav-types";
 
-const NAV_PILL = "group flex flex-col rounded-2xl px-3.5 py-2.5 transition";
-const NAV_ON =
-  "bg-gradient-to-br from-white/[0.14] to-white/[0.05] text-white shadow-[0_12px_28px_-18px_rgba(0,0,0,0.9)] ring-1 ring-white/20";
-const NAV_OFF =
-  "text-white/60 hover:bg-white/[0.06] hover:text-white hover:ring-1 hover:ring-white/10";
-
 function viewHref(view: VaultView) {
   if (view === "all") return "/vault";
   if (view === "filmmaking") return filmmakingHubHref();
   return `/vault?view=${view}`;
+}
+
+function NavRow({
+  href,
+  label,
+  count,
+  active,
+  onNavigate,
+}: {
+  href: string;
+  label: string;
+  count: number;
+  active: boolean;
+  onNavigate?: () => void;
+}) {
+  return (
+    <VaultPendingLink
+      href={href}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+      className={`group relative flex min-h-11 w-full items-center justify-between gap-3 px-3 py-2.5 transition-colors ${
+        active ? "text-white" : "text-white/55 hover:text-white"
+      }`}
+    >
+      <span
+        aria-hidden
+        className={`absolute inset-y-1.5 left-0 w-[2px] rounded-full transition ${
+          active
+            ? "bg-sky-400"
+            : "bg-transparent group-hover:bg-sky-400/35"
+        }`}
+      />
+      <span className="truncate text-[13px] font-medium tracking-tight">{label}</span>
+      <span
+        className={`shrink-0 font-mono text-[10px] tabular-nums tracking-wide ${
+          active ? "text-white/45" : "text-white/25 group-hover:text-white/40"
+        }`}
+      >
+        {count}
+      </span>
+    </VaultPendingLink>
+  );
+}
+
+function SubNavRow({
+  href,
+  label,
+  count,
+  active,
+  onNavigate,
+}: {
+  href: string;
+  label: string;
+  count: number;
+  active: boolean;
+  onNavigate?: () => void;
+}) {
+  return (
+    <VaultPendingLink
+      href={href}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+      className={`group flex min-h-10 w-full items-center justify-between gap-2 px-3 py-2 transition-colors ${
+        active ? "text-white" : "text-white/45 hover:text-white/85"
+      }`}
+    >
+      <span className="truncate text-[12px] font-medium tracking-tight">{label}</span>
+      <span
+        className={`shrink-0 font-mono text-[10px] tabular-nums ${
+          active ? "text-white/40" : "text-white/20 group-hover:text-white/35"
+        }`}
+      >
+        {count}
+      </span>
+    </VaultPendingLink>
+  );
 }
 
 type Props = {
@@ -42,177 +112,131 @@ export default function VaultBrowseNav({
   const onFilmmakingRoute =
     pathname === "/vault/filmmaking" || pathname.startsWith("/vault/filmmaking/");
   const filmmakingActive = activeView === "filmmaking" || onFilmmakingRoute;
+  const filmmakingHubActive = filmmakingActive && !activeGenreSlug;
   const [open, setOpen] = useState(filmmakingActive);
 
   useEffect(() => {
     if (filmmakingActive) setOpen(true);
   }, [filmmakingActive]);
 
-  const topItems: { id: VaultView; label: string; hint: string; count: number }[] = [
-    { id: "all", label: "All labs", hint: "Everything in the vault", count: counts.all },
-    {
-      id: "ads",
-      label: YAIL_VAULT_CATEGORIES[1].label,
-      hint: YAIL_VAULT_CATEGORIES[1].rail,
-      count: counts.ads,
-    },
-    { id: "avatars", label: "AI Avatars", hint: "Directory & jumbotrons", count: counts.avatars },
-  ];
-
   return (
-    <nav className="flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto px-3 pb-6 pt-2">
-      <div>
-        <p className="mb-2.5 px-3 font-mono text-[9px] uppercase tracking-[0.28em] text-white/35">
-          Browse
-        </p>
-        <ul className="space-y-1.5">
-          {/* All labs */}
-          <li>
-            <VaultPendingLink
-              href={viewHref("all")}
-              onClick={onNavigate}
-              className={`${NAV_PILL} ${activeView === "all" && !onFilmmakingRoute ? NAV_ON : NAV_OFF}`}
-            >
-              <span className="flex items-center justify-between gap-2">
-                <span className="text-[13px] font-semibold tracking-tight">All labs</span>
-                <span
-                  className={`font-mono text-[10px] ${
-                    activeView === "all" && !onFilmmakingRoute ? "text-white/45" : "text-white/25"
-                  }`}
-                >
-                  {counts.all}
-                </span>
-              </span>
-              <span className="mt-0.5 text-[11px] leading-snug text-white/30 group-hover:text-white/40">
-                Everything in the vault
-              </span>
-            </VaultPendingLink>
-          </li>
+    <nav className="flex min-h-0 flex-1 flex-col overflow-y-auto px-2 pb-6 pt-3">
+      <p className="mb-1 px-3 font-mono text-[9px] uppercase tracking-[0.28em] text-white/35">
+        Browse
+      </p>
 
-          {/* AI Filmmaking + genre dropdown */}
-          <li>
-            <div
-              className={`${NAV_PILL} ${
-                filmmakingActive && !activeGenreSlug ? NAV_ON : filmmakingActive ? "ring-1 ring-white/10" : NAV_OFF
+      <ul className="flex flex-col">
+        <li>
+          <NavRow
+            href={viewHref("all")}
+            label="All labs"
+            count={counts.all}
+            active={activeView === "all" && !onFilmmakingRoute}
+            onNavigate={onNavigate}
+          />
+        </li>
+
+        <li>
+          <div className="flex items-stretch">
+            <VaultPendingLink
+              href={filmmakingHubHref()}
+              onClick={onNavigate}
+              aria-current={filmmakingHubActive ? "page" : undefined}
+              className={`group relative flex min-h-11 min-w-0 flex-1 items-center justify-between gap-3 px-3 py-2.5 transition-colors ${
+                filmmakingActive ? "text-white" : "text-white/55 hover:text-white"
               }`}
             >
-              <div className="flex items-start gap-1">
-                <VaultPendingLink
+              <span
+                aria-hidden
+                className={`absolute inset-y-1.5 left-0 w-[2px] rounded-full transition ${
+                  filmmakingHubActive
+                    ? "bg-sky-400"
+                    : filmmakingActive
+                      ? "bg-sky-400/45"
+                      : "bg-transparent group-hover:bg-sky-400/35"
+                }`}
+              />
+              <span className="truncate text-[13px] font-medium tracking-tight">
+                {YAIL_VAULT_CATEGORIES[0].label}
+              </span>
+              <span
+                className={`shrink-0 font-mono text-[10px] tabular-nums tracking-wide ${
+                  filmmakingActive ? "text-white/45" : "text-white/25 group-hover:text-white/40"
+                }`}
+              >
+                {counts.filmmaking}
+              </span>
+            </VaultPendingLink>
+
+            <button
+              type="button"
+              aria-label={open ? "Collapse genres" : "Expand genres"}
+              aria-expanded={open}
+              onClick={() => setOpen((v) => !v)}
+              className="flex w-11 shrink-0 items-center justify-center text-white/40 transition-colors hover:text-white"
+            >
+              <span
+                className={`block text-[11px] leading-none transition-transform duration-200 ${
+                  open ? "rotate-90" : ""
+                }`}
+                aria-hidden
+              >
+                ›
+              </span>
+            </button>
+          </div>
+
+          {open ? (
+            <ul className="mb-1 ml-3 border-l border-white/[0.08] pl-1">
+              <li>
+                <SubNavRow
                   href={filmmakingHubHref()}
-                  onClick={onNavigate}
-                  className="min-w-0 flex-1 text-left"
-                >
-                  <span className="flex items-center justify-between gap-2">
-                    <span className="text-[13px] font-semibold tracking-tight text-inherit">
-                      {YAIL_VAULT_CATEGORIES[0].label}
-                    </span>
-                    <span
-                      className={`font-mono text-[10px] ${
-                        filmmakingActive ? "text-white/45" : "text-white/25"
-                      }`}
-                    >
-                      {counts.filmmaking}
-                    </span>
-                  </span>
-                  <span
-                    className={`mt-0.5 block text-[11px] leading-snug ${
-                      filmmakingActive ? "text-white/45" : "text-white/30"
-                    }`}
-                  >
-                    {YAIL_VAULT_CATEGORIES[0].rail}
-                  </span>
-                </VaultPendingLink>
-                <button
-                  type="button"
-                  aria-label={open ? "Collapse genres" : "Expand genres"}
-                  aria-expanded={open}
-                  onClick={() => setOpen((v) => !v)}
-                  className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white/50 transition hover:bg-white/[0.06] hover:text-white/80"
-                >
-                  <span
-                    className={`block text-[10px] transition ${open ? "rotate-90" : ""}`}
-                    aria-hidden
-                  >
-                    ›
-                  </span>
-                </button>
-              </div>
-
-              {open ? (
-                <ul className="mt-2 space-y-0.5 border-t border-white/10 pt-2">
-                  <li>
-                    <VaultPendingLink
-                      href={filmmakingHubHref()}
-                      onClick={onNavigate}
-                      className={`flex items-center justify-between gap-2 rounded-xl px-2.5 py-1.5 text-[12px] transition ${
-                        filmmakingActive && !activeGenreSlug
-                          ? "bg-white/[0.08] font-medium text-white"
-                          : "text-white/55 hover:bg-white/[0.05] hover:text-white/85"
-                      }`}
-                    >
-                      <span>All filmmaking</span>
-                      <span className="font-mono text-[10px] text-white/30">{counts.filmmaking}</span>
-                    </VaultPendingLink>
-                  </li>
-                  {genres.map((g) => {
-                    const on = activeGenreSlug === g.slug;
-                    return (
-                      <li key={g.slug}>
-                        <VaultPendingLink
-                          href={genreHref(g.slug)}
-                          onClick={onNavigate}
-                          className={`flex items-center justify-between gap-2 rounded-xl px-2.5 py-1.5 text-[12px] transition ${
-                            on
-                              ? "bg-white/[0.08] font-medium text-white"
-                              : "text-white/55 hover:bg-white/[0.05] hover:text-white/85"
-                          }`}
-                        >
-                          <span className="truncate">{g.name}</span>
-                          <span className="shrink-0 font-mono text-[10px] text-white/30">{g.count}</span>
-                        </VaultPendingLink>
-                      </li>
-                    );
-                  })}
-                  {!genres.length ? (
-                    <li className="px-2.5 py-1.5 text-[11px] text-white/35">
-                      Genres appear when cuts have a Genre tag.
-                    </li>
-                  ) : null}
-                </ul>
-              ) : null}
-            </div>
-          </li>
-
-          {topItems
-            .filter((item) => item.id !== "all")
-            .map((item) => {
-              const on = activeView === item.id && !onFilmmakingRoute;
-              return (
-                <li key={item.id}>
-                  <VaultPendingLink
-                    href={viewHref(item.id)}
-                    onClick={onNavigate}
-                    className={`${NAV_PILL} ${on ? NAV_ON : NAV_OFF}`}
-                  >
-                    <span className="flex items-center justify-between gap-2">
-                      <span className="text-[13px] font-semibold tracking-tight">{item.label}</span>
-                      <span className={`font-mono text-[10px] ${on ? "text-white/45" : "text-white/25"}`}>
-                        {item.count}
-                      </span>
-                    </span>
-                    <span
-                      className={`mt-0.5 text-[11px] leading-snug ${
-                        on ? "text-white/45" : "text-white/30 group-hover:text-white/40"
-                      }`}
-                    >
-                      {item.hint}
-                    </span>
-                  </VaultPendingLink>
+                  label="All filmmaking"
+                  count={counts.filmmaking}
+                  active={filmmakingHubActive}
+                  onNavigate={onNavigate}
+                />
+              </li>
+              {genres.map((g) => (
+                <li key={g.slug}>
+                  <SubNavRow
+                    href={genreHref(g.slug)}
+                    label={g.name}
+                    count={g.count}
+                    active={activeGenreSlug === g.slug}
+                    onNavigate={onNavigate}
+                  />
                 </li>
-              );
-            })}
-        </ul>
-      </div>
+              ))}
+              {!genres.length ? (
+                <li className="px-3 py-2 text-[11px] leading-snug text-white/30">
+                  Genres appear when cuts have a Genre tag.
+                </li>
+              ) : null}
+            </ul>
+          ) : null}
+        </li>
+
+        <li>
+          <NavRow
+            href={viewHref("ads")}
+            label={YAIL_VAULT_CATEGORIES[1].label}
+            count={counts.ads}
+            active={activeView === "ads" && !onFilmmakingRoute}
+            onNavigate={onNavigate}
+          />
+        </li>
+
+        <li>
+          <NavRow
+            href={viewHref("avatars")}
+            label="AI Avatars"
+            count={counts.avatars}
+            active={activeView === "avatars" && !onFilmmakingRoute}
+            onNavigate={onNavigate}
+          />
+        </li>
+      </ul>
     </nav>
   );
 }

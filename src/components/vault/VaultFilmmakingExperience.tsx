@@ -1,7 +1,7 @@
 "use client";
 
 import VaultShell from "@/components/vault/VaultShell";
-import { EmptyVault, VaultOttHero, VaultRail } from "@/components/vault/vault-browse-ui";
+import { EmptyVault, VaultGallery, VaultOttHero } from "@/components/vault/vault-browse-ui";
 import type { YailVaultAvatar } from "@/data/yail-vault-avatars";
 import { YAIL_VAULT_CATEGORIES, pickVaultHero, type YailVaultEntry } from "@/data/yail-vault";
 import {
@@ -11,10 +11,6 @@ import {
   genreHref,
   groupEntriesByGenre,
 } from "@/lib/yail-vault/genres";
-
-function padScene(n: number) {
-  return String(n).padStart(2, "0");
-}
 
 type Props = {
   filmmaking: YailVaultEntry[];
@@ -51,15 +47,23 @@ export default function VaultFilmmakingExperience({
   const hero = genreSlug
     ? pickVaultHero(genreEntries, "genre")
     : pickVaultHero(filmmaking, "category");
-  const railEntries = genreSlug
+
+  /** Single-genre page: one gallery. Hub: a gallery per genre. */
+  const genreRails = genreSlug
+    ? null
+    : groupEntriesByGenre(filmmaking).map((rail) => ({
+        ...rail,
+        entries: rail.entries.filter((e) => e.id !== hero?.id),
+      }));
+
+  const singleGenreGallery = genreSlug
     ? genreEntries.filter((e) => e.id !== hero?.id)
-    : filmmaking.filter((e) => e.id !== hero?.id);
-  const genreRails = genreSlug ? [] : groupEntriesByGenre(railEntries);
+    : null;
 
   const headerTitle = genreMeta ? genreMeta.name : YAIL_VAULT_CATEGORIES[0].label;
   const headerMeta = genreMeta
     ? `${genreMeta.count} ${genreMeta.count === 1 ? "cut" : "cuts"}`
-    : `${filmmaking.length} cuts`;
+    : `${filmmaking.length} cuts · ${genres.length} genres`;
 
   return (
     <VaultShell
@@ -87,32 +91,37 @@ export default function VaultFilmmakingExperience({
       ) : (
         <div className="pb-14">
           {hero ? <VaultOttHero entry={hero} /> : null}
-          <div className="relative z-10 -mt-6 space-y-8 sm:-mt-8 sm:space-y-10">
-            {genreSlug ? (
-              railEntries.length ? (
-                <VaultRail
-                  title={genreMeta?.name ?? "Genre"}
+          <div className="relative z-10 -mt-6 space-y-10 sm:-mt-8 sm:space-y-12">
+            {genreSlug && singleGenreGallery ? (
+              singleGenreGallery.length ? (
+                <VaultGallery
+                  title={genreMeta?.name ?? YAIL_VAULT_CATEGORIES[0].label}
                   scene="01"
-                  entries={railEntries}
+                  entries={singleGenreGallery}
                   titleHref={filmmakingHubHref()}
                 />
-              ) : null
+              ) : (
+                <p className="px-5 text-sm text-white/40 sm:px-8 lg:px-10">
+                  More cuts will show once you publish additional labs.
+                </p>
+              )
+            ) : genreRails?.length ? (
+              genreRails.map((rail, i) =>
+                rail.entries.length ? (
+                  <VaultGallery
+                    key={rail.slug}
+                    title={rail.title}
+                    scene={String(i + 1).padStart(2, "0")}
+                    entries={rail.entries}
+                    titleHref={genreHref(rail.slug)}
+                  />
+                ) : null,
+              )
             ) : (
-              genreRails.map((rail, index) => (
-                <VaultRail
-                  key={rail.slug}
-                  title={rail.title}
-                  scene={padScene(index + 1)}
-                  entries={rail.entries}
-                  titleHref={genreHref(rail.slug)}
-                />
-              ))
-            )}
-            {!genreSlug && !genreRails.length ? (
               <p className="px-5 text-sm text-white/40 sm:px-8 lg:px-10">
-                More cuts will show in the rails once you publish additional labs.
+                More cuts will show once you publish additional labs.
               </p>
-            ) : null}
+            )}
           </div>
         </div>
       )}

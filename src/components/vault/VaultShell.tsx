@@ -62,48 +62,72 @@ export default function VaultShell({
   );
 
   const brand = (
-    <div className="select-none">
-      <div className="flex items-center gap-2.5">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/logo_yail.png" alt="" className="h-7 w-auto" />
-        <div>
-          <p className="font-mono text-[9px] tracking-[0.32em] text-emerald-400">YAIL</p>
-          <p className="mt-0.5 font-heading text-xl leading-none tracking-tight">Vault</p>
-        </div>
+    <VaultPendingLink
+      href="/vault"
+      onClick={() => setMenuOpen(false)}
+      aria-label="All labs"
+      className="group flex w-full items-center gap-2.5 px-5 py-4 transition-colors hover:bg-white/[0.04]"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/images/logo_yail.png" alt="" className="h-7 w-auto transition group-hover:opacity-95" />
+      <div>
+        <p className="font-mono text-[9px] tracking-[0.32em] text-emerald-400 transition group-hover:text-emerald-300">
+          YAIL
+        </p>
+        <p className="mt-0.5 font-heading text-xl leading-none tracking-tight transition group-hover:text-white">
+          Vault
+        </p>
       </div>
-    </div>
+    </VaultPendingLink>
   );
 
   const sidebarHeader = (closeBtn?: ReactNode) => (
     <div className="shrink-0 border-b border-white/10">
-      <div className="relative flex items-center gap-1 overflow-hidden px-3 py-2.5">
+      <div className="relative overflow-hidden">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-gradient-to-r from-sky-500/[0.14] via-sky-400/[0.05] to-transparent"
         />
-        <div aria-hidden className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-sky-400/40 via-sky-400/10 to-transparent" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-sky-400/40 via-sky-400/10 to-transparent"
+        />
         <VaultPendingLink
           href="/"
-          className="group relative z-[1] flex min-w-0 flex-1 items-center gap-2.5 rounded-xl px-2 py-1.5 transition hover:bg-white/[0.04]"
+          aria-label="YOURAILens Studios home"
+          className={`group relative z-[1] flex w-full items-center gap-2.5 px-5 py-3.5 transition-colors hover:bg-white/[0.03] ${
+            closeBtn ? "pr-14" : ""
+          }`}
         >
           <span
             aria-hidden
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-sky-300/25 bg-sky-400/10 font-mono text-[11px] text-sky-200/90 transition group-hover:border-sky-300/45 group-hover:bg-sky-400/16 group-hover:text-sky-100"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-blue-600 transition group-hover:bg-blue-500"
           >
-            ←
+            <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+              <path
+                d="M9 1L16 5V13L9 17L2 13V5L9 1Z"
+                fill="white"
+                fillOpacity="0.15"
+                stroke="white"
+                strokeWidth="1.5"
+              />
+              <circle cx="9" cy="9" r="3" fill="white" />
+            </svg>
           </span>
-          <span className="min-w-0">
-            <span className="block text-[12px] font-medium tracking-tight text-sky-100/90 transition group-hover:text-white">
-              Back to Studios
+          <span className="flex min-w-0 flex-col justify-center leading-none">
+            <span className="font-heading text-[1.05rem] tracking-[0.04em] text-white">
+              YOUR<span className="text-blue-400">AI</span>LENS
             </span>
-            <span className="mt-0.5 block font-mono text-[9px] uppercase tracking-[0.2em] text-sky-200/40 transition group-hover:text-sky-200/65">
-              Studio home
+            <span className="mt-0.5 font-heading text-[0.52rem] uppercase tracking-[0.42em] text-white/55 transition group-hover:text-white/70">
+              Studios
             </span>
           </span>
         </VaultPendingLink>
-        {closeBtn ? <div className="relative z-[1] shrink-0">{closeBtn}</div> : null}
+        {closeBtn ? (
+          <div className="absolute right-3 top-1/2 z-[2] -translate-y-1/2">{closeBtn}</div>
+        ) : null}
       </div>
-      <div className="px-5 py-4">{brand}</div>
+      {brand}
     </div>
   );
 

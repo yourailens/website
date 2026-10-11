@@ -27,6 +27,8 @@ type EntryRow = {
   featured: boolean;
   category_hero?: boolean | null;
   genre_hero?: boolean | null;
+  home_tease?: boolean | null;
+  home_tease_order?: number | null;
   published: boolean;
   sort_order: number;
   created_at: string;
@@ -113,6 +115,11 @@ function rowToEntry(
     featured: Boolean(row.featured),
     category_hero: Boolean(row.category_hero),
     genre_hero: Boolean(row.genre_hero),
+    home_tease: Boolean(row.home_tease),
+    home_tease_order:
+      typeof row.home_tease_order === "number" && Number.isFinite(row.home_tease_order)
+        ? Math.round(row.home_tease_order)
+        : 0,
     published: row.published,
     sort_order: row.sort_order,
     created_at: row.created_at,

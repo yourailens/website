@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import AiModelBadge from "@/components/vault/AiModelBadge";
 import VaultPendingLink from "@/components/vault/VaultPendingLink";
 import {
@@ -19,6 +19,46 @@ function PlayGlyph({ size = 14 }: { size?: number }) {
       <path d="M3 1.5v11l9-5.5L3 1.5z" />
     </svg>
   );
+}
+
+function useEntryRatio(entry: YailVaultEntry) {
+  const thumb = entryThumb(entry);
+  const isVideo = entry.media_type === "video";
+  const [ratio, setRatio] = useState(() =>
+    entry.aspect_width && entry.aspect_height
+      ? entry.aspect_width / entry.aspect_height
+      : 16 / 9
+  );
+
+  useEffect(() => {
+    if (entry.aspect_width && entry.aspect_height) {
+      setRatio(entry.aspect_width / entry.aspect_height);
+      return;
+    }
+    const src = thumb || (isVideo ? entry.media_url : null);
+    if (!src) return;
+    if (thumb) {
+      const img = new window.Image();
+      img.onload = () => {
+        if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+          setRatio(img.naturalWidth / img.naturalHeight);
+        }
+      };
+      img.src = thumb;
+      return;
+    }
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    video.muted = true;
+    video.onloadedmetadata = () => {
+      if (video.videoWidth > 0 && video.videoHeight > 0) {
+        setRatio(video.videoWidth / video.videoHeight);
+      }
+    };
+    video.src = entry.media_url;
+  }, [entry.aspect_height, entry.aspect_width, entry.media_url, isVideo, thumb]);
+
+  return { ratio, thumb, isVideo };
 }
 
 /** OTT hero: full-bleed media + bottom-left overlay copy. */
@@ -80,57 +120,23 @@ export function VaultOttHero({ entry }: { entry: YailVaultEntry }) {
   );
 }
 
-function VaultRailCard({ entry }: { entry: YailVaultEntry }) {
+function VaultGalleryCard({ entry }: { entry: YailVaultEntry }) {
   const genre = tagsOfKind(entry, "genre")[0]?.name;
   const tag = genre ?? yailVaultCategoryLabel(entry.category);
-  const thumb = entryThumb(entry);
-  const isVideo = entry.media_type === "video";
-  const [ratio, setRatio] = useState(() =>
-    entry.aspect_width && entry.aspect_height
-      ? entry.aspect_width / entry.aspect_height
-      : 16 / 9
-  );
-
-  useEffect(() => {
-    if (entry.aspect_width && entry.aspect_height) {
-      setRatio(entry.aspect_width / entry.aspect_height);
-      return;
-    }
-    const src = thumb || (isVideo ? entry.media_url : null);
-    if (!src) return;
-    if (thumb) {
-      const img = new window.Image();
-      img.onload = () => {
-        if (img.naturalWidth > 0 && img.naturalHeight > 0) {
-          setRatio(img.naturalWidth / img.naturalHeight);
-        }
-      };
-      img.src = thumb;
-      return;
-    }
-    const video = document.createElement("video");
-    video.preload = "metadata";
-    video.muted = true;
-    video.onloadedmetadata = () => {
-      if (video.videoWidth > 0 && video.videoHeight > 0) {
-        setRatio(video.videoWidth / video.videoHeight);
-      }
-    };
-    video.src = entry.media_url;
-  }, [entry.aspect_height, entry.aspect_width, entry.media_url, isVideo, thumb]);
+  const { ratio, thumb, isVideo } = useEntryRatio(entry);
 
   return (
     <VaultPendingLink
       href={`/vault/${entry.slug}`}
-      className="group relative block h-[9.5rem] shrink-0 overflow-hidden rounded-md bg-zinc-900 sm:h-[11rem] lg:h-[12rem]"
-      style={{ aspectRatio: `${ratio}`, width: "auto" }}
+      className="group relative mb-2 block w-full break-inside-avoid overflow-hidden rounded-md bg-zinc-900 sm:mb-2.5"
+      style={{ aspectRatio: `${ratio}` }}
     >
       {thumb ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={thumb}
           alt={entry.title}
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
         />
       ) : isVideo ? (
         <video
@@ -158,11 +164,11 @@ function VaultRailCard({ entry }: { entry: YailVaultEntry }) {
         {tag ? (
           <p className="font-mono text-[7px] tracking-[0.18em] text-sky-300/90">{tag}</p>
         ) : null}
-        <p className="mt-0.5 truncate text-[12px] font-medium leading-tight text-white sm:text-[13px]">
+        <p className="mt-0.5 line-clamp-2 text-[12px] font-medium leading-tight text-white sm:text-[13px]">
           {entry.title}
         </p>
         {entry.ai_model ? (
-          <div className="mt-1.5">
+          <div className="mt-1.5 hidden sm:block">
             <AiModelBadge modelId={entry.ai_model} />
           </div>
         ) : null}
@@ -171,7 +177,8 @@ function VaultRailCard({ entry }: { entry: YailVaultEntry }) {
   );
 }
 
-export function VaultRail({
+/** Pinterest-style masonry gallery — 2→3→4 columns, natural aspect ratios. */
+export function VaultGallery({
   title,
   scene,
   entries,
@@ -182,14 +189,6 @@ export function VaultRail({
   entries: YailVaultEntry[];
   titleHref?: string;
 }) {
-  const scroller = useRef<HTMLDivElement>(null);
-
-  const scrollBy = (dir: -1 | 1) => {
-    const node = scroller.current;
-    if (!node) return;
-    node.scrollBy({ left: dir * node.clientWidth * 0.72, behavior: "smooth" });
-  };
-
   if (!entries.length) return null;
 
   return (
@@ -210,34 +209,14 @@ export function VaultRail({
             </h2>
           )}
         </div>
-        <div className="mb-0.5 hidden shrink-0 gap-1 md:flex">
-          <button
-            type="button"
-            aria-label="Previous"
-            onClick={() => scrollBy(-1)}
-            className="flex h-7 w-7 items-center justify-center rounded-md border border-white/15 text-white/70 transition hover:border-white/40 hover:text-white"
-          >
-            ‹
-          </button>
-          <button
-            type="button"
-            aria-label="Next"
-            onClick={() => scrollBy(1)}
-            className="flex h-7 w-7 items-center justify-center rounded-md border border-white/15 text-white/70 transition hover:border-white/40 hover:text-white"
-          >
-            ›
-          </button>
-        </div>
+        <p className="mb-0.5 shrink-0 font-mono text-[10px] text-white/35">
+          {entries.length} {entries.length === 1 ? "cut" : "cuts"}
+        </p>
       </div>
 
-      <div
-        ref={scroller}
-        className="ott-rail mt-3 flex snap-x snap-mandatory gap-2 overflow-x-auto px-5 pb-1 sm:gap-2.5 sm:px-8 lg:px-10"
-      >
+      <div className="mt-4 columns-2 gap-2 px-5 sm:mt-5 sm:columns-3 sm:gap-2.5 sm:px-8 lg:columns-4 lg:px-10">
         {entries.map((entry) => (
-          <div key={entry.id} className="snap-start">
-            <VaultRailCard entry={entry} />
-          </div>
+          <VaultGalleryCard key={entry.id} entry={entry} />
         ))}
       </div>
     </section>

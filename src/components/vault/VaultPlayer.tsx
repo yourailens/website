@@ -46,6 +46,7 @@ export default function VaultPlayer({ src, poster, title }: Props) {
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  /** Volume on by default; fall back to muted only if the browser blocks audible play. */
   const [muted, setMuted] = useState(false);
   const [hovering, setHovering] = useState(true);
   const [dragging, setDragging] = useState(false);
@@ -55,6 +56,8 @@ export default function VaultPlayer({ src, poster, title }: Props) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const hideTimer = useRef<number | null>(null);
   const wantPlayRef = useRef(false);
+  const mutedRef = useRef(false);
+  mutedRef.current = muted;
 
   const showChrome = hovering || !playing || dragging;
 
@@ -65,6 +68,11 @@ export default function VaultPlayer({ src, poster, title }: Props) {
       if (playing && !dragging) setHovering(false);
     }, 2400);
   }, [playing, dragging]);
+
+  const isCoarsePointer = useCallback(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(hover: none), (pointer: coarse)").matches;
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -77,6 +85,7 @@ export default function VaultPlayer({ src, poster, title }: Props) {
     setBuffering(false);
     wantPlayRef.current = false;
     setPlaying(false);
+    setMuted(false);
     setTime(0);
     setDuration(0);
     setMediaSize(null);
@@ -124,10 +133,26 @@ export default function VaultPlayer({ src, poster, title }: Props) {
     // Harden against casual download / remote playback UI
     video.setAttribute("controlsList", "nodownload noplaybackrate noremoteplayback");
     video.setAttribute("disablePictureInPicture", "true");
+    video.setAttribute("playsinline", "true");
+    video.setAttribute("webkit-playsinline", "true");
+    video.playsInline = true;
+    video.muted = mutedRef.current;
+    if (!mutedRef.current) video.removeAttribute("muted");
 
     const release = attachProgressivePlayback(video, {
       onReadyToPlay: () => {
-        if (wantPlayRef.current) void video.play().catch(() => {});
+        if (!wantPlayRef.current) return;
+        const preferMuted = mutedRef.current;
+        video.muted = preferMuted;
+        if (preferMuted) video.setAttribute("muted", "");
+        else video.removeAttribute("muted");
+        void video.play().catch(() => {
+          // Browser blocked audible resume — continue muted so playback still starts.
+          video.muted = true;
+          video.setAttribute("muted", "");
+          setMuted(true);
+          void video.play().catch(() => {});
+        });
       },
       onBuffering: (busy) => {
         // Only show the spinner after the user asked to play.
@@ -155,15 +180,43 @@ export default function VaultPlayer({ src, poster, title }: Props) {
   const togglePlay = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
-    if (video.paused) {
-      wantPlayRef.current = true;
-      setBuffering(video.readyState < 2);
-      void video.play().catch(() => {});
-    } else {
+
+    if (!video.paused) {
       wantPlayRef.current = false;
       video.pause();
+      bumpChrome();
+      return;
     }
-    bumpChrome();
+
+    wantPlayRef.current = true;
+    setBuffering(video.readyState < 2);
+    // Keep element attributes in sync before play() — required on iOS.
+    video.playsInline = true;
+    video.setAttribute("playsinline", "");
+    video.setAttribute("webkit-playsinline", "");
+
+    const attempt = async (asMuted: boolean) => {
+      video.muted = asMuted;
+      if (asMuted) video.setAttribute("muted", "");
+      else video.removeAttribute("muted");
+      setMuted(asMuted);
+      await video.play();
+    };
+
+    void (async () => {
+      try {
+        // Default: play with volume. If the browser blocks it, retry muted.
+        await attempt(false);
+      } catch {
+        try {
+          await attempt(true);
+        } catch {
+          wantPlayRef.current = false;
+          setBuffering(false);
+        }
+      }
+      bumpChrome();
+    })();
   }, [bumpChrome]);
 
   const seekFromEvent = useCallback((clientX: number) => {
@@ -247,13 +300,18 @@ export default function VaultPlayer({ src, poster, title }: Props) {
         ref={videoRef}
         src={src}
         poster={poster ?? undefined}
+        muted={muted}
         playsInline
         preload="auto"
         controls={false}
         controlsList="nodownload noplaybackrate noremoteplayback"
         disablePictureInPicture
-        className="absolute inset-0 h-full w-full object-contain"
-        onClick={togglePlay}
+        className="absolute inset-0 z-0 h-full w-full object-contain"
+        onClick={() => {
+          // Desktop: click stage to toggle. Mobile uses the explicit play control.
+          if (isCoarsePointer()) return;
+          togglePlay();
+        }}
         onDragStart={(e) => e.preventDefault()}
       />
 
@@ -281,26 +339,41 @@ export default function VaultPlayer({ src, poster, title }: Props) {
       </div>
 
       {buffering ? (
-        <div className="pointer-events-none absolute inset-0 z-[12] flex items-center justify-center">
+        <div className="pointer-events-none absolute inset-0 z-[35] flex items-center justify-center">
           <span className="h-10 w-10 animate-spin rounded-full border-2 border-white/25 border-t-sky-400" aria-hidden />
           <span className="sr-only">Loading</span>
         </div>
       ) : null}
 
-      {/* Center play affordance when paused */}
+      {/* Paused: dim stage + solid play control (circle only — don't cover bottom chrome). */}
       {!playing && !buffering ? (
-        <button
-          type="button"
-          onClick={togglePlay}
-          className="absolute inset-0 z-10 flex items-center justify-center bg-black/25"
-          aria-label={`Play ${title}`}
-        >
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[#fafafa] text-black shadow-[0_16px_40px_-12px_rgba(0,0,0,0.8)] transition hover:scale-105 sm:h-[4.5rem] sm:w-[4.5rem]">
+        <>
+          <div className="pointer-events-none absolute inset-0 z-[10] bg-black/25" aria-hidden />
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              togglePlay();
+            }}
+            className="absolute left-1/2 top-[42%] z-[30] flex h-[4.25rem] w-[4.25rem] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#fafafa] text-black shadow-[0_16px_40px_-12px_rgba(0,0,0,0.8)] transition active:scale-95 sm:top-1/2 sm:h-[4.5rem] sm:w-[4.5rem] sm:hover:scale-105"
+            aria-label={`Play ${title}`}
+          >
             <svg width="22" height="22" viewBox="0 0 14 14" fill="currentColor" aria-hidden>
               <path d="M3 1.5v11l9-5.5L3 1.5z" />
             </svg>
-          </span>
-        </button>
+          </button>
+        </>
+      ) : null}
+
+      {/* Mobile: tap video body to pause (chrome stays above at z-20). */}
+      {playing ? (
+        <button
+          type="button"
+          aria-label="Pause"
+          className="absolute inset-0 z-[5] sm:hidden"
+          onClick={() => togglePlay()}
+        />
       ) : null}
 
       {/* Custom chrome */}

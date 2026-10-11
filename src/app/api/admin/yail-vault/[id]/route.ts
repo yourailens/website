@@ -152,13 +152,14 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
   if (Object.keys(patch).length) {
     const { error } = await db.from("yail_vault_entries").update(patch).eq("id", id);
     if (error) {
-      const missing = /ai_model|aspect_|og_image_url|category_hero|genre_hero|schema cache/i.test(
-        error.message
-      );
+      const missing =
+        /ai_model|aspect_|og_image_url|category_hero|genre_hero|home_tease|schema cache/i.test(
+          error.message
+        );
       return NextResponse.json(
         {
           error: missing
-            ? "Run supabase/migrations/077–083 (incl. 083_yail_vault_page_heroes.sql) in the Supabase SQL editor first."
+            ? "Run supabase/migrations/077–084 (incl. 084_yail_vault_home_tease.sql) in the Supabase SQL editor first."
             : error.message,
         },
         { status: 400 }

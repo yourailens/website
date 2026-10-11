@@ -40,6 +40,10 @@ export type YailVaultEntry = {
   category_hero: boolean;
   /** Hero on this cut’s Genre page under Filmmaking. */
   genre_hero: boolean;
+  /** Include in homepage YAIL Vault tilted-tile promo for this category. */
+  home_tease: boolean;
+  /** Order within the homepage tease row (0 = first). */
+  home_tease_order: number;
   published: boolean;
   sort_order: number;
   created_at: string;

@@ -18,6 +18,7 @@ import {
 } from "@/data/yail-vault";
 import { readMediaDimensions } from "@/lib/media/read-dimensions";
 import VaultAvatarsDesk from "./VaultAvatarsDesk";
+import VaultHomeTeaseDesk from "./VaultHomeTeaseDesk";
 
 const FIELD =
   "w-full rounded-2xl border border-white/15 bg-white/[0.06] px-3.5 py-2.5 text-sm text-white placeholder:text-white/40 caret-white outline-none transition focus:border-white/40 focus:bg-white/[0.09]";
@@ -97,7 +98,7 @@ function entryToDraft(entry: YailVaultEntry): Draft {
 
 export default function VaultDesk() {
   const fileRef = useRef<HTMLInputElement>(null);
-  const [tab, setTab] = useState<"labs" | "avatars">("labs");
+  const [tab, setTab] = useState<"labs" | "avatars" | "home">("labs");
   const [entries, setEntries] = useState<YailVaultEntry[]>([]);
   const [tags, setTags] = useState<YailVaultTag[]>([]);
   const [avatars, setAvatars] = useState<YailVaultAvatar[]>([]);
@@ -401,6 +402,7 @@ export default function VaultDesk() {
         {(
           [
             { id: "labs" as const, label: "Lab cuts" },
+            { id: "home" as const, label: "Homepage rows" },
             { id: "avatars" as const, label: "AI Avatars" },
           ] as const
         ).map((item) => (
@@ -427,6 +429,8 @@ export default function VaultDesk() {
 
       {tab === "avatars" ? (
         <VaultAvatarsDesk avatars={avatars} onChange={setAvatars} />
+      ) : tab === "home" ? (
+        <VaultHomeTeaseDesk entries={entries} onSaved={setEntries} />
       ) : (
         <>
       <div className={BUBBLE}>

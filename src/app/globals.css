@@ -676,3 +676,53 @@ video::-internal-media-controls-download-button {
   pointer-events: none;
   user-select: none;
 }
+
+/* Homepage YAIL Vault — Artfolio-style thumb wall */
+@keyframes vaultTicker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes vaultTickerReverse {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+.animate-vault-ticker {
+  animation: vaultTicker 48s linear infinite;
+}
+.animate-vault-ticker-reverse {
+  animation: vaultTickerReverse 56s linear infinite;
+}
+.vault-thumb-wall {
+  position: relative;
+  perspective: 1400px;
+  /* Extra room so rotateX doesn’t clip thumb bottoms into the page black */
+  padding-block: 2.5rem 3.5rem;
+  overflow: visible;
+}
+.vault-thumb-wall__stage {
+  transform: rotateX(14deg) scale(1.06);
+  transform-origin: center center;
+  will-change: transform;
+  /* Slightly quieter so the wall doesn’t blow out */
+  opacity: 0.82;
+}
+.vault-thumb-wall__fade {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  /* Soft vignette — sides stronger, top/bottom light only */
+  background:
+    linear-gradient(to right, #000 0%, transparent 18%, transparent 82%, #000 100%),
+    linear-gradient(to bottom, #000 0%, transparent 22%, transparent 78%, #000 100%);
+  opacity: 0.75;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-vault-ticker,
+  .animate-vault-ticker-reverse {
+    animation: none;
+  }
+  .vault-thumb-wall__stage {
+    transform: none;
+  }
+}
