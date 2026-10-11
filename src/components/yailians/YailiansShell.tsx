@@ -27,12 +27,12 @@ export default function YailiansShell({
             : "sticky top-0 z-40 border-b border-white/10 bg-black/90 backdrop-blur-md"
         }
       >
-        <div className="mx-auto flex max-w-none flex-wrap items-center gap-3 px-5 py-4 sm:gap-5 sm:px-8 lg:px-12">
-          <div className="flex min-w-0 shrink-0 items-center gap-3 sm:gap-4">
+        <div className="mx-auto flex max-w-none items-center gap-2 px-4 py-3 sm:gap-5 sm:px-8 sm:py-4 lg:px-12">
+          <div className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-4">
             <Link
               href="/"
               aria-label="YOURAILens Studios home"
-              className="group relative flex items-center gap-2.5 rounded-xl px-2 py-1.5 transition hover:bg-white/[0.04]"
+              className="group relative flex items-center gap-2 rounded-xl px-1.5 py-1 transition hover:bg-white/[0.04] sm:gap-2.5 sm:px-2 sm:py-1.5"
             >
               <span
                 aria-hidden
@@ -49,7 +49,7 @@ export default function YailiansShell({
                   <circle cx="9" cy="9" r="3" fill="white" />
                 </svg>
               </span>
-              <span className="flex min-w-0 flex-col justify-center leading-none">
+              <span className="hidden min-w-0 flex-col justify-center leading-none sm:flex">
                 <span className="font-heading text-[1.05rem] tracking-[0.04em] text-white">
                   YOUR<span className="text-blue-400">AI</span>LENS
                 </span>
@@ -62,12 +62,14 @@ export default function YailiansShell({
             <span className="hidden h-8 w-px bg-white/15 sm:block" aria-hidden />
 
             <Link href="/yailians" className="shrink-0">
-              <p className="font-mono text-[9px] tracking-[0.36em] text-white/55">YAIL</p>
-              <p className="mt-0.5 font-heading text-xl leading-none tracking-[0.18em]">YAILIANS</p>
+              <p className="hidden font-mono text-[9px] tracking-[0.36em] text-white/55 sm:block">YAIL</p>
+              <p className="font-heading text-lg leading-none tracking-[0.14em] sm:mt-0.5 sm:text-xl sm:tracking-[0.18em]">
+                YAILIANS
+              </p>
             </Link>
           </div>
 
-          <nav className="order-3 flex w-full min-w-0 flex-wrap items-center gap-1 sm:order-none sm:ml-auto sm:w-auto sm:justify-end">
+          <nav className="ml-auto flex min-w-0 items-center gap-0.5 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-1 [&::-webkit-scrollbar]:hidden">
             {NAV.map((item) => {
               const on =
                 "exact" in item && item.exact
@@ -77,7 +79,7 @@ export default function YailiansShell({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em] transition ${
+                  className={`shrink-0 px-2.5 py-2 font-mono text-[9px] uppercase tracking-[0.18em] transition sm:px-3 sm:text-[10px] sm:tracking-[0.22em] ${
                     on ? "text-white" : "text-white/45 hover:text-white/85"
                   }`}
                 >

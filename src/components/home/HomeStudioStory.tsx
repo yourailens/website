@@ -12,6 +12,7 @@ import {
   ottCutYoutubeId,
   type OttCut,
 } from "@/data/ott-cuts";
+import { tagsOfKind, yailVaultCategoryLabel, type YailVaultEntry } from "@/data/yail-vault";
 
 function channelPathForRail(rail: HomeWatchRail) {
   if (rail === "ads") return "/ai-ads";
@@ -127,6 +128,43 @@ export default async function HomeStudioStory() {
   const vaultFilmmaking = teaseRow("filmmaking");
   const vaultAds = teaseRow("ads");
 
+  /** Extra Ott-style row → each card opens that vault cut. */
+  const vaultToCard = (entry: YailVaultEntry): OttCard | null => {
+    const poster = entry.poster_url?.trim() || "";
+    const media = entry.media_url?.trim() || "";
+    if (!poster && !media) return null;
+    const ratio =
+      entry.aspect_width && entry.aspect_height && entry.aspect_height > 0
+        ? entry.aspect_width / entry.aspect_height
+        : null;
+    const genre = tagsOfKind(entry, "genre")[0]?.name;
+    return {
+      href: `/vault/${entry.slug}`,
+      title: entry.title,
+      tag: genre ?? yailVaultCategoryLabel(entry.category),
+      video: !poster && entry.media_type === "video" ? media : undefined,
+      image: entry.media_type === "image" ? media : undefined,
+      poster: poster || undefined,
+      aspect: ratio != null && ratio < 0.9 ? "poster" : "wide",
+    };
+  };
+  const vaultLot = (() => {
+    const teased = [...vaultEntries]
+      .filter((e) => e.home_tease)
+      .sort((a, b) => {
+        if (a.category !== b.category) return a.category === "filmmaking" ? -1 : 1;
+        return a.home_tease_order - b.home_tease_order;
+      })
+      .map(vaultToCard)
+      .filter((c): c is OttCard => Boolean(c));
+    if (teased.length) return teased.slice(0, 16);
+    return [...vaultEntries]
+      .sort(byLatest)
+      .map(vaultToCard)
+      .filter((c): c is OttCard => Boolean(c))
+      .slice(0, 16);
+  })();
+
   const trailerMeta = getHomeWatch("ai-films-trailer");
   const feature: OttCard | null = homepageFeature
     ? (() => {
@@ -168,19 +206,22 @@ export default async function HomeStudioStory() {
       <section id="films">
         <div className="flex items-end justify-between gap-4 px-5 sm:px-8 lg:px-16 xl:pl-52 xl:pr-10">
           <div>
-            <p className="font-mono text-[10px] tracking-[0.32em] text-blue-400">SC. 3 · AI FILMS</p>
-            <h2 className="mt-2 font-body text-[clamp(1.7rem,3.6vw,2.8rem)] font-semibold leading-none tracking-tight">AI films</h2>
+            <p className="font-mono text-[10px] tracking-[0.32em] text-emerald-400">SC. 3 · FEATURE FILM</p>
+            <h2 className="mt-2 font-body text-[clamp(1.7rem,3.6vw,2.8rem)] font-semibold leading-none tracking-tight">
+              YAILIANS
+            </h2>
             <p className="mt-2 max-w-lg text-sm font-light text-white/50">
-              Our first 45 min AI film —{" "}
-              <a href="/yailians" className="text-sky-300/90 transition hover:text-sky-200">
-                YAILIANS
-              </a>
-              . Then the cuts from the desk.
+              Our first 45 min AI film. Step into the world.
             </p>
           </div>
-          <OttSeeAllLink href="/yailians" label="YAILIANS" className="mb-0.5" />
+          <Link
+            href="/yailians"
+            className="mb-0.5 inline-flex shrink-0 items-center gap-2 rounded-full bg-emerald-400 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-black shadow-[0_12px_32px_-10px_rgba(52,211,153,0.8)] transition hover:bg-emerald-300"
+          >
+            Enter YAILIANS
+          </Link>
         </div>
-        <div className="mt-8">
+        <div className="mt-6 sm:mt-8">
           {feature ? <FilmFeature card={feature} /> : null}
         </div>
       </section>
@@ -190,6 +231,17 @@ export default async function HomeStudioStory() {
         ads={vaultAds}
         cutCount={vaultEntries.length}
       />
+
+      {vaultLot.length > 0 ? (
+        <OttRail
+          tone="row"
+          scene="VAULT"
+          title="From the vault"
+          seeAllHref="/vault"
+          seeAllLabel="All vault"
+          cards={vaultLot}
+        />
+      ) : null}
 
       {lot.length > 0 ? (
         <section id="lot" className="pt-2">

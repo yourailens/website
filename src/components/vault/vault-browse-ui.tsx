@@ -128,8 +128,8 @@ function VaultGalleryCard({ entry }: { entry: YailVaultEntry }) {
   return (
     <VaultPendingLink
       href={`/vault/${entry.slug}`}
-      className="group relative mb-2 block w-full break-inside-avoid overflow-hidden rounded-md bg-zinc-900 sm:mb-2.5"
-      style={{ aspectRatio: `${ratio}` }}
+      className="group relative block w-full overflow-hidden rounded-2xl bg-zinc-900 aspect-square sm:mb-2.5 sm:break-inside-avoid sm:rounded-md sm:[aspect-ratio:var(--vault-r)]"
+      style={{ ["--vault-r" as string]: String(ratio) }}
     >
       {thumb ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -153,14 +153,14 @@ function VaultGalleryCard({ entry }: { entry: YailVaultEntry }) {
       )}
 
       {isVideo ? (
-        <span className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition group-hover:opacity-100">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#fafafa] text-black shadow-lg">
-            <PlayGlyph size={14} />
+        <span className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/25 bg-black/35 text-white/80 backdrop-blur-[2px] sm:h-10 sm:w-10 sm:border-0 sm:bg-[#fafafa] sm:text-black sm:shadow-lg sm:backdrop-blur-none">
+            <PlayGlyph size={12} />
           </span>
         </span>
       ) : null}
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-2.5 pb-2 pt-10">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/55 to-transparent px-2.5 pb-2.5 pt-12 sm:via-black/40 sm:px-2.5 sm:pb-2 sm:pt-10">
         {tag ? (
           <p className="font-mono text-[7px] tracking-[0.18em] text-sky-300/90">{tag}</p>
         ) : null}
@@ -177,7 +177,7 @@ function VaultGalleryCard({ entry }: { entry: YailVaultEntry }) {
   );
 }
 
-/** Pinterest-style masonry gallery — 2→3→4 columns, natural aspect ratios. */
+/** Mobile: square feed grid. Desktop: masonry with natural ratios. */
 export function VaultGallery({
   title,
   scene,
@@ -193,7 +193,7 @@ export function VaultGallery({
 
   return (
     <section className="w-full">
-      <div className="flex items-end justify-between gap-3 px-5 sm:px-8 lg:px-10">
+      <div className="flex items-end justify-between gap-3 px-4 sm:px-8 lg:px-10">
         <div className="min-w-0">
           <p className="font-mono text-[9px] tracking-[0.28em] text-sky-400/90">{scene}</p>
           {titleHref ? (
@@ -214,7 +214,7 @@ export function VaultGallery({
         </p>
       </div>
 
-      <div className="mt-4 columns-2 gap-2 px-5 sm:mt-5 sm:columns-3 sm:gap-2.5 sm:px-8 lg:columns-4 lg:px-10">
+      <div className="mt-3.5 grid grid-cols-2 gap-2.5 px-4 sm:mt-5 sm:block sm:columns-3 sm:gap-2.5 sm:px-8 lg:columns-4 lg:px-10">
         {entries.map((entry) => (
           <VaultGalleryCard key={entry.id} entry={entry} />
         ))}
