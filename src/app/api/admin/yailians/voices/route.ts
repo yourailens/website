@@ -29,9 +29,9 @@ export async function POST(req: NextRequest) {
   if (!auth.ok) return auth.response;
   const b = (await req.json()) as Record<string, unknown>;
   const name = String(b.name ?? "").trim();
-  const quote = String(b.quote ?? "").trim();
-  if (!name || !quote) {
-    return NextResponse.json({ error: "Name and quote are required" }, { status: 400 });
+  const video_url = String(b.video_url ?? "").trim();
+  if (!name || !video_url) {
+    return NextResponse.json({ error: "Name and interview video are required" }, { status: 400 });
   }
 
   const db = createServiceRoleClient();
@@ -40,10 +40,11 @@ export async function POST(req: NextRequest) {
     .from("yailians_voices")
     .insert({
       name,
-      quote,
+      video_url,
+      quote: String(b.quote ?? "").trim() || null,
       role: String(b.role ?? "").trim() || null,
       portrait_url: String(b.portrait_url ?? "").trim() || null,
-      video_url: String(b.video_url ?? "").trim() || null,
+      poster_url: String(b.poster_url ?? "").trim() || null,
       featured_on_hub: b.featured_on_hub === true,
       published: b.published !== false,
       sort_order,
@@ -51,11 +52,11 @@ export async function POST(req: NextRequest) {
     .select("*")
     .single();
   if (error) {
-    const missing = /does not exist|schema cache/i.test(error.message);
+    const missing = /does not exist|schema cache|poster_url|null value/i.test(error.message);
     return NextResponse.json(
       {
         error: missing
-          ? "Run supabase/migrations/085_yailians.sql in the Supabase SQL editor first."
+          ? "Run supabase/migrations/085_yailians.sql and 087_yailians_voices_interviews.sql in the Supabase SQL editor first."
           : error.message,
       },
       { status: 400 }

@@ -21,9 +21,13 @@ export type YailiansVoice = {
   id: string;
   name: string;
   role: string | null;
-  quote: string;
+  /** Optional pull-quote from the interview. */
+  quote: string | null;
   portrait_url: string | null;
+  /** Interview video URL. */
   video_url: string | null;
+  /** Still frame / thumbnail for the interview. */
+  poster_url: string | null;
   featured_on_hub: boolean;
   published: boolean;
   sort_order: number;

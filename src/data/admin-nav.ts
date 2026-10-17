@@ -60,7 +60,7 @@ export const ADMIN_QUICK_ACTIONS: {
     href: "/admin/yailians",
     label: "YAILIANS",
     kicker: "02",
-    blurb: "Trailer, voices, screenings, world.",
+    blurb: "Trailer, interviews, screenings, world.",
   },
   {
     href: "/admin",

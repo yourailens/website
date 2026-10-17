@@ -154,7 +154,7 @@ export default function YailiansDesk() {
         {(
           [
             { id: "film" as const, label: "Film & hero" },
-            { id: "voices" as const, label: "Voices" },
+            { id: "voices" as const, label: "Interviews" },
             { id: "screenings" as const, label: "Screenings" },
             { id: "world" as const, label: "World gallery" },
           ] as const
@@ -487,15 +487,21 @@ function VoicesPanel({
   setMsg: (v: string) => void;
   onChange: (v: YailiansVoice[]) => void;
 }) {
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [draft, setDraft] = useState({
+  const videoRef = useRef<HTMLInputElement>(null);
+  const posterRef = useRef<HTMLInputElement>(null);
+  const portraitRef = useRef<HTMLInputElement>(null);
+  const emptyDraft = {
     name: "",
     role: "",
     quote: "",
+    video_url: "",
+    poster_url: "",
     portrait_url: "",
     featured_on_hub: true,
     published: true,
-  });
+  };
+  const [draft, setDraft] = useState(emptyDraft);
+  const previewThumb = draft.poster_url || draft.portrait_url;
 
   async function create() {
     setBusy(true);
@@ -510,8 +516,8 @@ function VoicesPanel({
       const j = (await res.json().catch(() => ({}))) as { voices?: YailiansVoice[]; error?: string };
       if (!res.ok) throw new Error(j.error || "Create failed");
       onChange(j.voices ?? []);
-      setDraft({ name: "", role: "", quote: "", portrait_url: "", featured_on_hub: true, published: true });
-      setMsg("Voice added.");
+      setDraft(emptyDraft);
+      setMsg("Interview added.");
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Create failed");
     } finally {
@@ -538,7 +544,7 @@ function VoicesPanel({
   }
 
   async function remove(id: string) {
-    if (!confirm("Delete this voice?")) return;
+    if (!confirm("Delete this interview?")) return;
     setBusy(true);
     try {
       const res = await fetch(`/api/admin/yailians/voices/${id}`, { method: "DELETE" });
@@ -555,17 +561,104 @@ function VoicesPanel({
   return (
     <div className="space-y-6">
       <section className={BUBBLE}>
-        <h2 className="font-heading text-xl tracking-tight">Add a voice</h2>
-        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+        <div>
+          <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-emerald-300/80">Voices</p>
+          <h2 className="mt-1.5 font-heading text-2xl tracking-tight">Add an interview</h2>
+          <p className="mt-2 text-sm text-white/50">
+            Upload the recorded interview video. Name + video required; quote optional.
+          </p>
+        </div>
+
+        <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
           <div className="space-y-3">
             <div className="grid gap-3 sm:grid-cols-2">
-              <input className={FIELD} placeholder="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
-              <input className={FIELD} placeholder="Role / credit" value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value })} />
+              <input
+                className={FIELD}
+                placeholder="Name"
+                value={draft.name}
+                onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+              />
+              <input
+                className={FIELD}
+                placeholder="Role / credit"
+                value={draft.role}
+                onChange={(e) => setDraft({ ...draft, role: e.target.value })}
+              />
             </div>
-            <textarea className={`${FIELD} min-h-24`} placeholder="Quote" value={draft.quote} onChange={(e) => setDraft({ ...draft, quote: e.target.value })} />
-            <input className={FIELD} placeholder="Portrait URL" value={draft.portrait_url} onChange={(e) => setDraft({ ...draft, portrait_url: e.target.value })} />
+            <textarea
+              className={`${FIELD} min-h-20`}
+              placeholder="Optional pull-quote"
+              value={draft.quote}
+              onChange={(e) => setDraft({ ...draft, quote: e.target.value })}
+            />
             <input
-              ref={fileRef}
+              className={FIELD}
+              placeholder="Interview video URL"
+              value={draft.video_url}
+              onChange={(e) => setDraft({ ...draft, video_url: e.target.value })}
+            />
+            <input
+              ref={videoRef}
+              type="file"
+              accept="video/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                void uploadFile(file)
+                  .then((up) =>
+                    setDraft((d) => ({
+                      ...d,
+                      video_url: up.url!,
+                      poster_url: up.poster_url || d.poster_url,
+                    }))
+                  )
+                  .catch((er) => setErr(String(er.message || er)));
+                e.target.value = "";
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => videoRef.current?.click()}
+              className="w-full rounded-full border border-dashed border-white/25 bg-white/[0.04] py-3 text-sm font-semibold text-white/80 transition hover:border-emerald-300/50 hover:text-white"
+            >
+              Upload interview video
+            </button>
+            <input
+              className={FIELD}
+              placeholder="Poster / thumbnail URL (optional)"
+              value={draft.poster_url}
+              onChange={(e) => setDraft({ ...draft, poster_url: e.target.value })}
+            />
+            <input
+              ref={posterRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                void uploadFile(file)
+                  .then((up) => setDraft((d) => ({ ...d, poster_url: up.url! })))
+                  .catch((er) => setErr(String(er.message || er)));
+                e.target.value = "";
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => posterRef.current?.click()}
+              className="w-full rounded-full border border-dashed border-white/20 bg-white/[0.03] py-2.5 text-sm text-white/70"
+            >
+              Upload poster image
+            </button>
+            <input
+              className={FIELD}
+              placeholder="Portrait URL (optional)"
+              value={draft.portrait_url}
+              onChange={(e) => setDraft({ ...draft, portrait_url: e.target.value })}
+            />
+            <input
+              ref={portraitRef}
               type="file"
               accept="image/*"
               className="hidden"
@@ -580,62 +673,124 @@ function VoicesPanel({
             />
             <button
               type="button"
-              onClick={() => fileRef.current?.click()}
-              className="w-full rounded-full border border-dashed border-white/25 bg-white/[0.04] py-3 text-sm font-semibold text-white/80"
+              onClick={() => portraitRef.current?.click()}
+              className="w-full rounded-full border border-dashed border-white/20 bg-white/[0.03] py-2.5 text-sm text-white/70"
             >
-              Upload portrait
+              Upload portrait (optional)
             </button>
             <label className="flex items-center gap-2 text-xs text-white/60">
-              <input type="checkbox" checked={draft.featured_on_hub} onChange={(e) => setDraft({ ...draft, featured_on_hub: e.target.checked })} />
+              <input
+                type="checkbox"
+                checked={draft.featured_on_hub}
+                onChange={(e) => setDraft({ ...draft, featured_on_hub: e.target.checked })}
+              />
               Hub promo
             </label>
-            <button type="button" disabled={busy} onClick={() => void create()} className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black disabled:opacity-50">
-              Add voice
+            <button
+              type="button"
+              disabled={busy || !draft.name.trim() || !draft.video_url.trim()}
+              onClick={() => void create()}
+              className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black disabled:opacity-50"
+            >
+              Add interview
             </button>
           </div>
-          <div className="flex min-h-[14rem] flex-col items-center justify-center rounded-[1.25rem] border border-white/12 bg-black/60 p-6 text-center">
-            {draft.portrait_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={draft.portrait_url} alt="" className="h-24 w-24 rounded-full object-cover" />
-            ) : (
-              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white/10 text-xs text-white/35">Portrait</div>
-            )}
-            <p className="mt-4 font-semibold text-white">{draft.name || "Name"}</p>
-            <p className="text-xs text-white/40">{draft.role || "Role"}</p>
-            <p className="mt-3 line-clamp-4 text-sm text-white/65">
-              {draft.quote ? `“${draft.quote}”` : "Quote preview"}
-            </p>
+
+          <div className="overflow-hidden rounded-[1.25rem] border border-white/12 bg-black/60">
+            <div className="relative aspect-video bg-zinc-950">
+              {previewThumb ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={previewThumb} alt="" className="h-full w-full object-cover" />
+              ) : draft.video_url ? (
+                <video
+                  src={draft.video_url}
+                  className="h-full w-full object-cover"
+                  muted
+                  playsInline
+                  preload="metadata"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-white/35">
+                  Interview preview
+                </div>
+              )}
+              <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-black/40 text-white/90">
+                  <svg viewBox="0 0 24 24" className="ml-0.5 h-4 w-4 fill-current" aria-hidden>
+                    <path d="M8 5.5v13l11-6.5-11-6.5z" />
+                  </svg>
+                </span>
+              </span>
+            </div>
+            <div className="p-5">
+              <p className="font-semibold text-white">{draft.name || "Name"}</p>
+              <p className="text-xs text-white/40">{draft.role || "Role"}</p>
+              {draft.quote ? (
+                <p className="mt-3 line-clamp-3 text-sm text-white/65">“{draft.quote}”</p>
+              ) : (
+                <p className="mt-3 text-sm text-white/35">Optional quote preview</p>
+              )}
+            </div>
           </div>
         </div>
       </section>
 
       <ul className="space-y-3">
-        {voices.map((v) => (
-          <li key={v.id} className={`${BUBBLE} flex flex-wrap items-start gap-4`}>
-            {v.portrait_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={v.portrait_url} alt="" className="h-16 w-16 rounded-full object-cover" />
-            ) : (
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 text-xs text-white/40">—</div>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="font-semibold text-white">{v.name}</p>
-              <p className="text-xs text-white/40">{v.role || "—"}</p>
-              <p className="mt-2 text-sm text-white/70">“{v.quote}”</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button type="button" disabled={busy} onClick={() => void patch(v.id, { featured_on_hub: !v.featured_on_hub })} className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-white/70">
-                {v.featured_on_hub ? "Hub ✓" : "Hub"}
-              </button>
-              <button type="button" disabled={busy} onClick={() => void patch(v.id, { published: !v.published })} className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-white/70">
-                {v.published ? "Live" : "Draft"}
-              </button>
-              <button type="button" disabled={busy} onClick={() => void remove(v.id)} className="rounded-full border border-rose-400/30 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-rose-200/80">
-                Delete
-              </button>
-            </div>
-          </li>
-        ))}
+        {voices.map((v) => {
+          const thumb = v.poster_url || v.portrait_url;
+          return (
+            <li key={v.id} className={`${BUBBLE} flex flex-wrap items-start gap-4`}>
+              <div className="h-20 w-36 shrink-0 overflow-hidden rounded-xl bg-zinc-900">
+                {thumb ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={thumb} alt="" className="h-full w-full object-cover" />
+                ) : v.video_url ? (
+                  <video
+                    src={v.video_url}
+                    className="h-full w-full object-cover"
+                    muted
+                    playsInline
+                    preload="metadata"
+                  />
+                ) : null}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-white">{v.name}</p>
+                <p className="text-xs text-white/40">{v.role || "—"}</p>
+                {v.quote ? <p className="mt-2 line-clamp-2 text-sm text-white/70">“{v.quote}”</p> : null}
+                <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-white/30">
+                  {v.video_url ? "Video ready" : "Missing video"}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void patch(v.id, { featured_on_hub: !v.featured_on_hub })}
+                  className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-white/70"
+                >
+                  {v.featured_on_hub ? "Hub ✓" : "Hub"}
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void patch(v.id, { published: !v.published })}
+                  className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-white/70"
+                >
+                  {v.published ? "Live" : "Draft"}
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void remove(v.id)}
+                  className="rounded-full border border-rose-400/30 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-rose-200/80"
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

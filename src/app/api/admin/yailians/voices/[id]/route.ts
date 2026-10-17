@@ -20,10 +20,11 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
   const b = (await req.json()) as Record<string, unknown>;
   const patch: Record<string, unknown> = {};
   if (typeof b.name === "string") patch.name = b.name.trim();
-  if (typeof b.quote === "string") patch.quote = b.quote.trim();
+  if ("quote" in b) patch.quote = String(b.quote ?? "").trim() || null;
   if ("role" in b) patch.role = String(b.role ?? "").trim() || null;
   if ("portrait_url" in b) patch.portrait_url = String(b.portrait_url ?? "").trim() || null;
   if ("video_url" in b) patch.video_url = String(b.video_url ?? "").trim() || null;
+  if ("poster_url" in b) patch.poster_url = String(b.poster_url ?? "").trim() || null;
   if (typeof b.featured_on_hub === "boolean") patch.featured_on_hub = b.featured_on_hub;
   if (typeof b.published === "boolean") patch.published = b.published;
   if (typeof b.sort_order === "number" && Number.isFinite(b.sort_order)) {
@@ -36,7 +37,17 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
 
   const db = createServiceRoleClient();
   const { error } = await db.from("yailians_voices").update(patch).eq("id", id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) {
+    const missing = /does not exist|schema cache|poster_url/i.test(error.message);
+    return NextResponse.json(
+      {
+        error: missing
+          ? "Run supabase/migrations/087_yailians_voices_interviews.sql in the Supabase SQL editor first."
+          : error.message,
+      },
+      { status: 400 }
+    );
+  }
   revalidate();
   return NextResponse.json({ voices: await adminGetAllVoices() });
 }

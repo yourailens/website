@@ -31,41 +31,75 @@ export default function YailiansHub({
     <YailiansShell activeHref="/yailians" overHero>
       <YailiansHero site={site} />
 
-      {/* Voices promo */}
+      {/* Voices promo — interview videos */}
       <section className="border-b border-white/10">
-        <div className="mx-auto grid max-w-6xl gap-8 px-5 py-14 sm:px-8 lg:grid-cols-[1fr_1.4fr] lg:items-end">
-          <div>
-            <p className="font-mono text-[10px] tracking-[0.28em] text-sky-400/90">01 · VOICES</p>
-            <h2 className="mt-3 font-body text-[clamp(1.8rem,4vw,2.8rem)] font-semibold leading-none tracking-tight">
-              What people think
-            </h2>
-            <p className="mt-3 max-w-md text-sm text-white/50">
-              Reactions, notes, and conversations around the film.
-            </p>
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="font-mono text-[10px] tracking-[0.28em] text-sky-400/90">01 · VOICES</p>
+              <h2 className="mt-3 font-body text-[clamp(1.8rem,4vw,2.8rem)] font-semibold leading-none tracking-tight">
+                Interviews
+              </h2>
+              <p className="mt-3 max-w-md text-sm text-white/50">
+                Conversations we recorded with people around the film.
+              </p>
+            </div>
             <Link
               href="/yailians/voices"
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-sky-100"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-sky-100"
             >
-              Open voices →
+              All interviews →
             </Link>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {(voices.length ? voices : []).slice(0, 4).map((v) => (
-              <blockquote
-                key={v.id}
-                className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
-              >
-                <p className="text-sm leading-relaxed text-white/75">“{v.quote}”</p>
-                <footer className="mt-3">
-                  <p className="text-sm font-semibold text-white">{v.name}</p>
-                  {v.role ? <p className="text-xs text-white/40">{v.role}</p> : null}
-                </footer>
-              </blockquote>
-            ))}
+          <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {voices.slice(0, 3).map((v) => {
+              const thumb = v.poster_url || v.portrait_url;
+              return (
+                <li key={v.id}>
+                  <Link
+                    href="/yailians/voices"
+                    className="block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:border-white/25"
+                  >
+                    <div className="relative aspect-video bg-zinc-950">
+                      {thumb ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={thumb} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                      ) : v.video_url ? (
+                        <video
+                          src={v.video_url}
+                          className="absolute inset-0 h-full w-full object-cover"
+                          muted
+                          playsInline
+                          preload="metadata"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-black" />
+                      )}
+                      <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                        <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-black/40 text-white/90 backdrop-blur-[2px]">
+                          <svg viewBox="0 0 24 24" className="ml-0.5 h-4 w-4 fill-current" aria-hidden>
+                            <path d="M8 5.5v13l11-6.5-11-6.5z" />
+                          </svg>
+                        </span>
+                      </span>
+                    </div>
+                    <div className="p-4">
+                      <p className="font-semibold text-white">{v.name}</p>
+                      {v.role ? <p className="mt-0.5 text-xs text-white/40">{v.role}</p> : null}
+                      {v.quote ? (
+                        <p className="mt-2 line-clamp-2 text-sm text-white/55">“{v.quote}”</p>
+                      ) : null}
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
             {!voices.length ? (
-              <p className="text-sm text-white/40 sm:col-span-2">Voices will land here once published.</p>
+              <li className="text-sm text-white/40 sm:col-span-2">
+                Interviews will land here once published.
+              </li>
             ) : null}
-          </div>
+          </ul>
         </div>
       </section>
 
