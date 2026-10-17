@@ -227,6 +227,40 @@ textarea {
   font-family: var(--font-comfortaa), system-ui, sans-serif;
 }
 
+/* Planner stays on Comfortaa, including headings. */
+.planner-root,
+.planner-root .font-heading,
+.planner-root .font-body,
+.planner-root h1,
+.planner-root h2,
+.planner-root h3,
+.planner-root button,
+.planner-root input,
+.planner-root textarea,
+.planner-root select {
+  font-family: var(--font-comfortaa), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Public theme remaps .bg-white to near black. Keep planner actions light so black labels stay readable. */
+html.ott-theme .planner-root .bg-white,
+html.ott-theme .planner-root .hover\:bg-white:hover {
+  background-color: #f4f4f5 !important;
+  color: #111111;
+}
+
+@keyframes planner-sheet-up {
+  from {
+    transform: translateY(110%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.planner-sheet {
+  animation: planner-sheet-up 240ms ease-out;
+}
+
 /* One-line paper strip highlight (hero, etc.) */
 .hero-paper-strip {
   position: relative;

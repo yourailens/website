@@ -10,6 +10,7 @@ import { SITE_CONTACT_EMAIL, SITE_LOCATION_LINE } from "@/lib/site-contact";
 function hideFooter(pathname: string | null) {
   if (!pathname) return false;
   if (pathname.startsWith("/admin")) return true;
+  if (pathname.startsWith("/planner")) return true;
   if (pathname === "/vault" || pathname.startsWith("/vault/")) return true;
   if (pathname === "/contact") return true;
   if (!pathname.startsWith("/pricing/")) return false;
