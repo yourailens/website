@@ -226,31 +226,17 @@ export type PlannerNavItem = {
 
 export const PLANNER_NAV: { id: string; label: string; items: PlannerNavItem[] }[] = [
   {
-    id: "home",
-    label: "Home",
-    items: [{ href: "/planner/tasks", label: "Planner", hint: "Todos and deadlines" }],
-  },
-  {
-    id: "work",
-    label: "Work",
+    id: "main",
+    label: "Main",
     items: [
-      { href: "/planner/follow-ups", label: "Follow ups", hint: "Calls" },
+      { href: "/planner/tasks", label: "Planner", hint: "Todos and deadlines" },
       { href: "/planner/follow-ups/contacts", label: "Contacts", hint: "People we know" },
-      { href: "/planner/people", label: "People", hint: "Tasks by person" },
-    ],
-  },
-  {
-    id: "ops",
-    label: "Ops",
-    items: [
-      { href: "/planner/directory", label: "Directory", hint: "Links we keep" },
+      { href: "/planner/follow-ups", label: "Follow ups", hint: "Calls" },
       { href: "/planner/finances", label: "Finances", hint: "Money in and out", coreOnly: true },
+      { href: "/planner/directory", label: "Directory", hint: "Links we keep" },
+      { href: "/planner/people", label: "People", hint: "Tasks by person" },
+      { href: "/planner/feed", label: "Feed", hint: "What the team is saying" },
     ],
-  },
-  {
-    id: "talk",
-    label: "Talk",
-    items: [{ href: "/planner/feed", label: "Feed", hint: "What the team is saying" }],
   },
 ];
 

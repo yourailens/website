@@ -80,18 +80,47 @@ export function DashHero({
   );
 }
 
+/** Soft outline stamp for contact category + subcategory (Client, Hot, …). */
 export function BioKind({ category, label }: { category: PlannerBioCategory; label?: string | null }) {
-  const color = PLANNER_BIO_CATEGORY_COLOR[category];
+  const accent = bioAccent(category, label);
   const group = category === "lead" ? "Lead" : category === "sponsor" ? "Sponsor" : "Misc";
   const sub = label?.trim();
   return (
-    <div className="w-max max-w-[8.5rem] shrink-0 overflow-hidden rounded-[14px] px-3 py-2 text-right" style={{ background: `${color}22`, boxShadow: `inset 0 0 0 1px ${color}66` }}>
-      <p className="whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.16em]" style={{ color }}>
-        {group}
-      </p>
-      {sub ? <p className="mt-0.5 whitespace-nowrap text-[15px] font-bold leading-tight text-white">{sub}</p> : null}
+    <div className="shrink-0 text-right" title={sub ? `${group} · ${sub}` : group}>
+      <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/30">{group}</p>
+      {sub ? (
+        <span
+          className="mt-1 inline-flex max-w-[7.5rem] items-center truncate rounded-full px-2.5 py-0.5 text-[12px] font-semibold tracking-wide text-white"
+          style={{
+            color: accent,
+            boxShadow: `inset 0 0 0 1px ${accent}`,
+            background: `${accent}14`,
+          }}
+        >
+          {sub}
+        </span>
+      ) : null}
     </div>
   );
+}
+
+/** Category / subcategory tint for card outlines and avatar rings. */
+export function bioAccent(category: PlannerBioCategory, label?: string | null): string {
+  const sub = (label ?? "").trim().toLowerCase();
+  if (category === "lead") {
+    if (sub === "client") return "#f5c542";
+    if (sub === "hot") return "#ff8a1f";
+    if (sub === "warm") return "#f5a524";
+    if (sub === "cold") return "#8ec5ff";
+    return PLANNER_BIO_CATEGORY_COLOR.lead;
+  }
+  if (category === "sponsor") {
+    if (sub === "big") return "#e9d5ff";
+    if (sub === "medium") return "#c084fc";
+    if (sub === "small") return "#a78bfa";
+    return PLANNER_BIO_CATEGORY_COLOR.sponsor;
+  }
+  return PLANNER_BIO_CATEGORY_COLOR.misc;
 }
 
 export function PlannerFace({ name, size = 28 }: { name: string; size?: number }) {

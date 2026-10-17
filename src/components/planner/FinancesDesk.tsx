@@ -14,10 +14,22 @@ import { P_GLASS, P_PAGE } from "@/components/planner/planner-ui";
 
 type View = "all" | PlannerFinanceKind;
 
-function stamp(iso: string) {
+function dayLabel(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+}
+
+function yearLabel(iso: string) {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleString(undefined, { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" });
+  return String(d.getFullYear());
+}
+
+function timeLabel(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 }
 
 export default function FinancesDesk({
@@ -58,94 +70,127 @@ export default function FinancesDesk({
         </p>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className={`${P_GLASS} p-5`}>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/40">Revenue</p>
-          <p className="mt-2 text-[28px] font-bold leading-none text-[#86efac]">{formatPlannerMoney(revenueTotal)}</p>
+      {/* Compact statement header */}
+      <div className="overflow-hidden rounded-[24px] border border-white/15 bg-white/[0.05] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-white/10 px-5 py-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Studio ledger</p>
+            <p className={`mt-2 text-[36px] font-bold leading-none tracking-tight ${net >= 0 ? "text-white" : "text-[#ffb4b4]"}`}>
+              {formatPlannerMoney(net)}
+            </p>
+            <p className="mt-2 text-[13px] text-white/40">{net >= 0 ? "Net profit so far" : "Net loss so far"}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-right font-mono text-[13px]">
+            <span className="text-white/35">In</span>
+            <span className="text-white/85">{formatPlannerMoney(revenueTotal)}</span>
+            <span className="text-white/35">Out</span>
+            <span className="text-white/85">{formatPlannerMoney(expenseTotal)}</span>
+          </div>
         </div>
-        <div className={`${P_GLASS} p-5`}>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/40">Expenses</p>
-          <p className="mt-2 text-[28px] font-bold leading-none text-[#ff8a8a]">{formatPlannerMoney(expenseTotal)}</p>
-        </div>
-        <div className={`${P_GLASS} p-5`}>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/40">Net</p>
-          <p className={`mt-2 text-[28px] font-bold leading-none ${net >= 0 ? "text-[#86efac]" : "text-[#ff8a8a]"}`}>
-            {formatPlannerMoney(net)}
-          </p>
-          <p className="mt-2 text-[12px] text-white/40">{net >= 0 ? "Profit" : "Loss"}</p>
+
+        <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:px-5">
+          <div className="flex flex-1 gap-1 rounded-full border border-white/10 bg-black/20 p-1">
+            {(
+              [
+                ["all", "All", rows.length],
+                ["revenue", "In", rows.filter((r) => r.kind === "revenue").length],
+                ["expense", "Out", rows.filter((r) => r.kind === "expense").length],
+              ] as const
+            ).map(([id, label, count]) => {
+              const on = view === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => setView(id)}
+                  className={`flex-1 rounded-full px-3 py-2 text-[13px] font-semibold transition ${
+                    on ? "bg-white text-[#111]" : "text-white/55 hover:text-white"
+                  }`}
+                >
+                  {label}
+                  <span className={`ml-1.5 font-mono text-[11px] ${on ? "text-black/45" : "text-white/30"}`}>{count}</span>
+                </button>
+              );
+            })}
+          </div>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search who, what, method…"
+            className="w-full rounded-full border border-white/15 bg-white/[0.04] px-4 py-2.5 text-[14px] text-white outline-none placeholder:text-white/30 focus:border-white/40 sm:max-w-[240px]"
+          />
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="grid flex-1 grid-cols-3 gap-1 rounded-[22px] border border-white/15 bg-white/[0.06] p-1.5">
-          {(
-            [
-              ["all", "All", rows.length],
-              ["revenue", "Revenue", rows.filter((r) => r.kind === "revenue").length],
-              ["expense", "Expense", rows.filter((r) => r.kind === "expense").length],
-            ] as const
-          ).map(([id, label, count]) => {
-            const on = view === id;
-            return (
-              <button
-                key={id}
-                type="button"
-                aria-pressed={on}
-                onClick={() => setView(id)}
-                className={`flex min-h-12 flex-col items-center justify-center rounded-[16px] ${
-                  on ? "bg-[#f4f4f5] text-[#111]" : "text-white/70"
-                }`}
-              >
-                <span className="text-[16px] font-bold leading-none">{count}</span>
-                <span className="mt-1 text-[11px] font-semibold uppercase tracking-[0.12em]">{label}</span>
-              </button>
-            );
-          })}
-        </div>
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search who, what, or method"
-          className="w-full rounded-[22px] border border-white/15 bg-white/[0.05] px-4 py-3 text-[15px] text-white outline-none placeholder:text-white/35 sm:max-w-xs"
-        />
-      </div>
+      {/* Ledger rows */}
+      {shown.length ? (
+        <div className="overflow-hidden rounded-[24px] border border-white/12 bg-white/[0.03]">
+          <div className="hidden grid-cols-[4.5rem_minmax(0,1.4fr)_minmax(0,1fr)_5.5rem_7.5rem] gap-3 border-b border-white/10 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/30 sm:grid sm:px-5">
+            <span>When</span>
+            <span>For</span>
+            <span>Who</span>
+            <span>Via</span>
+            <span className="text-right">Amount</span>
+          </div>
 
-      <ol className="space-y-3">
-        {shown.map((row) => {
-          const inMoney = row.kind === "revenue";
-          return (
-            <li key={row.id}>
-              <Link
-                href={`/planner/finances/${row.id}`}
-                className={`${P_GLASS} flex flex-wrap items-start justify-between gap-4 p-5 transition hover:border-white/30`}
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${
-                        inMoney ? "bg-[#34c759]/15 text-[#86efac]" : "bg-[#e50914]/15 text-[#ff8a8a]"
+          <ul>
+            {shown.map((row, i) => {
+              const inMoney = row.kind === "revenue";
+              return (
+                <li key={row.id} className={i > 0 ? "border-t border-white/[0.07]" : undefined}>
+                  <Link
+                    href={`/planner/finances/${row.id}`}
+                    className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3.5 transition hover:bg-white/[0.04] sm:grid-cols-[4.5rem_minmax(0,1.4fr)_minmax(0,1fr)_5.5rem_7.5rem] sm:gap-3 sm:px-5"
+                  >
+                    {/* Date */}
+                    <div className="min-w-[3.25rem] sm:min-w-0">
+                      <p className="text-[14px] font-semibold leading-none text-white/90">{dayLabel(row.paid_at)}</p>
+                      <p className="mt-1 hidden text-[11px] text-white/30 sm:block">{yearLabel(row.paid_at)}</p>
+                      <p className="mt-1 text-[10px] text-white/25 sm:hidden">{timeLabel(row.paid_at)}</p>
+                    </div>
+
+                    {/* Title + mobile who */}
+                    <div className="min-w-0 sm:contents">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span
+                            aria-hidden
+                            className={`h-1.5 w-1.5 shrink-0 rounded-full ${inMoney ? "bg-[#86efac]" : "bg-[#ff8a8a]"}`}
+                          />
+                          <p className="truncate text-[15px] font-semibold text-white group-hover:text-white">
+                            {row.title}
+                          </p>
+                        </div>
+                        <p className="mt-1 truncate pl-3.5 text-[12px] text-white/40 sm:hidden">
+                          {inMoney ? row.party : `Us → ${row.party}`} · {plannerPaymentMethodLabel(row.payment_method)}
+                        </p>
+                      </div>
+
+                      <p className="hidden min-w-0 truncate text-[14px] text-white/55 sm:block">{row.party}</p>
+                      <p className="hidden text-[12px] text-white/40 sm:block">
+                        {plannerPaymentMethodLabel(row.payment_method)}
+                      </p>
+                    </div>
+
+                    {/* Amount */}
+                    <p
+                      className={`text-right font-mono text-[15px] font-semibold tabular-nums leading-none sm:text-[16px] ${
+                        inMoney ? "text-[#b7f5c8]" : "text-[#ffc0c0]"
                       }`}
                     >
-                      {plannerFinanceKindLabel(row.kind)}
-                    </span>
-                    <span className="text-[12px] text-white/35">{plannerPaymentMethodLabel(row.payment_method)}</span>
-                  </div>
-                  <p className="mt-3 text-[20px] font-bold leading-none">{row.title}</p>
-                  <p className="mt-2 text-[14px] text-white/55">
-                    {inMoney ? "Paid by" : "Paid by us"} {row.party}
-                  </p>
-                  <p className="mt-2 text-[12px] text-white/35">{stamp(row.paid_at)}</p>
-                </div>
-                <p className={`text-[24px] font-bold leading-none ${inMoney ? "text-[#86efac]" : "text-[#ff8a8a]"}`}>
-                  {inMoney ? "+" : "−"}
-                  {formatPlannerMoney(row.amount)}
-                </p>
-              </Link>
-            </li>
-          );
-        })}
-      </ol>
-      {!shown.length && !missing ? <p className="text-sm text-white/50">No entries yet.</p> : null}
+                      {inMoney ? "+" : "−"}
+                      {formatPlannerMoney(row.amount)}
+                    </p>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : !missing ? (
+        <p className="px-1 text-sm text-white/45">No entries yet. Add the first one from the header.</p>
+      ) : null}
     </div>
   );
 }

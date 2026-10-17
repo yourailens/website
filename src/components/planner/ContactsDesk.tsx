@@ -10,7 +10,7 @@ import {
   type PlannerBioCategory,
   type PlannerMember,
 } from "@/data/planner";
-import { BioKind, PlannerFace } from "@/components/planner/planner-look";
+import { BioKind, PlannerFace, bioAccent } from "@/components/planner/planner-look";
 import { useSetPlannerHeader } from "@/components/planner/planner-header";
 import { P_GLASS, P_PAGE } from "@/components/planner/planner-ui";
 
@@ -171,7 +171,10 @@ export default function ContactsDesk({ me, bios, missing }: { me: PlannerMember;
 }
 
 function ContactCard({ bio }: { bio: PlannerBio }) {
-  const title = bio.preferred_name?.trim() || bio.full_name;
+  const name = bio.full_name.trim();
+  const called = bio.preferred_name?.trim();
+  const showCalled = Boolean(called && called.toLowerCase() !== name.toLowerCase());
+  const accent = bioAccent(bio.category, bio.label);
   const place = [bio.city, bio.country].filter(Boolean).join(", ");
   const phone = bio.phone?.trim();
   const email = bio.email?.trim();
@@ -183,18 +186,34 @@ function ContactCard({ bio }: { bio: PlannerBio }) {
   ].filter((row): row is [string, string] => Boolean(row[1]?.trim()));
 
   return (
-    <Link href={`/planner/follow-ups/contacts/${bio.slug}`} className={`${P_GLASS} flex h-full flex-col rounded-[28px] p-5`}>
-      <div className="flex items-start gap-4">
-        <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/10 text-[24px] font-bold">
-          {title.slice(0, 1).toUpperCase()}
+    <Link
+      href={`/planner/follow-ups/contacts/${bio.slug}`}
+      className="flex h-full flex-col rounded-[28px] border bg-white/[0.05] p-5 backdrop-blur-2xl transition hover:bg-white/[0.07]"
+      style={{
+        borderColor: `${accent}55`,
+        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.22), 0 0 0 1px ${accent}22, 0 18px 40px -28px ${accent}88`,
+      }}
+    >
+      <div className="flex items-start gap-3">
+        <span
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/[0.08] text-[18px] font-bold text-white/90"
+          style={{
+            boxShadow: `inset 0 0 0 1.5px ${accent}aa, 0 0 18px -6px ${accent}`,
+          }}
+        >
+          {name.slice(0, 1).toUpperCase()}
         </span>
-        <div className="min-w-0 flex-1 pt-1">
-          <p className="text-[22px] font-bold leading-[1.1]">{title}</p>
-          {bio.preferred_name && bio.preferred_name !== bio.full_name ? (
-            <p className="mt-1.5 truncate text-[13px] text-white/40">{bio.full_name}</p>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <p className="min-w-0 text-[20px] font-bold leading-[1.15] tracking-tight text-white">{name}</p>
+            <BioKind category={bio.category} label={bio.label} />
+          </div>
+          {showCalled ? (
+            <p className="mt-1 truncate text-[13px] text-white/40" title={called}>
+              {called}
+            </p>
           ) : null}
         </div>
-        <BioKind category={bio.category} label={bio.label} />
       </div>
 
       {facts.length ? (
