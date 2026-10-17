@@ -69,7 +69,9 @@ function PlannerFrame({
     window.location.href = "/planner/login";
   }
 
-  const items = PLANNER_NAV.flatMap((g) => g.items);
+  const items = PLANNER_NAV.flatMap((g) => g.items).filter(
+    (item) => !item.coreOnly || member?.is_core
+  );
   const createHref =
     bits?.kind === "tasks"
       ? "/planner/tasks/new"
@@ -79,7 +81,7 @@ function PlannerFrame({
           ? "/planner/follow-ups/contacts/new"
           : bits?.kind === "links"
             ? "/planner/directory/new"
-            : bits?.kind === "finances"
+            : bits?.kind === "finances" && member?.is_core
               ? "/planner/finances/new"
               : null;
   const createLabel =
@@ -129,7 +131,16 @@ function PlannerFrame({
         </Link>
         <div className="min-h-0 flex-1 overflow-y-auto pb-6">{links}</div>
         <div className="border-t border-white/10 px-6 pt-4">
-          {member ? <p className="truncate text-[13px] text-white/55">{member.display_name}</p> : null}
+          {member ? (
+            <p className="truncate text-[13px] text-white/55">
+              {member.display_name}
+              {member.is_core ? (
+                <span className="ml-2 rounded-full bg-[#2f6cff]/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#9cc0ff]">
+                  Core
+                </span>
+              ) : null}
+            </p>
+          ) : null}
           <button type="button" onClick={signOut} className="mt-2 text-[14px] font-medium text-white/80 hover:text-white">
             Sign out
           </button>
@@ -148,7 +159,16 @@ function PlannerFrame({
             </Link>
             <div className="min-h-0 overflow-y-auto">{links}</div>
             <div className="mt-2 border-t border-white/10 px-6 pt-4">
-              {member ? <p className="truncate text-[13px] text-white/55">{member.display_name}</p> : null}
+              {member ? (
+                <p className="truncate text-[13px] text-white/55">
+                  {member.display_name}
+                  {member.is_core ? (
+                    <span className="ml-2 rounded-full bg-[#2f6cff]/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#9cc0ff]">
+                      Core
+                    </span>
+                  ) : null}
+                </p>
+              ) : null}
               <button type="button" onClick={signOut} className="mt-2 text-[14px] font-medium text-white/80 hover:text-white">
                 Sign out
               </button>

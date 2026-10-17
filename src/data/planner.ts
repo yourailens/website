@@ -27,11 +27,21 @@ export type PlannerMember = {
   slug: string;
   role_title: string | null;
   is_ceo: boolean;
+  /** Core agents unlock gated ops (finances, etc.). */
+  is_core: boolean;
   active: boolean;
   avatar_url: string | null;
   bio: string | null;
   created_at: string;
   updated_at: string;
+};
+
+/** Safe fields for the spy login agent picker (no emails / hashes). */
+export type PlannerLoginAgent = {
+  id: string;
+  display_name: string;
+  slug: string;
+  role_title: string | null;
 };
 
 export type PlannerTask = {
@@ -210,6 +220,8 @@ export type PlannerNavItem = {
   href: string;
   label: string;
   hint?: string;
+  /** Hide from agents who are not core. */
+  coreOnly?: boolean;
 };
 
 export const PLANNER_NAV: { id: string; label: string; items: PlannerNavItem[] }[] = [
@@ -232,13 +244,13 @@ export const PLANNER_NAV: { id: string; label: string; items: PlannerNavItem[] }
     label: "Ops",
     items: [
       { href: "/planner/directory", label: "Directory", hint: "Links we keep" },
-      { href: "/planner/finances", label: "Finances", hint: "Money in and out" },
+      { href: "/planner/finances", label: "Finances", hint: "Money in and out", coreOnly: true },
     ],
   },
   {
     id: "talk",
     label: "Talk",
-    items: [{ href: "/planner", label: "Feed", hint: "What the team is saying" }],
+    items: [{ href: "/planner/feed", label: "Feed", hint: "What the team is saying" }],
   },
 ];
 
@@ -339,7 +351,9 @@ export function formatPlannerMoney(amount: number, currency = "INR") {
 }
 
 export function plannerNavActive(pathname: string, item: PlannerNavItem) {
-  if (item.href === "/planner") return pathname === "/planner" || pathname.startsWith("/planner/post");
+  if (item.href === "/planner/feed") {
+    return pathname === "/planner/feed" || pathname.startsWith("/planner/post");
+  }
   if (item.href === "/planner/follow-ups" && pathname.startsWith("/planner/follow-ups/contacts")) return false;
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }

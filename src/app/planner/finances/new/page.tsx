@@ -1,9 +1,9 @@
 import FinanceForm from "@/components/planner/FinanceForm";
-import { requirePlannerPage } from "@/lib/planner/auth";
+import { requirePlannerCorePage } from "@/lib/planner/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewFinancePage() {
-  await requirePlannerPage();
+  await requirePlannerCorePage();
   return <FinanceForm />;
 }

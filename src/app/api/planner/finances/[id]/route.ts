@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { isPlannerFinanceKind, isPlannerPaymentMethod } from "@/data/planner";
-import { requirePlanner } from "@/lib/planner/auth";
+import { requirePlannerCore } from "@/lib/planner/auth";
 import { getPlannerFinanceEntry } from "@/lib/planner/load";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
 
@@ -15,7 +15,7 @@ function clean(value: unknown) {
 }
 
 export async function GET(_req: NextRequest, ctx: Ctx) {
-  const auth = await requirePlanner();
+  const auth = await requirePlannerCore();
   if (!auth.ok) return auth.response;
   const { id } = await ctx.params;
   try {
@@ -28,7 +28,7 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
 }
 
 export async function PATCH(req: NextRequest, ctx: Ctx) {
-  const auth = await requirePlanner();
+  const auth = await requirePlannerCore();
   if (!auth.ok) return auth.response;
   const { id } = await ctx.params;
   const b = (await req.json()) as Record<string, unknown>;
@@ -78,7 +78,7 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
 }
 
 export async function DELETE(_req: NextRequest, ctx: Ctx) {
-  const auth = await requirePlanner();
+  const auth = await requirePlannerCore();
   if (!auth.ok) return auth.response;
   const { id } = await ctx.params;
   const db = createServiceRoleClient();

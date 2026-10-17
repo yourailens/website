@@ -186,7 +186,7 @@ export function NavGlyph({ name }: { name: string }) {
 }
 
 export function glyphFor(href: string) {
-  if (href === "/planner") return "feed";
+  if (href === "/planner/feed" || href === "/planner") return "feed";
   if (href.startsWith("/planner/tasks")) return "tasks";
   if (href.startsWith("/planner/follow-ups/contacts")) return "contacts";
   if (href.startsWith("/planner/follow-ups")) return "follow";

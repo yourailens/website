@@ -58,7 +58,7 @@ export default function PostCard({
         ) : null}
         <div className="mt-auto flex items-center gap-2 pt-3">
           <Link
-            href={post.author ? `/planner/people/${post.author.slug}` : "/planner"}
+            href={post.author ? `/planner/people/${post.author.slug}` : "/planner/feed"}
             className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/10 text-[11px] font-medium text-white/55"
           >
             {post.author?.avatar_url ? (

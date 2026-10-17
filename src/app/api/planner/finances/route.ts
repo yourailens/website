@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { isPlannerFinanceKind, isPlannerPaymentMethod } from "@/data/planner";
-import { requirePlanner } from "@/lib/planner/auth";
+import { requirePlannerCore } from "@/lib/planner/auth";
 import { listPlannerFinanceEntries } from "@/lib/planner/load";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
 
@@ -13,7 +13,7 @@ function clean(value: unknown) {
 }
 
 export async function GET() {
-  const auth = await requirePlanner();
+  const auth = await requirePlannerCore();
   if (!auth.ok) return auth.response;
   try {
     return NextResponse.json(await listPlannerFinanceEntries());
@@ -23,7 +23,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const auth = await requirePlanner();
+  const auth = await requirePlannerCore();
   if (!auth.ok) return auth.response;
   const b = (await req.json()) as Record<string, unknown>;
   if (!isPlannerFinanceKind(b.kind)) return NextResponse.json({ error: "Kind required" }, { status: 400 });

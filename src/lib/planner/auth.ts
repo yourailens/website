@@ -41,3 +41,22 @@ export async function requirePlannerPage(): Promise<PlannerMember> {
   if (!member) redirect("/planner/login");
   return member;
 }
+
+/** Core-only page gate. Non-core agents bounce to tasks. */
+export async function requirePlannerCorePage(): Promise<PlannerMember> {
+  const member = await requirePlannerPage();
+  if (!member.is_core) redirect("/planner/tasks");
+  return member;
+}
+
+export async function requirePlannerCore() {
+  const auth = await requirePlanner();
+  if (!auth.ok) return auth;
+  if (!auth.member.is_core) {
+    return {
+      ok: false as const,
+      response: NextResponse.json({ error: "Core clearance required" }, { status: 403 }),
+    };
+  }
+  return auth;
+}

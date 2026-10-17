@@ -41,6 +41,7 @@ function rowToMember(row: Record<string, unknown>): PlannerMember {
     slug: String(row.slug ?? ""),
     role_title: (row.role_title as string | null) ?? null,
     is_ceo: Boolean(row.is_ceo),
+    is_core: Boolean(row.is_core),
     active: row.active !== false,
     avatar_url: (row.avatar_url as string | null) ?? null,
     bio: (row.bio as string | null) ?? null,
@@ -141,6 +142,45 @@ export async function getPlannerMemberByEmail(email: string): Promise<(PlannerMe
   if (!data) return null;
   const row = data as Record<string, unknown>;
   return { ...rowToMember(row), password_hash: String(row.password_hash ?? "") };
+}
+
+export async function getPlannerMemberAuthById(
+  id: string
+): Promise<(PlannerMember & { password_hash: string }) | null> {
+  const db = createServiceRoleClient();
+  const { data, error } = await db.from("planner_members").select("*").eq("id", id).maybeSingle();
+  if (error) {
+    if (softEmpty(error.message)) return null;
+    throw new Error(error.message);
+  }
+  if (!data) return null;
+  const row = data as Record<string, unknown>;
+  return { ...rowToMember(row), password_hash: String(row.password_hash ?? "") };
+}
+
+/** Active agents for the login dossier — no secrets. */
+export async function listPlannerLoginAgents(): Promise<
+  { id: string; display_name: string; slug: string; role_title: string | null }[]
+> {
+  const db = createServiceRoleClient();
+  const { data, error } = await db
+    .from("planner_members")
+    .select("id, display_name, slug, role_title")
+    .eq("active", true)
+    .order("display_name");
+  if (error) {
+    if (softEmpty(error.message)) return [];
+    throw new Error(error.message);
+  }
+  return (data ?? []).map((r) => {
+    const row = r as Record<string, unknown>;
+    return {
+      id: String(row.id),
+      display_name: String(row.display_name ?? ""),
+      slug: String(row.slug ?? ""),
+      role_title: (row.role_title as string | null) ?? null,
+    };
+  });
 }
 
 export async function getPlannerMemberBySlug(slug: string): Promise<PlannerMember | null> {

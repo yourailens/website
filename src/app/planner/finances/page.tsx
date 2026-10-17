@@ -1,11 +1,11 @@
 import FinancesDesk from "@/components/planner/FinancesDesk";
-import { requirePlannerPage } from "@/lib/planner/auth";
+import { requirePlannerCorePage } from "@/lib/planner/auth";
 import { listPlannerFinanceEntries } from "@/lib/planner/load";
 
 export const dynamic = "force-dynamic";
 
 export default async function PlannerFinancesPage() {
-  await requirePlannerPage();
+  await requirePlannerCorePage();
   const data = await listPlannerFinanceEntries();
   return (
     <FinancesDesk

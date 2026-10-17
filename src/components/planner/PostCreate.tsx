@@ -17,7 +17,7 @@ export default function PostCreate({ initial }: { initial: string }) {
       <FeedComposer
         initial={initial}
         onPosted={() => {
-          router.push("/planner");
+          router.push("/planner/feed");
           router.refresh();
         }}
       />

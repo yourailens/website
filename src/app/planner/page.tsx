@@ -1,11 +1,10 @@
-import FeedHome from "@/components/planner/FeedHome";
+import { redirect } from "next/navigation";
 import { requirePlannerPage } from "@/lib/planner/auth";
-import { listPlannerPosts } from "@/lib/planner/load";
 
 export const dynamic = "force-dynamic";
 
+/** Home is the task planner, not the feed. */
 export default async function PlannerHomePage() {
-  const me = await requirePlannerPage();
-  const posts = await listPlannerPosts({ limit: 80 });
-  return <FeedHome me={me} initialPosts={posts} />;
+  await requirePlannerPage();
+  redirect("/planner/tasks");
 }
