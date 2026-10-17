@@ -70,6 +70,30 @@ function PlannerFrame({
   }
 
   const items = PLANNER_NAV.flatMap((g) => g.items);
+  const createHref =
+    bits?.kind === "tasks"
+      ? "/planner/tasks/new"
+      : bits?.kind === "followups"
+        ? "/planner/follow-ups/new"
+        : bits?.kind === "contacts"
+          ? "/planner/follow-ups/contacts/new"
+          : bits?.kind === "links"
+            ? "/planner/directory/new"
+            : bits?.kind === "finances"
+              ? "/planner/finances/new"
+              : null;
+  const createLabel =
+    bits?.kind === "tasks"
+      ? "New task"
+      : bits?.kind === "followups"
+        ? "New follow up"
+        : bits?.kind === "contacts"
+          ? "New person"
+          : bits?.kind === "links"
+            ? "New link"
+            : bits?.kind === "finances"
+              ? "New entry"
+              : "New";
 
   const links = (
     <nav className="flex flex-col gap-1 px-4">
@@ -134,37 +158,77 @@ function PlannerFrame({
       ) : null}
 
       {menuOpen ? null : (
-        <button
-          type="button"
-          onClick={() => setMenuOpen(true)}
-          className="fixed right-4 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#2f6cff] text-white shadow-[0_12px_28px_-8px_rgba(47,108,255,0.95)] md:hidden"
-          aria-label="Menu"
-        >
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
-            <path d="M5 7.5h14M5 12h14M5 16.5h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-          </svg>
-        </button>
+        <div className="pointer-events-none fixed inset-x-0 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-40 flex items-end justify-between px-4 md:hidden">
+          {createHref ? (
+            <Link
+              href={createHref}
+              aria-label={createLabel}
+              className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#2f6cff] text-[32px] font-semibold leading-none !text-white shadow-[0_12px_28px_-8px_rgba(47,108,255,0.95)]"
+            >
+              +
+            </Link>
+          ) : (
+            <span className="h-14 w-14" aria-hidden />
+          )}
+          <button
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full border border-white/15 bg-[#161618] shadow-[0_12px_28px_-8px_rgba(0,0,0,0.85)]"
+            aria-label="Menu"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/logo_yail.png" alt="" className="h-7 w-auto" />
+          </button>
+        </div>
       )}
 
       <div className="relative z-10 md:pl-[280px]">
         <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-white/10 bg-white/[0.04] px-4 py-3 backdrop-blur-xl sm:px-8">
           <h1 className={`min-w-0 truncate text-[16px] font-semibold ${bits ? "hidden md:block" : ""}`}>{viewing?.display_name || meta.title || "Planner"}</h1>
-          {bits?.kind === "directory" ? (
+          {bits?.kind === "contacts" || bits?.kind === "links" ? (
             <div className="ml-auto flex items-center gap-2">
               <span className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.06] px-2.5 py-1.5">
                 <span className="text-[18px] font-bold leading-none">{bits.count}</span>
-                <span className="hidden text-[11px] uppercase tracking-[0.14em] text-white/40 md:inline">People</span>
+                <span className="hidden text-[11px] uppercase tracking-[0.14em] text-white/40 md:inline">
+                  {bits.kind === "contacts" ? "People" : "Links"}
+                </span>
               </span>
-              <Link
-                href="/planner/follow-ups/contacts/new"
-                aria-label="New person"
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-[#7eb0ff] to-[#2458e6] p-1.5 !text-white shadow-[0_12px_28px_-8px_rgba(47,108,255,1),inset_0_1px_0_rgba(255,255,255,0.65)] md:px-3.5 md:py-1.5"
-              >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-[22px] font-semibold leading-none text-[#2458e6]">+</span>
-                <span className="hidden pr-1 text-[14px] font-semibold md:inline">New person</span>
-              </Link>
+              {createHref ? (
+                <Link
+                  href={createHref}
+                  aria-label={createLabel}
+                  className="hidden items-center gap-2 rounded-full bg-gradient-to-b from-[#7eb0ff] to-[#2458e6] p-1.5 !text-white shadow-[0_12px_28px_-8px_rgba(47,108,255,1),inset_0_1px_0_rgba(255,255,255,0.65)] md:inline-flex md:px-3.5 md:py-1.5"
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-[22px] font-semibold leading-none text-[#2458e6]">+</span>
+                  <span className="pr-1 text-[14px] font-semibold">{createLabel}</span>
+                </Link>
+              ) : null}
             </div>
-          ) : bits ? (
+          ) : bits?.kind === "finances" ? (
+            <div className="ml-auto flex items-center gap-2">
+              <span
+                className={`flex items-center gap-1.5 rounded-full px-2.5 py-1.5 ${
+                  bits.net >= 0 ? "border border-[#34c759]/30 bg-[#34c759]/15" : "border border-[#e50914]/35 bg-[#e50914]/15"
+                }`}
+              >
+                <span className={`text-[18px] font-bold leading-none ${bits.net >= 0 ? "text-[#86efac]" : "text-[#ff8a8a]"}`}>
+                  {bits.net >= 0 ? "+" : "−"}
+                  {Math.abs(Math.round(bits.net)).toLocaleString("en-IN")}
+                </span>
+                <span className="hidden text-[11px] uppercase tracking-[0.14em] text-white/40 md:inline">Net</span>
+              </span>
+              {createHref ? (
+                <Link
+                  href={createHref}
+                  aria-label={createLabel}
+                  className="hidden items-center gap-2 rounded-full bg-gradient-to-b from-[#7eb0ff] to-[#2458e6] p-1.5 !text-white shadow-[0_12px_28px_-8px_rgba(47,108,255,1),inset_0_1px_0_rgba(255,255,255,0.65)] md:inline-flex md:px-3.5 md:py-1.5"
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-[22px] font-semibold leading-none text-[#2458e6]">+</span>
+                  <span className="pr-1 text-[14px] font-semibold">{createLabel}</span>
+                </Link>
+              ) : null}
+            </div>
+          ) : bits?.kind === "tasks" || bits?.kind === "followups" ? (
             <div className="ml-auto flex items-center gap-2">
               <span
                 className={`flex items-center gap-1.5 rounded-full px-2.5 py-1.5 ${
@@ -197,14 +261,16 @@ function PlannerFrame({
                   {bits.kind === "tasks" ? "Done" : "Signed"}
                 </span>
               </span>
-              <Link
-                href={bits.kind === "tasks" ? "/planner/tasks/new" : "/planner/follow-ups/new"}
-                aria-label={bits.kind === "tasks" ? "New task" : "New contact"}
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-[#7eb0ff] to-[#2458e6] p-1.5 !text-white shadow-[0_12px_28px_-8px_rgba(47,108,255,1),inset_0_1px_0_rgba(255,255,255,0.65)] md:px-3.5 md:py-1.5"
-              >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-[22px] font-semibold leading-none text-[#2458e6] shadow-[0_6px_14px_-6px_rgba(0,0,0,0.45)]">+</span>
-                <span className="hidden pr-1 text-[14px] font-semibold md:inline">{bits.kind === "tasks" ? "New task" : "New contact"}</span>
-              </Link>
+              {createHref ? (
+                <Link
+                  href={createHref}
+                  aria-label={createLabel}
+                  className="hidden items-center gap-2 rounded-full bg-gradient-to-b from-[#7eb0ff] to-[#2458e6] p-1.5 !text-white shadow-[0_12px_28px_-8px_rgba(47,108,255,1),inset_0_1px_0_rgba(255,255,255,0.65)] md:inline-flex md:px-3.5 md:py-1.5"
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-[22px] font-semibold leading-none text-[#2458e6] shadow-[0_6px_14px_-6px_rgba(0,0,0,0.45)]">+</span>
+                  <span className="pr-1 text-[14px] font-semibold">{createLabel}</span>
+                </Link>
+              ) : null}
             </div>
           ) : null}
         </header>

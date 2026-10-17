@@ -10,7 +10,7 @@ function siteUrl() {
 
 const TITLE = "Pricing | YourAILens Studios";
 const DESCRIPTION =
-  "Market rate ₹5,000 per 45s film. Weekly from ₹38,250 (15% below), monthly ₹1,44,000 (20% below), 3 months ₹4,05,000 (25% below). Sound, music, and commercial license included.";
+  "A la carte from ₹5,000 a minute by quality. Packages at 480p, 720p, or 1080p: weekly from ₹21,250 for 5 films, monthly from ₹80,000, 3 months from ₹2,25,000. Sound, music, and commercial license included.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const services = await loadPublicServices();

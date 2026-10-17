@@ -2,11 +2,16 @@ import type {
   PlannerBio,
   PlannerContact,
   PlannerContactEntry,
+  PlannerDirectoryItem,
+  PlannerDirectoryKind,
   PlannerEntryKind,
+  PlannerFinanceEntry,
+  PlannerFinanceKind,
   PlannerMeeting,
   PlannerMember,
   PlannerNote,
   PlannerNoteImage,
+  PlannerPaymentMethod,
   PlannerPost,
   PlannerPostImage,
   PlannerTask,
@@ -14,7 +19,10 @@ import type {
 } from "@/data/planner";
 import {
   isPlannerContactStatus,
+  isPlannerDirectoryKind,
   isPlannerEntryKind,
+  isPlannerFinanceKind,
+  isPlannerPaymentMethod,
   isPlannerTaskStatus,
   plannerBioCategory,
   plannerMeetCount,
@@ -550,4 +558,116 @@ export async function ensureUniquePlannerSlug(base: string, excludeId?: string):
     candidate = `${base}-${n}`;
     n += 1;
   }
+}
+
+function rowToDirectoryItem(row: Record<string, unknown>): PlannerDirectoryItem | null {
+  if (!isPlannerDirectoryKind(row.kind)) return null;
+  return {
+    id: String(row.id),
+    title: String(row.title ?? ""),
+    blurb: (row.blurb as string | null) ?? null,
+    kind: row.kind as PlannerDirectoryKind,
+    url: String(row.url ?? ""),
+    label: (row.label as string | null) ?? null,
+    notes: (row.notes as string | null) ?? null,
+    created_by: String(row.created_by ?? ""),
+    created_at: String(row.created_at ?? ""),
+    updated_at: String(row.updated_at ?? ""),
+  };
+}
+
+export async function listPlannerDirectory(): Promise<{ rows: PlannerDirectoryItem[]; missing: boolean }> {
+  const db = createServiceRoleClient();
+  const { data, error } = await db.from("planner_directory").select("*").order("updated_at", { ascending: false });
+  if (error) {
+    if (softEmpty(error.message)) return { rows: [], missing: true };
+    throw new Error(error.message);
+  }
+  const rows = (data ?? [])
+    .map((r) => rowToDirectoryItem(r as Record<string, unknown>))
+    .filter((r): r is PlannerDirectoryItem => Boolean(r));
+  const people = await memberMap(rows.map((r) => r.created_by));
+  return {
+    rows: rows.map((r) => ({ ...r, creator: people.get(r.created_by) ?? null })),
+    missing: false,
+  };
+}
+
+export async function getPlannerDirectoryItem(id: string): Promise<PlannerDirectoryItem | null> {
+  const db = createServiceRoleClient();
+  const { data, error } = await db.from("planner_directory").select("*").eq("id", id).maybeSingle();
+  if (error) {
+    if (softEmpty(error.message)) return null;
+    throw new Error(error.message);
+  }
+  if (!data) return null;
+  const item = rowToDirectoryItem(data as Record<string, unknown>);
+  if (!item) return null;
+  const people = await memberMap([item.created_by]);
+  return { ...item, creator: people.get(item.created_by) ?? null };
+}
+
+function rowToFinanceEntry(row: Record<string, unknown>): PlannerFinanceEntry | null {
+  if (!isPlannerFinanceKind(row.kind) || !isPlannerPaymentMethod(row.payment_method)) return null;
+  const amount = Number(row.amount);
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+  return {
+    id: String(row.id),
+    kind: row.kind as PlannerFinanceKind,
+    amount,
+    currency: String(row.currency ?? "INR"),
+    title: String(row.title ?? ""),
+    party: String(row.party ?? ""),
+    payment_method: row.payment_method as PlannerPaymentMethod,
+    notes: (row.notes as string | null) ?? null,
+    paid_at: String(row.paid_at ?? row.created_at ?? ""),
+    created_by: String(row.created_by ?? ""),
+    created_at: String(row.created_at ?? ""),
+    updated_at: String(row.updated_at ?? ""),
+  };
+}
+
+export async function listPlannerFinanceEntries(): Promise<{
+  rows: PlannerFinanceEntry[];
+  expenseTotal: number;
+  revenueTotal: number;
+  net: number;
+  missing: boolean;
+}> {
+  const db = createServiceRoleClient();
+  const { data, error } = await db.from("planner_finance_entries").select("*").order("paid_at", { ascending: false });
+  if (error) {
+    if (softEmpty(error.message)) {
+      return { rows: [], expenseTotal: 0, revenueTotal: 0, net: 0, missing: true };
+    }
+    throw new Error(error.message);
+  }
+  const rows = (data ?? [])
+    .map((r) => rowToFinanceEntry(r as Record<string, unknown>))
+    .filter((r): r is PlannerFinanceEntry => Boolean(r));
+  const people = await memberMap(rows.map((r) => r.created_by));
+  const withPeople = rows.map((r) => ({ ...r, creator: people.get(r.created_by) ?? null }));
+  const expenseTotal = withPeople.filter((r) => r.kind === "expense").reduce((sum, r) => sum + r.amount, 0);
+  const revenueTotal = withPeople.filter((r) => r.kind === "revenue").reduce((sum, r) => sum + r.amount, 0);
+  return {
+    rows: withPeople,
+    expenseTotal,
+    revenueTotal,
+    net: revenueTotal - expenseTotal,
+    missing: false,
+  };
+}
+
+export async function getPlannerFinanceEntry(id: string): Promise<PlannerFinanceEntry | null> {
+  const db = createServiceRoleClient();
+  const { data, error } = await db.from("planner_finance_entries").select("*").eq("id", id).maybeSingle();
+  if (error) {
+    if (softEmpty(error.message)) return null;
+    throw new Error(error.message);
+  }
+  if (!data) return null;
+  const entry = rowToFinanceEntry(data as Record<string, unknown>);
+  if (!entry) return null;
+  const people = await memberMap([entry.created_by]);
+  return { ...entry, creator: people.get(entry.created_by) ?? null };
 }

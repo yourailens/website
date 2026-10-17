@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import ContactDesk from "@/components/planner/ContactDesk";
 import { requirePlannerPage } from "@/lib/planner/auth";
-import { getPlannerContact, listPlannerMembers } from "@/lib/planner/load";
+import { getPlannerContact } from "@/lib/planner/load";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,7 @@ export default async function PlannerContactPage({
 }) {
   const me = await requirePlannerPage();
   const { id } = await params;
-  const [contact, members] = await Promise.all([getPlannerContact(id), listPlannerMembers()]);
+  const contact = await getPlannerContact(id);
   if (!contact) notFound();
-  return <ContactDesk me={me} members={members} initial={contact} />;
+  return <ContactDesk me={me} initial={contact} />;
 }

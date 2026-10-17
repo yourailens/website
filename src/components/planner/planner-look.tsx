@@ -160,6 +160,23 @@ export function NavGlyph({ name }: { name: string }) {
       </svg>
     );
   }
+  if (name === "links") {
+    return (
+      <svg viewBox="0 0 24 24" className={common} fill="none" aria-hidden>
+        <path d="M10 13a5 5 0 0 0 7.07 0l1.41-1.41a5 5 0 0 0-7.07-7.07L10 5.93" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+        <path d="M14 11a5 5 0 0 0-7.07 0L5.52 12.41a5 5 0 0 0 7.07 7.07L14 18.07" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (name === "money") {
+    return (
+      <svg viewBox="0 0 24 24" className={common} fill="none" aria-hidden>
+        <rect x="3.5" y="6" width="17" height="12" rx="2" stroke="currentColor" strokeWidth="1.6" />
+        <circle cx="12" cy="12" r="2.4" stroke="currentColor" strokeWidth="1.6" />
+        <path d="M6.5 9.5h1M16.5 14.5h1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      </svg>
+    );
+  }
   return (
     <svg viewBox="0 0 24 24" className={common} fill="none" aria-hidden>
       <circle cx="12" cy="8" r="3" stroke="currentColor" strokeWidth="1.6" />
@@ -174,5 +191,7 @@ export function glyphFor(href: string) {
   if (href.startsWith("/planner/follow-ups/contacts")) return "contacts";
   if (href.startsWith("/planner/follow-ups")) return "follow";
   if (href.startsWith("/planner/people")) return "people";
+  if (href.startsWith("/planner/directory")) return "links";
+  if (href.startsWith("/planner/finances")) return "money";
   return "team";
 }

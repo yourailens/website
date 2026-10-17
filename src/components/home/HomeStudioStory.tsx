@@ -61,9 +61,9 @@ function cutToCard(cut: OttCut): OttCard {
 }
 
 const PACKAGES: OttCard[] = [
-  { title: "Weekly", tag: "₹38,250 · 9 films", href: "/pricing#weekly" },
-  { title: "Monthly", tag: "₹1,44,000 · 36 films", href: "/pricing#monthly" },
-  { title: "3 months", tag: "₹4,05,000 · 108 films", href: "/pricing#quarterly" },
+  { title: "Weekly", tag: "From ₹21,250 · 5 films", href: "/pricing#weekly" },
+  { title: "Monthly", tag: "From ₹80,000 · 20 films", href: "/pricing#monthly" },
+  { title: "3 months", tag: "From ₹2,25,000 · 60 films", href: "/pricing#quarterly" },
   { title: "A la carte", tag: "Build the fare", href: "/pricing#alacarte" },
   { title: "AI menu", tag: "Logo, stills, more", href: "/pricing#ai-menu" },
 ];

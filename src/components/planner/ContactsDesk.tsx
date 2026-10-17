@@ -28,7 +28,7 @@ export default function ContactsDesk({ me, bios, missing }: { me: PlannerMember;
   const [mine, setMine] = useState(false);
   const [label, setLabel] = useState("");
   const [query, setQuery] = useState("");
-  useSetPlannerHeader({ kind: "directory", count: bios.length });
+  useSetPlannerHeader({ kind: "contacts", count: bios.length });
 
   const pool = useMemo(() => {
     const q = query.trim().toLowerCase();

@@ -5,7 +5,9 @@ import { createContext, useContext, useEffect, useState } from "react";
 export type PlannerHeaderBits =
   | { kind: "tasks"; open: number; done: number }
   | { kind: "followups"; due: number; won: number }
-  | { kind: "directory"; count: number };
+  | { kind: "contacts"; count: number }
+  | { kind: "links"; count: number }
+  | { kind: "finances"; net: number };
 
 const SetCtx = createContext<((bits: PlannerHeaderBits | null) => void) | null>(null);
 const BitsCtx = createContext<PlannerHeaderBits | null>(null);
@@ -30,7 +32,11 @@ export function useSetPlannerHeader(bits: PlannerHeaderBits) {
       ? `tasks:${bits.open}:${bits.done}`
       : bits.kind === "followups"
         ? `followups:${bits.due}:${bits.won}`
-        : `directory:${bits.count}`;
+        : bits.kind === "contacts"
+          ? `contacts:${bits.count}`
+          : bits.kind === "links"
+            ? `links:${bits.count}`
+            : `finances:${bits.net}`;
   useEffect(() => {
     setBits?.(bits);
     return () => setBits?.(null);

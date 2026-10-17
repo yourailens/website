@@ -228,11 +228,115 @@ export const PLANNER_NAV: { id: string; label: string; items: PlannerNavItem[] }
     ],
   },
   {
+    id: "ops",
+    label: "Ops",
+    items: [
+      { href: "/planner/directory", label: "Directory", hint: "Links we keep" },
+      { href: "/planner/finances", label: "Finances", hint: "Money in and out" },
+    ],
+  },
+  {
     id: "talk",
     label: "Talk",
     items: [{ href: "/planner", label: "Feed", hint: "What the team is saying" }],
   },
 ];
+
+export const PLANNER_DIRECTORY_KINDS = ["drive", "instagram", "website", "doc", "other"] as const;
+export type PlannerDirectoryKind = (typeof PLANNER_DIRECTORY_KINDS)[number];
+
+export const PLANNER_PAYMENT_METHODS = ["upi", "bank"] as const;
+export type PlannerPaymentMethod = (typeof PLANNER_PAYMENT_METHODS)[number];
+
+export const PLANNER_FINANCE_KINDS = ["expense", "revenue"] as const;
+export type PlannerFinanceKind = (typeof PLANNER_FINANCE_KINDS)[number];
+
+export type PlannerDirectoryItem = {
+  id: string;
+  title: string;
+  blurb: string | null;
+  kind: PlannerDirectoryKind;
+  url: string;
+  label: string | null;
+  notes: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  creator?: PlannerMember | null;
+};
+
+export type PlannerFinanceEntry = {
+  id: string;
+  kind: PlannerFinanceKind;
+  amount: number;
+  currency: string;
+  title: string;
+  party: string;
+  payment_method: PlannerPaymentMethod;
+  notes: string | null;
+  paid_at: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  creator?: PlannerMember | null;
+};
+
+export function isPlannerDirectoryKind(v: unknown): v is PlannerDirectoryKind {
+  return PLANNER_DIRECTORY_KINDS.includes(v as PlannerDirectoryKind);
+}
+
+export function isPlannerPaymentMethod(v: unknown): v is PlannerPaymentMethod {
+  return PLANNER_PAYMENT_METHODS.includes(v as PlannerPaymentMethod);
+}
+
+export function isPlannerFinanceKind(v: unknown): v is PlannerFinanceKind {
+  return PLANNER_FINANCE_KINDS.includes(v as PlannerFinanceKind);
+}
+
+export function plannerDirectoryKindLabel(kind: PlannerDirectoryKind) {
+  switch (kind) {
+    case "drive":
+      return "Drive";
+    case "instagram":
+      return "Instagram";
+    case "website":
+      return "Website";
+    case "doc":
+      return "Doc";
+    case "other":
+      return "Other";
+  }
+}
+
+export function plannerPaymentMethodLabel(method: PlannerPaymentMethod) {
+  switch (method) {
+    case "upi":
+      return "UPI";
+    case "bank":
+      return "Bank Transfer";
+  }
+}
+
+export function plannerFinanceKindLabel(kind: PlannerFinanceKind) {
+  switch (kind) {
+    case "expense":
+      return "Expense";
+    case "revenue":
+      return "Revenue";
+  }
+}
+
+export function formatPlannerMoney(amount: number, currency = "INR") {
+  try {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
+    }).format(amount);
+  } catch {
+    return `₹${amount.toLocaleString("en-IN")}`;
+  }
+}
 
 export function plannerNavActive(pathname: string, item: PlannerNavItem) {
   if (item.href === "/planner") return pathname === "/planner" || pathname.startsWith("/planner/post");
@@ -256,6 +360,12 @@ export function plannerPageMeta(pathname: string) {
   }
   if (pathname.startsWith("/planner/follow-ups/")) {
     return { group: "Work", title: "Contact", hint: "Follow up log" };
+  }
+  if (pathname.startsWith("/planner/directory")) {
+    return { group: "Ops", title: "Directory", hint: "Links we keep" };
+  }
+  if (pathname.startsWith("/planner/finances")) {
+    return { group: "Ops", title: "Finances", hint: "Money in and out" };
   }
   return { group: "Planner", title: "Studio", hint: "" };
 }

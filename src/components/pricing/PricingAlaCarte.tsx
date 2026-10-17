@@ -14,12 +14,18 @@ const GRID_PAPER = {
   backgroundSize: "18px 18px",
 } as const;
 
-/** 10s = ₹1,500. Each +5s = +₹750. */
+/** Rates are for 1 minute. Shorter or longer scales with the seconds. */
 const SEC_MIN = 10;
 const SEC_MAX = 600;
 const SEC_STEP = 5;
-const BASE_AT_MIN = 1_500;
-const PER_STEP = 750;
+
+type Quality = "480p" | "720p" | "1080p";
+
+const QUALITIES: { id: Quality; label: string; ratePerMin: number; note: string }[] = [
+  { id: "480p", label: "480p", ratePerMin: 5_000, note: "₹5k / min" },
+  { id: "720p", label: "720p", ratePerMin: 10_000, note: "₹10k / min" },
+  { id: "1080p", label: "1080p", ratePerMin: 20_000, note: "₹20k / min" },
+];
 
 const COUNT_MIN = 1;
 const COUNT_MAX = 20;
@@ -28,9 +34,9 @@ const HOURS_MIN = 5;
 const HOURS_MAX = 168;
 const HOURS_STANDARD = 48;
 
-function pricePerVideo(seconds: number) {
-  const steps = Math.max(0, Math.round((seconds - SEC_MIN) / SEC_STEP));
-  return BASE_AT_MIN + steps * PER_STEP;
+function pricePerVideo(seconds: number, quality: Quality) {
+  const rate = QUALITIES.find((q) => q.id === quality)?.ratePerMin ?? 10_000;
+  return Math.round(rate * (seconds / 60));
 }
 
 function deliveryFactor(hours: number) {
@@ -127,13 +133,14 @@ export default function PricingAlaCarte({
   tone?: "light" | "ott";
 }) {
   const ott = tone === "ott";
-  const [seconds, setSeconds] = useState(40);
+  const [quality, setQuality] = useState<Quality>("720p");
+  const [seconds, setSeconds] = useState(60);
   const [count, setCount] = useState(1);
   const [hours, setHours] = useState(HOURS_STANDARD);
   const [currency, setCurrency] = useState<Currency>("INR");
 
   const quote = useMemo(() => {
-    const unit = pricePerVideo(seconds);
+    const unit = pricePerVideo(seconds, quality);
     const base = unit * count;
     const factor = deliveryFactor(hours);
     const total = roundFare(base * factor);
@@ -148,19 +155,20 @@ export default function PricingAlaCarte({
       perVideo: Math.round(total / count),
       label: deliveryLabel(hours),
     };
-  }, [seconds, count, hours]);
+  }, [seconds, quality, count, hours]);
 
   const mailto = useMemo(() => {
     const body = [
       "Hi, I want an a la carte quote.",
       "",
+      `Quality: ${quality}`,
       `Length: ${formatSeconds(seconds)} each`,
       `Videos: ${count}`,
       `Delivery: ${formatDelivery(hours)} (${quote.label})`,
       `Fare: ${money(quote.total, "INR")}`,
     ].join("\n");
     return `mailto:${SITE_CONTACT_EMAIL}?subject=${encodeURIComponent("A la carte quote")}&body=${encodeURIComponent(body)}`;
-  }, [seconds, count, hours, quote.total, quote.label]);
+  }, [quality, seconds, count, hours, quote.total, quote.label]);
 
   const meter = (
     <div
@@ -241,13 +249,59 @@ export default function PricingAlaCarte({
         >
           <div>
             <div className="flex items-end justify-between gap-3">
+              <p
+                className={`text-[10px] font-medium uppercase tracking-[0.22em] ${
+                  ott ? "text-white/45" : "text-slate-500"
+                }`}
+              >
+                Quality
+              </p>
+              <p className={`text-sm font-light ${ott ? "text-white/50" : "text-slate-500"}`}>
+                Per 1 minute
+              </p>
+            </div>
+            <div className="mt-4 grid grid-cols-3 gap-1.5">
+              {QUALITIES.map((tier) => {
+                const on = quality === tier.id;
+                return (
+                  <button
+                    key={tier.id}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => setQuality(tier.id)}
+                    className={`flex min-h-[4.25rem] flex-col items-center justify-center rounded-xl border px-2 py-2 transition ${
+                      on
+                        ? ott
+                          ? "border-blue-400 bg-blue-500/20 text-white"
+                          : "border-blue-600 bg-blue-600 text-white"
+                        : ott
+                          ? "border-white/15 bg-white/[0.04] text-white/70 hover:border-white/30"
+                          : "border-blue-200 bg-white text-slate-700 hover:border-blue-400"
+                    }`}
+                  >
+                    <span className="text-[15px] font-semibold leading-none">{tier.label}</span>
+                    <span
+                      className={`mt-1.5 text-[11px] font-light ${
+                        on ? (ott ? "text-blue-200" : "text-white/85") : ott ? "text-white/40" : "text-slate-400"
+                      }`}
+                    >
+                      {tier.note}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-end justify-between gap-3">
               <label
                 htmlFor={`${idPrefix}-seconds`}
                 className={`text-[10px] font-medium uppercase tracking-[0.22em] ${
                   ott ? "text-white/45" : "text-slate-500"
                 }`}
               >
-                How many seconds
+                How long
               </label>
               <p className={`text-sm font-light ${ott ? "text-white" : "text-slate-900"}`}>
                 {formatSeconds(seconds)}{" "}
@@ -274,7 +328,7 @@ export default function PricingAlaCarte({
               }`}
             >
               <span>10s</span>
-              <span>₹1.5k start · +₹750 / 5s</span>
+              <span>Scales with the minute rate</span>
               <span>10 min</span>
             </div>
           </div>
@@ -379,7 +433,7 @@ export default function PricingAlaCarte({
               {money(quote.total, currency)}
             </p>
             <p className={`mt-2 text-sm font-light ${ott ? "text-white/50" : "text-slate-500"}`}>
-              {count === 1 ? "1 film" : `${count} films`} · {formatSeconds(seconds)} · {formatDelivery(hours)}
+              {count === 1 ? "1 film" : `${count} films`} · {quality} · {formatSeconds(seconds)} · {formatDelivery(hours)}
             </p>
             <p className={`mt-1 text-[11px] font-light ${ott ? "text-white/35" : "text-slate-400"}`}>
               {money(quote.perVideo, currency)} each after delivery
@@ -392,7 +446,9 @@ export default function PricingAlaCarte({
             }`}
           >
             <div className="flex items-baseline justify-between gap-3">
-              <span className={ott ? "text-white/45" : "text-slate-500"}>Length × count</span>
+              <span className={ott ? "text-white/45" : "text-slate-500"}>
+                {quality} · length × count
+              </span>
               <span className={ott ? "text-white/80" : "text-slate-700"}>{money(quote.base, currency)}</span>
             </div>
             {quote.rush > 0 ? (
@@ -474,7 +530,7 @@ export default function PricingAlaCarte({
           <p className="font-mono text-[10px] tracking-[0.32em] text-blue-400">FARE 02 · VIDEOS</p>
           <h2 className="mt-3 font-heading text-[clamp(2.2rem,5vw,3.6rem)] leading-none">A la carte</h2>
           <p className="mt-3 max-w-md text-sm font-light text-white/60">
-            Build a video fare. Pick the seconds. Pick how many. Pick how fast.
+            Pick the quality. Pick the length. Pick how many. Pick how fast. Rates are for 1 minute.
           </p>
           {meter}
         </div>
@@ -494,7 +550,7 @@ export default function PricingAlaCarte({
             A la carte
           </h3>
           <p className="mx-auto mt-3 max-w-md text-sm font-light text-slate-600">
-            Pick the seconds. Pick how many. Pick how fast. The fare moves with you.
+            Pick the quality, the length, how many, and how fast. Rates are for 1 minute.
           </p>
         </div>
         {meter}
@@ -514,7 +570,7 @@ export default function PricingAlaCarte({
             A la carte
           </h2>
           <p className="mx-auto mt-3 max-w-md text-sm font-light text-slate-600">
-            Pick the seconds. Pick how many. Pick how fast. The fare moves with you.
+            Pick the quality, the length, how many, and how fast. Rates are for 1 minute.
           </p>
         </div>
         {meter}
