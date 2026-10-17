@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { P_MENU } from "@/components/planner/planner-ui";
 
 export type PlannerOption = { value: string; label: string };
 
@@ -63,7 +64,7 @@ export default function PlannerSelect({
         </svg>
       </button>
       {open ? (
-        <ul className="absolute z-50 mt-1.5 max-h-64 w-full min-w-[12rem] overflow-auto rounded-[22px] border border-white/25 bg-white/10 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] backdrop-blur-2xl">
+        <ul className={`absolute z-50 mt-1.5 max-h-64 w-full min-w-[12rem] ${P_MENU}`}>
           {options.map((o) => {
             const on = o.value === value;
             return (
@@ -71,7 +72,7 @@ export default function PlannerSelect({
                 <button
                   type="button"
                   className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left text-[14px] transition ${
-                    on ? "bg-[#2f6cff] font-semibold text-white" : "text-white/80"
+                    on ? "bg-[#2f6cff] font-semibold text-white" : "text-white/80 hover:bg-white/10"
                   }`}
                   onClick={() => {
                     onChange(o.value);

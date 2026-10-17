@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { P_MENU } from "@/components/planner/planner-ui";
 
 export default function PlannerSuggest({
   value,
@@ -56,7 +57,7 @@ export default function PlannerSuggest({
         }
       />
       {open && matches.length ? (
-        <ul className="absolute z-50 mt-1.5 max-h-64 w-full overflow-auto rounded-[22px] border border-white/20 bg-[#161618] p-1.5 shadow-[0_24px_50px_-16px_rgba(0,0,0,0.85)]">
+        <ul className={`absolute z-50 mt-1.5 max-h-64 w-full ${P_MENU}`}>
           {matches.map((option) => {
             const on = option.toLowerCase() === value.trim().toLowerCase();
             return (
@@ -64,7 +65,7 @@ export default function PlannerSuggest({
                 <button
                   type="button"
                   className={`flex w-full rounded-xl px-3 py-2 text-left text-[14px] ${
-                    on ? "bg-[#2f6cff] font-semibold text-white" : "text-white/80"
+                    on ? "bg-[#2f6cff] font-semibold text-white" : "text-white/80 hover:bg-white/10"
                   }`}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {

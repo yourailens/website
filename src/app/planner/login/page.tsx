@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PlannerLoginAgent } from "@/data/planner";
-import { P_BTN, P_FIELD } from "@/components/planner/planner-ui";
+import { P_BTN, P_FIELD, P_MENU } from "@/components/planner/planner-ui";
 
 export default function PlannerLoginPage() {
   const router = useRouter();
@@ -194,7 +194,7 @@ export default function PlannerLoginPage() {
                   placeholder="Start typing your name…"
                 />
                 {open && matches.length ? (
-                  <ul className="absolute z-50 mt-1.5 max-h-64 w-full overflow-auto rounded-2xl border border-white/20 bg-[#161618] p-1.5 shadow-[0_24px_50px_-16px_rgba(0,0,0,0.85)]">
+                  <ul className={`absolute z-50 mt-1.5 max-h-64 w-full ${P_MENU}`}>
                     {matches.map((agent, i) => {
                       const on = agent.id === selectedId || i === highlight;
                       const callsign = agent.display_name.slice(0, 2).toUpperCase();
@@ -238,7 +238,7 @@ export default function PlannerLoginPage() {
                   </ul>
                 ) : null}
                 {open && query.trim() && !matches.length ? (
-                  <div className="absolute z-50 mt-1.5 w-full rounded-2xl border border-white/15 bg-[#161618] px-4 py-3 text-[13px] text-white/45">
+                  <div className="absolute z-50 mt-1.5 w-full rounded-2xl border border-white/20 bg-[#161618] px-4 py-3 text-[13px] text-white/45 shadow-[0_24px_50px_-16px_rgba(0,0,0,0.85)]">
                     No agent matches “{query.trim()}”
                   </div>
                 ) : null}

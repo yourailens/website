@@ -11,6 +11,7 @@ import {
   type PlannerBioSuggestions,
   type PlannerMember,
 } from "@/data/planner";
+import PlannerConfirm from "@/components/planner/PlannerConfirm";
 import PlannerDate from "@/components/planner/PlannerDate";
 import PlannerSuggest from "@/components/planner/PlannerSuggest";
 import { BioKind, PlannerFace } from "@/components/planner/planner-look";
@@ -112,6 +113,7 @@ export default function BioForm({
   const router = useRouter();
   const pathname = usePathname() ?? "";
   const [busy, setBusy] = useState(false);
+  const [askDelete, setAskDelete] = useState(false);
   const [err, setErr] = useState("");
   const [group, setGroup] = useState<Group>("reach");
   const [draft, setDraft] = useState<BioDraft>(initial ?? { ...EMPTY, owner_id: me.id });
@@ -172,7 +174,6 @@ export default function BioForm({
 
   async function remove() {
     if (!bioId) return;
-    if (!window.confirm("Delete this contact card?")) return;
     setBusy(true);
     setErr("");
     try {
@@ -184,6 +185,7 @@ export default function BioForm({
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Could not delete");
       setBusy(false);
+      setAskDelete(false);
     }
   }
 
@@ -427,12 +429,22 @@ export default function BioForm({
             Cancel
           </button>
           {bioId ? (
-            <button type="button" className="text-[14px] text-[#ffb4b4]" disabled={busy} onClick={() => void remove()}>
+            <button type="button" className="text-[14px] text-[#ffb4b4]" disabled={busy} onClick={() => setAskDelete(true)}>
               Delete
             </button>
           ) : null}
         </div>
       </section>
+
+      <PlannerConfirm
+        open={askDelete}
+        title="Delete this contact card?"
+        body="This removes them from Contacts. Any open follow-up stays, but won’t be linked to this card anymore."
+        confirmLabel="Delete contact"
+        busy={busy}
+        onCancel={() => setAskDelete(false)}
+        onConfirm={() => void remove()}
+      />
 
       <aside className="mt-6 lg:sticky lg:top-24 lg:mt-0 lg:self-start">
         <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-white/40">On the list</p>

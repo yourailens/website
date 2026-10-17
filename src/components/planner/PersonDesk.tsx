@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { PlannerMeeting, PlannerMember, PlannerNote, PlannerPost, PlannerTask } from "@/data/planner";
+import PlannerConfirm from "@/components/planner/PlannerConfirm";
 import PostCard from "@/components/planner/PostCard";
 import TaskCard from "@/components/planner/TaskCard";
 import { Stat } from "@/components/planner/planner-look";
@@ -26,14 +27,22 @@ export default function PersonDesk({
   const isOwn = me.id === person.id;
   const [posts, setPosts] = useState(initialPosts);
   const [err, setErr] = useState("");
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const open = initialTasks.filter((t) => t.status !== "done").length;
 
-  async function deletePost(id: string) {
-    if (!confirm("Delete this post?")) return;
-    const res = await fetch(`/api/planner/posts/${id}`, { method: "DELETE" });
-    const j = (await res.json().catch(() => ({}))) as { posts?: PlannerPost[]; error?: string };
-    if (res.ok) setPosts((j.posts ?? []).filter((p) => p.author_id === person.id));
-    else setErr(j.error || "Delete failed");
+  async function deletePost() {
+    if (!pendingId) return;
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/planner/posts/${pendingId}`, { method: "DELETE" });
+      const j = (await res.json().catch(() => ({}))) as { posts?: PlannerPost[]; error?: string };
+      if (res.ok) setPosts((j.posts ?? []).filter((p) => p.author_id === person.id));
+      else setErr(j.error || "Delete failed");
+      setPendingId(null);
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -129,13 +138,23 @@ export default function PersonDesk({
         <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {posts.map((p) => (
             <li key={p.id}>
-              <PostCard post={p} me={me} onDelete={(id) => void deletePost(id)} />
+              <PostCard post={p} me={me} onDelete={(id) => setPendingId(id)} />
             </li>
           ))}
         </ul>
         {!posts.length ? <p className="text-sm text-white/50">No posts yet.</p> : null}
       </section>
       {err ? <p className="text-sm text-rose-300">{err}</p> : null}
+
+      <PlannerConfirm
+        open={Boolean(pendingId)}
+        title="Delete this post?"
+        body="This removes the post from the feed. You cannot undo it."
+        confirmLabel="Delete post"
+        busy={busy}
+        onCancel={() => setPendingId(null)}
+        onConfirm={() => void deletePost()}
+      />
     </div>
   );
 }

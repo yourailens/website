@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import type { PlannerNote } from "@/data/planner";
+import PlannerConfirm from "@/components/planner/PlannerConfirm";
 import PlannerMore from "@/components/planner/PlannerMore";
 import {
   P_BTN,
@@ -21,6 +22,7 @@ export default function PlannerNotePage() {
   const [body, setBody] = useState("");
   const [images, setImages] = useState<PastedImage[]>([]);
   const [busy, setBusy] = useState(false);
+  const [askDelete, setAskDelete] = useState(false);
   const [err, setErr] = useState("");
   const [loaded, setLoaded] = useState(false);
 
@@ -69,7 +71,6 @@ export default function PlannerNotePage() {
   }
 
   async function remove() {
-    if (!confirm("Delete this note page?")) return;
     setBusy(true);
     try {
       const res = await fetch(`/api/planner/notes/${params.noteId}`, { method: "DELETE" });
@@ -81,6 +82,7 @@ export default function PlannerNotePage() {
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Delete failed");
       setBusy(false);
+      setAskDelete(false);
     }
   }
 
@@ -102,7 +104,7 @@ export default function PlannerNotePage() {
       <section className={P_BUBBLE}>
         <div className="flex items-center justify-between">
           <p className={P_KICKER}>Note page</p>
-          <PlannerMore label="Delete" disabled={busy} onSelect={() => void remove()} />
+          <PlannerMore label="Delete" disabled={busy} onSelect={() => setAskDelete(true)} />
         </div>
         <input
           className={`${P_FIELD} mt-3 font-heading text-xl`}
@@ -150,6 +152,16 @@ export default function PlannerNotePage() {
           </button>
         </div>
       </section>
+
+      <PlannerConfirm
+        open={askDelete}
+        title="Delete this note page?"
+        body="This removes the note. You cannot undo it."
+        confirmLabel="Delete note"
+        busy={busy}
+        onCancel={() => setAskDelete(false)}
+        onConfirm={() => void remove()}
+      />
     </div>
   );
 }

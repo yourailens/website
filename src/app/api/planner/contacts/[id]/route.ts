@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { isPlannerContactStatus } from "@/data/planner";
+import {
+  isPlannerContactStatus,
+  isPlannerFirstTouchChannel,
+  isPlannerFirstTouchSide,
+} from "@/data/planner";
 import { requirePlanner } from "@/lib/planner/auth";
 import { getPlannerContact } from "@/lib/planner/load";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
@@ -36,7 +40,19 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
   const { id } = await ctx.params;
   const b = (await req.json()) as Record<string, unknown>;
   const patch: Record<string, unknown> = {};
-  for (const key of ["name", "company", "role_title", "phone", "email", "website", "notes", "requirement", "pitch", "immediate_need"] as const) {
+  for (const key of [
+    "name",
+    "company",
+    "role_title",
+    "phone",
+    "email",
+    "website",
+    "notes",
+    "requirement",
+    "pitch",
+    "immediate_need",
+    "first_touch_note",
+  ] as const) {
     if (key in b) {
       const v = String(b[key] ?? "").trim();
       patch[key] = key === "name" ? v : v || null;
@@ -44,6 +60,12 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
   }
   if ("contacted" in b) patch.contacted = b.contacted === true;
   if (isPlannerContactStatus(b.status)) patch.status = b.status;
+  if ("first_touch_side" in b) {
+    patch.first_touch_side = isPlannerFirstTouchSide(b.first_touch_side) ? b.first_touch_side : null;
+  }
+  if ("first_touch_channel" in b) {
+    patch.first_touch_channel = isPlannerFirstTouchChannel(b.first_touch_channel) ? b.first_touch_channel : null;
+  }
   if ("follow_up_booked" in b) {
     patch.follow_up_booked = b.follow_up_booked === true;
     if (patch.follow_up_booked !== true && !("next_follow_up_at" in b)) patch.next_follow_up_at = null;

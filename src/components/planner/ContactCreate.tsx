@@ -3,10 +3,20 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { PlannerBio, PlannerContact, PlannerMember } from "@/data/planner";
+import {
+  PLANNER_FIRST_TOUCH_CHANNELS,
+  PLANNER_FIRST_TOUCH_NOTES,
+  plannerFirstTouchChannelLabel,
+  plannerFirstTouchLine,
+  type PlannerBio,
+  type PlannerContact,
+  type PlannerFirstTouchChannel,
+  type PlannerFirstTouchSide,
+  type PlannerMember,
+} from "@/data/planner";
 import PlannerSelect from "@/components/planner/PlannerSelect";
 import { PlannerFace } from "@/components/planner/planner-look";
-import { P_BTN, P_FIELD, P_LABEL, P_PAGE } from "@/components/planner/planner-ui";
+import { P_BTN, P_FIELD, P_LABEL, P_MENU, P_PAGE } from "@/components/planner/planner-ui";
 
 function personName(person: PlannerBio) {
   return person.preferred_name?.trim() || person.full_name;
@@ -41,7 +51,12 @@ export default function ContactCreate({
   const [making, setMaking] = useState(false);
   const [ownerId, setOwnerId] = useState(me.id);
   const [immediateNeed, setImmediateNeed] = useState("");
+  const [touchSide, setTouchSide] = useState<PlannerFirstTouchSide | null>(null);
+  const [touchChannel, setTouchChannel] = useState<PlannerFirstTouchChannel | null>(null);
+  const [touchNote, setTouchNote] = useState("Waiting for reply");
   const [fresh, setFresh] = useState({ company: "", role_title: "", phone: "", email: "" });
+
+  const touchLine = plannerFirstTouchLine({ side: touchSide, channel: touchChannel, note: touchNote });
 
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -85,6 +100,10 @@ export default function ContactCreate({
 
   async function create() {
     if (!picked || prior) return;
+    if (!touchSide || !touchChannel) {
+      setErr("How did the first touch happen?");
+      return;
+    }
     setBusy(true);
     setErr("");
     try {
@@ -99,6 +118,9 @@ export default function ContactCreate({
         immediate_need: immediateNeed,
         owner_id: ownerId,
         bio_id: picked.id,
+        first_touch_side: touchSide,
+        first_touch_channel: touchChannel,
+        first_touch_note: touchNote,
       });
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Could not start the follow up");
@@ -109,6 +131,10 @@ export default function ContactCreate({
   async function createPerson() {
     const fullName = query.trim();
     if (!fullName) return;
+    if (!touchSide || !touchChannel) {
+      setErr("How did the first touch happen?");
+      return;
+    }
     setBusy(true);
     setErr("");
     try {
@@ -136,6 +162,9 @@ export default function ContactCreate({
         immediate_need: immediateNeed,
         owner_id: ownerId,
         bio_id: j.id,
+        first_touch_side: touchSide,
+        first_touch_channel: touchChannel,
+        first_touch_note: touchNote,
       });
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Could not add them to contacts");
@@ -168,7 +197,7 @@ export default function ContactCreate({
             onFocus={() => setOpen(true)}
           />
           {open && !picked ? (
-            <ul className="absolute z-30 mt-2 max-h-72 w-full overflow-auto rounded-[22px] border border-white/15 bg-[#161618] p-1.5 shadow-[0_24px_50px_-16px_rgba(0,0,0,0.85)]">
+            <ul className={`absolute z-30 mt-2 max-h-72 w-full ${P_MENU}`}>
               {matches.map((person) => {
                 const line = [person.role_title, person.company].filter(Boolean).join(", ");
                 return (
@@ -242,6 +271,84 @@ export default function ContactCreate({
 
         {picked || making ? (
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2 rounded-[22px] border border-white/10 bg-white/[0.03] p-4">
+              <p className={P_LABEL}>First touch</p>
+              <p className="mb-3 text-[13px] text-white/45">How did this start — and where does that stand?</p>
+
+              <div className="flex flex-wrap gap-2">
+                {(
+                  [
+                    ["us", "We reached out"],
+                    ["them", "They reached out"],
+                  ] as const
+                ).map(([id, label]) => {
+                  const on = touchSide === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => setTouchSide(id)}
+                      className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium ${
+                        on ? "bg-[#2f6cff] text-white" : "border border-white/15 bg-white/[0.04] text-white/65"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                {PLANNER_FIRST_TOUCH_CHANNELS.map((channel) => {
+                  const on = touchChannel === channel;
+                  return (
+                    <button
+                      key={channel}
+                      type="button"
+                      onClick={() => setTouchChannel(channel)}
+                      className={`rounded-full px-3 py-1.5 text-[13px] font-medium ${
+                        on ? "bg-white text-[#111]" : "border border-white/15 bg-white/[0.04] text-white/65"
+                      }`}
+                    >
+                      {plannerFirstTouchChannelLabel(channel)}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                {PLANNER_FIRST_TOUCH_NOTES.map((note) => {
+                  const on = touchNote === note;
+                  return (
+                    <button
+                      key={note}
+                      type="button"
+                      onClick={() => setTouchNote(note)}
+                      className={`rounded-full px-3 py-1.5 text-[13px] font-medium ${
+                        on ? "bg-white/15 text-white" : "border border-white/10 text-white/50"
+                      }`}
+                    >
+                      {note}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <label className={`${P_LABEL} mt-4`}>Or write it</label>
+              <input
+                className={P_FIELD}
+                value={touchNote}
+                onChange={(e) => setTouchNote(e.target.value)}
+                placeholder="Waiting for reply"
+              />
+
+              {touchLine ? (
+                <p className="mt-3 rounded-xl border border-[#2f6cff]/25 bg-[#2f6cff]/10 px-3 py-2 text-[13px] text-[#b8d0ff]">
+                  {touchLine}
+                </p>
+              ) : null}
+            </div>
+
             <div className="sm:col-span-2">
               <label className={P_LABEL}>Right now</label>
               <input className={P_FIELD} placeholder="What they need immediately" value={immediateNeed} onChange={(e) => setImmediateNeed(e.target.value)} />
@@ -262,11 +369,21 @@ export default function ContactCreate({
               Open it
             </Link>
           ) : making ? (
-            <button type="button" disabled={busy || !query.trim()} onClick={() => void createPerson()} className={P_BTN}>
+            <button
+              type="button"
+              disabled={busy || !query.trim() || !touchSide || !touchChannel}
+              onClick={() => void createPerson()}
+              className={P_BTN}
+            >
               {busy ? "Saving" : "Add them and start"}
             </button>
           ) : (
-            <button type="button" disabled={busy || !picked} onClick={() => void create()} className={P_BTN}>
+            <button
+              type="button"
+              disabled={busy || !picked || !touchSide || !touchChannel}
+              onClick={() => void create()}
+              className={P_BTN}
+            >
               {busy ? "Saving" : "Start the follow up"}
             </button>
           )}

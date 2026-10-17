@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import type { PlannerContact, PlannerMember } from "@/data/planner";
-import { plannerContactStatusLabel, plannerEntryKindLabel } from "@/data/planner";
+import { plannerContactStatusLabel, plannerEntryKindLabel, plannerFirstTouchLine } from "@/data/planner";
 import LogMeetPoints from "@/components/planner/LogMeetPoints";
 import MeetBook from "@/components/planner/MeetBook";
+import PlannerConfirm from "@/components/planner/PlannerConfirm";
 import PlannerMore from "@/components/planner/PlannerMore";
 import { PlannerFace } from "@/components/planner/planner-look";
 import { P_PAGE } from "@/components/planner/planner-ui";
@@ -31,6 +32,7 @@ export default function ContactDesk({
 }) {
   const [contact, setContact] = useState(initial);
   const [busy, setBusy] = useState(false);
+  const [askDelete, setAskDelete] = useState(false);
   const [logging, setLogging] = useState(false);
   const [err, setErr] = useState("");
   const [logErr, setLogErr] = useState("");
@@ -38,6 +40,11 @@ export default function ContactDesk({
   const timeline = [...(contact.entries ?? [])].sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
   const line = [contact.role_title, contact.company].filter(Boolean).join(", ");
   const need = contact.immediate_need?.trim() || contact.requirement?.trim() || "";
+  const firstTouch = plannerFirstTouchLine({
+    side: contact.first_touch_side,
+    channel: contact.first_touch_channel,
+    note: contact.first_touch_note,
+  });
 
   async function saveContact(patch: Record<string, unknown>) {
     const previous = contact;
@@ -63,7 +70,6 @@ export default function ContactDesk({
   }
 
   async function remove() {
-    if (!confirm("Delete this contact and the whole timeline?")) return;
     setBusy(true);
     try {
       const res = await fetch(`/api/planner/contacts/${contact.id}`, { method: "DELETE" });
@@ -71,10 +77,12 @@ export default function ContactDesk({
         const j = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(j.error || "Delete failed");
       }
+      // Follow-up CRM only — the Contacts card (bio) stays.
       window.location.href = "/planner/follow-ups";
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Delete failed");
       setBusy(false);
+      setAskDelete(false);
     }
   }
 
@@ -111,9 +119,19 @@ export default function ContactDesk({
           Their file
         </Link>
         <div className="ml-auto">
-          <PlannerMore label="Delete contact" disabled={busy} onSelect={() => void remove()} />
+          <PlannerMore label="Delete follow up" disabled={busy} onSelect={() => setAskDelete(true)} />
         </div>
       </div>
+
+      <PlannerConfirm
+        open={askDelete}
+        title="Delete this follow up?"
+        body="This removes the follow-up thread and timeline only. Their contact card in Contacts stays."
+        confirmLabel="Delete follow up"
+        busy={busy}
+        onCancel={() => setAskDelete(false)}
+        onConfirm={() => void remove()}
+      />
 
       <header className="pt-2">
         <div className="flex flex-wrap items-start gap-4">
@@ -147,7 +165,10 @@ export default function ContactDesk({
                 </>
               ) : null}
             </div>
-            {need ? <p className="mt-3 max-w-2xl text-[13px] leading-[1.45] text-white/50 line-clamp-2">{need}</p> : null}
+            {firstTouch ? (
+              <p className="mt-3 max-w-2xl text-[13px] leading-[1.45] text-[#b8d0ff]/90">{firstTouch}</p>
+            ) : null}
+            {need ? <p className="mt-2 max-w-2xl text-[13px] leading-[1.45] text-white/50 line-clamp-2">{need}</p> : null}
           </div>
         </div>
 

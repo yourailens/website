@@ -9,6 +9,7 @@ import {
   type PlannerDirectoryItem,
   type PlannerDirectoryKind,
 } from "@/data/planner";
+import PlannerConfirm from "@/components/planner/PlannerConfirm";
 import { P_BTN_FANCY, P_PAGE } from "@/components/planner/planner-ui";
 
 const SOFT =
@@ -17,6 +18,7 @@ const SOFT =
 export default function DirectoryForm({ initial }: { initial?: PlannerDirectoryItem }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const [askDelete, setAskDelete] = useState(false);
   const [err, setErr] = useState("");
   const [draft, setDraft] = useState({
     title: initial?.title ?? "",
@@ -49,7 +51,6 @@ export default function DirectoryForm({ initial }: { initial?: PlannerDirectoryI
 
   async function remove() {
     if (!initial) return;
-    if (!confirm("Delete this link card?")) return;
     setBusy(true);
     try {
       const res = await fetch(`/api/planner/directory/${initial.id}`, { method: "DELETE" });
@@ -62,6 +63,7 @@ export default function DirectoryForm({ initial }: { initial?: PlannerDirectoryI
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Delete failed");
       setBusy(false);
+      setAskDelete(false);
     }
   }
 
@@ -139,12 +141,22 @@ export default function DirectoryForm({ initial }: { initial?: PlannerDirectoryI
             Cancel
           </button>
           {initial ? (
-            <button type="button" disabled={busy} onClick={() => void remove()} className="ml-auto text-[14px] text-[#ffb4b4]">
+            <button type="button" disabled={busy} onClick={() => setAskDelete(true)} className="ml-auto text-[14px] text-[#ffb4b4]">
               Delete
             </button>
           ) : null}
         </div>
       </section>
+
+      <PlannerConfirm
+        open={askDelete}
+        title="Delete this link?"
+        body="This removes the directory card. You cannot undo it."
+        confirmLabel="Delete link"
+        busy={busy}
+        onCancel={() => setAskDelete(false)}
+        onConfirm={() => void remove()}
+      />
     </div>
   );
 }

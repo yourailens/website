@@ -12,6 +12,7 @@ import {
   type PlannerFinanceKind,
   type PlannerPaymentMethod,
 } from "@/data/planner";
+import PlannerConfirm from "@/components/planner/PlannerConfirm";
 import { P_BTN_FANCY, P_PAGE } from "@/components/planner/planner-ui";
 
 const SOFT =
@@ -34,6 +35,7 @@ function fromLocalInput(value: string) {
 export default function FinanceForm({ initial }: { initial?: PlannerFinanceEntry }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const [askDelete, setAskDelete] = useState(false);
   const [err, setErr] = useState("");
   const [draft, setDraft] = useState({
     kind: (initial?.kind ?? "expense") as PlannerFinanceKind,
@@ -81,7 +83,6 @@ export default function FinanceForm({ initial }: { initial?: PlannerFinanceEntry
 
   async function remove() {
     if (!initial) return;
-    if (!confirm("Delete this finance entry?")) return;
     setBusy(true);
     try {
       const res = await fetch(`/api/planner/finances/${initial.id}`, { method: "DELETE" });
@@ -94,6 +95,7 @@ export default function FinanceForm({ initial }: { initial?: PlannerFinanceEntry
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Delete failed");
       setBusy(false);
+      setAskDelete(false);
     }
   }
 
@@ -208,12 +210,22 @@ export default function FinanceForm({ initial }: { initial?: PlannerFinanceEntry
             Cancel
           </button>
           {initial ? (
-            <button type="button" disabled={busy} onClick={() => void remove()} className="ml-auto text-[14px] text-[#ffb4b4]">
+            <button type="button" disabled={busy} onClick={() => setAskDelete(true)} className="ml-auto text-[14px] text-[#ffb4b4]">
               Delete
             </button>
           ) : null}
         </div>
       </section>
+
+      <PlannerConfirm
+        open={askDelete}
+        title="Delete this entry?"
+        body="This removes the finance row from the ledger. You cannot undo it."
+        confirmLabel="Delete entry"
+        busy={busy}
+        onCancel={() => setAskDelete(false)}
+        onConfirm={() => void remove()}
+      />
     </div>
   );
 }

@@ -60,6 +60,29 @@ export type PlannerTask = {
   creator?: PlannerMember | null;
 };
 
+export const PLANNER_FIRST_TOUCH_SIDES = ["us", "them"] as const;
+export type PlannerFirstTouchSide = (typeof PLANNER_FIRST_TOUCH_SIDES)[number];
+
+export const PLANNER_FIRST_TOUCH_CHANNELS = [
+  "email",
+  "call",
+  "whatsapp",
+  "instagram",
+  "linkedin",
+  "meet",
+  "referral",
+  "other",
+] as const;
+export type PlannerFirstTouchChannel = (typeof PLANNER_FIRST_TOUCH_CHANNELS)[number];
+
+export const PLANNER_FIRST_TOUCH_NOTES = [
+  "Waiting for reply",
+  "Got a reply",
+  "No response yet",
+  "Left a message",
+  "Scheduled next step",
+] as const;
+
 export type PlannerContact = {
   id: string;
   name: string;
@@ -77,6 +100,12 @@ export type PlannerContact = {
   requirement: string | null;
   meet_count: number;
   pitch: string | null;
+  /** Who started the first interaction. */
+  first_touch_side: PlannerFirstTouchSide | null;
+  /** Channel of the first interaction. */
+  first_touch_channel: PlannerFirstTouchChannel | null;
+  /** Status of that first move, e.g. Waiting for reply. */
+  first_touch_note: string | null;
   owner_id: string | null;
   bio_id: string | null;
   created_by: string;
@@ -85,6 +114,79 @@ export type PlannerContact = {
   owner?: PlannerMember | null;
   entries?: PlannerContactEntry[];
 };
+
+export function isPlannerFirstTouchSide(v: unknown): v is PlannerFirstTouchSide {
+  return PLANNER_FIRST_TOUCH_SIDES.includes(v as PlannerFirstTouchSide);
+}
+
+export function isPlannerFirstTouchChannel(v: unknown): v is PlannerFirstTouchChannel {
+  return PLANNER_FIRST_TOUCH_CHANNELS.includes(v as PlannerFirstTouchChannel);
+}
+
+export function plannerFirstTouchChannelLabel(channel: PlannerFirstTouchChannel) {
+  switch (channel) {
+    case "email":
+      return "Email";
+    case "call":
+      return "Call";
+    case "whatsapp":
+      return "WhatsApp";
+    case "instagram":
+      return "Instagram";
+    case "linkedin":
+      return "LinkedIn";
+    case "meet":
+      return "In person";
+    case "referral":
+      return "Referral";
+    case "other":
+      return "Other";
+  }
+}
+
+/** One-line summary for create + timeline. */
+export function plannerFirstTouchLine(input: {
+  side: PlannerFirstTouchSide | null;
+  channel: PlannerFirstTouchChannel | null;
+  note?: string | null;
+}) {
+  const note = input.note?.trim() || null;
+  if (!input.side || !input.channel) return note;
+  const channel = plannerFirstTouchChannelLabel(input.channel).toLowerCase();
+  const action =
+    input.side === "us"
+      ? input.channel === "email"
+        ? "Sent out an email"
+        : input.channel === "call"
+          ? "Called them"
+          : input.channel === "whatsapp"
+            ? "Messaged on WhatsApp"
+            : input.channel === "instagram"
+              ? "Reached on Instagram"
+              : input.channel === "linkedin"
+                ? "Reached on LinkedIn"
+                : input.channel === "meet"
+                  ? "Met in person"
+                  : input.channel === "referral"
+                    ? "Got in through a referral"
+                    : `Reached out (${channel})`
+      : input.channel === "email"
+        ? "They emailed us"
+        : input.channel === "call"
+          ? "They called us"
+          : input.channel === "whatsapp"
+            ? "They messaged on WhatsApp"
+            : input.channel === "instagram"
+              ? "They reached on Instagram"
+              : input.channel === "linkedin"
+                ? "They reached on LinkedIn"
+                : input.channel === "meet"
+                  ? "They came to us in person"
+                  : input.channel === "referral"
+                    ? "They came through a referral"
+                    : `They reached out (${channel})`;
+  return note ? `${action}, ${note.charAt(0).toLowerCase()}${note.slice(1)}` : action;
+}
 
 export type PlannerContactEntry = {
   id: string;

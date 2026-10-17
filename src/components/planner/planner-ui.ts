@@ -31,3 +31,7 @@ export const P_PILL =
   "rounded-full bg-white/10 px-3 py-1 text-[13px] text-white/75 transition hover:bg-white/15 hover:text-white";
 
 export const P_PILL_ON = "rounded-full bg-white px-3 py-1 text-[13px] font-semibold text-[#111]";
+
+/** Opaque panel for select / suggest / date / more menus. */
+export const P_MENU =
+  "overflow-auto rounded-[22px] border border-white/20 bg-[#161618] p-1.5 shadow-[0_24px_50px_-16px_rgba(0,0,0,0.85)]";

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { PlannerMember, PlannerTask } from "@/data/planner";
+import PlannerConfirm from "@/components/planner/PlannerConfirm";
 import PlannerDate from "@/components/planner/PlannerDate";
 import { PlannerFace } from "@/components/planner/planner-look";
 import { P_BTN_FANCY, P_PAGE } from "@/components/planner/planner-ui";
@@ -36,6 +37,7 @@ export default function TaskEdit({
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const [askDelete, setAskDelete] = useState(false);
   const [err, setErr] = useState("");
   const [draft, setDraft] = useState({
     title: task.title,
@@ -86,7 +88,6 @@ export default function TaskEdit({
   }
 
   async function remove() {
-    if (!confirm("Delete this task?")) return;
     setBusy(true);
     try {
       const res = await fetch(`/api/planner/tasks/${task.id}`, { method: "DELETE" });
@@ -99,6 +100,7 @@ export default function TaskEdit({
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Delete failed");
       setBusy(false);
+      setAskDelete(false);
     }
   }
 
@@ -174,11 +176,21 @@ export default function TaskEdit({
           <button type="button" className="text-[14px] text-white/50" onClick={() => router.push("/planner/tasks")}>
             Cancel
           </button>
-          <button type="button" disabled={busy} onClick={() => void remove()} className="ml-auto text-[14px] text-[#ffb4b4]">
+          <button type="button" disabled={busy} onClick={() => setAskDelete(true)} className="ml-auto text-[14px] text-[#ffb4b4]">
             Delete
           </button>
         </div>
       </section>
+
+      <PlannerConfirm
+        open={askDelete}
+        title="Delete this task?"
+        body="This removes the task from the planner. You cannot undo it."
+        confirmLabel="Delete task"
+        busy={busy}
+        onCancel={() => setAskDelete(false)}
+        onConfirm={() => void remove()}
+      />
 
       <aside className="mt-6 lg:mt-0">
         <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-white/40">On the board</p>

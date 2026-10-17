@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { PlannerMember, PlannerNote } from "@/data/planner";
+import PlannerConfirm from "@/components/planner/PlannerConfirm";
 import PlannerMore from "@/components/planner/PlannerMore";
 import {
   P_BTN,
@@ -27,6 +28,7 @@ export default function NoteEditor({
     initial.images.map((i) => ({ url: i.url, label: i.label ?? "" }))
   );
   const [busy, setBusy] = useState(false);
+  const [askDelete, setAskDelete] = useState(false);
   const [err, setErr] = useState("");
   const [msg, setMsg] = useState("");
   const onPaste = usePasteImages(images, setImages, setErr);
@@ -58,9 +60,15 @@ export default function NoteEditor({
   }
 
   async function remove() {
-    if (!canEdit || !confirm("Delete this note?")) return;
-    const res = await fetch(`/api/planner/notes/${note.id}`, { method: "DELETE" });
-    if (res.ok) window.location.href = `/planner/people/${personSlug}`;
+    if (!canEdit) return;
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/planner/notes/${note.id}`, { method: "DELETE" });
+      if (res.ok) window.location.href = `/planner/people/${personSlug}`;
+      else setAskDelete(false);
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -74,7 +82,7 @@ export default function NoteEditor({
       <section className={P_BUBBLE}>
         <div className="flex items-center justify-between">
           <p className={P_KICKER}>Note</p>
-          {canEdit ? <PlannerMore label="Delete" disabled={busy} onSelect={() => void remove()} /> : null}
+          {canEdit ? <PlannerMore label="Delete" disabled={busy} onSelect={() => setAskDelete(true)} /> : null}
         </div>
         <input
           className={`${P_FIELD} mt-3 font-heading text-xl`}
@@ -130,6 +138,16 @@ export default function NoteEditor({
           </div>
         ) : null}
       </section>
+
+      <PlannerConfirm
+        open={askDelete}
+        title="Delete this note?"
+        body="This removes the note page. You cannot undo it."
+        confirmLabel="Delete note"
+        busy={busy}
+        onCancel={() => setAskDelete(false)}
+        onConfirm={() => void remove()}
+      />
     </div>
   );
 }

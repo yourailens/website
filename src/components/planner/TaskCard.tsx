@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { PlannerTask } from "@/data/planner";
 import { PlannerFace } from "@/components/planner/planner-look";
 
@@ -11,6 +11,43 @@ function when(deadline: string | null) {
   const d = new Date(`${deadline}T00:00:00`);
   if (Number.isNaN(d.getTime())) return deadline;
   return d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+}
+
+/** Full notes by default; ellipsis only when the text overflows the card space. */
+function TaskNotes({ text, empty }: { text: string; empty: boolean }) {
+  const box = useRef<HTMLDivElement>(null);
+  const probe = useRef<HTMLParagraphElement>(null);
+  const [overflowing, setOverflowing] = useState(false);
+
+  useEffect(() => {
+    const boxEl = box.current;
+    const probeEl = probe.current;
+    if (!boxEl || !probeEl) return;
+    const check = () => setOverflowing(probeEl.scrollHeight > boxEl.clientHeight + 1);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(boxEl);
+    return () => ro.disconnect();
+  }, [text]);
+
+  return (
+    <div ref={box} className="relative mt-2 min-h-0 flex-1 overflow-hidden">
+      <p
+        ref={probe}
+        aria-hidden
+        className="pointer-events-none invisible absolute inset-x-0 top-0 text-[14px] leading-[1.5] break-words"
+      >
+        {text}
+      </p>
+      <p
+        className={`text-[14px] leading-[1.5] break-words ${empty ? "text-white/35" : "text-white/70"} ${
+          overflowing ? "line-clamp-6" : ""
+        }`}
+      >
+        {text}
+      </p>
+    </div>
+  );
 }
 
 function Mark({ kind }: { kind: "tick" | "cross" }) {
@@ -67,12 +104,10 @@ export default function TaskCard({ task, mine }: { task: PlannerTask; mine: bool
       </div>
 
       <Link href={`/planner/tasks/${task.id}`} className="flex min-h-0 flex-1 flex-col px-5 pb-2 pt-4">
-        <h3 className={`line-clamp-2 text-[22px] font-bold leading-[1.15] tracking-tight ${done ? "text-white/55" : "text-white"}`}>
+        <h3 className={`shrink-0 line-clamp-2 text-[22px] font-bold leading-[1.15] tracking-tight ${done ? "text-white/55" : "text-white"}`}>
           {task.title}
         </h3>
-        <p className={`mt-2 line-clamp-2 text-[14px] leading-[1.5] ${task.notes ? "text-white/70" : "text-white/35"}`}>
-          {task.notes || "No notes"}
-        </p>
+        <TaskNotes text={task.notes || "No notes"} empty={!task.notes} />
         <div className="mt-auto flex items-center justify-between gap-3 pt-4">
           <span className="flex min-w-0 items-center gap-2">
             <PlannerFace name={who} size={28} />

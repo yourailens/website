@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PlannerContact, PlannerMember } from "@/data/planner";
-import { plannerContactStatusLabel } from "@/data/planner";
+import { plannerContactStatusLabel, plannerFirstTouchLine } from "@/data/planner";
 import MeetBook from "@/components/planner/MeetBook";
 import { useSetPlannerHeader } from "@/components/planner/planner-header";
 import { P_GLASS, P_PAGE } from "@/components/planner/planner-ui";
@@ -34,6 +34,11 @@ function FollowCard({ contact, index }: { contact: PlannerContact; index: number
   const saveSeq = useRef(0);
   const want = useRef<{ booked: boolean; when: string | null } | null>(null);
   const need = contact.immediate_need?.trim() || contact.requirement?.trim() || "";
+  const firstTouch = plannerFirstTouchLine({
+    side: contact.first_touch_side,
+    channel: contact.first_touch_channel,
+    note: contact.first_touch_note,
+  });
   const line = [contact.role_title, contact.company].filter(Boolean).join(", ");
 
   useEffect(() => {
@@ -78,6 +83,9 @@ function FollowCard({ contact, index }: { contact: PlannerContact; index: number
             </span>
           </span>
           {line ? <span className="mt-2 block truncate text-[14px] text-white/55">{line}</span> : null}
+          {firstTouch ? (
+            <span className="mt-2 block truncate text-[13px] text-[#b8d0ff]/85">{firstTouch}</span>
+          ) : null}
           <span className="mt-4 grid grid-cols-[4.5rem_minmax(0,1fr)] gap-3 border-t border-white/10 pt-4">
             <span>
               <span className="block text-[28px] font-bold leading-none">{contact.meet_count}</span>

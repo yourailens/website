@@ -62,11 +62,11 @@ export default function PlannerMore({
         <div
           ref={menu}
           style={{ top: box.top, left: box.left }}
-          className="fixed z-50 w-40 overflow-hidden rounded-[18px] border border-white/25 bg-white/10 py-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] backdrop-blur-2xl"
+          className="fixed z-50 w-40 overflow-hidden rounded-[18px] border border-white/20 bg-[#161618] py-1 shadow-[0_24px_50px_-16px_rgba(0,0,0,0.85)]"
         >
           <button
             type="button"
-            className="block w-full px-3 py-2 text-left text-[13px] text-[#ffb4b4] hover:bg-white/5"
+            className="block w-full px-3 py-2 text-left text-[13px] text-[#ffb4b4] hover:bg-white/10"
             onClick={() => {
               setOpen(false);
               onSelect();

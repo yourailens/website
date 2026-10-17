@@ -136,7 +136,7 @@ export default function PlannerDate({
 
       {open ? (
         <div
-          className={`absolute z-50 w-[19.5rem] overflow-hidden rounded-[22px] border border-white/20 bg-[#161618] shadow-[0_24px_50px_-16px_rgba(0,0,0,0.85)] ${
+          className={`absolute z-50 w-[19.5rem] overflow-hidden rounded-[22px] border border-white/20 bg-[#161618] p-0 shadow-[0_24px_50px_-16px_rgba(0,0,0,0.85)] ${
             dropUp ? "bottom-[calc(100%+0.5rem)]" : "mt-2"
           }`}
         >
