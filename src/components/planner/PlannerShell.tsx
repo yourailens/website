@@ -206,7 +206,7 @@ function PlannerFrame({
         </div>
       )}
 
-      <div className="relative z-10 md:pl-[280px]">
+      <div className="relative z-10 min-w-0 overflow-x-clip md:pl-[280px]">
         <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-white/10 bg-white/[0.04] px-4 py-3 backdrop-blur-xl sm:px-8">
           <h1 className={`min-w-0 truncate text-[16px] font-semibold ${bits ? "hidden md:block" : ""}`}>{viewing?.display_name || meta.title || "Planner"}</h1>
           {bits?.kind === "contacts" || bits?.kind === "links" ? (
@@ -319,7 +319,7 @@ function PlannerFrame({
             </div>
           ) : null}
         </header>
-        <div className="px-4 pt-6 pb-28 sm:px-8 md:pb-6">{children}</div>
+        <div className="min-w-0 px-4 pt-6 pb-28 sm:px-8 md:pb-6">{children}</div>
       </div>
     </div>
   );

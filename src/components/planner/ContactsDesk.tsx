@@ -95,7 +95,7 @@ export default function ContactsDesk({ me, bios, missing }: { me: PlannerMember;
               type="button"
               aria-pressed={on}
               onClick={() => pickBoard(item.id)}
-              className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-[16px] px-1"
+              className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-[16px] px-1"
               style={
                 on
                   ? {
@@ -107,7 +107,7 @@ export default function ContactsDesk({ me, bios, missing }: { me: PlannerMember;
               }
             >
               <span className="text-[18px] font-bold leading-none">{counts[item.id]}</span>
-              <span className="text-[11px] font-semibold uppercase tracking-[0.12em] sm:text-[12px]">{item.title}</span>
+              <span className="text-center text-[10px] font-semibold uppercase leading-tight tracking-[0.08em] sm:text-[12px] sm:tracking-[0.12em]">{item.title}</span>
             </button>
           );
         })}
@@ -158,7 +158,7 @@ export default function ContactsDesk({ me, bios, missing }: { me: PlannerMember;
       ) : null}
 
       {shown.length ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {shown.map((bio) => (
             <ContactCard key={bio.id} bio={bio} />
           ))}
@@ -188,7 +188,7 @@ function ContactCard({ bio }: { bio: PlannerBio }) {
   return (
     <Link
       href={`/planner/follow-ups/contacts/${bio.slug}`}
-      className="flex h-full flex-col rounded-[28px] border bg-white/[0.05] p-5 backdrop-blur-2xl transition hover:bg-white/[0.07]"
+      className="flex h-full min-w-0 flex-col rounded-[28px] border bg-white/[0.05] p-5 backdrop-blur-2xl transition hover:bg-white/[0.07]"
       style={{
         borderColor: `${accent}55`,
         boxShadow: `inset 0 1px 0 rgba(255,255,255,0.22), 0 0 0 1px ${accent}22, 0 18px 40px -28px ${accent}88`,

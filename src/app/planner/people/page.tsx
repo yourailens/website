@@ -22,10 +22,10 @@ export default async function PlannerPeoplePage() {
         <Stat label="People" value={members.length} />
         <Stat label="Open tasks" value={open} tone="text-[#fbbf24]" />
       </DashHero>
-      <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {members.map((m) => (
-          <li key={m.id}>
-            <Link href={`/planner/people/${m.slug}`} className="flex aspect-square flex-col rounded-[28px] border border-white/25 bg-white/[0.07] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] backdrop-blur-2xl">
+          <li key={m.id} className="min-w-0">
+            <Link href={`/planner/people/${m.slug}`} className="flex min-w-0 flex-col rounded-[28px] border border-white/25 bg-white/[0.07] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] backdrop-blur-2xl sm:aspect-square">
               <p className="text-[48px] font-bold leading-none">{m.display_name.slice(0, 1).toUpperCase()}</p>
               <p className="mt-auto text-[22px] font-bold leading-tight">{m.display_name}</p>
               <p className="mt-1 text-[14px] text-white/70">{m.role_title || "Team"}</p>

@@ -124,7 +124,7 @@ export default function MilestonesDesk({
       </div>
 
       {shown.length ? (
-        <ul className="grid gap-4 sm:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {shown.map((row) => {
             const when = dayLabel(row.target_on);
             const slipping = plannerMilestoneIsSlipping(row);
@@ -132,10 +132,10 @@ export default function MilestonesDesk({
             const held = row.waiting_on.filter((item) => item.status !== "landed");
             const ring = slipping ? "#ff8a8a" : row.status === "landed" ? "#86efac" : row.status === "stuck" ? "#ff8a8a" : "#f5c16c";
             return (
-              <li key={row.id}>
+              <li key={row.id} className="min-w-0">
                 <Link
                   href={`/planner/milestones/${row.id}`}
-                  className="group flex h-full gap-4 rounded-[28px] border border-white/12 bg-white/[0.04] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition hover:border-[#f5c16c]/40"
+                  className="group flex h-full min-w-0 gap-4 rounded-[28px] border border-white/12 bg-white/[0.04] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition hover:border-[#f5c16c]/40"
                 >
                   <span className="relative mt-1 flex h-14 w-14 shrink-0 items-center justify-center" aria-hidden>
                     <span className="absolute h-14 w-14 rounded-full border" style={{ borderColor: ring, opacity: 0.35 }} />
@@ -144,7 +144,7 @@ export default function MilestonesDesk({
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                      <h3 className="text-[20px] font-bold leading-tight tracking-tight group-hover:text-[#f5c16c]">{row.title}</h3>
+                      <h3 className="min-w-0 break-words text-[20px] font-bold leading-tight tracking-tight group-hover:text-[#f5c16c]">{row.title}</h3>
                       <span className={`text-[11px] font-semibold uppercase tracking-[0.14em] ${slipping ? "text-[#ff8a8a]" : tone(row.status)}`}>
                         {slipping ? "Slipping" : plannerMilestoneStatusLabel(row.status)}
                       </span>

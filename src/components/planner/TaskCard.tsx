@@ -98,7 +98,7 @@ export default function TaskCard({ task, mine }: { task: PlannerTask; mine: bool
 
   return (
     <>
-    <article className={`flex h-[340px] flex-col overflow-hidden rounded-[28px] border bg-[#121214] ${paint.ring}`}>
+    <article className={`flex h-auto w-full min-w-0 max-w-full flex-col overflow-hidden rounded-[28px] border bg-[#121214] sm:h-[340px] ${paint.ring}`}>
       <div className={`shrink-0 px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.16em] ${paint.bar} ${paint.ink}`}>
         {plannerTaskBoardLabel(tone)}
       </div>
@@ -106,17 +106,17 @@ export default function TaskCard({ task, mine }: { task: PlannerTask; mine: bool
       {task.milestone ? (
         <Link
           href={`/planner/milestones/${task.milestone.id}`}
-          className="mx-5 mt-4 inline-flex max-w-[calc(100%-2.5rem)] items-center gap-1.5 self-start truncate rounded-full border border-[#f5c16c]/40 bg-[#f5c16c]/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f5c16c]"
+          className="mx-5 mt-4 flex w-fit max-w-[calc(100%-2.5rem)] min-w-0 items-center gap-1.5 self-start rounded-full border border-[#f5c16c]/40 bg-[#f5c16c]/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f5c16c]"
         >
           <span className="shrink-0" aria-hidden>
             ◆
           </span>
-          <span className="truncate">{task.milestone.title}</span>
+          <span className="min-w-0 truncate">{task.milestone.title}</span>
         </Link>
       ) : null}
 
-      <Link href={`/planner/tasks/${task.id}`} className={`flex min-h-0 flex-1 flex-col px-5 pb-2 ${task.milestone ? "pt-3" : "pt-4"}`}>
-        <h3 className="line-clamp-2 shrink-0 text-[20px] font-bold leading-snug tracking-tight text-white">{task.title}</h3>
+      <Link href={`/planner/tasks/${task.id}`} className={`flex min-h-0 min-w-0 flex-1 flex-col px-5 pb-2 ${task.milestone ? "pt-3" : "pt-4"}`}>
+        <h3 className="line-clamp-2 shrink-0 break-words text-[20px] font-bold leading-snug tracking-tight text-white">{task.title}</h3>
         <p className={`mt-2 text-[15px] leading-[1.55] ${task.milestone ? "line-clamp-3" : "line-clamp-4"} ${task.notes ? "text-white/80" : "text-white/40"}`}>
           {task.notes || "No notes yet"}
         </p>
@@ -130,7 +130,7 @@ export default function TaskCard({ task, mine }: { task: PlannerTask; mine: bool
       </Link>
 
       <div
-        className={`mx-4 mb-4 flex shrink-0 items-center justify-center gap-2 rounded-full border p-1.5 ${
+        className={`mx-4 mb-4 grid w-auto min-w-0 shrink-0 grid-cols-2 gap-2 rounded-full border p-1.5 ${
           mine
             ? "border-white/15 bg-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]"
             : "border-white/10 bg-white/[0.03]"
@@ -142,7 +142,7 @@ export default function TaskCard({ task, mine }: { task: PlannerTask; mine: bool
           aria-pressed={!done}
           aria-label={mine ? "Mark not done" : "Only the assignee can change this"}
           onClick={() => void reopen()}
-          className={`flex h-12 flex-1 items-center justify-center rounded-full ${
+          className={`flex h-12 min-w-0 appearance-none items-center justify-center rounded-full ${
             !mine
               ? done
                 ? "text-white/25"
@@ -165,7 +165,7 @@ export default function TaskCard({ task, mine }: { task: PlannerTask; mine: bool
             setFinishErr("");
             setFinishOpen(true);
           }}
-          className={`flex h-12 flex-1 items-center justify-center rounded-full ${
+          className={`flex h-12 min-w-0 appearance-none items-center justify-center rounded-full ${
             !mine
               ? done
                 ? "bg-white/10 text-white/35"

@@ -106,8 +106,8 @@ export default function DirectoryDesk({
         {pool.map((item) => {
           const tone = KIND_TONE[item.kind];
           return (
-            <li key={item.id}>
-              <article className={`${P_GLASS} flex h-full flex-col p-5`}>
+            <li key={item.id} className="min-w-0">
+              <article className={`${P_GLASS} flex h-full min-w-0 flex-col p-5`}>
                 <div className="flex items-start justify-between gap-3">
                   <span
                     className="rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em]"
@@ -119,13 +119,13 @@ export default function DirectoryDesk({
                     Edit
                   </Link>
                 </div>
-                <h3 className="mt-4 text-[22px] font-bold leading-[1.15]">{item.title}</h3>
+                <h3 className="mt-4 break-words text-[22px] font-bold leading-[1.15]">{item.title}</h3>
                 {item.blurb ? <p className="mt-2 line-clamp-3 text-[14px] leading-[1.45] text-white/60">{item.blurb}</p> : null}
                 <a
                   href={item.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-auto pt-5 text-[14px] font-medium text-[#9ec1ff] hover:text-white"
+                  className="mt-auto block min-w-0 truncate pt-5 text-[14px] font-medium text-[#9ec1ff] hover:text-white"
                 >
                   {item.label?.trim() || hostOf(item.url)}
                 </a>

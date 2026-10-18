@@ -50,7 +50,7 @@ export default function TasksDesk({
               type="button"
               aria-pressed={on}
               onClick={() => setView(id)}
-              className={`flex min-h-12 items-center justify-center gap-2 rounded-[16px] px-2 text-[14px] font-semibold sm:text-[15px] ${
+              className={`flex min-h-12 min-w-0 items-center justify-center gap-1.5 rounded-[16px] px-2 text-[13px] font-semibold sm:gap-2 sm:text-[15px] ${
                 on
                   ? id === "completed"
                     ? "bg-[#34c759] text-white shadow-[0_8px_18px_-10px_rgba(52,199,89,0.95)]"
@@ -86,9 +86,9 @@ export default function TasksDesk({
       {view !== "completed" ? (
       <section>
         <h3 className="mb-3 text-[20px] font-bold">Open</h3>
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {open.map((t) => (
-            <li key={t.id}>
+            <li key={t.id} className="min-w-0">
               <TaskCard task={t} mine={t.assignee_id === me.id} />
             </li>
           ))}
@@ -99,9 +99,9 @@ export default function TasksDesk({
 
       <section id="completed">
         <h3 className="mb-3 text-[20px] font-bold">Completed</h3>
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {done.map((t) => (
-            <li key={t.id}>
+            <li key={t.id} className="min-w-0">
               <TaskCard task={t} mine={t.assignee_id === me.id} />
             </li>
           ))}

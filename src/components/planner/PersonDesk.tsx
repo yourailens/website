@@ -82,18 +82,18 @@ export default function PersonDesk({
             New task
           </Link>
         </div>
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {initialTasks.filter((t) => t.status !== "done").map((t) => (
-            <li key={t.id}>
+            <li key={t.id} className="min-w-0">
               <TaskCard task={t} mine={t.assignee_id === me.id} />
             </li>
           ))}
         </ul>
         {!initialTasks.some((t) => t.status !== "done") ? <p className="text-sm text-white/50">No open tasks.</p> : null}
         <h3 className="mb-3 mt-8 text-[20px] font-bold">Completed</h3>
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {initialTasks.filter((t) => t.status === "done").map((t) => (
-            <li key={t.id}>
+            <li key={t.id} className="min-w-0">
               <TaskCard task={t} mine={t.assignee_id === me.id} />
             </li>
           ))}
@@ -103,9 +103,9 @@ export default function PersonDesk({
 
       <section>
         <h3 className="mb-3 text-[20px] font-bold">Meetings</h3>
-        <ul className="grid gap-5 lg:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-5 lg:grid-cols-2">
           {initialMeetings.map((m) => (
-            <li key={m.id} className={`flex aspect-square flex-col p-5 ${P_GLASS}`}>
+            <li key={m.id} className={`flex min-w-0 flex-col p-5 sm:aspect-square ${P_GLASS}`}>
               <p className="text-[22px] font-bold leading-tight">{m.title}</p>
               <p className="mt-1 text-[13px] text-white/55">{m.starts_at ? new Date(m.starts_at).toLocaleString() : "No time set"}</p>
               {m.notes ? <p className="mt-2 text-[14px] text-white/70">{m.notes}</p> : null}
@@ -117,10 +117,10 @@ export default function PersonDesk({
 
       <section>
         <h3 className="mb-3 text-[20px] font-bold">Notes</h3>
-        <ul className="grid gap-5 lg:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-5 lg:grid-cols-2">
           {initialNotes.map((n) => (
-            <li key={n.id}>
-              <Link href={`/planner/people/${person.slug}/notes/${n.id}`} className={`flex aspect-square flex-col p-5 ${P_GLASS}`}>
+            <li key={n.id} className="min-w-0">
+              <Link href={`/planner/people/${person.slug}/notes/${n.id}`} className={`flex min-w-0 flex-col p-5 sm:aspect-square ${P_GLASS}`}>
                 <p className="text-[22px] font-bold leading-tight">{n.title}</p>
                 <p className="mt-1 text-[12px] text-white/45">
                   Updated {new Date(n.updated_at).toLocaleString()}
@@ -135,9 +135,9 @@ export default function PersonDesk({
 
       <section>
         <h3 className="mb-3 text-[20px] font-bold">Posts</h3>
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {posts.map((p) => (
-            <li key={p.id}>
+            <li key={p.id} className="min-w-0">
               <PostCard post={p} me={me} onDelete={(id) => setPendingId(id)} />
             </li>
           ))}

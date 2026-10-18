@@ -72,7 +72,7 @@ function FollowCard({ contact, index }: { contact: PlannerContact; index: number
   }
 
   return (
-    <article className={`${P_GLASS} relative flex h-full flex-col p-5 focus-within:z-30`}>
+    <article className={`${P_GLASS} relative flex h-full min-w-0 flex-col p-5 focus-within:z-30`}>
       <Link href={`/planner/follow-ups/${contact.id}`} className="flex gap-4">
         <span className="w-10 shrink-0 pt-1 text-[28px] font-bold leading-none text-white/25">{String(index).padStart(2, "0")}</span>
         <span className="min-w-0 flex-1">
@@ -168,7 +168,7 @@ export default function FollowUpsDesk({ me, initialContacts }: { me: PlannerMemb
               type="button"
               aria-pressed={on}
               onClick={() => setView(id)}
-              className={`flex min-h-14 flex-col items-center justify-center rounded-[16px] ${
+              className={`flex min-h-14 min-w-0 flex-col items-center justify-center rounded-[16px] ${
                 on
                   ? id === "won"
                     ? "bg-[#34c759] text-white"
@@ -185,7 +185,7 @@ export default function FollowUpsDesk({ me, initialContacts }: { me: PlannerMemb
 
       <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {shown.map((contact, index) => (
-          <li key={contact.id}>
+          <li key={contact.id} className="min-w-0">
             <FollowCard contact={contact} index={index + 1} />
           </li>
         ))}
