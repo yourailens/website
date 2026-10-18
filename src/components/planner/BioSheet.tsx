@@ -38,7 +38,12 @@ function Fact({ label, value, href }: { label: string; value: string | null; hre
 
 export default function BioSheet({ bio }: { bio: PlannerBio }) {
   const [copied, setCopied] = useState(false);
-  const title = bio.preferred_name?.trim() || bio.full_name;
+  const title = bio.full_name.trim() || bio.preferred_name?.trim() || "Unnamed";
+  const called =
+    bio.preferred_name?.trim() &&
+    bio.preferred_name.trim().toLowerCase() !== bio.full_name.trim().toLowerCase()
+      ? bio.preferred_name.trim()
+      : null;
   const place = [bio.city, bio.country].filter(Boolean).join(", ");
   const role = [bio.role_title, bio.company].filter(Boolean).join(" at ");
 
@@ -82,8 +87,10 @@ export default function BioSheet({ bio }: { bio: PlannerBio }) {
             </span>
             <div className="min-w-0 pb-1">
               <h2 className="text-[32px] font-bold leading-none tracking-tight">{title}</h2>
-              {bio.preferred_name && bio.preferred_name !== bio.full_name ? (
-                <p className="mt-2 text-[14px] text-white/45">{bio.full_name}</p>
+              {called ? (
+                <p className="mt-2 truncate text-[14px] text-white/45" title={called}>
+                  {called}
+                </p>
               ) : null}
               <p className="mt-2 text-[16px] text-white/75">{role || "No role yet"}</p>
             </div>

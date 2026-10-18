@@ -190,7 +190,12 @@ export default function BioForm({
   }
 
   const who = people.find((m) => m.id === draft.owner_id);
-  const title = draft.preferred_name.trim() || draft.full_name.trim() || "New person";
+  const title = draft.full_name.trim() || "New person";
+  const called =
+    draft.preferred_name.trim() &&
+    draft.preferred_name.trim().toLowerCase() !== draft.full_name.trim().toLowerCase()
+      ? draft.preferred_name.trim()
+      : null;
   const category = plannerBioCategory(draft.category);
   const place = [draft.city.trim(), draft.country.trim()].filter(Boolean).join(", ");
   const phone = draft.phone.trim();
@@ -455,8 +460,10 @@ export default function BioForm({
             </span>
             <div className="min-w-0 flex-1 pt-1">
               <h3 className={`text-[22px] font-bold leading-[1.1] ${draft.full_name.trim() ? "text-white" : "text-white/30"}`}>{title}</h3>
-              {draft.preferred_name.trim() && draft.preferred_name.trim() !== draft.full_name.trim() ? (
-                <p className="mt-1.5 truncate text-[13px] text-white/40">{draft.full_name.trim()}</p>
+              {called ? (
+                <p className="mt-1.5 truncate text-[13px] text-white/40" title={called}>
+                  {called}
+                </p>
               ) : null}
             </div>
             <BioKind category={category} label={draft.label} />

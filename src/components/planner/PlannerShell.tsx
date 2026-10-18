@@ -83,7 +83,9 @@ function PlannerFrame({
             ? "/planner/directory/new"
             : bits?.kind === "finances" && member?.is_core
               ? "/planner/finances/new"
-              : null;
+              : bits?.kind === "milestones"
+                ? "/planner/milestones/new"
+                : null;
   const createLabel =
     bits?.kind === "tasks"
       ? "New task"
@@ -95,7 +97,9 @@ function PlannerFrame({
             ? "New link"
             : bits?.kind === "finances"
               ? "New entry"
-              : "New";
+              : bits?.kind === "milestones"
+                ? "New milestone"
+                : "New";
 
   const links = (
     <nav className="flex flex-col gap-1 px-4">
@@ -236,6 +240,27 @@ function PlannerFrame({
                   {Math.abs(Math.round(bits.net)).toLocaleString("en-IN")}
                 </span>
                 <span className="hidden text-[11px] uppercase tracking-[0.14em] text-white/40 md:inline">Net</span>
+              </span>
+              {createHref ? (
+                <Link
+                  href={createHref}
+                  aria-label={createLabel}
+                  className="hidden items-center gap-2 rounded-full bg-gradient-to-b from-[#7eb0ff] to-[#2458e6] p-1.5 !text-white shadow-[0_12px_28px_-8px_rgba(47,108,255,1),inset_0_1px_0_rgba(255,255,255,0.65)] md:inline-flex md:px-3.5 md:py-1.5"
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-[22px] font-semibold leading-none text-[#2458e6]">+</span>
+                  <span className="pr-1 text-[14px] font-semibold">{createLabel}</span>
+                </Link>
+              ) : null}
+            </div>
+          ) : bits?.kind === "milestones" ? (
+            <div className="ml-auto flex items-center gap-2">
+              <span className="flex items-center gap-1.5 rounded-full border border-[#f5c16c]/35 bg-[#f5c16c]/15 px-2.5 py-1.5">
+                <span className="text-[18px] font-bold leading-none text-[#f5c16c]">{bits.moving}</span>
+                <span className="hidden text-[11px] uppercase tracking-[0.14em] text-white/40 md:inline">Open</span>
+              </span>
+              <span className="flex items-center gap-1.5 rounded-full border border-[#34c759]/30 bg-[#34c759]/15 px-2.5 py-1.5">
+                <span className="text-[18px] font-bold leading-none text-[#86efac]">{bits.landed}</span>
+                <span className="hidden text-[11px] uppercase tracking-[0.14em] text-white/40 md:inline">Landed</span>
               </span>
               {createHref ? (
                 <Link

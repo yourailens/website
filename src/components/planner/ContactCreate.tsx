@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import {
   PLANNER_FIRST_TOUCH_CHANNELS,
   PLANNER_FIRST_TOUCH_NOTES,
+  plannerBioCalledName,
+  plannerBioDisplayName,
   plannerFirstTouchChannelLabel,
   plannerFirstTouchLine,
   type PlannerBio,
@@ -17,10 +19,6 @@ import {
 import PlannerSelect from "@/components/planner/PlannerSelect";
 import { PlannerFace } from "@/components/planner/planner-look";
 import { P_BTN, P_FIELD, P_LABEL, P_MENU, P_PAGE } from "@/components/planner/planner-ui";
-
-function personName(person: PlannerBio) {
-  return person.preferred_name?.trim() || person.full_name;
-}
 
 function samePerson(contact: PlannerContact, person: PlannerBio) {
   if (contact.bio_id && contact.bio_id === person.id) return true;
@@ -58,23 +56,41 @@ export default function ContactCreate({
 
   const touchLine = plannerFirstTouchLine({ side: touchSide, channel: touchChannel, note: touchNote });
 
+  const takenByPerson = useMemo(() => {
+    const map = new Map<string, PlannerContact>();
+    for (const person of people) {
+      const hit = existing.find((contact) => samePerson(contact, person));
+      if (hit) map.set(person.id, hit);
+    }
+    return map;
+  }, [existing, people]);
+
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return people
-      .filter((person) => {
-        if (!q) return true;
-        const hay = [person.full_name, person.preferred_name, person.company, person.email].filter(Boolean).join(" ").toLowerCase();
-        return hay.includes(q);
+    const pool = people.filter((person) => {
+      if (!q) return true;
+      const hay = [person.full_name, person.preferred_name, person.company, person.email].filter(Boolean).join(" ").toLowerCase();
+      return hay.includes(q);
+    });
+    // Open people first; ones with a follow-up already sit below, disabled.
+    return pool
+      .slice()
+      .sort((a, b) => {
+        const aTaken = takenByPerson.has(a.id) ? 1 : 0;
+        const bTaken = takenByPerson.has(b.id) ? 1 : 0;
+        if (aTaken !== bTaken) return aTaken - bTaken;
+        return plannerBioDisplayName(a).localeCompare(plannerBioDisplayName(b));
       })
       .slice(0, 24);
-  }, [people, query]);
+  }, [people, query, takenByPerson]);
 
-  const prior = picked ? existing.find((contact) => samePerson(contact, picked)) : undefined;
+  const prior = picked ? takenByPerson.get(picked.id) ?? existing.find((contact) => samePerson(contact, picked)) : undefined;
 
   function choose(person: PlannerBio) {
+    if (takenByPerson.has(person.id)) return;
     setPicked(person);
     setMaking(false);
-    setQuery(personName(person));
+    setQuery(plannerBioDisplayName(person));
     setOpen(false);
     setErr("");
   }
@@ -108,7 +124,7 @@ export default function ContactCreate({
     setErr("");
     try {
       await startFollowUp({
-        name: personName(picked),
+        name: plannerBioDisplayName(picked),
         company: picked.company,
         role_title: picked.role_title,
         phone: picked.phone,
@@ -200,19 +216,51 @@ export default function ContactCreate({
             <ul className={`absolute z-30 mt-2 max-h-72 w-full ${P_MENU}`}>
               {matches.map((person) => {
                 const line = [person.role_title, person.company].filter(Boolean).join(", ");
+                const called = plannerBioCalledName(person);
+                const taken = takenByPerson.get(person.id);
                 return (
                   <li key={person.id}>
-                    <button type="button" onClick={() => choose(person)} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-white/10">
-                      <PlannerFace name={personName(person)} size={32} />
-                      <span className="min-w-0">
-                        <span className="block truncate text-[15px] font-semibold">{personName(person)}</span>
-                        {line ? <span className="block truncate text-[12px] text-white/45">{line}</span> : null}
-                      </span>
-                    </button>
+                    {taken ? (
+                      <div className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 opacity-45">
+                        <PlannerFace name={plannerBioDisplayName(person)} size={32} />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[15px] font-semibold text-white/70">
+                            {plannerBioDisplayName(person)}
+                          </span>
+                          <span className="mt-0.5 block truncate text-[12px] text-white/40">
+                            Follow up already created
+                          </span>
+                        </span>
+                        <Link
+                          href={`/planner/follow-ups/${taken.id}`}
+                          className="shrink-0 text-[12px] font-medium text-[#9ec1ff] hover:text-white"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Open
+                        </Link>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => choose(person)}
+                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-white/10"
+                      >
+                        <PlannerFace name={plannerBioDisplayName(person)} size={32} />
+                        <span className="min-w-0">
+                          <span className="block truncate text-[15px] font-semibold">{plannerBioDisplayName(person)}</span>
+                          {called ? (
+                            <span className="mt-0.5 block truncate text-[12px] text-white/40">{called}</span>
+                          ) : line ? (
+                            <span className="block truncate text-[12px] text-white/45">{line}</span>
+                          ) : null}
+                        </span>
+                      </button>
+                    )}
                   </li>
                 );
               })}
-              {query.trim() && !matches.some((person) => personName(person).toLowerCase() === query.trim().toLowerCase()) ? (
+              {query.trim() &&
+              !matches.some((person) => plannerBioDisplayName(person).toLowerCase() === query.trim().toLowerCase()) ? (
                 <li>
                   <button
                     type="button"
@@ -235,10 +283,14 @@ export default function ContactCreate({
         {picked ? (
           <div className="mt-4 flex items-center justify-between gap-3 rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-3">
             <span className="flex min-w-0 items-center gap-3">
-              <PlannerFace name={personName(picked)} size={40} />
+              <PlannerFace name={plannerBioDisplayName(picked)} size={40} />
               <span className="min-w-0">
-                <span className="block truncate text-[16px] font-semibold">{personName(picked)}</span>
-                <span className="block truncate text-[13px] text-white/45">{[picked.role_title, picked.company].filter(Boolean).join(", ") || "In contacts"}</span>
+                <span className="block truncate text-[16px] font-semibold">{plannerBioDisplayName(picked)}</span>
+                <span className="block truncate text-[13px] text-white/45">
+                  {plannerBioCalledName(picked) ||
+                    [picked.role_title, picked.company].filter(Boolean).join(", ") ||
+                    "In contacts"}
+                </span>
               </span>
             </span>
             <button type="button" className="shrink-0 text-[13px] text-white/50" onClick={clearPick}>

@@ -4,8 +4,10 @@ import { listPlannerMembers } from "@/lib/planner/load";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewTaskPage() {
+export default async function NewTaskPage({ searchParams }: { searchParams: Promise<{ milestone?: string }> }) {
   const me = await requirePlannerPage();
+  const sp = await searchParams;
   const members = await listPlannerMembers();
-  return <TaskCreate me={me} members={members} />;
+  const milestoneId = sp.milestone?.trim() || null;
+  return <TaskCreate me={me} members={members} milestoneId={milestoneId} />;
 }

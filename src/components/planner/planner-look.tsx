@@ -197,6 +197,14 @@ export function NavGlyph({ name }: { name: string }) {
       </svg>
     );
   }
+  if (name === "flag") {
+    return (
+      <svg viewBox="0 0 24 24" className={common} fill="none" aria-hidden>
+        <path d="M6 20V5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+        <path d="M6 5.5h9.5L13 9l2.5 3.5H6" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      </svg>
+    );
+  }
   if (name === "money") {
     return (
       <svg viewBox="0 0 24 24" className={common} fill="none" aria-hidden>
@@ -216,6 +224,7 @@ export function NavGlyph({ name }: { name: string }) {
 
 export function glyphFor(href: string) {
   if (href === "/planner/feed" || href === "/planner") return "feed";
+  if (href.startsWith("/planner/milestones")) return "flag";
   if (href.startsWith("/planner/tasks")) return "tasks";
   if (href.startsWith("/planner/follow-ups/contacts")) return "contacts";
   if (href.startsWith("/planner/follow-ups")) return "follow";

@@ -9,6 +9,13 @@ import type {
   PlannerFinanceKind,
   PlannerMeeting,
   PlannerMember,
+  PlannerMilestone,
+  PlannerMilestoneEntry,
+  PlannerMilestoneEntryKind,
+  PlannerMilestoneLink,
+  PlannerMilestonePerson,
+  PlannerMilestoneRole,
+  PlannerMilestoneStatus,
   PlannerNote,
   PlannerNoteImage,
   PlannerPaymentMethod,
@@ -24,6 +31,9 @@ import {
   isPlannerFinanceKind,
   isPlannerFirstTouchChannel,
   isPlannerFirstTouchSide,
+  isPlannerMilestoneEntryKind,
+  isPlannerMilestoneHorizon,
+  isPlannerMilestoneStatus,
   isPlannerPaymentMethod,
   isPlannerTaskStatus,
   plannerBioCategory,
@@ -65,6 +75,7 @@ function rowToTask(row: Record<string, unknown>): PlannerTask | null {
     sort_order: Number(row.sort_order ?? 0),
     created_at: String(row.created_at ?? ""),
     updated_at: String(row.updated_at ?? ""),
+    milestone_id: row.milestone_id ? String(row.milestone_id) : null,
   };
 }
 
@@ -274,11 +285,27 @@ export async function listPlannerContacts(): Promise<PlannerContact[]> {
       counts.set(mark.contact_id, (counts.get(mark.contact_id) ?? 0) + 1);
     }
   }
+  const names = await bioDisplayNames(contacts.map((c) => c.bio_id));
   return contacts.map((c) => ({
     ...c,
+    name: (c.bio_id && names.get(c.bio_id)) || c.name,
     meet_count: counts.get(c.id) ?? 0,
     owner: c.owner_id ? people.get(c.owner_id) ?? null : null,
   }));
+}
+
+/** Prefer full_name from the Contacts bio card when a follow-up is linked. */
+async function bioDisplayNames(bioIds: (string | null | undefined)[]) {
+  const unique = [...new Set(bioIds.filter((id): id is string => Boolean(id)))];
+  const map = new Map<string, string>();
+  if (!unique.length) return map;
+  const db = createServiceRoleClient();
+  const { data } = await db.from("planner_bios").select("id, full_name").in("id", unique);
+  for (const row of data ?? []) {
+    const r = row as { id?: string; full_name?: string };
+    if (r.id && r.full_name?.trim()) map.set(String(r.id), r.full_name.trim());
+  }
+  return map;
 }
 
 export async function getPlannerContact(id: string): Promise<PlannerContact | null> {
@@ -305,8 +332,10 @@ export async function getPlannerContact(id: string): Promise<PlannerContact | nu
     contact.created_by,
     ...parsed.map((e) => e.created_by),
   ]);
+  const names = await bioDisplayNames([contact.bio_id]);
   return {
     ...contact,
+    name: (contact.bio_id && names.get(contact.bio_id)) || contact.name,
     meet_count: plannerMeetCount(parsed),
     owner: contact.owner_id ? people.get(contact.owner_id) ?? null : null,
     entries: parsed.map((e) => ({ ...e, creator: people.get(e.created_by) ?? null })),
@@ -715,4 +744,201 @@ export async function getPlannerFinanceEntry(id: string): Promise<PlannerFinance
   if (!entry) return null;
   const people = await memberMap([entry.created_by]);
   return { ...entry, creator: people.get(entry.created_by) ?? null };
+}
+
+function rowToMilestone(row: Record<string, unknown>): PlannerMilestone | null {
+  if (!isPlannerMilestoneStatus(row.status)) return null;
+  const target = row.target_on ? String(row.target_on).slice(0, 10) : null;
+  return {
+    id: String(row.id),
+    title: String(row.title ?? ""),
+    intent: (row.intent as string | null) ?? null,
+    done_when: (row.done_when as string | null) ?? null,
+    status: row.status as PlannerMilestoneStatus,
+    horizon: isPlannerMilestoneHorizon(row.horizon) ? row.horizon : "quarter",
+    target_on: target,
+    created_by: String(row.created_by ?? ""),
+    created_at: String(row.created_at ?? ""),
+    updated_at: String(row.updated_at ?? ""),
+    crew: [],
+    waiting_on: [],
+    open_tasks: 0,
+  };
+}
+
+function rowToMilestoneEntry(row: Record<string, unknown>): PlannerMilestoneEntry | null {
+  if (!isPlannerMilestoneEntryKind(row.kind)) return null;
+  const body = String(row.body ?? "").trim();
+  const proofUrl = String(row.proof_url ?? "").trim();
+  const proofRef = String(row.proof_ref ?? "").trim();
+  if (!body && !proofUrl && !proofRef) return null;
+  return {
+    id: String(row.id),
+    milestone_id: String(row.milestone_id ?? ""),
+    kind: row.kind as PlannerMilestoneEntryKind,
+    body,
+    proof_url: proofUrl || null,
+    proof_ref: proofRef || null,
+    created_by: String(row.created_by ?? ""),
+    created_at: String(row.created_at ?? ""),
+  };
+}
+
+async function crewByMilestone(ids: string[]): Promise<Map<string, PlannerMilestonePerson[]>> {
+  const map = new Map<string, PlannerMilestonePerson[]>();
+  if (!ids.length) return map;
+  const db = createServiceRoleClient();
+  const selected = await db
+    .from("planner_milestone_members")
+    .select("milestone_id, member_id, role")
+    .in("milestone_id", ids);
+  let data = selected.data as { milestone_id: string; member_id: string; role?: string }[] | null;
+  let error = selected.error;
+  if (error && /role/i.test(error.message)) {
+    const fallback = await db.from("planner_milestone_members").select("milestone_id, member_id").in("milestone_id", ids);
+    data = (fallback.data ?? null) as { milestone_id: string; member_id: string; role?: string }[] | null;
+    error = fallback.error;
+  }
+  if (error) {
+    if (softEmpty(error.message)) return map;
+    throw new Error(error.message);
+  }
+  const links = data ?? [];
+  const people = await memberMap(links.map((l) => l.member_id));
+  for (const link of links) {
+    const member = people.get(link.member_id);
+    if (!member) continue;
+    const role: PlannerMilestoneRole = link.role === "owner" ? "owner" : "helper";
+    const list = map.get(link.milestone_id) ?? [];
+    list.push({ ...member, milestone_role: role });
+    map.set(link.milestone_id, list);
+  }
+  for (const list of map.values()) {
+    list.sort((a, b) => {
+      if (a.milestone_role !== b.milestone_role) return a.milestone_role === "owner" ? -1 : 1;
+      return a.display_name.localeCompare(b.display_name);
+    });
+  }
+  return map;
+}
+
+async function waitingByMilestone(rows: PlannerMilestone[]): Promise<Map<string, PlannerMilestoneLink[]>> {
+  const map = new Map<string, PlannerMilestoneLink[]>();
+  if (!rows.length) return map;
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  const db = createServiceRoleClient();
+  const { data, error } = await db
+    .from("planner_milestone_deps")
+    .select("milestone_id, blocked_by")
+    .in("milestone_id", rows.map((row) => row.id));
+  if (error) {
+    if (softEmpty(error.message)) return map;
+    throw new Error(error.message);
+  }
+  for (const link of (data ?? []) as { milestone_id: string; blocked_by: string }[]) {
+    const other = byId.get(link.blocked_by);
+    if (!other) continue;
+    const list = map.get(link.milestone_id) ?? [];
+    list.push({ id: other.id, title: other.title, status: other.status });
+    map.set(link.milestone_id, list);
+  }
+  return map;
+}
+
+async function openTasksByMilestone(ids: string[]): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  if (!ids.length) return map;
+  const db = createServiceRoleClient();
+  const { data, error } = await db.from("planner_tasks").select("milestone_id, status").in("milestone_id", ids);
+  if (error) {
+    if (softEmpty(error.message)) return map;
+    throw new Error(error.message);
+  }
+  for (const row of (data ?? []) as { milestone_id?: string; status?: string }[]) {
+    if (!row.milestone_id || row.status === "done") continue;
+    map.set(row.milestone_id, (map.get(row.milestone_id) ?? 0) + 1);
+  }
+  return map;
+}
+
+export async function listPlannerMilestones(): Promise<{ rows: PlannerMilestone[]; missing: boolean }> {
+  const db = createServiceRoleClient();
+  const { data, error } = await db.from("planner_milestones").select("*").order("created_at", { ascending: false });
+  if (error) {
+    if (softEmpty(error.message)) return { rows: [], missing: true };
+    throw new Error(error.message);
+  }
+  const rows = (data ?? [])
+    .map((r) => rowToMilestone(r as Record<string, unknown>))
+    .filter((r): r is PlannerMilestone => Boolean(r));
+  const ids = rows.map((r) => r.id);
+  const [crew, people, waiting, openTasks] = await Promise.all([
+    crewByMilestone(ids),
+    memberMap(rows.map((r) => r.created_by)),
+    waitingByMilestone(rows),
+    openTasksByMilestone(ids),
+  ]);
+  return {
+    rows: rows.map((r) => ({
+      ...r,
+      crew: crew.get(r.id) ?? [],
+      waiting_on: waiting.get(r.id) ?? [],
+      open_tasks: openTasks.get(r.id) ?? 0,
+      creator: people.get(r.created_by) ?? null,
+    })),
+    missing: false,
+  };
+}
+
+export async function getPlannerMilestone(
+  id: string,
+): Promise<{ milestone: PlannerMilestone; entries: PlannerMilestoneEntry[]; tasks: PlannerTask[] } | null> {
+  const db = createServiceRoleClient();
+  const { data, error } = await db.from("planner_milestones").select("*").eq("id", id).maybeSingle();
+  if (error) {
+    if (softEmpty(error.message)) return null;
+    throw new Error(error.message);
+  }
+  if (!data) return null;
+  const milestone = rowToMilestone(data as Record<string, unknown>);
+  if (!milestone) return null;
+  const { data: entryRows, error: entryError } = await db
+    .from("planner_milestone_entries")
+    .select("*")
+    .eq("milestone_id", id)
+    .order("created_at", { ascending: false });
+  if (entryError && !softEmpty(entryError.message)) throw new Error(entryError.message);
+  const entries = (entryRows ?? [])
+    .map((r) => rowToMilestoneEntry(r as Record<string, unknown>))
+    .filter((r): r is PlannerMilestoneEntry => Boolean(r));
+  const { data: taskRows, error: taskError } = await db.from("planner_tasks").select("*").eq("milestone_id", id);
+  if (taskError && !softEmpty(taskError.message)) throw new Error(taskError.message);
+  const tasks = (taskRows ?? [])
+    .map((r) => rowToTask(r as Record<string, unknown>))
+    .filter((task): task is PlannerTask => Boolean(task));
+  const listed = await listPlannerMilestones();
+  const [crew, people] = await Promise.all([
+    crewByMilestone([id]),
+    memberMap([
+      milestone.created_by,
+      ...entries.map((e) => e.created_by),
+      ...tasks.flatMap((task) => [task.assignee_id, task.created_by]),
+    ]),
+  ]);
+  const fromList = listed.rows.find((row) => row.id === id);
+  return {
+    milestone: {
+      ...milestone,
+      crew: crew.get(id) ?? [],
+      waiting_on: fromList?.waiting_on ?? [],
+      open_tasks: fromList?.open_tasks ?? tasks.filter((task) => task.status !== "done").length,
+      creator: people.get(milestone.created_by) ?? null,
+    },
+    entries: entries.map((e) => ({ ...e, creator: people.get(e.created_by) ?? null })),
+    tasks: tasks.map((task) => ({
+      ...task,
+      assignee: people.get(task.assignee_id) ?? null,
+      creator: people.get(task.created_by) ?? null,
+    })),
+  };
 }

@@ -7,7 +7,8 @@ export type PlannerHeaderBits =
   | { kind: "followups"; due: number; won: number }
   | { kind: "contacts"; count: number }
   | { kind: "links"; count: number }
-  | { kind: "finances"; net: number };
+  | { kind: "finances"; net: number }
+  | { kind: "milestones"; moving: number; landed: number };
 
 const SetCtx = createContext<((bits: PlannerHeaderBits | null) => void) | null>(null);
 const BitsCtx = createContext<PlannerHeaderBits | null>(null);
@@ -36,7 +37,9 @@ export function useSetPlannerHeader(bits: PlannerHeaderBits) {
           ? `contacts:${bits.count}`
           : bits.kind === "links"
             ? `links:${bits.count}`
-            : `finances:${bits.net}`;
+            : bits.kind === "milestones"
+              ? `milestones:${bits.moving}:${bits.landed}`
+              : `finances:${bits.net}`;
   useEffect(() => {
     setBits?.(bits);
     return () => setBits?.(null);

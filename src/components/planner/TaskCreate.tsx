@@ -25,7 +25,15 @@ function pretty(deadline: string) {
   return d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
 }
 
-export default function TaskCreate({ me, members }: { me: PlannerMember; members: PlannerMember[] }) {
+export default function TaskCreate({
+  me,
+  members,
+  milestoneId = null,
+}: {
+  me: PlannerMember;
+  members: PlannerMember[];
+  milestoneId?: string | null;
+}) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -58,11 +66,11 @@ export default function TaskCreate({ me, members }: { me: PlannerMember; members
       const res = await fetch("/api/planner/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(draft),
+        body: JSON.stringify({ ...draft, milestone_id: milestoneId }),
       });
       const j = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) throw new Error(j.error || "Create failed");
-      router.push("/planner/tasks");
+      router.push(milestoneId ? `/planner/milestones/${milestoneId}` : "/planner/tasks");
       router.refresh();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Create failed");
@@ -73,7 +81,7 @@ export default function TaskCreate({ me, members }: { me: PlannerMember; members
 
   return (
     <div className={`${P_PAGE} lg:grid lg:max-w-[1100px] lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-6 lg:space-y-0`}>
-      <Link href="/planner/tasks" className="mb-2 inline-flex w-fit items-center rounded-full border border-white/20 bg-white/[0.06] px-4 py-2 text-[14px] font-medium text-white lg:col-span-2">
+      <Link href={milestoneId ? `/planner/milestones/${milestoneId}` : "/planner/tasks"} className="mb-2 inline-flex w-fit items-center rounded-full border border-white/20 bg-white/[0.06] px-4 py-2 text-[14px] font-medium text-white lg:col-span-2">
         Back
       </Link>
       <section className="rounded-[36px] border border-white/20 bg-white/[0.07] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] backdrop-blur-2xl sm:p-8">
@@ -141,7 +149,7 @@ export default function TaskCreate({ me, members }: { me: PlannerMember; members
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[16px] leading-none">+</span>
             {busy ? "Adding" : "Add to the board"}
           </button>
-          <button type="button" className="text-[14px] text-white/50" onClick={() => router.push("/planner/tasks")}>
+          <button type="button" className="text-[14px] text-white/50" onClick={() => router.push(milestoneId ? `/planner/milestones/${milestoneId}` : "/planner/tasks")}>
             Cancel
           </button>
         </div>

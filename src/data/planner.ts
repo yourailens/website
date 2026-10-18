@@ -58,6 +58,7 @@ export type PlannerTask = {
   /** Joined for UI */
   assignee?: PlannerMember | null;
   creator?: PlannerMember | null;
+  milestone_id: string | null;
 };
 
 export const PLANNER_FIRST_TOUCH_SIDES = ["us", "them"] as const;
@@ -332,6 +333,7 @@ export const PLANNER_NAV: { id: string; label: string; items: PlannerNavItem[] }
     label: "Main",
     items: [
       { href: "/planner/tasks", label: "Planner", hint: "Todos and deadlines" },
+      { href: "/planner/milestones", label: "Milestones", hint: "Studio targets" },
       { href: "/planner/follow-ups/contacts", label: "Contacts", hint: "People we know" },
       { href: "/planner/follow-ups", label: "Follow ups", hint: "Calls" },
       { href: "/planner/finances", label: "Finances", hint: "Money in and out", coreOnly: true },
@@ -391,6 +393,138 @@ export function isPlannerPaymentMethod(v: unknown): v is PlannerPaymentMethod {
 
 export function isPlannerFinanceKind(v: unknown): v is PlannerFinanceKind {
   return PLANNER_FINANCE_KINDS.includes(v as PlannerFinanceKind);
+}
+
+export const PLANNER_MILESTONE_STATUSES = ["queued", "moving", "stuck", "landed"] as const;
+export type PlannerMilestoneStatus = (typeof PLANNER_MILESTONE_STATUSES)[number];
+
+export const PLANNER_MILESTONE_ENTRY_KINDS = ["move", "decision", "blocker", "proof"] as const;
+export type PlannerMilestoneEntryKind = (typeof PLANNER_MILESTONE_ENTRY_KINDS)[number];
+
+export const PLANNER_MILESTONE_HORIZONS = ["quarter", "someday"] as const;
+export type PlannerMilestoneHorizon = (typeof PLANNER_MILESTONE_HORIZONS)[number];
+
+export const PLANNER_MILESTONE_ROLES = ["owner", "helper"] as const;
+export type PlannerMilestoneRole = (typeof PLANNER_MILESTONE_ROLES)[number];
+
+export type PlannerMilestonePerson = PlannerMember & { milestone_role: PlannerMilestoneRole };
+
+export type PlannerMilestoneLink = {
+  id: string;
+  title: string;
+  status: PlannerMilestoneStatus;
+};
+
+export type PlannerMilestoneCrewInput = {
+  member_id: string;
+  role: PlannerMilestoneRole;
+};
+
+export type PlannerMilestone = {
+  id: string;
+  title: string;
+  intent: string | null;
+  done_when: string | null;
+  status: PlannerMilestoneStatus;
+  horizon: PlannerMilestoneHorizon;
+  target_on: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  crew: PlannerMilestonePerson[];
+  waiting_on: PlannerMilestoneLink[];
+  open_tasks: number;
+  creator?: PlannerMember | null;
+};
+
+export type PlannerMilestoneEntry = {
+  id: string;
+  milestone_id: string;
+  kind: PlannerMilestoneEntryKind;
+  body: string;
+  proof_url: string | null;
+  proof_ref: string | null;
+  created_by: string;
+  created_at: string;
+  creator?: PlannerMember | null;
+};
+
+export function isPlannerMilestoneStatus(v: unknown): v is PlannerMilestoneStatus {
+  return PLANNER_MILESTONE_STATUSES.includes(v as PlannerMilestoneStatus);
+}
+
+export function isPlannerMilestoneEntryKind(v: unknown): v is PlannerMilestoneEntryKind {
+  return PLANNER_MILESTONE_ENTRY_KINDS.includes(v as PlannerMilestoneEntryKind);
+}
+
+export function isPlannerMilestoneHorizon(v: unknown): v is PlannerMilestoneHorizon {
+  return PLANNER_MILESTONE_HORIZONS.includes(v as PlannerMilestoneHorizon);
+}
+
+export function plannerMilestoneHorizonLabel(horizon: PlannerMilestoneHorizon) {
+  return horizon === "someday" ? "Someday" : "This quarter";
+}
+
+/** The aim date has passed and the target has not landed. */
+export function plannerMilestoneIsSlipping(row: { status: PlannerMilestoneStatus; target_on: string | null }) {
+  if (row.status === "landed" || !row.target_on) return false;
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  return row.target_on < today;
+}
+
+export function parseMilestoneCrew(value: unknown): PlannerMilestoneCrewInput[] {
+  if (!Array.isArray(value)) return [];
+  const out: PlannerMilestoneCrewInput[] = [];
+  const seen = new Set<string>();
+  let hasOwner = false;
+  for (const item of value) {
+    const member_id =
+      typeof item === "string" ? item.trim() : String((item as { member_id?: unknown })?.member_id ?? "").trim();
+    if (!member_id || seen.has(member_id)) continue;
+    const raw = typeof item === "string" ? "helper" : (item as { role?: unknown }).role;
+    let role: PlannerMilestoneRole = raw === "owner" ? "owner" : "helper";
+    if (role === "owner") {
+      if (hasOwner) role = "helper";
+      else hasOwner = true;
+    }
+    seen.add(member_id);
+    out.push({ member_id, role });
+  }
+  return out;
+}
+
+export function cleanProofUrl(value: unknown): { url: string | null } | { error: string } {
+  const text = String(value ?? "").trim();
+  if (!text) return { url: null };
+  if (!/^https?:\/\//i.test(text)) return { error: "Proof link should start with http:// or https://" };
+  return { url: text };
+}
+
+export function plannerMilestoneStatusLabel(s: PlannerMilestoneStatus) {
+  switch (s) {
+    case "queued":
+      return "Queued";
+    case "moving":
+      return "In motion";
+    case "stuck":
+      return "Blocked";
+    case "landed":
+      return "Landed";
+  }
+}
+
+export function plannerMilestoneEntryLabel(k: PlannerMilestoneEntryKind) {
+  switch (k) {
+    case "move":
+      return "Moved";
+    case "decision":
+      return "Decided";
+    case "blocker":
+      return "Blocked";
+    case "proof":
+      return "Proof";
+  }
 }
 
 export function plannerDirectoryKindLabel(kind: PlannerDirectoryKind) {
@@ -595,6 +729,19 @@ export function plannerBioSuggestions(rows: PlannerBio[]): PlannerBioSuggestions
   }
   out.misc_label = [...misc].sort((a, b) => a.localeCompare(b));
   return out;
+}
+
+/** Emphasized name everywhere: legal / full name first. */
+export function plannerBioDisplayName(bio: Pick<PlannerBio, "full_name" | "preferred_name">) {
+  return bio.full_name.trim() || bio.preferred_name?.trim() || "Unnamed";
+}
+
+/** What we call them — only when different from the full name. */
+export function plannerBioCalledName(bio: Pick<PlannerBio, "full_name" | "preferred_name">) {
+  const full = bio.full_name.trim();
+  const called = bio.preferred_name?.trim() || "";
+  if (!called || called.toLowerCase() === full.toLowerCase()) return null;
+  return called;
 }
 
 export function draftFromBio(bio: PlannerBio) {

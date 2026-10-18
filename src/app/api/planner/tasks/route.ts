@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { isPlannerTaskStatus } from "@/data/planner";
 import { requirePlanner } from "@/lib/planner/auth";
 import { listPlannerTasks, nextPlannerSortOrder } from "@/lib/planner/load";
+import { milestoneSqlError } from "@/lib/planner/milestone-write";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -37,6 +38,7 @@ export async function POST(req: NextRequest) {
   const status = isPlannerTaskStatus(b.status) ? b.status : "open";
   const deadline = String(b.deadline ?? "").trim() || null;
   const notes = String(b.notes ?? "").trim() || null;
+  const milestone_id = String(b.milestone_id ?? "").trim() || null;
 
   const db = createServiceRoleClient();
   const sort_order = await nextPlannerSortOrder("planner_tasks");
@@ -48,18 +50,22 @@ export async function POST(req: NextRequest) {
     created_by: auth.member.id,
     assignee_id,
     sort_order,
+    ...(milestone_id ? { milestone_id } : {}),
   });
   if (error) {
     const missing = /does not exist|schema cache/i.test(error.message);
     return NextResponse.json(
       {
-        error: missing
-          ? "Run supabase/migrations/088_planner.sql in the Supabase SQL editor first."
-          : error.message,
+        error: milestone_id
+          ? milestoneSqlError(error.message)
+          : missing
+            ? "Run supabase/migrations/088_planner.sql in the Supabase SQL editor first."
+            : error.message,
       },
       { status: 400 }
     );
   }
+  if (milestone_id) revalidatePath(`/planner/milestones/${milestone_id}`);
   revalidate();
   return NextResponse.json({ tasks: await listPlannerTasks() });
 }
