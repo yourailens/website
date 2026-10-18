@@ -2,52 +2,17 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { PlannerTask } from "@/data/planner";
+import { plannerTaskBoardLabel, plannerTaskBoardTone } from "@/data/planner";
 import { PlannerFace } from "@/components/planner/planner-look";
+import { P_BTN_GHOST, P_FIELD } from "@/components/planner/planner-ui";
 
 function when(deadline: string | null) {
   if (!deadline) return "No date";
   const d = new Date(`${deadline}T00:00:00`);
   if (Number.isNaN(d.getTime())) return deadline;
   return d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
-}
-
-/** Full notes by default; ellipsis only when the text overflows the card space. */
-function TaskNotes({ text, empty }: { text: string; empty: boolean }) {
-  const box = useRef<HTMLDivElement>(null);
-  const probe = useRef<HTMLParagraphElement>(null);
-  const [overflowing, setOverflowing] = useState(false);
-
-  useEffect(() => {
-    const boxEl = box.current;
-    const probeEl = probe.current;
-    if (!boxEl || !probeEl) return;
-    const check = () => setOverflowing(probeEl.scrollHeight > boxEl.clientHeight + 1);
-    check();
-    const ro = new ResizeObserver(check);
-    ro.observe(boxEl);
-    return () => ro.disconnect();
-  }, [text]);
-
-  return (
-    <div ref={box} className="relative mt-2 min-h-0 flex-1 overflow-hidden">
-      <p
-        ref={probe}
-        aria-hidden
-        className="pointer-events-none invisible absolute inset-x-0 top-0 text-[14px] leading-[1.5] break-words"
-      >
-        {text}
-      </p>
-      <p
-        className={`text-[14px] leading-[1.5] break-words ${empty ? "text-white/35" : "text-white/70"} ${
-          overflowing ? "line-clamp-6" : ""
-        }`}
-      >
-        {text}
-      </p>
-    </div>
-  );
 }
 
 function Mark({ kind }: { kind: "tick" | "cross" }) {
@@ -62,10 +27,22 @@ function Mark({ kind }: { kind: "tick" | "cross" }) {
   );
 }
 
+const TONE = {
+  idle: { bar: "bg-[#ff3b30]", ink: "text-white", ring: "border-[#ff3b30]/45" },
+  moving: { bar: "bg-[#6d28d9]", ink: "text-white", ring: "border-[#6d28d9]/55" },
+  roadblock: { bar: "bg-[#f5c16c]", ink: "text-[#1a1408]", ring: "border-[#f5c16c]/70" },
+  done: { bar: "bg-[#34c759]", ink: "text-white", ring: "border-[#34c759]/45" },
+} as const;
+
 export default function TaskCard({ task, mine }: { task: PlannerTask; mine: boolean }) {
   const router = useRouter();
   const [done, setDone] = useState(task.status === "done");
   const [busy, setBusy] = useState(false);
+  const [finishOpen, setFinishOpen] = useState(false);
+  const [finishNote, setFinishNote] = useState("");
+  const [finishErr, setFinishErr] = useState("");
+  const tone = plannerTaskBoardTone({ ...task, status: done ? "done" : task.status === "done" ? "open" : task.status });
+  const paint = TONE[tone];
 
   useEffect(() => {
     setDone(task.status === "done");
@@ -73,52 +50,87 @@ export default function TaskCard({ task, mine }: { task: PlannerTask; mine: bool
 
   const who = task.assignee?.display_name ?? "Unassigned";
 
-  async function setStatus(nextDone: boolean) {
-    if (!mine || busy || nextDone === done) return;
-    setDone(nextDone);
+  async function reopen() {
+    if (!mine || busy || !done) return;
+    setDone(false);
     setBusy(true);
     try {
       const res = await fetch(`/api/planner/tasks/${task.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: nextDone ? "done" : "open" }),
+        body: JSON.stringify({ status: "open" }),
       });
-      if (!res.ok) setDone(!nextDone);
+      if (!res.ok) setDone(true);
       else router.refresh();
     } catch {
-      setDone(!nextDone);
+      setDone(true);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function finish() {
+    const note = finishNote.trim();
+    if (!mine || busy || !note) return;
+    setBusy(true);
+    setFinishErr("");
+    try {
+      const res = await fetch(`/api/planner/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "done", completion_note: note }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) {
+        setFinishErr(data.error || "Could not finish this.");
+        return;
+      }
+      setDone(true);
+      setFinishOpen(false);
+      setFinishNote("");
+      router.refresh();
+    } catch {
+      setFinishErr("Could not finish this.");
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <article className="flex aspect-square flex-col overflow-hidden rounded-[36px] border border-white/20 bg-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-2xl">
-      <div
-        className={`flex items-center justify-center gap-2 px-4 py-3 text-[15px] font-semibold tracking-wide text-white ${
-          done ? "bg-[#34c759]" : "bg-[#ff3b30]"
-        }`}
-      >
-        <Mark kind={done ? "tick" : "cross"} />
-        {done ? "Done" : "Not done"}
+    <>
+    <article className={`flex h-[340px] flex-col overflow-hidden rounded-[28px] border bg-[#121214] ${paint.ring}`}>
+      <div className={`shrink-0 px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.16em] ${paint.bar} ${paint.ink}`}>
+        {plannerTaskBoardLabel(tone)}
       </div>
 
-      <Link href={`/planner/tasks/${task.id}`} className="flex min-h-0 flex-1 flex-col px-5 pb-2 pt-4">
-        <h3 className={`shrink-0 line-clamp-2 text-[22px] font-bold leading-[1.15] tracking-tight ${done ? "text-white/55" : "text-white"}`}>
-          {task.title}
-        </h3>
-        <TaskNotes text={task.notes || "No notes"} empty={!task.notes} />
+      {task.milestone ? (
+        <Link
+          href={`/planner/milestones/${task.milestone.id}`}
+          className="mx-5 mt-4 inline-flex max-w-[calc(100%-2.5rem)] items-center gap-1.5 self-start truncate rounded-full border border-[#f5c16c]/40 bg-[#f5c16c]/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f5c16c]"
+        >
+          <span className="shrink-0" aria-hidden>
+            ◆
+          </span>
+          <span className="truncate">{task.milestone.title}</span>
+        </Link>
+      ) : null}
+
+      <Link href={`/planner/tasks/${task.id}`} className={`flex min-h-0 flex-1 flex-col px-5 pb-2 ${task.milestone ? "pt-3" : "pt-4"}`}>
+        <h3 className="line-clamp-2 shrink-0 text-[20px] font-bold leading-snug tracking-tight text-white">{task.title}</h3>
+        <p className={`mt-2 text-[15px] leading-[1.55] ${task.milestone ? "line-clamp-3" : "line-clamp-4"} ${task.notes ? "text-white/80" : "text-white/40"}`}>
+          {task.notes || "No notes yet"}
+        </p>
         <div className="mt-auto flex items-center justify-between gap-3 pt-4">
           <span className="flex min-w-0 items-center gap-2">
             <PlannerFace name={who} size={28} />
-            <span className="truncate text-[13px] font-semibold text-white">{who}</span>
+            <span className="truncate text-[14px] font-semibold text-white">{who}</span>
           </span>
-          <span className="shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-[12px] font-medium text-white/70">{when(task.deadline)}</span>
+          <span className="shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-[12px] font-medium text-white/75">{when(task.deadline)}</span>
         </div>
       </Link>
 
       <div
-        className={`mx-4 mb-4 flex items-center justify-center gap-2 rounded-full border p-1.5 ${
+        className={`mx-4 mb-4 flex shrink-0 items-center justify-center gap-2 rounded-full border p-1.5 ${
           mine
             ? "border-white/15 bg-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]"
             : "border-white/10 bg-white/[0.03]"
@@ -129,7 +141,7 @@ export default function TaskCard({ task, mine }: { task: PlannerTask; mine: bool
           disabled={!mine || busy}
           aria-pressed={!done}
           aria-label={mine ? "Mark not done" : "Only the assignee can change this"}
-          onClick={() => void setStatus(false)}
+          onClick={() => void reopen()}
           className={`flex h-12 flex-1 items-center justify-center rounded-full ${
             !mine
               ? done
@@ -147,7 +159,12 @@ export default function TaskCard({ task, mine }: { task: PlannerTask; mine: bool
           disabled={!mine || busy}
           aria-pressed={done}
           aria-label={mine ? "Mark done" : "Only the assignee can change this"}
-          onClick={() => void setStatus(true)}
+          onClick={() => {
+            if (!mine || busy || done) return;
+            setFinishNote("");
+            setFinishErr("");
+            setFinishOpen(true);
+          }}
           className={`flex h-12 flex-1 items-center justify-center rounded-full ${
             !mine
               ? done
@@ -162,5 +179,49 @@ export default function TaskCard({ task, mine }: { task: PlannerTask; mine: bool
         </button>
       </div>
     </article>
+    {finishOpen ? (
+      <div className="fixed inset-0 z-[80] flex items-end justify-center p-4 sm:items-center">
+        <button
+          type="button"
+          aria-label="Dismiss"
+          className="absolute inset-0 bg-black/65"
+          disabled={busy}
+          onClick={() => {
+            if (!busy) setFinishOpen(false);
+          }}
+        />
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="relative z-10 w-full max-w-[440px] rounded-[28px] border border-white/20 bg-[#161618] p-5 shadow-[0_28px_80px_-24px_rgba(0,0,0,0.9)] sm:p-6"
+        >
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#86efac]">Finish</p>
+          <h2 className="mt-2 text-[22px] font-bold leading-tight text-white">What got done?</h2>
+          <p className="mt-2 text-[14px] leading-relaxed text-white/55">Write a completion note. The tick will not save without it.</p>
+          <textarea
+            className={`${P_FIELD} mt-4 min-h-[110px] resize-y`}
+            value={finishNote}
+            onChange={(e) => setFinishNote(e.target.value)}
+            placeholder="Shipped the filing, receipt is in the drive"
+            autoFocus
+          />
+          {finishErr ? <p className="mt-3 text-sm text-rose-300">{finishErr}</p> : null}
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={busy || !finishNote.trim()}
+              onClick={() => void finish()}
+              className="inline-flex items-center justify-center rounded-md bg-[#34c759] px-4 py-2.5 text-[14px] font-semibold text-white disabled:opacity-40"
+            >
+              {busy ? "Saving" : "Mark done"}
+            </button>
+            <button type="button" disabled={busy} onClick={() => setFinishOpen(false)} className={`${P_BTN_GHOST} !py-2.5`}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    ) : null}
+    </>
   );
 }

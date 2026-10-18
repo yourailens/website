@@ -59,7 +59,59 @@ export type PlannerTask = {
   assignee?: PlannerMember | null;
   creator?: PlannerMember | null;
   milestone_id: string | null;
+  /** Joined when the task hangs under a target. */
+  milestone?: { id: string; title: string } | null;
+  completion_note: string | null;
+  /** Progress marks on the task log. */
+  progress_count: number;
+  /** Roadblocks that have not been sorted. */
+  open_roadblocks: number;
 };
+
+export const PLANNER_TASK_LOG_KINDS = ["progress", "roadblock"] as const;
+export type PlannerTaskLogKind = (typeof PLANNER_TASK_LOG_KINDS)[number];
+
+export type PlannerTaskLog = {
+  id: string;
+  task_id: string;
+  kind: PlannerTaskLogKind;
+  body: string;
+  resolved_at: string | null;
+  created_by: string;
+  created_at: string;
+  creator?: PlannerMember | null;
+};
+
+export type PlannerTaskBoardTone = "idle" | "moving" | "roadblock" | "done";
+
+export function isPlannerTaskLogKind(v: unknown): v is PlannerTaskLogKind {
+  return PLANNER_TASK_LOG_KINDS.includes(v as PlannerTaskLogKind);
+}
+
+/** Board color: yellow beats everything, then done, then moving, otherwise red. */
+export function plannerTaskBoardTone(task: {
+  status: PlannerTaskStatus;
+  progress_count?: number;
+  open_roadblocks?: number;
+}): PlannerTaskBoardTone {
+  if ((task.open_roadblocks ?? 0) > 0) return "roadblock";
+  if (task.status === "done") return "done";
+  if (task.status === "doing" || (task.progress_count ?? 0) > 0) return "moving";
+  return "idle";
+}
+
+export function plannerTaskBoardLabel(tone: PlannerTaskBoardTone) {
+  switch (tone) {
+    case "roadblock":
+      return "Roadblock";
+    case "done":
+      return "Done";
+    case "moving":
+      return "Moving";
+    case "idle":
+      return "Not moving";
+  }
+}
 
 export const PLANNER_FIRST_TOUCH_SIDES = ["us", "them"] as const;
 export type PlannerFirstTouchSide = (typeof PLANNER_FIRST_TOUCH_SIDES)[number];

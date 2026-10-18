@@ -22,6 +22,7 @@ import type {
   PlannerPost,
   PlannerPostImage,
   PlannerTask,
+  PlannerTaskLog,
   PlannerTaskStatus,
 } from "@/data/planner";
 import {
@@ -35,6 +36,7 @@ import {
   isPlannerMilestoneHorizon,
   isPlannerMilestoneStatus,
   isPlannerPaymentMethod,
+  isPlannerTaskLogKind,
   isPlannerTaskStatus,
   plannerBioCategory,
   plannerMeetCount,
@@ -76,6 +78,9 @@ function rowToTask(row: Record<string, unknown>): PlannerTask | null {
     created_at: String(row.created_at ?? ""),
     updated_at: String(row.updated_at ?? ""),
     milestone_id: row.milestone_id ? String(row.milestone_id) : null,
+    completion_note: (row.completion_note as string | null) ?? null,
+    progress_count: 0,
+    open_roadblocks: 0,
   };
 }
 
@@ -253,12 +258,92 @@ export async function listPlannerTasks(opts?: {
   const tasks = (data ?? [])
     .map((r) => rowToTask(r as Record<string, unknown>))
     .filter((t): t is PlannerTask => Boolean(t));
-  const people = await memberMap(tasks.flatMap((t) => [t.assignee_id, t.created_by]));
-  return tasks.map((t) => ({
-    ...t,
-    assignee: people.get(t.assignee_id) ?? null,
-    creator: people.get(t.created_by) ?? null,
-  }));
+  const [people, motion, titles] = await Promise.all([
+    memberMap(tasks.flatMap((t) => [t.assignee_id, t.created_by])),
+    taskMotion(tasks.map((t) => t.id)),
+    milestoneTitles(tasks.map((t) => t.milestone_id ?? "")),
+  ]);
+  return tasks.map((t) => {
+    const marks = motion.get(t.id);
+    return {
+      ...t,
+      progress_count: marks?.progress ?? 0,
+      open_roadblocks: marks?.roadblocks ?? 0,
+      assignee: people.get(t.assignee_id) ?? null,
+      creator: people.get(t.created_by) ?? null,
+      milestone: t.milestone_id
+        ? { id: t.milestone_id, title: titles.get(t.milestone_id) ?? "Milestone" }
+        : null,
+    };
+  });
+}
+
+async function milestoneTitles(ids: string[]) {
+  const unique = [...new Set(ids.filter(Boolean))];
+  const map = new Map<string, string>();
+  if (!unique.length) return map;
+  const db = createServiceRoleClient();
+  const { data, error } = await db.from("planner_milestones").select("id, title").in("id", unique);
+  if (error) {
+    if (softEmpty(error.message)) return map;
+    throw new Error(error.message);
+  }
+  for (const row of (data ?? []) as { id?: string; title?: string }[]) {
+    if (!row.id) continue;
+    map.set(String(row.id), String(row.title ?? "").trim() || "Milestone");
+  }
+  return map;
+}
+
+async function taskMotion(ids: string[]) {
+  const map = new Map<string, { progress: number; roadblocks: number }>();
+  if (!ids.length) return map;
+  const db = createServiceRoleClient();
+  const { data, error } = await db.from("planner_task_entries").select("task_id, kind, resolved_at").in("task_id", ids);
+  if (error) {
+    if (softEmpty(error.message)) return map;
+    throw new Error(error.message);
+  }
+  for (const row of (data ?? []) as { task_id?: string; kind?: string; resolved_at?: string | null }[]) {
+    if (!row.task_id) continue;
+    const current = map.get(row.task_id) ?? { progress: 0, roadblocks: 0 };
+    if (row.kind === "progress") current.progress += 1;
+    if (row.kind === "roadblock" && !row.resolved_at) current.roadblocks += 1;
+    map.set(row.task_id, current);
+  }
+  return map;
+}
+
+export async function listPlannerTaskEntries(taskId: string): Promise<PlannerTaskLog[]> {
+  const db = createServiceRoleClient();
+  const { data, error } = await db
+    .from("planner_task_entries")
+    .select("*")
+    .eq("task_id", taskId)
+    .order("created_at", { ascending: false });
+  if (error) {
+    if (softEmpty(error.message)) return [];
+    throw new Error(error.message);
+  }
+  const rows = (data ?? [])
+    .map((row) => {
+      const record = row as Record<string, unknown>;
+      if (!isPlannerTaskLogKind(record.kind)) return null;
+      const body = String(record.body ?? "").trim();
+      if (!body) return null;
+      return {
+        id: String(record.id),
+        task_id: String(record.task_id ?? ""),
+        kind: record.kind,
+        body,
+        resolved_at: (record.resolved_at as string | null) ?? null,
+        created_by: String(record.created_by ?? ""),
+        created_at: String(record.created_at ?? ""),
+      } satisfies PlannerTaskLog;
+    })
+    .filter((row): row is PlannerTaskLog => Boolean(row));
+  const people = await memberMap(rows.map((row) => row.created_by));
+  return rows.map((row) => ({ ...row, creator: people.get(row.created_by) ?? null }));
 }
 
 export async function listPlannerContacts(): Promise<PlannerContact[]> {

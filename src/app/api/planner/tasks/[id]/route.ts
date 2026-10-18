@@ -25,6 +25,12 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
   if ("notes" in b) patch.notes = String(b.notes ?? "").trim() || null;
   if ("deadline" in b) patch.deadline = String(b.deadline ?? "").trim() || null;
   if (isPlannerTaskStatus(b.status)) patch.status = b.status;
+  if ("completion_note" in b) patch.completion_note = String(b.completion_note ?? "").trim() || null;
+  if (patch.status === "done") {
+    const note = String(patch.completion_note ?? "").trim();
+    if (!note) return NextResponse.json({ error: "Write what got finished" }, { status: 400 });
+    patch.completion_note = note;
+  }
   if (typeof b.assignee_id === "string" && b.assignee_id.trim()) patch.assignee_id = b.assignee_id.trim();
   if (typeof b.sort_order === "number" && Number.isFinite(b.sort_order)) {
     patch.sort_order = Math.round(b.sort_order);
@@ -33,14 +39,27 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
     return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
   }
   const db = createServiceRoleClient();
-  if (patch.status) {
-    const { data: existing } = await db.from("planner_tasks").select("assignee_id").eq("id", id).maybeSingle();
-    if (!existing || existing.assignee_id !== auth.member.id) {
-      return NextResponse.json({ error: "Only the assignee can change this" }, { status: 403 });
-    }
+  const { data: existing } = await db.from("planner_tasks").select("assignee_id, created_by").eq("id", id).maybeSingle();
+  if (!existing) return NextResponse.json({ error: "Task not found" }, { status: 404 });
+  const details = Object.keys(patch).filter((key) => key !== "status" && key !== "completion_note");
+  if (details.length && existing.created_by !== auth.member.id) {
+    return NextResponse.json({ error: "Only the person who added this task can edit it" }, { status: 403 });
+  }
+  if (patch.status && existing.assignee_id !== auth.member.id) {
+    return NextResponse.json({ error: "Only the assignee can change this" }, { status: 403 });
   }
   const { error } = await db.from("planner_tasks").update(patch).eq("id", id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) {
+    const missing = /completion_note/i.test(error.message) && /does not exist|schema cache/i.test(error.message);
+    return NextResponse.json(
+      {
+        error: missing
+          ? "Run supabase/migrations/106_planner_task_completion.sql in the Supabase SQL editor."
+          : error.message,
+      },
+      { status: 400 },
+    );
+  }
   revalidate();
   return NextResponse.json({ tasks: await listPlannerTasks() });
 }
@@ -50,6 +69,11 @@ export async function DELETE(_req: NextRequest, ctx: Ctx) {
   if (!auth.ok) return auth.response;
   const { id } = await ctx.params;
   const db = createServiceRoleClient();
+  const { data: existing } = await db.from("planner_tasks").select("created_by").eq("id", id).maybeSingle();
+  if (!existing) return NextResponse.json({ error: "Task not found" }, { status: 404 });
+  if (existing.created_by !== auth.member.id) {
+    return NextResponse.json({ error: "Only the person who added this task can delete it" }, { status: 403 });
+  }
   const { error } = await db.from("planner_tasks").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   revalidate();
