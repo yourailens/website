@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import HomeBelowHero from "@/components/home/HomeBelowHero";
 import HomeHero from "@/components/home/HomeHero";
 import HomeSoundHero from "@/components/home/HomeSoundHero";
+import HomeSummitTease from "@/components/home/HomeSummitTease";
 import HomeStudioStory from "@/components/home/HomeStudioStory";
 import { SceneRail } from "@/components/home/LensChrome";
 import { HERO_SLOTS, ottCutYoutubeId } from "@/data/ott-cuts";
@@ -46,6 +47,7 @@ export default async function Home() {
         );
       })}
       {heroes[0] ? <HomeHero /> : null}
+      <HomeSummitTease />
       <HomeStudioStory />
     </div>
   );

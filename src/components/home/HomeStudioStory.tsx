@@ -5,6 +5,7 @@ import FilmFeature from "@/components/home/FilmFeature";
 import HomeVaultTease from "@/components/home/HomeVaultTease";
 import { HOME_WATCH_TITLES, getHomeWatch, type HomeWatchRail, type HomeWatchTitle } from "@/data/home-watch";
 import { getHomepageFeatureOttCut, getPublishedOttCuts, isHomepageHeroCut } from "@/lib/ott-cuts/load";
+import { getYailiansSite } from "@/lib/yailians/load";
 import { getPublishedVaultEntries } from "@/lib/yail-vault/load";
 import {
   ottCutAspectLabel,
@@ -60,20 +61,13 @@ function cutToCard(cut: OttCut): OttCard {
   };
 }
 
-const PACKAGES: OttCard[] = [
-  { title: "Weekly", tag: "From ₹21,250 · 5 films", href: "/pricing#weekly" },
-  { title: "Monthly", tag: "From ₹80,000 · 20 films", href: "/pricing#monthly" },
-  { title: "3 months", tag: "From ₹2,25,000 · 60 films", href: "/pricing#quarterly" },
-  { title: "A la carte", tag: "Build the fare", href: "/pricing#alacarte" },
-  { title: "AI menu", tag: "Logo, stills, more", href: "/pricing#ai-menu" },
-];
-
 export default async function HomeStudioStory() {
-  const [adsCuts, filmCuts, homepageFeature, vaultEntries] = await Promise.all([
+  const [adsCuts, filmCuts, homepageFeature, vaultEntries, yailiansSite] = await Promise.all([
     getPublishedOttCuts("ads"),
     getPublishedOttCuts("films"),
     getHomepageFeatureOttCut(),
     getPublishedVaultEntries(),
+    getYailiansSite().catch(() => null),
   ]);
   const landed = [...adsCuts]
     .filter((cut) => !isHomepageHeroCut(cut))
@@ -166,23 +160,32 @@ export default async function HomeStudioStory() {
   })();
 
   const trailerMeta = getHomeWatch("ai-films-trailer");
-  const feature: OttCard | null = homepageFeature
-    ? (() => {
-        const yt = ottCutYoutubeId(homepageFeature.media_url);
-        return {
+  const trailerYt =
+    (yailiansSite?.trailer_url && ottCutYoutubeId(yailiansSite.trailer_url)) ||
+    (homepageFeature ? ottCutYoutubeId(homepageFeature.media_url) : null) ||
+    trailerMeta?.youtubeId ||
+    null;
+  const featureFile =
+    homepageFeature && !ottCutYoutubeId(homepageFeature.media_url) && homepageFeature.media_type === "video"
+      ? homepageFeature.media_url
+      : undefined;
+  const feature: OttCard | null =
+    trailerYt || featureFile || homepageFeature || trailerMeta
+      ? {
           href: "/yailians",
-          title: homepageFeature.caption || trailerMeta?.title || "YAILIANS",
-          tag: trailerMeta?.tag ?? "45 min",
-          video: !yt && homepageFeature.media_type === "video" ? homepageFeature.media_url : undefined,
-          image: homepageFeature.media_type === "image" ? homepageFeature.media_url : undefined,
-          poster: homepageFeature.poster_url ?? undefined,
-          embed: yt ? `https://www.youtube.com/embed/${yt}` : undefined,
+          title: homepageFeature?.caption || trailerMeta?.title || yailiansSite?.title || "YAILIANS",
+          tag: trailerMeta?.tag ?? yailiansSite?.runtime_label ?? "45 min",
+          video: trailerYt ? undefined : featureFile,
+          image: homepageFeature?.media_type === "image" ? homepageFeature.media_url : undefined,
+          poster:
+            homepageFeature?.poster_url ||
+            yailiansSite?.trailer_poster ||
+            (trailerYt ? `https://i.ytimg.com/vi/${trailerYt}/hqdefault.jpg` : undefined) ||
+            trailerMeta?.poster,
+          embed: trailerYt ? `https://www.youtube.com/embed/${trailerYt}` : undefined,
           featured: true,
           aspect: "wide" as const,
-        };
-      })()
-    : trailerMeta
-      ? { ...toOttCard(trailerMeta), href: "/yailians", title: trailerMeta.title || "YAILIANS" }
+        }
       : null;
 
   return (
@@ -248,34 +251,6 @@ export default async function HomeStudioStory() {
           <OttRail tone="row" scene="NEW" title="On the lot" cards={lot} />
         </section>
       ) : null}
-
-      <section id="community">
-        <OttRail
-          scene="SC. 4 · COMMUNITY"
-          title="AI community"
-          kicker="Cuts from the studio and the feed."
-          seeAllHref="/ai-verse"
-          seeAllLabel="All community"
-          cards={cards("community")}
-        />
-      </section>
-
-      <section id="callsheet">
-        <OttRail
-          scene="SC. 5 · COMMISSION"
-          title="Pricing"
-          kicker="Brief. Budget. Date. Then we build."
-          seeAllHref="/pricing"
-          seeAllLabel="Pricing"
-          cards={PACKAGES}
-        />
-        <div className="mt-8 px-5 sm:px-8 lg:px-16 xl:pl-52">
-          <Link href="/contact" className="inline-flex items-center gap-3 text-sm font-semibold text-white">
-            <span className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_12px_rgba(96,165,250,0.9)]" aria-hidden />
-            Commission a world
-          </Link>
-        </div>
-      </section>
     </div>
   );
 }

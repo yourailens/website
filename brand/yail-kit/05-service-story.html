@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Service story · YAIL Brand Kit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/system.css" />
+  <style>
+    .story-block { margin: 72px 0; }
+    .role-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    @media (max-width: 900px) { .role-grid { grid-template-columns: repeat(2, 1fr); } }
+    .role-card { text-align: center; padding: 22px 14px; }
+    .role-card .avatar-ring { width: 100px; height: 100px; }
+    .role-card .avatar-ring svg { width: 72px; }
+    .flow {
+      display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 12px; align-items: center;
+    }
+    @media (max-width: 900px) { .flow { grid-template-columns: 1fr; } .flow .arrow { transform: rotate(90deg); justify-self: center; } }
+    .arrow { color: var(--blue); font-weight: 800; font-size: 24px; }
+    .outcome li { margin: 10px 0; font-weight: 650; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand-lockup" href="index.html"><span class="dot"></span> YourAILens Brand Kit</a>
+    <nav class="nav">
+      <a href="index.html">Hub</a>
+      <a href="01-foundations.html">Foundations</a>
+      <a href="02-components.html">Components</a>
+      <a href="03-cast.html">Cast</a>
+      <a href="04-product-ui.html">Product UI</a>
+      <a href="05-service-story.html" aria-current="page">Service story</a>
+      <a href="06-frames.html">Frames</a>
+      <a href="07-client-journey.html">Journey</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <!-- HERO -->
+    <section class="jumbo jumbo-navy story-block" style="margin-top:0;">
+      <div class="split">
+        <div>
+          <p class="eyebrow" style="color:#93a8ff;">YourAILens Studios</p>
+          <h1>Content studios for brands that can’t wait on a full desk.</h1>
+          <p class="lede">AI does the heavy lift. Humans keep the taste. Bangalore-born. Built for founders, marketers, and creators who need to ship.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:12px;">
+            <a class="btn lg" href="#how">How it works</a>
+            <a class="btn ghost lg" href="#promise" style="background:rgba(255,255,255,0.12);color:#fff;">Our promise</a>
+          </div>
+        </div>
+        <div style="text-align:center;">
+          <img src="assets/yourailens-mark-white.png" alt="YourAILens" style="height:56px;margin:0 auto 20px;" />
+          <div class="caption" style="background:#fff;color:var(--navy);">Bring the mess.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROBLEM -->
+    <section class="story-block" id="problem">
+      <div class="jumbo">
+        <div class="split">
+          <div>
+            <p class="eyebrow">The problem</p>
+            <h2>Everyone needs content. Nobody has a desk.</h2>
+            <p class="lede" style="margin-bottom:0;">Brand leads, growth folks, filmmakers, editors — each stuck with their own mess. Blank phones. Dead calendars. Weird AI faces. Endless finals.</p>
+          </div>
+          <div style="display:flex;gap:20px;align-items:flex-end;justify-content:center;flex-wrap:wrap;">
+            <div style="width:120px;height:220px;border:3px solid var(--navy);border-radius:22px;background:#fff;display:grid;place-items:center;font-size:36px;font-weight:800;color:var(--blue);box-shadow:var(--shadow-sm);">???</div>
+            <div class="float-card" style="width:200px;">
+              <div class="kicker">This week</div>
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px;">
+                <i style="height:16px;background:#fecaca;border-radius:4px;"></i>
+                <i style="height:16px;background:#fecaca;border-radius:4px;"></i>
+                <i style="height:16px;background:#fde68a;border-radius:4px;"></i>
+                <i style="height:16px;background:#fecaca;border-radius:4px;"></i>
+                <i style="height:16px;background:#fecaca;border-radius:4px;"></i>
+                <i style="height:16px;background:#e5e7eb;border-radius:4px;"></i>
+                <i style="height:16px;background:#fecaca;border-radius:4px;"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="caption-row"><div class="caption">Everyone needs content. Nobody has a desk.</div></div>
+      </div>
+    </section>
+
+    <!-- FOUR DESKS -->
+    <section class="story-block" id="desks">
+      <div class="section-head">
+        <p class="eyebrow">The cast</p>
+        <h2>Four desks. One mess each.</h2>
+        <p class="lede">Same structure Tapli uses for tailor / mechanic / driver — a row of roles, then zoom into the hero path.</p>
+      </div>
+      <div class="role-grid">
+        <div class="card role-card">
+          <div class="avatar-ring" style="background:var(--sarah-soft);">
+            <svg viewBox="0 0 120 160"><ellipse class="shadow-oval" cx="60" cy="148" rx="28" ry="6"/><rect x="40" y="78" width="40" height="50" rx="14" fill="#8b7cf6"/><circle cx="60" cy="52" r="24" fill="#c48a5a"/><path d="M38 50 Q42 28 60 30 Q78 28 82 50" fill="#2a1f3d"/><circle cx="51" cy="52" r="2.5" fill="#1a1220"/><circle cx="69" cy="52" r="2.5" fill="#1a1220"/><path d="M52 62 Q60 68 68 62" fill="none" stroke="#1a1220" stroke-width="2.5" stroke-linecap="round"/></svg>
+          </div>
+          <div style="font-size:11px;font-weight:750;letter-spacing:0.1em;color:var(--ink-faint);">BRAND</div>
+          <div style="font-weight:800;font-size:20px;margin:4px 0 10px;">Sarah</div>
+          <span class="chip bad">premium???</span>
+        </div>
+        <div class="card role-card">
+          <div class="avatar-ring" style="background:var(--maya-soft);">
+            <svg viewBox="0 0 120 160"><ellipse class="shadow-oval" cx="60" cy="148" rx="28" ry="6"/><rect x="40" y="78" width="40" height="50" rx="14" fill="#34d399"/><circle cx="60" cy="52" r="24" fill="#c48a5a"/><path d="M36 54 Q36 28 60 28 Q84 28 84 54" fill="#1f2937"/><circle cx="51" cy="52" r="2.5" fill="#1a1220"/><circle cx="69" cy="52" r="2.5" fill="#1a1220"/><path d="M52 62 Q60 66 68 62" fill="none" stroke="#1a1220" stroke-width="2.5" stroke-linecap="round"/></svg>
+          </div>
+          <div style="font-size:11px;font-weight:750;letter-spacing:0.1em;color:var(--ink-faint);">GROWTH</div>
+          <div style="font-weight:800;font-size:20px;margin:4px 0 10px;">Maya</div>
+          <span class="chip bad">FAIL / MEH</span>
+        </div>
+        <div class="card role-card">
+          <div class="avatar-ring" style="background:var(--sasha-soft);">
+            <svg viewBox="0 0 120 160"><ellipse class="shadow-oval" cx="60" cy="148" rx="28" ry="6"/><rect x="40" y="78" width="40" height="50" rx="14" fill="#60a5fa"/><circle cx="60" cy="52" r="24" fill="#d4a574"/><path d="M42 44 Q60 24 78 44" fill="#0f172a"/><circle cx="51" cy="52" r="2.5" fill="#1a1220"/><circle cx="69" cy="52" r="2.5" fill="#1a1220"/><path d="M52 62 Q60 66 68 62" fill="none" stroke="#1a1220" stroke-width="2.5" stroke-linecap="round"/></svg>
+          </div>
+          <div style="font-size:11px;font-weight:750;letter-spacing:0.1em;color:var(--ink-faint);">FILM</div>
+          <div style="font-weight:800;font-size:20px;margin:4px 0 10px;">Sasha</div>
+          <span class="chip bad">AI face weird</span>
+        </div>
+        <div class="card role-card">
+          <div class="avatar-ring" style="background:var(--max-soft);">
+            <svg viewBox="0 0 120 160"><ellipse class="shadow-oval" cx="60" cy="148" rx="28" ry="6"/><rect x="40" y="78" width="40" height="42" rx="12" fill="#fbbf24"/><rect x="44" y="116" width="32" height="18" rx="5" fill="#1e293b"/><circle cx="60" cy="52" r="24" fill="#c48a5a"/><path d="M40 48 Q60 26 80 48" fill="#78350f"/><circle cx="51" cy="52" r="2.5" fill="#1a1220"/><circle cx="69" cy="52" r="2.5" fill="#1a1220"/><path d="M52 62 Q60 66 68 62" fill="none" stroke="#1a1220" stroke-width="2.5" stroke-linecap="round"/></svg>
+          </div>
+          <div style="font-size:11px;font-weight:750;letter-spacing:0.1em;color:var(--ink-faint);">EDIT</div>
+          <div style="font-weight:800;font-size:20px;margin:4px 0 10px;">Max</div>
+          <span class="chip bad">v03_FINAL</span>
+        </div>
+      </div>
+      <div class="caption-row"><div class="caption">Four desks. One mess each.</div></div>
+    </section>
+
+    <!-- WHAT IS YAIL -->
+    <section class="story-block" id="promise">
+      <div class="jumbo">
+        <div class="split">
+          <div>
+            <p class="eyebrow">What YAIL is</p>
+            <h2>A studio with a Lens.</h2>
+            <p class="lede">YAIL stamps out generic “AI content.” The Lens redraws the mess into real deliverables. Taste stays human.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;">
+              <span class="chip">Brand campaigns</span>
+              <span class="chip">Growth weeks</span>
+              <span class="chip">Film worlds</span>
+              <span class="chip">Edit selects</span>
+            </div>
+          </div>
+          <div style="text-align:center;">
+            <img src="assets/yail-mark-black.png" alt="YAIL" style="height:120px;margin:0 auto 12px;" />
+            <div style="font-weight:700;color:var(--blue);font-size:18px;">yourailens studios</div>
+            <div style="margin-top:20px;display:inline-block;position:relative;background:var(--bg-muted);padding:16px 28px;border-radius:16px;font-weight:800;font-size:22px;color:var(--ink-soft);">
+              AI CONTENT
+              <span style="position:absolute;inset:0;display:grid;place-items:center;font-size:64px;color:var(--danger);font-weight:900;">✕</span>
+            </div>
+          </div>
+        </div>
+        <div class="caption-row"><div class="caption">YAIL stamps the mess.</div></div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="story-block" id="how">
+      <div class="section-head">
+        <p class="eyebrow">How it works</p>
+        <h2>Mess in. Shipped work out.</h2>
+      </div>
+      <div class="flow" style="margin-bottom:28px;">
+        <div class="card" style="text-align:center;">
+          <div style="font-size:28px;margin-bottom:8px;">①</div>
+          <strong>Bring the mess</strong>
+          <p style="color:var(--ink-soft);font-size:14px;margin:8px 0 0;">Briefs, refs, chaos folders</p>
+        </div>
+        <div class="arrow">→</div>
+        <div class="card" style="text-align:center;">
+          <div style="font-size:28px;margin-bottom:8px;">②</div>
+          <strong>Lens redraws</strong>
+          <p style="color:var(--ink-soft);font-size:14px;margin:8px 0 0;">Campaigns · weeks · worlds · selects</p>
+        </div>
+        <div class="arrow">→</div>
+        <div class="card" style="text-align:center;">
+          <div style="font-size:28px;margin-bottom:8px;">③</div>
+          <strong>Taste approves</strong>
+          <p style="color:var(--ink-soft);font-size:14px;margin:8px 0 0;">Arjun stamps. You ship.</p>
+        </div>
+      </div>
+
+      <!-- Solution A -->
+      <div class="jumbo" style="margin-bottom:20px;">
+        <div class="split">
+          <div>
+            <p class="eyebrow">Solution A · Brand</p>
+            <h2>Sarah gets real ads</h2>
+            <p class="lede">Blank phone → filled campaign. Feed, Story, Display. Same “product UI on the right” layout Tapli uses.</p>
+          </div>
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="ui-label">Campaign</div>
+              <div class="ui-title">Just landed</div>
+              <div class="ui-row">Feed <span class="chip ok">Ready</span></div>
+              <div class="ui-row">Story <span class="chip ok">Ready</span></div>
+              <div class="ui-row">Display <span class="chip ok">Ready</span></div>
+              <div class="ui-cta">Ship ads</div>
+            </div>
+          </div>
+        </div>
+        <div class="caption-row"><div class="caption">Lens fills Sarah’s campaign.</div></div>
+      </div>
+
+      <!-- Solution B -->
+      <div class="jumbo" style="margin-bottom:20px;">
+        <div class="split">
+          <div>
+            <p class="eyebrow">Solution B · Growth</p>
+            <h2>Maya fills the week</h2>
+            <p class="lede">Checks cascade across the calendar. No more FAIL / MEH roulette.</p>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <span style="width:40px;height:48px;border-radius:10px;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;font-weight:800;">✓</span>
+              <span style="width:40px;height:48px;border-radius:10px;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;font-weight:800;">✓</span>
+              <span style="width:40px;height:48px;border-radius:10px;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;font-weight:800;">✓</span>
+              <span style="width:40px;height:48px;border-radius:10px;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;font-weight:800;">✓</span>
+              <span style="width:40px;height:48px;border-radius:10px;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;font-weight:800;">✓</span>
+              <span style="width:40px;height:48px;border-radius:10px;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;font-weight:800;">✓</span>
+            </div>
+          </div>
+          <div class="float-card">
+            <div class="kicker">Week plan</div>
+            <div class="body">6 / 7 slots filled</div>
+            <div class="hint">Auto from kit + trends</div>
+            <div style="height:10px;border-radius:99px;background:linear-gradient(90deg,var(--ok) 86%,var(--bg-muted) 86%);margin-top:14px;"></div>
+          </div>
+        </div>
+        <div class="caption-row"><div class="caption">Maya’s week lights up.</div></div>
+      </div>
+
+      <!-- Solution C -->
+      <div class="jumbo">
+        <div class="split">
+          <div>
+            <p class="eyebrow">Solution C · Film + Edit</p>
+            <h2>Sasha’s world. Max’s selects.</h2>
+            <p class="lede">Boards connect into one continuous world. Timeline stops drowning in v03_FINAL.</p>
+          </div>
+          <div class="grid-2" style="gap:12px;">
+            <div class="card" style="padding:14px;">
+              <div class="ui-label">World</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                <div style="aspect-ratio:1;background:var(--sasha-soft);border-radius:8px;border:2px solid var(--sasha);"></div>
+                <div style="aspect-ratio:1;background:var(--sasha-soft);border-radius:8px;border:2px solid var(--sasha);"></div>
+                <div style="aspect-ratio:1;background:var(--sasha-soft);border-radius:8px;border:2px solid var(--sasha);"></div>
+                <div style="aspect-ratio:1;background:var(--blue-soft);border-radius:8px;border:2px dashed var(--blue);"></div>
+              </div>
+            </div>
+            <div class="card" style="padding:14px;">
+              <div class="ui-label">Timeline</div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;">
+                <div style="height:12px;border-radius:99px;background:linear-gradient(90deg,var(--max) 45%,var(--bg-muted) 45%);"></div>
+                <div style="height:12px;border-radius:99px;background:linear-gradient(90deg,var(--ok) 70%,var(--bg-muted) 70%);"></div>
+                <div style="height:12px;border-radius:99px;background:linear-gradient(90deg,var(--blue) 55%,var(--bg-muted) 55%);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="caption-row"><div class="caption">Boards connect. Selects land.</div></div>
+      </div>
+    </section>
+
+    <!-- TASTE -->
+    <section class="story-block" id="taste">
+      <div class="jumbo">
+        <div class="split">
+          <div style="text-align:center;">
+            <div class="avatar-ring" style="background:var(--arjun-soft);width:160px;height:160px;">
+              <svg viewBox="0 0 120 160" width="120"><ellipse class="shadow-oval" cx="60" cy="148" rx="34" ry="8"/><rect x="38" y="72" width="44" height="58" rx="16" fill="#fb7185"/><circle cx="60" cy="48" r="26" fill="#8d5a3b"/><path d="M40 42 Q60 22 80 42" fill="#1c1917"/><circle cx="50" cy="48" r="3" fill="#1a1220"/><circle cx="70" cy="48" r="3" fill="#1a1220"/><path d="M52 58 Q60 63 68 58" fill="none" stroke="#1a1220" stroke-width="2.5" stroke-linecap="round"/></svg>
+            </div>
+            <div style="font-weight:800;font-size:22px;">Arjun</div>
+            <div style="color:var(--ink-soft);font-size:14px;font-weight:600;">Taste desk · Bangalore</div>
+          </div>
+          <div>
+            <p class="eyebrow">The gate</p>
+            <h2>AI is the lens.<br/>The studio is the taste.</h2>
+            <p class="lede">Lens proposes. Arjun decides. Nothing ships without the stamp.</p>
+            <div style="border:4px solid var(--danger);color:var(--danger);display:inline-block;font-weight:800;font-size:36px;padding:12px 24px;border-radius:12px;transform:rotate(-8deg);">APPROVED</div>
+          </div>
+        </div>
+        <div class="caption-row"><div class="caption">Human taste. Final say.</div></div>
+      </div>
+    </section>
+
+    <!-- OUTCOMES -->
+    <section class="story-block" id="outcomes">
+      <div class="jumbo jumbo-navy">
+        <p class="eyebrow" style="color:#93a8ff;">Outcomes</p>
+        <h2>What clients walk away with</h2>
+        <ul class="outcome" style="font-size:1.15rem;line-height:1.7;padding-left:22px;color:rgba(255,255,255,0.9);">
+          <li>No blank phones — campaigns ready to ship</li>
+          <li>No empty weeks — growth calendar filled</li>
+          <li>No weird AI faces — continuous worlds</li>
+          <li>No v03_FINAL forever — selects that stick</li>
+        </ul>
+        <div style="margin-top:28px;">
+          <a class="btn lg" href="https://yourailens.studio" style="background:#fff;color:var(--navy);">yourailens.studio</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLOSING -->
+    <section class="story-block">
+      <div class="jumbo" style="text-align:center;padding:80px 40px;">
+        <img src="assets/yourailens-mark-black.png" alt="" style="height:48px;margin:0 auto 20px;" />
+        <h2 style="font-size:clamp(2rem,4vw,3rem);">Bring the mess.</h2>
+        <p class="lede" style="margin:0 auto 24px;">We’ll bring the Lens. You keep the taste.</p>
+        <div class="caption">yourailens.studio · Bangalore</div>
+      </div>
+    </section>
+
+    <footer class="kit-foot">
+      <a href="06-frames.html">Next: Frames for motion →</a>
+      <span>This page is the source of truth for the explainer film</span>
+    </footer>
+  </main>
+</body>
+</html>

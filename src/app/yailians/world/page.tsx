@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import WorldThumb from "@/components/yailians/WorldThumb";
 import YailiansShell from "@/components/yailians/YailiansShell";
 import {
   YAILIANS_WORLD_KINDS,
@@ -70,38 +71,29 @@ export default async function YailiansWorldPage({
           ))}
         </div>
 
-        <div className="mt-8 columns-2 gap-2 sm:columns-3 lg:columns-4">
+        <div className="mt-8 columns-1 gap-4 sm:columns-2 lg:columns-3">
           {items.map((item) => (
-            <article
+            <Link
               key={item.id}
-              className="mb-2 break-inside-avoid overflow-hidden rounded-md bg-zinc-900"
+              href={`/yailians/world/${item.id}`}
+              className="mb-4 block break-inside-avoid overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/10"
             >
-              {item.media_type === "video" && !item.poster_url ? (
-                <video
-                  src={item.media_url}
-                  className="w-full object-cover"
-                  muted
-                  playsInline
-                  preload="metadata"
-                />
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={item.poster_url || item.media_url}
-                  alt={item.title}
-                  className="w-full object-cover"
-                />
-              )}
-              <div className="px-2.5 py-2.5">
+              <WorldThumb
+                src={item.media_url}
+                poster={item.poster_url}
+                video={item.media_type === "video"}
+                alt={item.title}
+              />
+              <div className="px-3.5 py-3">
                 <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-sky-300/80">
                   {yailiansWorldKindLabel(item.kind)}
                 </p>
-                <p className="mt-0.5 text-[13px] font-medium text-white">{item.title}</p>
+                <p className="mt-0.5 text-[15px] font-medium text-white">{item.title}</p>
                 {item.caption ? (
-                  <p className="mt-1 text-[11px] leading-relaxed text-white/45">{item.caption}</p>
+                  <p className="mt-1 text-[12px] leading-relaxed text-white/45">{item.caption}</p>
                 ) : null}
               </div>
-            </article>
+            </Link>
           ))}
         </div>
         {!items.length ? (

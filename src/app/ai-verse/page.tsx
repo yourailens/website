@@ -1,23 +1,31 @@
 import type { Metadata } from "next";
-import { homeWatchAsOttCuts } from "@/data/home-watch";
-import { getPublishedOttCuts } from "@/lib/ott-cuts/load";
-import AiVerseExperience from "./AiVerseExperience";
+import CommunityPromo from "@/components/community/CommunityPromo";
+import { piecesByPlacement, getCommunitySite, getPublishedCommunityPieces } from "@/lib/community/load";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "AI Community | YourAILens Studios",
-  description:
-    "The YAIL community for AI filmmakers, advertisers, and builders — workshops, critique, and community cuts from YourAILens Studios.",
-  openGraph: {
-    title: "AI Community | YourAILens Studios",
-    description: "A professional community for people who ship AI film and ads.",
-    url: "/ai-verse",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getCommunitySite();
+  const description = site.lede || `${site.title} — ${site.member_count} ${site.member_label}.`;
+  return {
+    title: `${site.title} | YourAILens Studios`,
+    description,
+    openGraph: {
+      title: `${site.title} | YourAILens Studios`,
+      description,
+      url: "/ai-verse",
+    },
+  };
+}
 
 export default async function AiVersePage() {
-  const cuts = await getPublishedOttCuts("community");
-  const miscCuts = homeWatchAsOttCuts("community");
-  return <AiVerseExperience cuts={cuts} miscCuts={miscCuts} />;
+  const [site, pieces] = await Promise.all([getCommunitySite(), getPublishedCommunityPieces()]);
+  return (
+    <CommunityPromo
+      site={site}
+      heroes={piecesByPlacement(pieces, "hero")}
+      jumbos={piecesByPlacement(pieces, "jumbo")}
+      gallery={piecesByPlacement(pieces, "gallery")}
+    />
+  );
 }

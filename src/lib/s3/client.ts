@@ -1,4 +1,4 @@
-import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getS3Env, publicObjectUrl, type S3Env } from "./config";
 import { tryS3ObjectKeyFromUrl } from "./keys";
 
@@ -45,6 +45,19 @@ export async function uploadObjectToS3(
     bucket: env.bucket,
     region: env.region,
   };
+}
+
+/** Returns null when the object is missing or S3 is not configured. */
+export async function readObjectFromS3(key: string): Promise<Buffer | null> {
+  const env = getS3Env();
+  if (!env) return null;
+  try {
+    const res = await makeClient(env).send(new GetObjectCommand({ Bucket: env.bucket, Key: key }));
+    const bytes = await res.Body?.transformToByteArray();
+    return bytes ? Buffer.from(bytes) : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Best-effort delete when the row URL points at our bucket. */

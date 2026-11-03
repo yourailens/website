@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { RailCard, type OttCard } from "@/components/home/OttRail";
+import YailiansTrailer from "@/components/home/YailiansTrailer";
+import type { OttCard } from "@/components/home/OttRail";
+
+function youtubeIdFromEmbed(embed?: string) {
+  if (!embed) return "";
+  return embed.match(/(?:embed\/|v=|youtu\.be\/)([^?/&]+)/)?.[1] ?? "";
+}
 
 const NOTES = [
   { code: "BUDGET", title: "Limited budget", body: "A small fare. You’ll be shocked to know the figure." },
@@ -7,6 +13,7 @@ const NOTES = [
 ] as const;
 
 export default function FilmFeature({ card }: { card: OttCard }) {
+  const youtubeId = youtubeIdFromEmbed(card.embed);
   return (
     <div className="relative">
       {/* Emphasized YAILIANS billboard */}
@@ -22,17 +29,22 @@ export default function FilmFeature({ card }: { card: OttCard }) {
           />
 
           <div className="relative grid lg:grid-cols-[minmax(0,1.35fr)_minmax(16rem,0.85fr)]">
-            <div className="relative min-h-[14rem] sm:min-h-[18rem] lg:min-h-[22rem]">
-              <div className="absolute inset-0">
-                <RailCard card={{ ...card, href: "/yailians" }} aspect="wide" fill />
-              </div>
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-transparent lg:to-black/50" />
-              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7 lg:hidden">
-                <p className="font-mono text-[9px] tracking-[0.34em] text-emerald-300">YAIL ORIGINAL · 45 MIN</p>
-                <p className="mt-2 font-heading text-[clamp(2.4rem,12vw,3.5rem)] leading-none tracking-[0.12em] text-white">
-                  YAILIANS
-                </p>
-              </div>
+            <div className="relative aspect-video w-full self-start">
+              <YailiansTrailer
+                title={card.title}
+                tag={card.tag}
+                poster={card.poster || card.image}
+                youtubeId={youtubeId || undefined}
+                video={youtubeId ? undefined : card.video}
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-transparent lg:to-black/50" />
+                <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7 lg:hidden">
+                  <p className="font-mono text-[9px] tracking-[0.34em] text-emerald-300">YAIL ORIGINAL · 45 MIN</p>
+                  <p className="mt-2 font-heading text-[clamp(2.4rem,12vw,3.5rem)] leading-none tracking-[0.12em] text-white">
+                    YAILIANS
+                  </p>
+                </div>
+              </YailiansTrailer>
             </div>
 
             <div className="relative flex flex-col justify-between border-t border-white/10 px-5 py-7 sm:px-7 sm:py-8 lg:border-l lg:border-t-0">

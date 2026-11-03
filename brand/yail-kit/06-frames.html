@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Frames · YAIL Brand Kit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/system.css" />
+  <style>
+    .frame {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      width: 100%;
+      background: var(--bg);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      border: 1px solid rgba(10,26,77,0.06);
+      margin-bottom: 12px;
+    }
+    .frame::before, .frame::after {
+      content: ""; position: absolute; border-radius: 50%;
+      border: 40px solid var(--blue-ring); pointer-events: none;
+    }
+    .frame::before { width: 280px; height: 280px; left: -90px; top: -100px; }
+    .frame::after { width: 240px; height: 240px; right: -80px; bottom: -90px; border-width: 32px; }
+    .frame-inner {
+      position: absolute; inset: 0; z-index: 1;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4%;
+      align-items: center; padding: 5% 6% 12%;
+    }
+    .frame-navy { background: var(--navy); color: #fff; }
+    .frame-navy::before, .frame-navy::after { border-color: rgba(255,255,255,0.06); }
+    .frame .cap {
+      position: absolute; left: 50%; bottom: 4.5%; transform: translateX(-50%);
+      z-index: 2; white-space: nowrap;
+      background: var(--navy); color: #fff; font-size: clamp(11px, 1.4vw, 15px);
+      font-weight: 650; padding: 0.6em 1.4em; border-radius: 999px;
+    }
+    .frame-navy .cap { background: #fff; color: var(--navy); }
+    .frame-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
+    .f-title { font-size: clamp(18px, 2.6vw, 36px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.08; margin: 0 0 8px; }
+    .f-sub { font-size: clamp(12px, 1.4vw, 16px); color: var(--ink-soft); font-weight: 500; margin: 0; }
+    .frame-navy .f-sub { color: rgba(255,255,255,0.7); }
+    .f-eye { font-size: clamp(9px, 1vw, 11px); font-weight: 750; letter-spacing: 0.14em; text-transform: uppercase; color: var(--blue); margin-bottom: 6px; }
+    .frame-navy .f-eye { color: #93a8ff; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand-lockup" href="index.html"><span class="dot"></span> YourAILens Brand Kit</a>
+    <nav class="nav">
+      <a href="index.html">Hub</a>
+      <a href="01-foundations.html">Foundations</a>
+      <a href="02-components.html">Components</a>
+      <a href="03-cast.html">Cast</a>
+      <a href="04-product-ui.html">Product UI</a>
+      <a href="05-service-story.html">Service story</a>
+      <a href="06-frames.html" aria-current="page">Frames</a>
+      <a href="07-client-journey.html">Journey</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <p class="eyebrow">06 · Frames</p>
+    <h1>Static 16:9 boards for motion.</h1>
+    <p class="lede">These are the website compositions flattened to film frames. Next step: Hyperframes / AE — pop, slide, stamp, live UI — Tapli motion on these layouts.</p>
+
+    <!-- F1 -->
+    <article class="section">
+      <div class="frame-meta"><span class="chip">F1 · 0–3s</span><strong>Cold open</strong></div>
+      <div class="frame">
+        <div class="frame-inner">
+          <div style="display:flex;gap:16px;align-items:flex-end;">
+            <div style="width:22%;aspect-ratio:9/16;border:3px solid var(--navy);border-radius:14px;background:#fff;display:grid;place-items:center;font-weight:800;font-size:clamp(16px,2vw,28px);color:var(--blue);">???</div>
+            <div style="flex:1;background:#fff;border-radius:12px;padding:12px;box-shadow:var(--shadow-sm);">
+              <div style="font-size:10px;font-weight:800;letter-spacing:0.1em;color:var(--ink-faint);">THIS WEEK</div>
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px;">
+                <i style="height:14px;background:#fecaca;border-radius:3px;"></i>
+                <i style="height:14px;background:#fecaca;border-radius:3px;"></i>
+                <i style="height:14px;background:#fde68a;border-radius:3px;"></i>
+                <i style="height:14px;background:#fecaca;border-radius:3px;"></i>
+                <i style="height:14px;background:#fecaca;border-radius:3px;"></i>
+                <i style="height:14px;background:#e5e7eb;border-radius:3px;"></i>
+                <i style="height:14px;background:#fecaca;border-radius:3px;"></i>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="f-eye">Cold open</div>
+            <p class="f-title">Everyone needs content.</p>
+            <p class="f-sub">Nobody has a desk.</p>
+          </div>
+        </div>
+        <div class="cap">Everyone needs content. Nobody has a desk.</div>
+      </div>
+    </article>
+
+    <!-- F2 -->
+    <article class="section">
+      <div class="frame-meta"><span class="chip">F2 · 3–7s</span><strong>Four messes</strong></div>
+      <div class="frame">
+        <div style="position:absolute;inset:0;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);gap:2%;padding:6% 5% 14%;align-items:center;">
+          <div class="card" style="text-align:center;padding:12px 8px;"><div style="font-weight:800;">Sarah</div><span class="chip bad" style="margin-top:8px;">premium???</span></div>
+          <div class="card" style="text-align:center;padding:12px 8px;"><div style="font-weight:800;">Maya</div><span class="chip bad" style="margin-top:8px;">FAIL / MEH</span></div>
+          <div class="card" style="text-align:center;padding:12px 8px;"><div style="font-weight:800;">Sasha</div><span class="chip bad" style="margin-top:8px;">AI face weird</span></div>
+          <div class="card" style="text-align:center;padding:12px 8px;"><div style="font-weight:800;">Max</div><span class="chip bad" style="margin-top:8px;">v03_FINAL</span></div>
+        </div>
+        <div class="cap">Four desks. One mess each.</div>
+      </div>
+    </article>
+
+    <!-- F3 -->
+    <article class="section">
+      <div class="frame-meta"><span class="chip">F3 · 7–11s</span><strong>Stamp</strong></div>
+      <div class="frame">
+        <div class="frame-inner">
+          <div style="text-align:center;">
+            <img src="assets/yail-mark-black.png" alt="" style="height:clamp(48px,8vw,100px);margin:0 auto;" />
+            <div style="margin-top:8px;font-weight:700;color:var(--blue);font-size:clamp(12px,1.5vw,18px);">yourailens studios</div>
+          </div>
+          <div>
+            <div class="f-eye">Stamp</div>
+            <p class="f-title">Kill “AI content.”</p>
+            <p class="f-sub">Wordmark lands clean.</p>
+          </div>
+        </div>
+        <div class="cap">YAIL stamps the mess.</div>
+      </div>
+    </article>
+
+    <!-- F4 -->
+    <article class="section">
+      <div class="frame-meta"><span class="chip">F4 · 11–18s</span><strong>Lens fixes</strong></div>
+      <div class="frame">
+        <div class="frame-inner">
+          <div>
+            <div class="f-eye">Lens · Solution A</div>
+            <p class="f-title">Sarah gets real ads</p>
+            <p class="f-sub">Phone fills. Campaign ready.</p>
+          </div>
+          <div style="justify-self:center;width:42%;background:var(--navy);border-radius:18px;padding:8px;">
+            <div style="background:#fff;border-radius:12px;padding:10px;font-size:clamp(9px,1.1vw,12px);">
+              <div style="font-weight:800;margin-bottom:6px;">Just landed</div>
+              <div style="background:var(--bg-muted);border-radius:6px;padding:6px;margin-bottom:4px;display:flex;justify-content:space-between;font-weight:700;">Feed <span style="color:var(--ok);">✓</span></div>
+              <div style="background:var(--bg-muted);border-radius:6px;padding:6px;margin-bottom:4px;display:flex;justify-content:space-between;font-weight:700;">Story <span style="color:var(--ok);">✓</span></div>
+              <div style="background:var(--blue);color:#fff;border-radius:6px;padding:6px;text-align:center;font-weight:750;">Ship ads</div>
+            </div>
+          </div>
+        </div>
+        <div class="cap">Lens fills Sarah’s campaign.</div>
+      </div>
+    </article>
+
+    <!-- F5 -->
+    <article class="section">
+      <div class="frame-meta"><span class="chip">F5 · 18–21s</span><strong>Taste</strong></div>
+      <div class="frame">
+        <div class="frame-inner">
+          <div style="text-align:center;">
+            <div style="width:28%;aspect-ratio:1;margin:0 auto;border-radius:50%;background:var(--arjun-soft);"></div>
+            <div style="font-weight:800;margin-top:8px;">Arjun</div>
+          </div>
+          <div>
+            <div style="display:inline-block;border:3px solid var(--danger);color:var(--danger);font-weight:800;font-size:clamp(18px,2.5vw,32px);padding:8px 14px;border-radius:8px;transform:rotate(-8deg);">APPROVED</div>
+            <p class="f-title" style="margin-top:16px;">AI is the lens. The studio is the taste.</p>
+          </div>
+        </div>
+        <div class="cap">Human taste. Final say.</div>
+      </div>
+    </article>
+
+    <!-- F6 -->
+    <article class="section">
+      <div class="frame-meta"><span class="chip">F6 · 21–25s</span><strong>Outro</strong></div>
+      <div class="frame frame-navy">
+        <div style="position:absolute;inset:0;z-index:1;display:grid;place-items:center;text-align:center;padding:8%;">
+          <div>
+            <img src="assets/yourailens-mark-white.png" alt="" style="height:clamp(28px,4vw,48px);margin:0 auto 12px;" />
+            <p class="f-sub" style="margin-bottom:12px;">yourailens.studio · Bangalore</p>
+            <p class="f-title" style="color:#fff;">Bring the mess.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <footer class="kit-foot">
+      <a href="05-service-story.html">← Service story</a>
+      <span>Ready for Hyperframes when you say go</span>
+    </footer>
+  </main>
+</body>
+</html>

@@ -27,6 +27,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     id: "studio",
     label: "Studio",
     items: [
+      { href: "/admin/summit", label: "Summit", hint: "Karnataka pavilion film" },
       { href: "/admin/team", label: "Team", hint: "People & portraits" },
       { href: "/admin/services", label: "Pricing", hint: "Packages" },
       { href: "/admin/events", label: "Events", hint: "Meetups & shows" },
@@ -39,6 +40,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     items: [
       { href: "/admin/vault", label: "YAIL Vault", hint: "GenAI labs & notes" },
       { href: "/admin/yailians", label: "YAILIANS", hint: "45 min AI film showcase" },
+      { href: "/admin/community", label: "Community", hint: "AI Creators page" },
       { href: "/admin/the-future", label: "The Future", hint: "Fields & modules" },
     ],
   },

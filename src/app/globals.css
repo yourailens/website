@@ -15,6 +15,12 @@
 @theme inline {
   --color-background: #ffffff;
   --color-foreground: #0F172A;
+  --color-kannada-gold: #f6c800;
+  --color-medal: #c6a15b;
+  --color-medal-bright: #e4c56a;
+  --color-kannada-red: #c4122e;
+  --color-kannada-ivory: #fff6dc;
+  --color-kannada-ink: #140f08;
   --font-sans: var(--font-comfortaa), system-ui, sans-serif;
   --font-heading: var(--font-unica-one), system-ui, sans-serif;
 }

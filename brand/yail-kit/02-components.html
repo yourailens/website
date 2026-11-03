@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Components · YAIL Brand Kit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/system.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand-lockup" href="index.html"><span class="dot"></span> YourAILens Brand Kit</a>
+    <nav class="nav">
+      <a href="index.html">Hub</a>
+      <a href="01-foundations.html">Foundations</a>
+      <a href="02-components.html" aria-current="page">Components</a>
+      <a href="03-cast.html">Cast</a>
+      <a href="04-product-ui.html">Product UI</a>
+      <a href="05-service-story.html">Service story</a>
+      <a href="06-frames.html">Frames</a>
+      <a href="07-client-journey.html">Journey</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <p class="eyebrow">02 · Components</p>
+    <h1>UI chrome for the story.</h1>
+    <p class="lede">Everything Tapli puts on screen: soft cards, phones, status pills, caption bars, jumbotrons. Compose first — animate later.</p>
+
+    <section class="section">
+      <div class="section-head"><h2>Actions & status</h2></div>
+      <div class="card card-lg">
+        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+          <button class="btn" type="button">Primary CTA</button>
+          <button class="btn ghost" type="button">Secondary</button>
+          <button class="btn navy" type="button">Navy</button>
+          <button class="btn lg" type="button">Large CTA</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <span class="chip">Lens online</span>
+          <span class="chip ok">APPROVED</span>
+          <span class="chip bad">premium???</span>
+          <span class="chip grey">Queued</span>
+          <span class="chip navy">Meta ad · Sponsored</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>Jumbotron</h2></div>
+      <div class="jumbo">
+        <div class="split">
+          <div>
+            <p class="eyebrow">Meet</p>
+            <h2 style="font-size:clamp(2rem,4vw,3rem);">Sarah.</h2>
+            <p class="lede">Brand lead. Opens with a blank phone and needs ads that don’t look AI.</p>
+            <span class="chip">Brand studio</span>
+          </div>
+          <div class="float-card" style="max-width:320px;margin:0 auto;">
+            <div class="kicker">Status in YAIL</div>
+            <div class="body">Campaign draft ready</div>
+            <div class="hint">3 formats · waiting on taste</div>
+          </div>
+        </div>
+        <div class="caption-row"><div class="caption">She opens YAIL with a blank phone.</div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>Phone + float cards</h2></div>
+      <div class="grid-2">
+        <div class="phone phone-lg">
+          <div class="phone-screen">
+            <div class="ui-label">Campaign</div>
+            <div class="ui-title">Just landed</div>
+            <div class="ui-row"><span>Feed</span><span class="chip ok">Ready</span></div>
+            <div class="ui-row"><span>Story</span><span class="chip ok">Ready</span></div>
+            <div class="ui-row"><span>Display</span><span class="chip grey">Queued</span></div>
+            <div class="ui-cta">Ship ads</div>
+          </div>
+        </div>
+        <div style="display:grid;gap:14px;align-content:center;">
+          <div class="float-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div class="kicker">New lead</div>
+                <div class="body">Ceiling fan repair · from Meta ad</div>
+              </div>
+              <span class="chip">Lead</span>
+            </div>
+          </div>
+          <div class="float-card">
+            <div class="kicker">Week plan</div>
+            <div class="body">6 / 7 slots filled</div>
+            <div style="display:flex;gap:6px;margin-top:12px;">
+              <i style="flex:1;height:10px;border-radius:99px;background:var(--ok);"></i>
+              <i style="flex:1;height:10px;border-radius:99px;background:var(--ok);"></i>
+              <i style="flex:1;height:10px;border-radius:99px;background:var(--ok);"></i>
+              <i style="flex:1;height:10px;border-radius:99px;background:var(--ok);"></i>
+              <i style="flex:1;height:10px;border-radius:99px;background:var(--ok);"></i>
+              <i style="flex:1;height:10px;border-radius:99px;background:var(--ok);"></i>
+              <i style="flex:1;height:10px;border-radius:99px;background:var(--bg-muted);"></i>
+            </div>
+          </div>
+          <div class="float-card" style="border:3px solid var(--danger);transform:rotate(-4deg);">
+            <div class="body" style="color:var(--danger);font-size:22px;letter-spacing:0.04em;">APPROVED</div>
+            <div class="hint">Arjun · taste desk</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>Caption bar</h2>
+        <p class="lede" style="margin:0;">Navy pill under every beat — one spoken sentence. Never two.</p>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;gap:14px;align-items:center;padding:36px;">
+        <div class="caption">Everyone needs content. Nobody has a desk.</div>
+        <div class="caption">Lens fills the campaign — live.</div>
+        <div class="caption">Human taste. Final say.</div>
+      </div>
+    </section>
+
+    <footer class="kit-foot">
+      <a href="03-cast.html">Next: Cast →</a>
+      <span>Reuse these blocks in Service story + Frames</span>
+    </footer>
+  </main>
+</body>
+</html>

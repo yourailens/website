@@ -23,6 +23,16 @@ const FIELD =
 const BUBBLE =
   "rounded-[1.35rem] border border-white/12 bg-gradient-to-br from-white/[0.09] to-white/[0.02] p-4 shadow-[0_18px_40px_-28px_rgba(0,0,0,0.9)] sm:p-5";
 const LABEL = "mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45";
+const CHIP =
+  "rounded-full border border-white/15 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-white/70 disabled:opacity-40";
+
+function toLocalInput(iso: string | null) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 type Tab = "film" | "voices" | "screenings" | "world";
 
@@ -543,6 +553,45 @@ function VoicesPanel({
     }
   }
 
+  async function move(index: number, dir: -1 | 1) {
+    const next = index + dir;
+    if (next < 0 || next >= voices.length || busy) return;
+    const ordered = [...voices];
+    const [item] = ordered.splice(index, 1);
+    if (!item) return;
+    ordered.splice(next, 0, item);
+    const ranked = ordered.map((voice, i) => ({ ...voice, sort_order: ordered.length - i }));
+    onChange(ranked);
+    setBusy(true);
+    setErr("");
+    setMsg("");
+    try {
+      await Promise.all(
+        ranked
+          .filter((voice) => voices.find((current) => current.id === voice.id)?.sort_order !== voice.sort_order)
+          .map(async (voice) => {
+            const res = await fetch(`/api/admin/yailians/voices/${voice.id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ sort_order: voice.sort_order }),
+            });
+            const j = (await res.json().catch(() => ({}))) as { error?: string };
+            if (!res.ok) throw new Error(j.error || "Reorder failed");
+          }),
+      );
+      const res = await fetch("/api/admin/yailians/voices");
+      const j = (await res.json().catch(() => ({}))) as { voices?: YailiansVoice[]; error?: string };
+      if (!res.ok) throw new Error(j.error || "Reorder failed");
+      onChange(j.voices ?? ranked);
+      setMsg("Order saved.");
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Reorder failed");
+      onChange(voices);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function remove(id: string) {
     if (!confirm("Delete this interview?")) return;
     setBusy(true);
@@ -735,8 +784,14 @@ function VoicesPanel({
         </div>
       </section>
 
+      <div>
+        <h2 className="font-heading text-xl tracking-tight">Order</h2>
+        <p className="mt-1 text-sm text-white/45">
+          Move an interview up or down. Higher in this list plays first. The YAILIANS page shows the first four that are live.
+        </p>
+      </div>
       <ul className="space-y-3">
-        {voices.map((v) => {
+        {voices.map((v, index) => {
           const thumb = v.poster_url || v.portrait_url;
           return (
             <li key={v.id} className={`${BUBBLE} flex flex-wrap items-start gap-4`}>
@@ -763,6 +818,22 @@ function VoicesPanel({
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={busy || index === 0}
+                  onClick={() => void move(index, -1)}
+                  className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-white/70 disabled:opacity-30"
+                >
+                  Up
+                </button>
+                <button
+                  type="button"
+                  disabled={busy || index === voices.length - 1}
+                  onClick={() => void move(index, 1)}
+                  className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-white/70 disabled:opacity-30"
+                >
+                  Down
+                </button>
                 <button
                   type="button"
                   disabled={busy}
@@ -812,7 +883,8 @@ function ScreeningsPanel({
   onChange: (v: YailiansScreening[]) => void;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const [draft, setDraft] = useState({
+  const editFileRef = useRef<HTMLInputElement>(null);
+  const emptyScreening = {
     title: "",
     venue: "",
     city: "",
@@ -823,7 +895,10 @@ function ScreeningsPanel({
     ticket_url: "",
     featured_on_hub: true,
     published: true,
-  });
+  };
+  const [draft, setDraft] = useState(emptyScreening);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [edit, setEdit] = useState(emptyScreening);
 
   async function create() {
     setBusy(true);
@@ -844,18 +919,7 @@ function ScreeningsPanel({
       };
       if (!res.ok) throw new Error(j.error || "Create failed");
       onChange(j.screenings ?? []);
-      setDraft({
-        title: "",
-        venue: "",
-        city: "",
-        starts_at: "",
-        status: "upcoming",
-        notes: "",
-        cover_url: "",
-        ticket_url: "",
-        featured_on_hub: true,
-        published: true,
-      });
+      setDraft(emptyScreening);
       setMsg("Screening added.");
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Create failed");
@@ -866,6 +930,7 @@ function ScreeningsPanel({
 
   async function patch(id: string, body: Record<string, unknown>) {
     setBusy(true);
+    setErr("");
     try {
       const res = await fetch(`/api/admin/yailians/screenings/${id}`, {
         method: "PATCH",
@@ -878,10 +943,46 @@ function ScreeningsPanel({
       };
       if (!res.ok) throw new Error(j.error || "Update failed");
       onChange(j.screenings ?? []);
+      return true;
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Update failed");
+      return false;
     } finally {
       setBusy(false);
+    }
+  }
+
+  function beginEdit(s: YailiansScreening) {
+    setEditingId(s.id);
+    setEdit({
+      title: s.title,
+      venue: s.venue ?? "",
+      city: s.city ?? "",
+      starts_at: toLocalInput(s.starts_at),
+      status: s.status,
+      notes: s.notes ?? "",
+      cover_url: s.cover_url ?? "",
+      ticket_url: s.ticket_url ?? "",
+      featured_on_hub: s.featured_on_hub,
+      published: s.published,
+    });
+  }
+
+  async function saveEdit() {
+    if (!editingId || !edit.title.trim()) return;
+    const ok = await patch(editingId, {
+      title: edit.title,
+      status: edit.status,
+      venue: edit.venue,
+      city: edit.city,
+      notes: edit.notes,
+      cover_url: edit.cover_url,
+      ticket_url: edit.ticket_url,
+      starts_at: edit.starts_at ? new Date(edit.starts_at).toISOString() : null,
+    });
+    if (ok) {
+      setMsg("Screening updated.");
+      setEditingId(null);
     }
   }
 
@@ -967,35 +1068,82 @@ function ScreeningsPanel({
       </section>
 
       <ul className="space-y-3">
-        {screenings.map((s) => (
-          <li key={s.id} className={`${BUBBLE} flex flex-wrap items-start gap-4`}>
-            <div className="h-20 w-32 shrink-0 overflow-hidden rounded-xl bg-zinc-900">
-              {s.cover_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={s.cover_url} alt="" className="h-full w-full object-cover" />
+        {screenings.map((s) => {
+          const open = editingId === s.id;
+          return (
+            <li key={s.id} className={BUBBLE}>
+              <div className="flex flex-wrap items-start gap-4">
+                <div className="h-20 w-32 shrink-0 overflow-hidden rounded-xl bg-zinc-900">
+                  {s.cover_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={s.cover_url} alt="" className="h-full w-full object-cover" />
+                  ) : null}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-sky-300/80">{s.status}</p>
+                  <p className="mt-1 font-semibold text-white">{s.title}</p>
+                  <p className="text-sm text-white/50">{[s.venue, s.city].filter(Boolean).join(" · ") || "—"}</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" disabled={busy} onClick={() => (open ? setEditingId(null) : beginEdit(s))} className={CHIP}>
+                    {open ? "Close" : "Edit"}
+                  </button>
+                  <button type="button" disabled={busy} onClick={() => void patch(s.id, { featured_on_hub: !s.featured_on_hub })} className={CHIP}>
+                    {s.featured_on_hub ? "Hub ✓" : "Hub"}
+                  </button>
+                  <button type="button" disabled={busy} onClick={() => void patch(s.id, { published: !s.published })} className={CHIP}>
+                    {s.published ? "Live" : "Draft"}
+                  </button>
+                  <button type="button" disabled={busy} onClick={() => void remove(s.id)} className="rounded-full border border-rose-400/30 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-rose-200/80">
+                    Delete
+                  </button>
+                </div>
+              </div>
+              {open ? (
+                <div className="mt-4 space-y-3 border-t border-white/10 pt-4">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <input className={FIELD} placeholder="Title" value={edit.title} onChange={(e) => setEdit({ ...edit, title: e.target.value })} />
+                    <select className={FIELD} value={edit.status} onChange={(e) => setEdit({ ...edit, status: e.target.value as "upcoming" | "past" })}>
+                      <option value="upcoming">Upcoming</option>
+                      <option value="past">Past / finished</option>
+                    </select>
+                    <input className={FIELD} placeholder="Venue" value={edit.venue} onChange={(e) => setEdit({ ...edit, venue: e.target.value })} />
+                    <input className={FIELD} placeholder="City" value={edit.city} onChange={(e) => setEdit({ ...edit, city: e.target.value })} />
+                    <input className={FIELD} type="datetime-local" value={edit.starts_at} onChange={(e) => setEdit({ ...edit, starts_at: e.target.value })} />
+                    <input className={FIELD} placeholder="Ticket URL" value={edit.ticket_url} onChange={(e) => setEdit({ ...edit, ticket_url: e.target.value })} />
+                  </div>
+                  <textarea className={`${FIELD} min-h-20`} placeholder="Notes" value={edit.notes} onChange={(e) => setEdit({ ...edit, notes: e.target.value })} />
+                  <input className={FIELD} placeholder="Cover URL" value={edit.cover_url} onChange={(e) => setEdit({ ...edit, cover_url: e.target.value })} />
+                  <input
+                    ref={editFileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      void uploadFile(file)
+                        .then((up) => setEdit((d) => ({ ...d, cover_url: up.url! })))
+                        .catch((er) => setErr(String(er.message || er)));
+                      e.target.value = "";
+                    }}
+                  />
+                  <button type="button" onClick={() => editFileRef.current?.click()} className="w-full rounded-full border border-dashed border-white/25 bg-white/[0.04] py-2.5 text-sm text-white/75">
+                    Replace cover
+                  </button>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" disabled={busy || !edit.title.trim()} onClick={() => void saveEdit()} className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black disabled:opacity-50">
+                      Save screening
+                    </button>
+                    <button type="button" onClick={() => setEditingId(null)} className={CHIP}>
+                      Cancel
+                    </button>
+                  </div>
+                </div>
               ) : null}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-sky-300/80">{s.status}</p>
-              <p className="mt-1 font-semibold text-white">{s.title}</p>
-              <p className="text-sm text-white/50">{[s.venue, s.city].filter(Boolean).join(" · ") || "—"}</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button type="button" disabled={busy} onClick={() => void patch(s.id, { status: s.status === "upcoming" ? "past" : "upcoming" })} className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-white/70">
-                Toggle status
-              </button>
-              <button type="button" disabled={busy} onClick={() => void patch(s.id, { featured_on_hub: !s.featured_on_hub })} className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-white/70">
-                {s.featured_on_hub ? "Hub ✓" : "Hub"}
-              </button>
-              <button type="button" disabled={busy} onClick={() => void patch(s.id, { published: !s.published })} className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-white/70">
-                {s.published ? "Live" : "Draft"}
-              </button>
-              <button type="button" disabled={busy} onClick={() => void remove(s.id)} className="rounded-full border border-rose-400/30 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-rose-200/80">
-                Delete
-              </button>
-            </div>
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
@@ -1017,7 +1165,8 @@ function WorldPanel({
   onChange: (v: YailiansWorldItem[]) => void;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const [draft, setDraft] = useState({
+  const editFileRef = useRef<HTMLInputElement>(null);
+  const emptyWorld = {
     title: "",
     caption: "",
     kind: "character" as YailiansWorldKind,
@@ -1026,7 +1175,10 @@ function WorldPanel({
     poster_url: "",
     featured_on_hub: true,
     published: true,
-  });
+  };
+  const [draft, setDraft] = useState(emptyWorld);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [edit, setEdit] = useState(emptyWorld);
 
   const grouped = useMemo(() => {
     const map = new Map<YailiansWorldKind, YailiansWorldItem[]>();
@@ -1050,16 +1202,7 @@ function WorldPanel({
       const j = (await res.json().catch(() => ({}))) as { items?: YailiansWorldItem[]; error?: string };
       if (!res.ok) throw new Error(j.error || "Create failed");
       onChange(j.items ?? []);
-      setDraft({
-        title: "",
-        caption: "",
-        kind: "character",
-        media_type: "image",
-        media_url: "",
-        poster_url: "",
-        featured_on_hub: true,
-        published: true,
-      });
+      setDraft(emptyWorld);
       setMsg("World piece added.");
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Create failed");
@@ -1070,6 +1213,7 @@ function WorldPanel({
 
   async function patch(id: string, body: Record<string, unknown>) {
     setBusy(true);
+    setErr("");
     try {
       const res = await fetch(`/api/admin/yailians/world/${id}`, {
         method: "PATCH",
@@ -1079,10 +1223,42 @@ function WorldPanel({
       const j = (await res.json().catch(() => ({}))) as { items?: YailiansWorldItem[]; error?: string };
       if (!res.ok) throw new Error(j.error || "Update failed");
       onChange(j.items ?? []);
+      return true;
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Update failed");
+      return false;
     } finally {
       setBusy(false);
+    }
+  }
+
+  function beginEdit(item: YailiansWorldItem) {
+    setEditingId(item.id);
+    setEdit({
+      title: item.title,
+      caption: item.caption ?? "",
+      kind: item.kind,
+      media_type: item.media_type,
+      media_url: item.media_url,
+      poster_url: item.poster_url ?? "",
+      featured_on_hub: item.featured_on_hub,
+      published: item.published,
+    });
+  }
+
+  async function saveEdit() {
+    if (!editingId || !edit.title.trim() || !edit.media_url.trim()) return;
+    const ok = await patch(editingId, {
+      title: edit.title,
+      kind: edit.kind,
+      caption: edit.caption,
+      media_type: edit.media_type,
+      media_url: edit.media_url,
+      poster_url: edit.poster_url,
+    });
+    if (ok) {
+      setMsg("World piece updated.");
+      setEditingId(null);
     }
   }
 
@@ -1192,7 +1368,9 @@ function WorldPanel({
             </div>
             <ul className="space-y-3">
               {list.map((item) => {
+                const open = editingId === item.id;
                 const thumb = item.poster_url || item.media_url;
+                const editThumb = edit.poster_url || (edit.media_type === "image" ? edit.media_url : "");
                 return (
                   <li key={item.id} className={`${BUBBLE} !p-3 sm:!p-4`}>
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
@@ -1220,10 +1398,13 @@ function WorldPanel({
                         <p className="font-semibold text-white">{item.title}</p>
                         {item.caption ? <p className="text-sm text-white/50">{item.caption}</p> : null}
                         <div className="flex flex-wrap gap-2 pt-1">
-                          <button type="button" disabled={busy} onClick={() => void patch(item.id, { featured_on_hub: !item.featured_on_hub })} className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-white/70">
+                          <button type="button" disabled={busy} onClick={() => (open ? setEditingId(null) : beginEdit(item))} className={CHIP}>
+                            {open ? "Close" : "Edit"}
+                          </button>
+                          <button type="button" disabled={busy} onClick={() => void patch(item.id, { featured_on_hub: !item.featured_on_hub })} className={CHIP}>
                             {item.featured_on_hub ? "Hub ✓" : "Hub"}
                           </button>
-                          <button type="button" disabled={busy} onClick={() => void patch(item.id, { published: !item.published })} className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-white/70">
+                          <button type="button" disabled={busy} onClick={() => void patch(item.id, { published: !item.published })} className={CHIP}>
                             {item.published ? "Live" : "Draft"}
                           </button>
                           <button type="button" disabled={busy} onClick={() => void remove(item.id)} className="rounded-full border border-rose-400/30 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-rose-200/80">
@@ -1232,6 +1413,63 @@ function WorldPanel({
                         </div>
                       </div>
                     </div>
+                    {open ? (
+                      <div className="mt-4 space-y-3 border-t border-white/10 pt-4">
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <input className={FIELD} placeholder="Title" value={edit.title} onChange={(e) => setEdit({ ...edit, title: e.target.value })} />
+                          <select className={FIELD} value={edit.kind} onChange={(e) => setEdit({ ...edit, kind: e.target.value as YailiansWorldKind })}>
+                            {YAILIANS_WORLD_KINDS.map((k) => (
+                              <option key={k} value={k}>{yailiansWorldKindLabel(k)}</option>
+                            ))}
+                          </select>
+                          <select className={FIELD} value={edit.media_type} onChange={(e) => setEdit({ ...edit, media_type: e.target.value as "image" | "video" })}>
+                            <option value="image">Image</option>
+                            <option value="video">Video</option>
+                          </select>
+                        </div>
+                        <textarea className={`${FIELD} min-h-20`} placeholder="Caption" value={edit.caption} onChange={(e) => setEdit({ ...edit, caption: e.target.value })} />
+                        <input className={FIELD} placeholder="Media URL" value={edit.media_url} onChange={(e) => setEdit({ ...edit, media_url: e.target.value })} />
+                        <input className={FIELD} placeholder="Poster URL" value={edit.poster_url} onChange={(e) => setEdit({ ...edit, poster_url: e.target.value })} />
+                        <input
+                          ref={editFileRef}
+                          type="file"
+                          accept="image/*,video/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            void uploadFile(file)
+                              .then((up) =>
+                                setEdit((d) => ({
+                                  ...d,
+                                  media_url: up.url!,
+                                  media_type: up.media_type ?? "image",
+                                  poster_url: up.poster_url ?? d.poster_url,
+                                }))
+                              )
+                              .catch((er) => setErr(String(er.message || er)));
+                            e.target.value = "";
+                          }}
+                        />
+                        <button type="button" onClick={() => editFileRef.current?.click()} className="w-full rounded-full border border-dashed border-white/25 bg-white/[0.04] py-2.5 text-sm text-white/75">
+                          Replace image or video
+                        </button>
+                        {edit.media_type === "video" && edit.media_url ? (
+                          <video src={edit.media_url} poster={edit.poster_url || undefined} className="max-h-64 w-full rounded-xl bg-black object-contain" muted playsInline controls />
+                        ) : editThumb ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={editThumb} alt="" className="max-h-64 w-full rounded-xl bg-black object-contain" />
+                        ) : null}
+                        <div className="flex flex-wrap gap-2">
+                          <button type="button" disabled={busy || !edit.title.trim() || !edit.media_url.trim()} onClick={() => void saveEdit()} className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black disabled:opacity-50">
+                            Save piece
+                          </button>
+                          <button type="button" onClick={() => setEditingId(null)} className={CHIP}>
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
                   </li>
                 );
               })}

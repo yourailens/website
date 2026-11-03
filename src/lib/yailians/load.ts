@@ -255,6 +255,22 @@ export async function getPublishedWorld(opts?: {
     .filter((e): e is YailiansWorldItem => Boolean(e));
 }
 
+export async function getPublishedWorldItem(id: string): Promise<YailiansWorldItem | null> {
+  const db = createServiceRoleClient();
+  const { data, error } = await db
+    .from("yailians_world")
+    .select("*")
+    .eq("id", id)
+    .eq("published", true)
+    .maybeSingle();
+  if (error) {
+    if (softEmpty(error.message)) return null;
+    throw new Error(error.message);
+  }
+  if (!data) return null;
+  return rowToWorld(data as Record<string, unknown>);
+}
+
 export async function nextSortOrder(table: "yailians_voices" | "yailians_screenings" | "yailians_world") {
   const db = createServiceRoleClient();
   const { data } = await db

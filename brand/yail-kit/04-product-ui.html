@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Product UI · YAIL Brand Kit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/system.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand-lockup" href="index.html"><span class="dot"></span> YourAILens Brand Kit</a>
+    <nav class="nav">
+      <a href="index.html">Hub</a>
+      <a href="01-foundations.html">Foundations</a>
+      <a href="02-components.html">Components</a>
+      <a href="03-cast.html">Cast</a>
+      <a href="04-product-ui.html" aria-current="page">Product UI</a>
+      <a href="05-service-story.html">Service story</a>
+      <a href="06-frames.html">Frames</a>
+      <a href="07-client-journey.html">Journey</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <p class="eyebrow">04 · Product UI</p>
+    <h1>The product surfaces in the story.</h1>
+    <p class="lede">Like Tapli’s booking page, leads list, and payments card — YAIL needs concrete UI artifacts the explainer can inhabit.</p>
+
+    <section class="section">
+      <div class="section-head">
+        <p class="eyebrow">Surface A</p>
+        <h2>Campaign phone — Sarah</h2>
+      </div>
+      <div class="jumbo">
+        <div class="split">
+          <div>
+            <h3>Before → After</h3>
+            <p style="color:var(--ink-soft);">Blank phone with ??? becomes a filled campaign: Feed, Story, Display — Ready.</p>
+            <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+              <span class="chip bad">??? blank</span>
+              <span class="chip ok">3 formats ready</span>
+            </div>
+          </div>
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="ui-label">Sarah · Brand</div>
+              <div class="ui-title">Just landed</div>
+              <div class="ui-row">Feed <span class="chip ok">Ready</span></div>
+              <div class="ui-row">Story <span class="chip ok">Ready</span></div>
+              <div class="ui-row">Display <span class="chip ok">Ready</span></div>
+              <div class="ui-row" style="background:#fff;border:1px dashed var(--blue);">Any format <span class="chip">Lens</span></div>
+              <div class="ui-cta">Ship ads</div>
+            </div>
+          </div>
+        </div>
+        <div class="caption-row"><div class="caption">She opens YAIL. The phone fills with real ads.</div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <p class="eyebrow">Surface B</p>
+        <h2>Week planner — Maya</h2>
+      </div>
+      <div class="jumbo">
+        <div class="split">
+          <div class="card" style="box-shadow:none;border:1px solid rgba(10,26,77,0.08);">
+            <div class="ui-label">This week</div>
+            <div class="ui-title" style="font-size:24px;">Growth calendar</div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;">
+              <div style="background:var(--ok-soft);border-radius:10px;height:56px;display:grid;place-items:center;font-weight:800;color:var(--ok);">✓</div>
+              <div style="background:var(--ok-soft);border-radius:10px;height:56px;display:grid;place-items:center;font-weight:800;color:var(--ok);">✓</div>
+              <div style="background:var(--ok-soft);border-radius:10px;height:56px;display:grid;place-items:center;font-weight:800;color:var(--ok);">✓</div>
+              <div style="background:var(--ok-soft);border-radius:10px;height:56px;display:grid;place-items:center;font-weight:800;color:var(--ok);">✓</div>
+              <div style="background:var(--ok-soft);border-radius:10px;height:56px;display:grid;place-items:center;font-weight:800;color:var(--ok);">✓</div>
+              <div style="background:var(--ok-soft);border-radius:10px;height:56px;display:grid;place-items:center;font-weight:800;color:var(--ok);">✓</div>
+              <div style="background:var(--bg-muted);border-radius:10px;height:56px;"></div>
+            </div>
+            <div style="margin-top:16px;font-size:13px;color:var(--ink-soft);font-weight:600;">6 slots filled · 1 open for reaction content</div>
+          </div>
+          <div>
+            <h3>Mess → filled week</h3>
+            <p style="color:var(--ink-soft);">FAIL / FAIL / MEH becomes a green check cascade. Same card language as Tapli’s “Booked!” success state.</p>
+            <div class="float-card" style="margin-top:18px;">
+              <div class="kicker">Status in YAIL</div>
+              <div class="body">Week plan · Maya</div>
+              <div class="hint">Auto-filled from brand kit + trends</div>
+            </div>
+          </div>
+        </div>
+        <div class="caption-row"><div class="caption">Maya’s week lights up.</div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <p class="eyebrow">Surface C</p>
+        <h2>Boards + timeline — Sasha & Max</h2>
+      </div>
+      <div class="grid-2">
+        <div class="card card-lg">
+          <div class="ui-label">Sasha · World</div>
+          <div class="ui-title">Storyboard connected</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="aspect-ratio:16/10;background:var(--sasha-soft);border-radius:12px;border:2px solid var(--sasha);"></div>
+            <div style="aspect-ratio:16/10;background:var(--sasha-soft);border-radius:12px;border:2px solid var(--sasha);"></div>
+            <div style="aspect-ratio:16/10;background:var(--sasha-soft);border-radius:12px;border:2px solid var(--sasha);"></div>
+            <div style="aspect-ratio:16/10;background:var(--blue-soft);border-radius:12px;border:2px dashed var(--blue);display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--blue);">WORLD</div>
+          </div>
+        </div>
+        <div class="card card-lg">
+          <div class="ui-label">Max · Timeline</div>
+          <div class="ui-title">Selects, not chaos</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="height:14px;border-radius:99px;background:linear-gradient(90deg,var(--max) 40%,var(--bg-muted) 40%);"></div>
+            <div style="height:14px;border-radius:99px;background:linear-gradient(90deg,var(--ok) 65%,var(--bg-muted) 65%);"></div>
+            <div style="height:14px;border-radius:99px;background:linear-gradient(90deg,var(--blue) 55%,var(--bg-muted) 55%);"></div>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+            <span class="chip">Runway</span>
+            <span class="chip">Higgsfield</span>
+            <span class="chip">Seedance</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <p class="eyebrow">Surface D</p>
+        <h2>Taste desk — Arjun</h2>
+      </div>
+      <div class="jumbo">
+        <div class="split">
+          <div>
+            <h2 style="font-size:2rem;">APPROVED</h2>
+            <p class="lede">The human gate. Lens proposes. Arjun decides. Line that must hold on screen:</p>
+            <p style="font-size:1.35rem;font-weight:800;letter-spacing:-0.02em;margin:0;">AI is the lens. The studio is the taste.</p>
+          </div>
+          <div style="display:grid;place-items:center;">
+            <div style="border:4px solid var(--danger);color:var(--danger);font-weight:800;font-size:40px;padding:16px 28px;border-radius:14px;transform:rotate(-8deg);background:#fff;box-shadow:var(--shadow-md);">APPROVED</div>
+          </div>
+        </div>
+        <div class="caption-row"><div class="caption">Human taste. Final say.</div></div>
+      </div>
+    </section>
+
+    <footer class="kit-foot">
+      <a href="05-service-story.html">Next: Service story →</a>
+      <span>These UIs are the “product” Tapli would show in phones</span>
+    </footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,339 @@
+/* ============================================================
+   YourAILens · Brand System
+   Crafted to match Tapli explainer language:
+   soft white stage · navy type · electric blue · soft cards
+   Font: Plus Jakarta Sans (geometric, bold display + clean UI)
+   ============================================================ */
+
+:root {
+  /* Surfaces */
+  --bg: #f5f7fb;
+  --bg-elevated: #ffffff;
+  --bg-muted: #eef1f7;
+  --bg-navy: #0a1a4d;
+
+  /* Ink */
+  --navy: #0a1a4d;
+  --navy-2: #13245f;
+  --ink: #0a1a4d;
+  --ink-soft: #5b6478;
+  --ink-faint: #8b93a7;
+
+  /* Brand blue (sampled from Tapli primary) */
+  --blue: #2647e8;
+  --blue-hover: #1f3cd1;
+  --blue-soft: #e8ecfe;
+  --blue-mist: #f0f3ff;
+  --blue-ring: rgba(38, 71, 232, 0.08);
+
+  /* Semantic */
+  --ok: #16a34a;
+  --ok-soft: #dcfce7;
+  --warn: #ea580c;
+  --warn-soft: #ffedd5;
+  --danger: #dc2626;
+  --danger-soft: #fee2e2;
+
+  /* Cast accents */
+  --sarah: #8b7cf6;
+  --sarah-soft: #efeaff;
+  --maya: #34d399;
+  --maya-soft: #e8fff4;
+  --sasha: #60a5fa;
+  --sasha-soft: #e8f2ff;
+  --max: #fbbf24;
+  --max-soft: #fff8e6;
+  --arjun: #fb7185;
+  --arjun-soft: #ffe8ee;
+
+  /* Elevation */
+  --shadow-xs: 0 2px 8px rgba(10, 26, 77, 0.04);
+  --shadow-sm: 0 8px 24px rgba(10, 26, 77, 0.07);
+  --shadow-md: 0 16px 48px rgba(10, 26, 77, 0.10);
+  --shadow-lg: 0 28px 72px rgba(10, 26, 77, 0.14);
+
+  /* Radii */
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+  --r-pill: 999px;
+
+  /* Type */
+  --font: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --tracking-tight: -0.04em;
+  --tracking-display: -0.045em;
+
+  /* Layout */
+  --wrap: 1120px;
+  --gutter: 24px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse 80% 50% at 0% -10%, var(--blue-soft), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, var(--blue-mist), transparent 50%),
+    var(--bg);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+img { max-width: 100%; display: block; }
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* —— Chrome —— */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+  padding: 14px var(--gutter);
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(10,26,77,0.06);
+}
+.brand-lockup {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-weight: 800; letter-spacing: var(--tracking-tight); font-size: 15px;
+  color: var(--navy); text-decoration: none;
+}
+.brand-lockup:hover { text-decoration: none; }
+.brand-lockup img { height: 22px; width: auto; }
+.brand-lockup .dot {
+  width: 10px; height: 10px; border-radius: 50%; background: var(--blue);
+}
+.nav {
+  display: flex; flex-wrap: wrap; gap: 6px 4px;
+  font-size: 13px; font-weight: 650;
+}
+.nav a {
+  color: var(--ink-soft); padding: 8px 12px; border-radius: var(--r-pill);
+  text-decoration: none;
+}
+.nav a:hover, .nav a[aria-current="page"] {
+  color: var(--navy); background: var(--blue-soft); text-decoration: none;
+}
+
+.wrap {
+  width: min(var(--wrap), calc(100% - 2 * var(--gutter)));
+  margin: 0 auto;
+  padding: 48px 0 120px;
+}
+
+/* —— Type scale —— */
+.eyebrow {
+  display: inline-block;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--blue); margin: 0 0 12px;
+}
+h1, .display {
+  font-size: clamp(2.6rem, 5.5vw, 4rem);
+  font-weight: 800;
+  letter-spacing: var(--tracking-display);
+  line-height: 1.02;
+  margin: 0 0 16px;
+  color: var(--navy);
+}
+h2 {
+  font-size: clamp(1.7rem, 3vw, 2.35rem);
+  font-weight: 800;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.12;
+  margin: 0 0 12px;
+}
+h3 {
+  font-size: 1.25rem; font-weight: 750;
+  letter-spacing: -0.02em; margin: 0 0 8px;
+}
+.lede {
+  font-size: 1.15rem; color: var(--ink-soft);
+  max-width: 54ch; margin: 0 0 24px; font-weight: 500;
+}
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 36px;
+}
+
+/* —— Buttons / chips —— */
+.btn {
+  appearance: none; border: none; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: inherit; font-weight: 750; font-size: 14px;
+  padding: 13px 22px; border-radius: var(--r-pill);
+  background: var(--blue); color: #fff;
+  box-shadow: var(--shadow-sm);
+  transition: transform .15s ease, background .15s ease;
+  text-decoration: none;
+}
+.btn:hover { background: var(--blue-hover); transform: translateY(-1px); text-decoration: none; color: #fff; }
+.btn.ghost {
+  background: var(--blue-soft); color: var(--blue); box-shadow: none;
+}
+.btn.ghost:hover { background: #dce2ff; color: var(--blue); }
+.btn.navy { background: var(--navy); }
+.btn.lg { font-size: 16px; padding: 16px 28px; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: var(--r-pill);
+  background: var(--blue-soft); color: var(--blue);
+  font-size: 12px; font-weight: 750;
+}
+.chip.grey { background: var(--bg-muted); color: var(--ink-soft); }
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.bad { background: var(--danger-soft); color: var(--danger); }
+.chip.navy { background: var(--navy); color: #fff; }
+
+/* —— Cards —— */
+.card {
+  background: var(--bg-elevated);
+  border-radius: var(--r-lg);
+  border: 1px solid rgba(10,26,77,0.05);
+  box-shadow: var(--shadow-sm);
+  padding: 24px;
+}
+.card-lg { padding: 32px; box-shadow: var(--shadow-md); border-radius: var(--r-xl); }
+.card-flat { box-shadow: none; background: var(--bg-muted); }
+
+/* —— Jumbotron / hero stage —— */
+.jumbo {
+  position: relative;
+  background: var(--bg-elevated);
+  border-radius: 36px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(10,26,77,0.05);
+  overflow: hidden;
+  padding: clamp(36px, 5vw, 64px);
+}
+.jumbo::before,
+.jumbo::after {
+  content: "";
+  position: absolute; border-radius: 50%;
+  border: 56px solid var(--blue-ring);
+  pointer-events: none;
+}
+.jumbo::before { width: 480px; height: 480px; left: -160px; top: -180px; }
+.jumbo::after { width: 400px; height: 400px; right: -140px; bottom: -160px; border-width: 44px; }
+.jumbo > * { position: relative; z-index: 1; }
+
+.jumbo-navy {
+  background: var(--bg-navy); color: #fff;
+  box-shadow: var(--shadow-lg);
+}
+.jumbo-navy h1, .jumbo-navy h2, .jumbo-navy .display { color: #fff; }
+.jumbo-navy .lede { color: rgba(255,255,255,0.72); }
+.jumbo-navy::before, .jumbo-navy::after { border-color: rgba(255,255,255,0.06); }
+
+/* —— Caption bar (Tapli signature) —— */
+.caption {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 48px; padding: 12px 28px;
+  background: var(--navy); color: #fff;
+  border-radius: var(--r-pill);
+  font-size: 16px; font-weight: 650;
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+.caption-row {
+  display: flex; justify-content: center; margin-top: 28px;
+}
+
+/* —— Grids —— */
+.grid-2 { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.grid-3 { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.grid-4 { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.split {
+  display: grid; gap: 40px; align-items: center;
+  grid-template-columns: 1.05fr 0.95fr;
+}
+@media (max-width: 860px) {
+  .split { grid-template-columns: 1fr; }
+}
+
+.section { margin: 64px 0; }
+.section-head { margin-bottom: 22px; }
+
+/* —— Phone mock —— */
+.phone {
+  width: 280px; max-width: 100%;
+  background: var(--navy);
+  border-radius: 36px;
+  padding: 12px;
+  box-shadow: var(--shadow-md);
+  margin: 0 auto;
+}
+.phone-screen {
+  background: #fff;
+  border-radius: 26px;
+  min-height: 460px;
+  padding: 18px;
+  overflow: hidden;
+}
+.phone-lg { width: 320px; }
+.phone-lg .phone-screen { min-height: 520px; }
+
+.ui-label {
+  font-size: 11px; font-weight: 750; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px;
+}
+.ui-title { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 14px; }
+.ui-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 12px 14px; background: var(--bg-muted); border-radius: 14px;
+  margin-bottom: 10px; font-size: 13px; font-weight: 700;
+}
+.ui-cta {
+  display: block; text-align: center; margin-top: 14px;
+  background: var(--blue); color: #fff; font-weight: 750; font-size: 14px;
+  padding: 13px; border-radius: 14px;
+}
+
+/* —— Floating status / lead cards —— */
+.float-card {
+  background: #fff;
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(10,26,77,0.05);
+  padding: 14px 16px;
+}
+.float-card .kicker { font-size: 11px; font-weight: 750; color: var(--blue); letter-spacing: 0.08em; text-transform: uppercase; }
+.float-card .body { font-size: 14px; font-weight: 700; margin-top: 4px; }
+.float-card .hint { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+
+/* —— Swatches —— */
+.swatch {
+  height: 88px; border-radius: 16px; padding: 12px 14px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  color: #fff; font-size: 12px; font-weight: 750;
+}
+.swatch.light { color: var(--navy); border: 1px solid rgba(10,26,77,0.08); }
+.swatch code { font-family: ui-monospace, monospace; font-weight: 600; opacity: 0.85; font-size: 11px; }
+
+/* —— Type specimen —— */
+.type-row {
+  display: grid; gap: 8px; padding: 18px 0;
+  border-bottom: 1px solid rgba(10,26,77,0.06);
+}
+.type-row .label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
+
+/* —— Cast avatar —— */
+.avatar-ring {
+  width: 148px; height: 148px; border-radius: 50%;
+  display: grid; place-items: center; margin: 0 auto 14px;
+  box-shadow: var(--shadow-sm);
+}
+.avatar-ring svg { width: 110px; height: auto; }
+.shadow-oval { fill: rgba(120, 100, 200, 0.16); }
+
+/* —— Footer —— */
+.kit-foot {
+  margin-top: 80px; padding-top: 28px;
+  border-top: 1px solid rgba(10,26,77,0.08);
+  display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between;
+  font-size: 13px; color: var(--ink-soft); font-weight: 600;
+}

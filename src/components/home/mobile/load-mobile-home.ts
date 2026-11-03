@@ -88,10 +88,6 @@ export async function loadMobileHomeData(): Promise<MobileHomeData> {
     .slice(0, 12)
     .map((cut) => fromCut(cut, "On the lot"));
 
-  const community = HOME_WATCH_TITLES.filter((t) => t.rail === "community").map((t) =>
-    fromWatch(t, "Community")
-  );
-
   return {
     heroes: heroCuts.map((cut) =>
       fromCut(cut, HERO_SLOTS.find((slot) => slot.id === cut.hero_slot)?.label ?? "Hero")
@@ -109,13 +105,5 @@ export async function loadMobileHomeData(): Promise<MobileHomeData> {
     formats,
     feature,
     lot,
-    community,
-    pricing: [
-      { title: "Weekly", tag: "From ₹21,250 · 5 films", href: "/pricing#weekly" },
-      { title: "Monthly", tag: "From ₹80,000 · 20 films", href: "/pricing#monthly" },
-      { title: "3 months", tag: "From ₹2,25,000 · 60 films", href: "/pricing#quarterly" },
-      { title: "A la carte", tag: "Build the fare", href: "/pricing#alacarte" },
-      { title: "AI menu", tag: "Logo, stills, more", href: "/pricing#ai-menu" },
-    ],
   };
 }

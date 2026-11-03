@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import VoiceInterviewCard from "@/components/yailians/VoiceInterviewCard";
+import VoicesBay from "@/components/yailians/VoicesBay";
 import YailiansShell from "@/components/yailians/YailiansShell";
 import { getPublishedVoices, getYailiansSite } from "@/lib/yailians/load";
 
@@ -19,32 +20,26 @@ export default async function YailiansVoicesPage() {
 
   return (
     <YailiansShell activeHref="/yailians/voices">
-      <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
-        <Link
-          href="/yailians"
-          className="font-mono text-[10px] uppercase tracking-[0.28em] text-sky-300/80 transition hover:text-sky-200"
-        >
-          ← YAILIANS
-        </Link>
-        <p className="mt-6 font-mono text-[10px] tracking-[0.28em] text-emerald-400/90">VOICES</p>
-        <h1 className="mt-3 font-body text-[clamp(2rem,5vw,3.5rem)] font-semibold leading-none tracking-tight">
-          Interviews
-        </h1>
-        <p className="mt-4 max-w-xl text-sm text-white/50">
-          Conversations we recorded around the film — press play.
-        </p>
-
-        <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {voices.map((v) => (
-            <li key={v.id}>
-              <VoiceInterviewCard voice={v} />
+      <VoicesBay
+        heading="h1"
+        back={
+          <Link
+            href="/yailians"
+            className="font-mono text-[10px] uppercase tracking-[0.28em] text-sky-300/80 transition hover:text-sky-200"
+          >
+            ← YAILIANS
+          </Link>
+        }
+      >
+        <ul className="grid grid-cols-2 items-start gap-x-4 gap-y-10 sm:flex sm:flex-wrap sm:gap-x-6">
+          {voices.map((voice) => (
+            <li key={voice.id} className="min-w-0 sm:w-[17rem]">
+              <VoiceInterviewCard voice={voice} />
             </li>
           ))}
         </ul>
-        {!voices.length ? (
-          <p className="mt-10 text-sm text-white/40">No interviews published yet.</p>
-        ) : null}
-      </div>
+        {!voices.length ? <p className="text-sm text-white/40">No interviews published yet.</p> : null}
+      </VoicesBay>
     </YailiansShell>
   );
 }

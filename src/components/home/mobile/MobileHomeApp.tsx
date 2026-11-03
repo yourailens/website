@@ -117,65 +117,6 @@ export default function MobileHomeApp({ data }: { data: MobileHomeData }) {
 
           <Rail scene="NEW" title="On the lot" clips={data.lot} />
         </section>
-
-        <section id="community">
-          <div className="mb-4 flex items-end justify-between gap-3">
-            <div>
-              <p className="font-mono text-[10px] tracking-[0.32em] text-blue-400">SC. 4 · COMMUNITY</p>
-              <h2 className="mt-1.5 text-xl font-semibold tracking-tight">AI community</h2>
-              <p className="mt-1.5 text-sm font-light text-white/45">Cuts from the studio and the feed.</p>
-            </div>
-            <Link href="/ai-verse" className="text-xs text-white/45">
-              All community
-            </Link>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {data.community.map((clip) => (
-              <div key={clip.id} className="w-[42vw] max-w-[11rem] shrink-0">
-                <GlossyPlayCard
-                  clip={clip}
-                  playingId={playingId}
-                  onPlay={setPlayingId}
-                  onPause={pause}
-                  thumbnailOnly
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section id="callsheet">
-          <div className="mb-4 flex items-end justify-between gap-3">
-            <div>
-              <p className="font-mono text-[10px] tracking-[0.32em] text-blue-400">SC. 5 · COMMISSION</p>
-              <h2 className="mt-1.5 text-xl font-semibold tracking-tight">Pricing</h2>
-              <p className="mt-1.5 text-sm font-light text-white/45">Brief. Budget. Date. Then we build.</p>
-            </div>
-            <Link href="/pricing" className="text-xs text-white/45">
-              Pricing
-            </Link>
-          </div>
-          <ul className="space-y-2">
-            {data.pricing.map((p) => (
-              <li key={p.href}>
-                <Link
-                  href={p.href}
-                  className="flex items-center justify-between rounded-[1.25rem] border border-white/15 bg-white/[0.06] px-4 py-4 backdrop-blur-xl"
-                >
-                  <span>
-                    <span className="block text-base font-semibold">{p.title}</span>
-                    <span className="mt-1 block text-xs text-white/45">{p.tag}</span>
-                  </span>
-                  <span className="text-white/35">→</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <Link href="/contact" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white">
-            <span className="h-2 w-2 rounded-full bg-blue-400" aria-hidden />
-            Commission a world
-          </Link>
-        </section>
       </main>
     </div>
   );

@@ -23,8 +23,4 @@ export type MobileHomeData = {
   feature: MobileClip | null;
   /** SC. 3 · On the lot */
   lot: MobileClip[];
-  /** SC. 4 · Community */
-  community: MobileClip[];
-  /** SC. 5 · Call sheet */
-  pricing: { title: string; tag: string; href: string }[];
 };

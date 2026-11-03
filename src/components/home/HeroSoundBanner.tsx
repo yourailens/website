@@ -3,13 +3,15 @@
 type HeroSoundBannerProps = {
   muted: boolean;
   onToggle: () => void;
+  /** Sit on the video itself instead of under the site nav. */
+  flush?: boolean;
 };
 
-export default function HeroSoundBanner({ muted, onToggle }: HeroSoundBannerProps) {
+export default function HeroSoundBanner({ muted, onToggle, flush = false }: HeroSoundBannerProps) {
   return (
     <div
       className="absolute inset-x-0 z-30 flex justify-center bg-transparent px-4 py-3"
-      style={{ top: "var(--nav-h, 4.5rem)" }}
+      style={{ top: flush ? 0 : "var(--nav-h, 4.5rem)" }}
     >
       <style>{`
         @keyframes hero-eq-bounce {

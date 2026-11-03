@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Client Journey Storyboard · YAIL Brand Kit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/system.css" />
+  <style>
+    .vo-doc {
+      background: #fff;
+      border-radius: var(--r-xl);
+      box-shadow: var(--shadow-md);
+      border: 1px solid rgba(10,26,77,0.06);
+      padding: 28px 32px;
+      margin-bottom: 48px;
+    }
+    .vo-doc pre {
+      white-space: pre-wrap;
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--navy);
+      margin: 0;
+      font-weight: 500;
+    }
+    .vo-doc .who {
+      display: inline-block;
+      font-size: 11px; font-weight: 800; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--blue); margin-bottom: 12px;
+    }
+
+    .scene {
+      margin: 56px 0 72px;
+      scroll-margin-top: 80px;
+    }
+    .scene-head {
+      display: flex; flex-wrap: wrap; gap: 10px 16px;
+      align-items: baseline; margin-bottom: 14px;
+    }
+    .scene-head h2 { margin: 0; font-size: 1.45rem; }
+    .beat-tag {
+      font-size: 12px; font-weight: 800; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--blue);
+    }
+
+    .board {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      width: 100%;
+      background: var(--bg);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(10,26,77,0.06);
+    }
+    .board::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 42%;
+      width: min(560px, 62%);
+      aspect-ratio: 1470 / 813;
+      transform: translate(-50%, -50%);
+      background: url("assets/yail-mark-blue.png") center / contain no-repeat;
+      opacity: 0.1;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .board::after { content: none; }
+    .board-inner {
+      position: relative; z-index: 1;
+      height: 100%;
+      display: grid; grid-template-columns: 1.05fr 0.95fr;
+      gap: 4%; align-items: center;
+      padding: 5% 5.5% 14%;
+    }
+    @media (max-width: 720px) {
+      .board { aspect-ratio: auto; min-height: 420px; }
+      .board-inner { grid-template-columns: 1fr; padding-bottom: 18%; }
+    }
+    .board.full .board-inner { grid-template-columns: 1fr; }
+    .board.navy { background: var(--navy); color: #fff; }
+    .board.navy::before,
+    .board.casino::before,
+    .board.pool::before {
+      background-image: url("assets/yail-mark-white.png");
+      opacity: 0.1;
+    }
+    .board.casino {
+      background:
+        radial-gradient(circle at 20% 30%, rgba(255,215,0,0.15), transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(38,71,232,0.2), transparent 45%),
+        #0a1a4d;
+      color: #fff;
+    }
+    .board.pool {
+      background:
+        linear-gradient(180deg, #87ceeb 0%, #5dade2 45%, #1a6fb5 100%);
+    }
+    .board .cap {
+      position: absolute; left: 50%; bottom: 4.2%; transform: translateX(-50%);
+      z-index: 3; max-width: 90%;
+      background: var(--navy); color: #fff;
+      font-size: clamp(13px, 1.5vw, 17px); font-weight: 650;
+      padding: 12px 22px; border-radius: 999px;
+      box-shadow: var(--shadow-sm); text-align: center;
+      line-height: 1.35;
+    }
+    .board.navy .cap, .board.casino .cap { background: #fff; color: var(--navy); }
+
+    .vo-line {
+      margin-top: 16px;
+      background: #fff;
+      border-radius: var(--r-lg);
+      border: 1px solid rgba(10,26,77,0.06);
+      box-shadow: var(--shadow-xs);
+      padding: 18px 20px;
+      display: grid; gap: 6px;
+    }
+    .vo-line .label {
+      font-size: 11px; font-weight: 800; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--blue);
+    }
+    .vo-line .line {
+      font-size: 17px; font-weight: 650; color: var(--navy); line-height: 1.45;
+    }
+    .vo-line .dir {
+      font-size: 13px; color: var(--ink-soft); font-weight: 500; font-style: italic;
+    }
+    .vo-line .whisper {
+      font-size: 14px; color: var(--ink-faint); font-weight: 600;
+    }
+
+    /* AE stage — layered composition, not a blog card */
+    .stage { position: absolute; inset: 0; z-index: 1; }
+    .ico { width: 18px; height: 18px; display: block; }
+    .ico-lg { width: 28px; height: 28px; }
+    .pill-ui {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #fff; border-radius: 14px; padding: 8px 12px;
+      box-shadow: var(--shadow-sm); font-size: 12px; font-weight: 750;
+      border: 1px solid rgba(10,26,77,0.06);
+    }
+    .mini-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      background: var(--bg-muted); border-radius: 10px; padding: 8px 10px;
+      font-size: 12px; font-weight: 700;
+    }
+    .bar { height: 6px; border-radius: 99px; background: var(--bg-muted); overflow: hidden; }
+    .bar > i { display: block; height: 100%; background: var(--blue); border-radius: 99px; }
+    .bar.ok > i { background: var(--ok); }
+
+    .channel-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .channel {
+      background: #fff; border-radius: 16px; padding: 14px 16px;
+      box-shadow: var(--shadow-sm); font-weight: 750; font-size: 13px;
+      display: flex; align-items: center; gap: 8px;
+      border: 1px solid rgba(10,26,77,0.05);
+    }
+    .channel .ico {
+      width: 28px; height: 28px; border-radius: 8px;
+      display: grid; place-items: center; font-size: 14px; font-weight: 800; color: #fff;
+    }
+
+    .mood-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    @media (max-width: 700px) { .mood-row { grid-template-columns: repeat(2, 1fr); } }
+    .mood {
+      background: #fff; border-radius: 16px; padding: 14px 10px; text-align: center;
+      box-shadow: var(--shadow-sm); border: 2px solid transparent;
+    }
+    .mood.on { border-color: var(--blue); box-shadow: var(--shadow-md); }
+    .mood .face { font-size: 28px; margin-bottom: 6px; }
+    .mood strong { display: block; font-size: 13px; }
+
+    .puzzle {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+      max-width: 280px; margin: 0 auto;
+    }
+    .puzzle i {
+      aspect-ratio: 1; border-radius: 12px;
+      background: var(--blue-soft); border: 2px dashed var(--blue);
+      display: grid; place-items: center; font-weight: 800; color: var(--blue); font-size: 18px;
+    }
+    .puzzle i.filled { background: var(--blue); color: #fff; border-style: solid; }
+
+    .vending {
+      width: min(220px, 100%); margin: 0 auto;
+      background: #fff;
+      border: 1px solid rgba(10,26,77,0.06);
+      border-radius: 20px; padding: 14px;
+      box-shadow: var(--shadow-md);
+      color: var(--navy);
+    }
+    .vending .slot {
+      background: var(--blue-mist); border-radius: 10px; height: 100px;
+      display: grid; place-items: center; color: var(--navy); font-weight: 800;
+      letter-spacing: 0.08em; font-size: 12px; margin-bottom: 10px;
+    }
+    .vending .btn-gen {
+      background: var(--blue); color: #fff; text-align: center;
+      font-weight: 800; padding: 12px; border-radius: 12px; font-size: 14px;
+    }
+
+    .pool-char {
+      width: 100px; height: 100px; border-radius: 50%;
+      background: var(--arjun-soft); margin: 0 auto 8px;
+      display: grid; place-items: center; font-size: 42px;
+      box-shadow: var(--shadow-md); transform: rotate(-8deg);
+    }
+    .floaties {
+      display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    }
+    .floaties span {
+      background: rgba(255,255,255,0.9); border-radius: 999px;
+      padding: 8px 12px; font-size: 12px; font-weight: 750; color: var(--navy);
+      box-shadow: var(--shadow-xs);
+    }
+
+    .toc {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px; margin: 24px 0 40px;
+    }
+    .toc a {
+      background: #fff; border-radius: 14px; padding: 12px 14px;
+      font-size: 13px; font-weight: 700; color: var(--navy);
+      text-decoration: none; box-shadow: var(--shadow-xs);
+      border: 1px solid rgba(10,26,77,0.05);
+    }
+    .toc a:hover { background: var(--blue-soft); color: var(--blue); }
+    .toc a span { display: block; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 2px; }
+
+    /* Motion reel — looping “video” of entrances */
+    .reel .m-pop { animation: mPop 7.2s cubic-bezier(.2,1.6,.3,1) infinite; }
+    .reel .m-slide { animation: mSlide 7.2s cubic-bezier(.16,1,.3,1) infinite; }
+    .reel .m-drop { animation: mDrop 7.2s cubic-bezier(.16,1.4,.3,1) infinite; }
+    .reel .m-stamp { animation: mStamp 7.2s cubic-bezier(.15,1.7,.3,1) infinite; }
+    .reel .m-stagger > * { animation: mPop 7.2s cubic-bezier(.2,1.5,.3,1) infinite; }
+    .reel .m-stagger > *:nth-child(2) { animation-delay: .12s; }
+    .reel .m-stagger > *:nth-child(3) { animation-delay: .24s; }
+    .reel .m-stagger > *:nth-child(4) { animation-delay: .36s; }
+    .reel .m-draw > i { animation: mDraw 7.2s ease infinite; transform-origin: left center; }
+    .reel .m-rise { animation: mRise 7.2s ease infinite; }
+    @keyframes mPop {
+      0%, 8% { opacity: 0; transform: scale(.62); }
+      18% { opacity: 1; transform: scale(1.08); }
+      26%, 78% { opacity: 1; transform: scale(1); }
+      90%, 100% { opacity: 0; transform: scale(.9); }
+    }
+    @keyframes mSlide {
+      0%, 14% { opacity: 0; transform: translateX(48px); }
+      28%, 78% { opacity: 1; transform: translateX(0); }
+      90%, 100% { opacity: 0; transform: translateX(-12px); }
+    }
+    @keyframes mDrop {
+      0%, 20% { opacity: 0; transform: translateY(-28px); }
+      34%, 78% { opacity: 1; transform: translateY(0); }
+      90%, 100% { opacity: 0; transform: translateY(10px); }
+    }
+    @keyframes mStamp {
+      0%, 36% { opacity: 0; transform: scale(1.7) rotate(-16deg); }
+      48% { opacity: 1; transform: scale(.92) rotate(-6deg); }
+      56%, 78% { opacity: 1; transform: scale(1) rotate(-8deg); }
+      90%, 100% { opacity: 0; transform: scale(.8) rotate(-8deg); }
+    }
+    @keyframes mDraw {
+      0%, 42% { transform: scaleX(0); }
+      62%, 78% { transform: scaleX(1); }
+      90%, 100% { transform: scaleX(0); }
+    }
+    @keyframes mRise {
+      0%, 58% { opacity: 0; transform: translate(-50%, 16px); }
+      72%, 86% { opacity: 1; transform: translate(-50%, 0); }
+      96%, 100% { opacity: 0; transform: translate(-50%, 8px); }
+    }
+    .s01-fill {
+      position: absolute; inset: 6% 3.5% 15% 3.5%;
+      display: grid;
+      grid-template-columns: 1.05fr 1.25fr .9fr;
+      grid-template-rows: 1fr auto;
+      gap: 10px;
+    }
+    .s01-fill .wide { grid-column: 1 / -1; }
+    .house { position: absolute; inset: 3% 2.8% 15.5% 2.8%; display: flex; flex-direction: column; gap: 8px; }
+    .proscenium { display: grid; grid-template-columns: 34px 1fr 34px; gap: 6px; align-items: stretch; }
+    .curtain { border-radius: 10px; background: repeating-linear-gradient(90deg, #1c2a4a 0 7px, #2c3e66 7px 12px); }
+    .silver { padding: 8px; border-radius: 14px; background: linear-gradient(180deg, #fbfcfe 0%, #b7bec8 48%, #eceff3 100%); box-shadow: inset 0 1px 0 #fff, 0 8px 18px rgba(10,26,77,0.12); }
+    .silver .pic { height: 118px; border-radius: 8px; background: linear-gradient(160deg, #243044 0%, #4c5c78 55%, #8b97ab 100%); color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 12px 14px; }
+    .floor { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 5px; padding: 6px 4px 2px; border-radius: 12px; background: linear-gradient(180deg, #e7ebf4, #dfe5f0); }
+    .row { flex: 1; min-height: 0; display: flex; align-items: stretch; gap: 10px; margin-inline: auto; }
+    .row.r1 { width: 70%; } .row.r2 { width: 78%; } .row.r3 { width: 86%; } .row.r4 { width: 93%; } .row.r5 { width: 97%; } .row.r6 { width: 100%; }
+    .block { flex: 1; display: flex; gap: 3px; min-width: 0; }
+    .st { flex: 1; min-width: 0; border-radius: 6px 6px 3px 3px; background: linear-gradient(180deg, #f7f9fd, #d5def2); box-shadow: inset 0 -5px 0 #c5d0ea; position: relative; }
+    .row, .block, .st.on { overflow: visible; }
+    .row.r4 { position: relative; z-index: 2; }
+    .who { position: absolute; left: 50%; bottom: 6%; width: 100%; height: 176%; transform: translateX(-50%); overflow: visible; }
+    .st.is-jack .who { width: 118%; height: 198%; }
+    .cast-note { position: absolute; left: 0; right: 0; top: -78px; height: 72px; z-index: 6; pointer-events: none; }
+    .brk { position: absolute; top: 28px; height: 14px; border-top: 2px solid #0a1a4d; }
+    .brk.left { left: 34.6%; width: 14.6%; border-left: 2px solid #0a1a4d; border-radius: 8px 0 0 0; }
+    .brk.right { left: 58.2%; width: 20.6%; border-right: 2px solid #0a1a4d; border-radius: 0 8px 0 0; }
+    .team-pin { position: absolute; top: 0; transform: translateX(-50%); background: #fff; color: var(--navy); font-size: 11px; font-weight: 800; letter-spacing: -0.02em; padding: 3px 8px; border-radius: 999px; box-shadow: 0 6px 14px rgba(10,26,77,0.14); white-space: nowrap; }
+    .team-pin.left { left: 41.9%; }
+    .team-pin.right { left: 68.5%; }
+    .jack-pin { position: absolute; left: 54.2%; top: 0; transform: translateX(-50%); text-align: center; }
+    .jack-pin span { display: inline-block; background: #0a1a4d; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: -0.02em; padding: 3px 9px; border-radius: 999px; box-shadow: 0 6px 14px rgba(10,26,77,0.2); }
+    .jack-pin i { display: block; width: 2px; height: 16px; margin: 0 auto; background: #0a1a4d; border-radius: 2px; position: relative; }
+    .jack-pin i::after { content: ""; position: absolute; left: 50%; bottom: -3px; width: 7px; height: 7px; border-radius: 50%; background: #0a1a4d; transform: translateX(-50%); }
+    .fig { width: 64px; height: auto; aspect-ratio: 64 / 96; display: block; flex: none; }
+    .tet { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; background: #fff; border-radius: 14px; padding: 8px; }
+    .tet i { display: grid; place-items: center; min-height: 30px; border-radius: 6px; background: #eef1f8; font-size: 9px; font-weight: 800; letter-spacing: 0.01em; color: #fff; font-style: normal; }
+    .tet i.ghost { background: transparent; box-shadow: inset 0 0 0 1.5px var(--blue); color: var(--blue); }
+  </style>
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5.5 19.2c1.2-3 3.6-4.4 6.5-4.4s5.3 1.4 6.5 4.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 7l8 6 8-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-ig" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17" cy="7" r="1" fill="currentColor"/></symbol>
+    <symbol id="i-in" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 11v6M8 8h.01M12 17v-4.2a2 2 0 014 0V17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-web" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 12h16M12 4c2.2 2.4 3.3 5.1 3.3 8S14.2 17.6 12 20c-2.2-2.4-3.3-5.1-3.3-8S9.8 6.4 12 4z" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="i-door" viewBox="0 0 24 24"><path d="M6 20V5.5A1.5 1.5 0 017.5 4h9A1.5 1.5 0 0118 5.5V20" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 20h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="15" cy="12" r="0.9" fill="currentColor"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10.5 8.8v6.4L16 12l-5.5-3.2z" fill="currentColor"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 19s-6.5-4-6.5-8.2A3.4 3.4 0 0112 8a3.4 3.4 0 016.5 2.8C18.5 15 12 19 12 19z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-like" viewBox="0 0 24 24"><path d="M8 11v8H5.5A1.5 1.5 0 014 17.5v-5A1.5 1.5 0 015.5 11H8zM8 11l3.2-6.2A1.6 1.6 0 0112.6 4H13a1.5 1.5 0 011.5 1.5V9H18a2 2 0 011.9 2.5l-1.2 5A2 2 0 0116.8 19H8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-ask" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.8.6-1.5 1-1.5 2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="16.5" r="0.8" fill="currentColor"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 12.2l2.4 2.4 4.6-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M7 3.5h7l4 4V20a1.5 1.5 0 01-1.5 1.5h-9.5A1.5 1.5 0 015.5 20V5A1.5 1.5 0 017 3.5z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M14 3.8V8h4.2M8.5 12h7M8.5 15.5h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-film" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 5v14M16 5v14M3.5 9.5h4.5M16 9.5h4.5M3.5 14.5h4.5M16 14.5h4.5" stroke="currentColor" stroke-width="1.4"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 17.5a2.2 2.2 0 11-2-2.2V7l10-2v8.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="17" cy="13.2" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-wave" viewBox="0 0 24 24"><path d="M3 14c2 0 2-4 4-4s2 4 4 4 2-4 4-4 2 4 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M14 5l5 5L9 20H4v-5L14 5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 6.5A2.5 2.5 0 017.5 4h9A2.5 2.5 0 0119 6.5v6A2.5 2.5 0 0116.5 15H10l-4 3.5V6.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="3.5" y="6" width="17" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 10h17" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="c-kabir" viewBox="0 0 64 96">
+      <ellipse cx="32" cy="91" rx="16" ry="3.5" fill="rgba(10,26,77,.12)"/>
+      <rect x="23" y="68" width="8" height="20" rx="4" fill="#0a1a4d"/>
+      <rect x="33" y="68" width="8" height="20" rx="4" fill="#0a1a4d"/>
+      <path d="M6 50c8-14 44-14 52 0v22H6V50z" fill="#0a1a4d"/>
+      <path d="M22 48c3.2-6 16.6-6 20 0" fill="none" stroke="#1d3a86" stroke-width="1.8" stroke-linecap="round"/>
+      <rect x="27" y="40" width="10" height="12" rx="3" fill="#c48a5a"/>
+      <ellipse cx="16.5" cy="33" rx="3.2" ry="4.2" fill="#b87448"/>
+      <ellipse cx="47.5" cy="33" rx="3.2" ry="4.2" fill="#b87448"/>
+      <ellipse cx="32" cy="32" rx="13" ry="15" fill="#c48a5a"/>
+      <path d="M21 24C22 14 29 10 35 13c6-3 11 4 9 10-4 4-12 5-16 2-4 3-7 2-7-1z" fill="#1c1917"/>
+      <circle cx="27" cy="33" r="1.7" fill="#1a1220"/><circle cx="37" cy="33" r="1.7" fill="#1a1220"/>
+      <path d="M26 40q6 4.5 12 0" fill="none" stroke="#1a1220" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="b-jack" viewBox="0 0 40 56">
+      <path d="M0 37c8-12 32-12 40 0v17H0V37z" fill="#0a1a4d"/>
+      <path d="M12 36c2.4-5 13.2-5 16 0" fill="none" stroke="#1d3a86" stroke-width="1.6" stroke-linecap="round"/>
+      <rect x="16.4" y="28" width="7.2" height="10" rx="2.4" fill="#c48a5a"/>
+      <ellipse cx="11.6" cy="23.5" rx="2.4" ry="3.2" fill="#b87448"/>
+      <ellipse cx="28.4" cy="23.5" rx="2.4" ry="3.2" fill="#b87448"/>
+      <ellipse cx="20" cy="22" rx="7.2" ry="8.4" fill="#c48a5a"/>
+      <path d="M14.2 17.6C15 11.2 18.4 8.2 21.6 11.4 24.4 8.6 27.6 12.2 26.6 16.8 23.2 18.6 17 18.8 14.2 17.6Z" fill="#1c1917"/>
+    </symbol>
+    <symbol id="b-sarah" viewBox="0 0 40 56">
+      <path d="M4 40c5-8 27-8 32 0v14H4V40z" fill="#8b7cf6"/>
+      <path d="M12 18c-1.2 8-2 20-1 32h4.2c.2-8 .8-16 1.6-20 1 8 1.6 16 1.8 20h3.6c.2-6 .8-14 1.6-20 1 8 1.4 16 1.6 20H29c1-12.2-1-24-1.4-32-2.4-6-6.2-9-7.6-9s-5.4 3-8 9z" fill="#3b2f2a"/>
+    </symbol>
+    <symbol id="b-maya" viewBox="0 0 40 56">
+      <path d="M3 39c6-9 28-9 34 0v15H3V39z" fill="#34d399"/>
+      <rect x="16.5" y="30" width="7" height="9" rx="2.2" fill="#d9a07a"/>
+      <ellipse cx="12.4" cy="25" rx="2.1" ry="2.8" fill="#c48a62"/>
+      <ellipse cx="27.6" cy="25" rx="2.1" ry="2.8" fill="#c48a62"/>
+      <ellipse cx="20" cy="23.5" rx="6.8" ry="7.6" fill="#d9a07a"/>
+      <circle cx="20" cy="10.5" r="4.3" fill="#1c1917"/>
+      <path d="M14.4 17.6c.2-3.6 2.2-5.8 5.6-5.8s5.4 2.2 5.6 5.8c-.8 1.1-2.6 1.7-5.6 1.7s-4.8-.6-5.6-1.7z" fill="#1c1917"/>
+    </symbol>
+    <symbol id="b-sasha" viewBox="0 0 40 56">
+      <path d="M3 39c6-9 28-9 34 0v15H3V39z" fill="#60a5fa"/>
+      <rect x="16.5" y="30" width="7" height="9" rx="2.2" fill="#c48a5a"/>
+      <ellipse cx="12.2" cy="24.6" rx="2.2" ry="3" fill="#b87448"/>
+      <ellipse cx="27.8" cy="24.6" rx="2.2" ry="3" fill="#b87448"/>
+      <ellipse cx="20" cy="23" rx="7" ry="8" fill="#c48a5a"/>
+      <path d="M14 15.2c.4-4.2 2-7 4.6-7.6 1.4 2 2.6.2 4-.8 1.8 1 3.2 0 4.2 1.6.2 2.4 0 5-.6 7-1.4 1.6-3.4 2.3-6.2 2.3s-4.8-.8-6-2.5z" fill="#1c1917"/>
+    </symbol>
+    <symbol id="b-max" viewBox="0 0 40 56">
+      <path d="M3 39c6-9 28-9 34 0v15H3V39z" fill="#fbbf24"/>
+      <rect x="16.5" y="30" width="7" height="9" rx="2.2" fill="#e0b08a"/>
+      <ellipse cx="12" cy="26.2" rx="2.3" ry="2.9" fill="#c9926c"/>
+      <ellipse cx="28" cy="26.2" rx="2.3" ry="2.9" fill="#c9926c"/>
+      <ellipse cx="20" cy="24.5" rx="6.4" ry="6.8" fill="#e0b08a"/>
+      <path d="M12.4 17.8c.5-6.4 3.2-9.6 7.6-9.6s7.1 3.2 7.6 9.6v1.4H12.4v-1.4z" fill="#1c1917"/>
+      <rect x="11.2" y="17.6" width="17.6" height="3.2" rx="1.1" fill="#111827"/>
+    </symbol>
+    <symbol id="b-arjun" viewBox="0 0 40 56">
+      <path d="M3 39c6-9 28-9 34 0v15H3V39z" fill="#fb7185"/>
+      <rect x="16.5" y="30" width="7" height="9" rx="2.2" fill="#c48a5a"/>
+      <ellipse cx="12.2" cy="24.8" rx="2.3" ry="3" fill="#b87448"/>
+      <ellipse cx="27.8" cy="24.8" rx="2.3" ry="3" fill="#b87448"/>
+      <ellipse cx="20" cy="23.2" rx="7" ry="8" fill="#c48a5a"/>
+      <path d="M14.2 17.2c.15-3.2 2.2-5.2 5.8-5.2s5.65 2 5.8 5.2c-.5.8-2.4 1.3-5.8 1.3s-5.3-.5-5.8-1.3z" fill="#1c1917"/>
+    </symbol>
+    <symbol id="c-jack-seat" viewBox="0 0 120 88">
+      <path d="M30 14h40a14 14 0 0 1 14 14v30H16V28a14 14 0 0 1 14-14z" fill="#d5defc"/>
+      <rect x="12" y="54" width="86" height="16" rx="8" fill="#c3cffb"/>
+      <rect x="62" y="58" width="40" height="9" rx="4.5" fill="#0a1a4d"/>
+      <rect x="78" y="66" width="22" height="8" rx="4" fill="#152a6b"/>
+      <rect x="36" y="36" width="30" height="24" rx="12" fill="#0a1a4d"/>
+      <circle cx="51" cy="28" r="14" fill="#c48a5a"/>
+      <path d="M39 26C40 16 47 12 53 15c6-3 11 4 9 10-4 4-12 5-16 2-4 3-7 2-7-1z" fill="#1c1917"/>
+      <circle cx="46" cy="29" r="1.7" fill="#1a1220"/>
+      <circle cx="56" cy="29" r="1.7" fill="#1a1220"/>
+      <path d="M46 35q5 4 10 0" fill="none" stroke="#1a1220" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="c-jack-cans" viewBox="0 0 64 96">
+      <ellipse cx="32" cy="91" rx="16" ry="3.5" fill="rgba(10,26,77,.12)"/>
+      <rect x="23" y="68" width="8" height="20" rx="4" fill="#0a1a4d"/>
+      <rect x="33" y="68" width="8" height="20" rx="4" fill="#0a1a4d"/>
+      <path d="M6 50c8-14 44-14 52 0v22H6V50z" fill="#0a1a4d"/>
+      <path d="M22 48c3.2-6 16.6-6 20 0" fill="none" stroke="#1d3a86" stroke-width="1.8" stroke-linecap="round"/>
+      <rect x="27" y="40" width="10" height="12" rx="3" fill="#c48a5a"/>
+      <ellipse cx="16.5" cy="33" rx="3.2" ry="4.2" fill="#b87448"/>
+      <ellipse cx="47.5" cy="33" rx="3.2" ry="4.2" fill="#b87448"/>
+      <ellipse cx="32" cy="32" rx="13" ry="15" fill="#c48a5a"/>
+      <path d="M21 24C22 14 29 10 35 13c6-3 11 4 9 10-4 4-12 5-16 2-4 3-7 2-7-1z" fill="#1c1917"/>
+      <circle cx="27" cy="33" r="1.7" fill="#1a1220"/><circle cx="37" cy="33" r="1.7" fill="#1a1220"/>
+      <path d="M26 40q6 4.5 12 0" fill="none" stroke="#1a1220" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M15.5 30Q32 6 48.5 30" fill="none" stroke="#2647E8" stroke-width="2.6" stroke-linecap="round"/>
+      <rect x="11" y="26" width="9" height="14" rx="3" fill="#2647E8"/>
+      <rect x="44" y="26" width="9" height="14" rx="3" fill="#2647E8"/>
+    </symbol>
+    <symbol id="c-kabir-ask" viewBox="0 0 64 96">
+      <ellipse cx="32" cy="91" rx="16" ry="3.5" fill="rgba(10,26,77,.12)"/>
+      <rect x="23" y="68" width="8" height="20" rx="4" fill="#0a1a4d"/>
+      <rect x="33" y="68" width="8" height="20" rx="4" fill="#0a1a4d"/>
+      <path d="M6 50c8-14 44-14 52 0v22H6V50z" fill="#0a1a4d"/>
+      <path d="M22 48c3.2-6 16.6-6 20 0" fill="none" stroke="#1d3a86" stroke-width="1.8" stroke-linecap="round"/>
+      <rect x="27" y="40" width="10" height="12" rx="3" fill="#c48a5a"/>
+      <ellipse cx="16.5" cy="33" rx="3.2" ry="4.2" fill="#b87448"/>
+      <ellipse cx="47.5" cy="33" rx="3.2" ry="4.2" fill="#b87448"/>
+      <ellipse cx="32" cy="32" rx="13" ry="15" fill="#c48a5a"/>
+      <path d="M21 24C22 14 29 10 35 13c6-3 11 4 9 10-4 4-12 5-16 2-4 3-7 2-7-1z" fill="#1c1917"/>
+      <path d="M23 27l5 2M41 27l-5 2" fill="none" stroke="#1a1220" stroke-width="1.4" stroke-linecap="round"/>
+      <circle cx="27" cy="33" r="1.7" fill="#1a1220"/><circle cx="37" cy="33" r="1.7" fill="#1a1220"/>
+      <path d="M26 40h12" fill="none" stroke="#1a1220" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="c-kabir-pizza" viewBox="0 0 64 96">
+      <ellipse cx="32" cy="91" rx="16" ry="3.5" fill="rgba(10,26,77,.12)"/>
+      <rect x="23" y="68" width="8" height="20" rx="4" fill="#0a1a4d"/>
+      <rect x="33" y="68" width="8" height="20" rx="4" fill="#0a1a4d"/>
+      <path d="M6 50c8-14 44-14 52 0v22H6V50z" fill="#0a1a4d"/>
+      <rect x="12" y="54" width="40" height="18" rx="4" fill="#fff" stroke="#0a1a4d" stroke-width="1.6"/>
+      <rect x="15" y="57" width="34" height="10" rx="2" fill="#2647e8"/>
+      <path d="M22 48c3.2-6 16.6-6 20 0" fill="none" stroke="#1d3a86" stroke-width="1.8" stroke-linecap="round"/>
+      <rect x="27" y="40" width="10" height="12" rx="3" fill="#c48a5a"/>
+      <ellipse cx="16.5" cy="33" rx="3.2" ry="4.2" fill="#b87448"/>
+      <ellipse cx="47.5" cy="33" rx="3.2" ry="4.2" fill="#b87448"/>
+      <ellipse cx="32" cy="32" rx="13" ry="15" fill="#c48a5a"/>
+      <path d="M21 24C22 14 29 10 35 13c6-3 11 4 9 10-4 4-12 5-16 2-4 3-7 2-7-1z" fill="#1c1917"/>
+      <circle cx="27" cy="33" r="1.7" fill="#1a1220"/><circle cx="37" cy="33" r="1.7" fill="#1a1220"/>
+      <path d="M26 40q6 4.5 12 0" fill="none" stroke="#1a1220" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="c-sarah" viewBox="0 0 64 96">
+      <ellipse cx="32" cy="91" rx="16" ry="3.5" fill="rgba(10,26,77,.12)"/>
+      <rect x="22" y="60" width="8" height="24" rx="4" fill="#6d5bd4"/>
+      <rect x="34" y="60" width="8" height="24" rx="4" fill="#6d5bd4"/>
+      <path d="M16 32c-1 12 0 24 2 30h7c-1-10-1-20 0-30h-9z" fill="#3b2f2a"/>
+      <path d="M48 32c1 12 0 24-2 30h-7c1-10 1-20 0-30h9z" fill="#3b2f2a"/>
+      <rect x="18" y="40" width="28" height="26" rx="11" fill="#8b7cf6"/>
+      <circle cx="32" cy="24" r="14" fill="#e7b896"/>
+      <path d="M18 24c1-13 8-18 14-18s13 5 14 18c-1 4-3 6-6 4-2-3-5-4-8-4s-6 1-8 4c-3 2-5 0-6-4z" fill="#3b2f2a"/>
+      <circle cx="27" cy="25" r="1.6" fill="#1a1220"/><circle cx="37" cy="25" r="1.6" fill="#1a1220"/>
+      <path d="M27 31q5 3.5 10 0" fill="none" stroke="#1a1220" stroke-width="1.4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="c-maya" viewBox="0 0 64 96">
+      <ellipse cx="32" cy="91" rx="16" ry="3.5" fill="rgba(10,26,77,.12)"/>
+      <rect x="22" y="60" width="8" height="24" rx="4" fill="#1f9d72"/>
+      <rect x="34" y="60" width="8" height="24" rx="4" fill="#1f9d72"/>
+      <rect x="18" y="40" width="28" height="26" rx="11" fill="#34d399"/>
+      <circle cx="32" cy="24" r="14" fill="#d9a07a"/>
+      <circle cx="32" cy="10" r="7" fill="#1c1917"/>
+      <path d="M20 24c1-10 6-14 12-14s11 4 12 14c-3-5-8-7-12-7s-9 2-12 7z" fill="#1c1917"/>
+      <circle cx="27" cy="25" r="1.6" fill="#1a1220"/><circle cx="37" cy="25" r="1.6" fill="#1a1220"/>
+      <path d="M27 31q5 4 10 0" fill="none" stroke="#1a1220" stroke-width="1.4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="c-sasha" viewBox="0 0 64 96">
+      <ellipse cx="32" cy="91" rx="16" ry="3.5" fill="rgba(10,26,77,.12)"/>
+      <rect x="22" y="60" width="8" height="24" rx="4" fill="#3b82f6"/>
+      <rect x="34" y="60" width="8" height="24" rx="4" fill="#3b82f6"/>
+      <rect x="18" y="40" width="28" height="26" rx="11" fill="#60a5fa"/>
+      <circle cx="32" cy="24" r="14" fill="#c48a5a"/>
+      <path d="M18 20c4-10 24-12 30 2-6-4-10-2-14 1-4-4-10-6-16-3z" fill="#1c1917"/>
+      <circle cx="27" cy="25" r="1.6" fill="#1a1220"/><circle cx="37" cy="25" r="1.6" fill="#1a1220"/>
+      <path d="M28 31q4 3 8 0" fill="none" stroke="#1a1220" stroke-width="1.4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="c-max" viewBox="0 0 64 96">
+      <ellipse cx="32" cy="91" rx="16" ry="3.5" fill="rgba(10,26,77,.12)"/>
+      <rect x="22" y="60" width="8" height="24" rx="4" fill="#d97706"/>
+      <rect x="34" y="60" width="8" height="24" rx="4" fill="#d97706"/>
+      <rect x="18" y="40" width="28" height="26" rx="11" fill="#fbbf24"/>
+      <circle cx="32" cy="26" r="13" fill="#e0b08a"/>
+      <path d="M16 22h32c-1-8-8-12-16-12S17 14 16 22z" fill="#1c1917"/>
+      <rect x="16" y="18" width="32" height="6" rx="2" fill="#1c1917"/>
+      <circle cx="27" cy="27" r="1.6" fill="#1a1220"/><circle cx="37" cy="27" r="1.6" fill="#1a1220"/>
+      <path d="M27 33q5 3 10 0" fill="none" stroke="#1a1220" stroke-width="1.4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="c-arjun" viewBox="0 0 64 96">
+      <ellipse cx="32" cy="91" rx="16" ry="3.5" fill="rgba(10,26,77,.12)"/>
+      <rect x="22" y="60" width="8" height="24" rx="4" fill="#e11d48"/>
+      <rect x="34" y="60" width="8" height="24" rx="4" fill="#e11d48"/>
+      <rect x="18" y="40" width="28" height="26" rx="11" fill="#fb7185"/>
+      <circle cx="32" cy="24" r="14" fill="#c48a5a"/>
+      <path d="M18 22c2-12 10-16 14-16s12 4 14 16c-3-6-8-8-14-8s-11 2-14 8z" fill="#1c1917"/>
+      <circle cx="27" cy="25" r="1.7" fill="#1a1220"/>
+      <path d="M34 25h6" stroke="#1a1220" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M27 31q5 4 10 0" fill="none" stroke="#1a1220" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+  </svg>
+  <header class="topbar">
+    <a class="brand-lockup" href="index.html"><span class="dot"></span> YourAILens Brand Kit</a>
+    <nav class="nav">
+      <a href="index.html">Hub</a>
+      <a href="01-foundations.html">Foundations</a>
+      <a href="02-components.html">Components</a>
+      <a href="03-cast.html">Cast</a>
+      <a href="04-product-ui.html">Product UI</a>
+      <a href="05-service-story.html">Service story</a>
+      <a href="06-frames.html">Frames</a>
+      <a href="07-client-journey.html" aria-current="page">Journey</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <p class="eyebrow">07 · Client journey · Storyboard + VO</p>
+    <h1>From “hi” to cheque. Scene by scene.</h1>
+    <p class="lede">
+      A typical lead’s path with YourAILens Studios — Tapli-style frames, male voiceover under every beat.
+      Humor where it belongs. Clarity where money changes hands.
+    </p>
+    <div class="meta-row">
+      <span class="chip">~90–110s film target</span>
+      <span class="chip grey">16 scenes</span>
+      <span class="chip grey">VO: warm male · confident · wink-friendly</span>
+      <span class="chip grey">Plus Jakarta Sans · YAIL system</span>
+    </div>
+
+    <!-- FULL VO SCRIPT -->
+    <div class="vo-doc" id="full-script">
+      <div class="who">Full male voiceover · read-through</div>
+      <pre>A lead finds us. Instagram. Email. The website. LinkedIn.
+Sometimes… they just walk in. We allow it.
+
+We show them the work. Love it? Hate it? Confused?
+Confused? We don’t make you watch more videos. We explain the whole workflow —
+how this saves time, money, and those stressful messages between teams.
+Yeah… we know. It happens on our side too.
+
+We make it simple to go from A to Z.
+You bring the imagination. We cut the puzzle pieces —
+and stitch them into a proper production video.
+We charge for the pieces. And for putting them together.
+
+Already like the work? Even simpler.
+Brief. Brand kit — or we build one.
+Paperwork. Agreements. Then we jump straight into pre-production.
+
+Script. Reference sheets. Sound. Music. Editing style.
+We show the AI-ready assets. Client approves.
+Then we hit generate… and wait for the vending machine.
+
+Puzzle pieces out. Expert team stitches post.
+Then the annoying part — changes.
+(whisper) But not for us.
+We’re that good. Minimal notes. Wink.
+
+Client’s happy. Creatives get reach.
+We’re happy when the client’s happy…
+…jk. We need the cheque. We’ve got a team.
+
+The YAIL Team. YourAILens Studios.</pre>
+    </div>
+
+    <div class="toc">
+      <a href="#motion-reel"><span>Play</span> Motion reel</a>
+      <a href="#s01"><span>S01</span> Lead arrives</a>
+      <a href="#s02"><span>S02</span> Channels (+ in person gag)</a>
+      <a href="#s03"><span>S03</span> Portfolio mood check</a>
+      <a href="#s04"><span>S04</span> Confused → workflow</a>
+      <a href="#s05"><span>S05</span> A to Z / puzzle</a>
+      <a href="#s06"><span>S06</span> How we charge</a>
+      <a href="#s07"><span>S07</span> Love it → brief shortcut</a>
+      <a href="#s08"><span>S08</span> Brand kit + paperwork</a>
+      <a href="#s09"><span>S09</span> Jump into pre-pro pool</a>
+      <a href="#s10"><span>S10</span> Pre-pro checklist</a>
+      <a href="#s11"><span>S11</span> Client approval</a>
+      <a href="#s12"><span>S12</span> Generate / casino vend</a>
+      <a href="#s13"><span>S13</span> Post = stitch puzzle</a>
+      <a href="#s14"><span>S14</span> Changes (whisper)</a>
+      <a href="#s15"><span>S15</span> Happy + cheque</a>
+      <a href="#s16"><span>S16</span> THE YAIL TEAM</a>
+    </div>
+
+    <section class="section" id="motion-reel">
+      <div class="section-head">
+        <p class="eyebrow">Motion language · plays on a loop</p>
+        <h2>Each piece gets its own entrance.</h2>
+        <p class="lede">This is the film language — not a fade between slides. Watch the frame: pop, slide, drop, stamp, stagger, then the bar draws on. Same moves land inside every storyboard below.</p>
+      </div>
+      <div class="board">
+        <div class="stage reel">
+          <div class="card m-pop" style="position:absolute;left:4%;top:10%;width:28%;padding:14px;">
+            <div class="ui-label">01 · Pop</div>
+            <div style="font-weight:800;font-size:20px;">Overshoot</div>
+            <div style="font-size:12px;color:var(--ink-soft);font-weight:650;margin-top:4px;">Scale past 1, then settle. Characters and hero cards.</div>
+          </div>
+          <div class="card m-slide" style="position:absolute;left:34%;top:10%;width:30%;padding:14px;">
+            <div class="ui-label">02 · Slide</div>
+            <div style="font-weight:800;font-size:20px;">From the side</div>
+            <div style="font-size:12px;color:var(--ink-soft);font-weight:650;margin-top:4px;">UI panels enter on X. Phones, invoices, forms.</div>
+          </div>
+          <div class="float-card m-drop" style="position:absolute;right:4%;top:10%;width:28%;">
+            <div class="kicker">03 · Drop</div>
+            <div class="body">From above</div>
+            <div class="hint">Toasts, DMs, “new lead” chips.</div>
+          </div>
+          <div class="m-stamp" style="position:absolute;left:4%;bottom:18%;border:4px solid var(--danger);color:var(--danger);font-weight:800;font-size:22px;padding:8px 14px;border-radius:10px;background:#fff;">APPROVED</div>
+          <div class="m-stagger" style="position:absolute;left:28%;bottom:20%;display:flex;gap:8px;">
+            <span class="pill-ui">Brief</span>
+            <span class="pill-ui">Kit</span>
+            <span class="pill-ui">Pre-pro</span>
+            <span class="pill-ui">Generate</span>
+          </div>
+          <div class="card m-draw" style="position:absolute;right:4%;bottom:18%;width:28%;padding:12px;">
+            <div class="ui-label">05 · Draw</div>
+            <div class="bar"><i style="width:100%"></i></div>
+            <div style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-top:6px;">Bars and timelines grow, they don’t pop whole.</div>
+          </div>
+        </div>
+        <div class="cap m-rise" style="animation:mRise 7.2s ease infinite;">06 · Caption rises last and holds.</div>
+      </div>
+      <div class="grid-3" style="margin-top:14px;">
+        <div class="card"><strong>Pop</strong><p style="margin:6px 0 0;color:var(--ink-soft);font-size:14px;">Jack, mood cards, GENERATE button.</p></div>
+        <div class="card"><strong>Slide + drop</strong><p style="margin:6px 0 0;color:var(--ink-soft);font-size:14px;">Inbox, channels, invoices, walk-in slam.</p></div>
+        <div class="card"><strong>Stamp + stagger + draw</strong><p style="margin:6px 0 0;color:var(--ink-soft);font-size:14px;">APPROVED, checklist chips, reach bars, timeline clips.</p></div>
+      </div>
+    </section>
+
+    <!-- ========== S01 ========== -->
+    <article class="scene" id="s01">
+      <div class="scene-head">
+        <span class="beat-tag">Scene 01 · Open</span>
+        <h2>Meet the lead</h2>
+      </div>
+      <div class="board">
+        <div class="stage">
+          <div class="s01-fill">
+            <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;gap:12px;align-items:center;">
+                <div class="avatar-ring" style="width:84px;height:84px;margin:0;background:#fff3e0;flex:none;">
+                  <svg viewBox="0 0 120 160" width="68"><ellipse class="shadow-oval" cx="60" cy="148" rx="34" ry="8"/><path d="M14 96c12-22 80-22 92 0v36H14V96z" fill="#0a1a4d"/><path d="M42 94c5-10 31-10 36 0" fill="none" stroke="#1d3a86" stroke-width="2.4" stroke-linecap="round"/><rect x="50" y="78" width="20" height="22" rx="5" fill="#c48a5a"/><ellipse cx="32" cy="58" rx="6" ry="8" fill="#b87448"/><ellipse cx="88" cy="58" rx="6" ry="8" fill="#b87448"/><ellipse cx="60" cy="54" rx="24" ry="28" fill="#c48a5a"/><path d="M40 48C42 30 54 22 66 28c12-6 18 8 14 18-8 6-22 8-30 3-5 3-10 2-10-1z" fill="#1c1917"/><circle cx="50" cy="56" r="3" fill="#1a1220"/><circle cx="70" cy="56" r="3" fill="#1a1220"/><path d="M50 68Q60 76 70 68" fill="none" stroke="#1a1220" stroke-width="2.5" stroke-linecap="round"/></svg>
+                </div>
+                <div>
+                  <div class="ui-label">Lead · pops in</div>
+                  <div style="font-weight:800;font-size:26px;letter-spacing:-0.03em;line-height:1;">Jack</div>
+                  <div style="font-size:12px;color:var(--ink-soft);font-weight:650;">Brand</div>
+                </div>
+              </div>
+              <div class="mini-row"><span style="display:flex;gap:6px;align-items:center;"><svg class="ico" style="color:var(--blue)"><use href="#i-web"/></svg> Source</span><span class="chip">Website</span></div>
+              <div class="mini-row"><span>Status</span><span class="chip ok">New lead</span></div>
+              <div class="mini-row"><span>Budget band</span><span>Studio</span></div>
+              <div class="mini-row"><span>Need</span><span>Launch film</span></div>
+              <div class="bar" style="margin-top:auto;"><i style="width:22%"></i></div>
+              <div style="font-size:11px;font-weight:700;color:var(--ink-faint);">Fit score draws on after the card</div>
+            </div>
+            <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div class="ui-label" style="margin:0;">Inbox · slides in</div>
+                <span class="chip">2m ago</span>
+              </div>
+              <div class="mini-row"><span style="display:flex;gap:6px;align-items:center;"><svg class="ico"><use href="#i-mail"/></svg> jack@brand.co</span></div>
+              <div style="background:#fff;border:1px solid rgba(10,26,77,0.08);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:650;color:var(--navy);">“We need a film that doesn’t look like AI sludge.”</div>
+              <div style="background:var(--blue-mist);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:650;">YAIL · “Sending the reel. Three moods — love, like, or confused.”</div>
+              <div style="background:#fff;border:1px solid rgba(10,26,77,0.08);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:650;color:var(--ink-soft);">Jack · “Also… I might just walk in.”</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;">
+                <span class="pill-ui"><svg class="ico" style="color:var(--blue)"><use href="#i-chat"/></svg> 47 unread</span>
+                <span class="pill-ui"><svg class="ico" style="color:var(--danger)"><use href="#i-doc"/></svg> Due yesterday</span>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div class="float-card">
+                <div class="kicker">Drops from top</div>
+                <div class="body">New lead · Website</div>
+                <div class="hint">Assigned · Arjun desk</div>
+              </div>
+              <div class="card" style="padding:12px;flex:1;">
+                <div class="ui-label">Next on the reel</div>
+                <div class="mini-row"><span style="display:flex;gap:6px;align-items:center;"><svg class="ico" style="color:var(--sarah)"><use href="#i-user"/></svg> Sarah</span><span class="chip">Brand</span></div>
+                <div class="mini-row" style="margin-top:6px;"><span style="display:flex;gap:6px;align-items:center;"><svg class="ico" style="color:var(--maya)"><use href="#i-user"/></svg> Maya</span><span class="chip">Growth</span></div>
+                <div class="mini-row" style="margin-top:6px;"><span style="display:flex;gap:6px;align-items:center;"><svg class="ico" style="color:var(--blue)"><use href="#i-film"/></svg> Reel</span><span class="chip ok">Ready</span></div>
+              </div>
+            </div>
+            <div class="card wide" style="padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+              <span style="font-size:12px;font-weight:800;letter-spacing:0.08em;color:var(--ink-faint);">STAGGER IN</span>
+              <span class="pill-ui">1 Profile</span>
+              <span class="pill-ui">2 Inbox</span>
+              <span class="pill-ui">3 Toast</span>
+              <span class="pill-ui">4 Desks</span>
+              <span class="pill-ui">5 Caption</span>
+            </div>
+          </div>
+        </div>
+        <div class="cap">This is Jack. He needs content. He found YAIL.</div>
+      </div>
+      <div class="vo-line">
+        <div class="label">VO · male</div>
+        <div class="line">“This is Jack. He needs content. And somehow… he found YAIL.”</div>
+        <div class="dir">Direction: warm intro, slight smile in the voice. Jack pops in with soft overshoot.</div>
+      </div>
+    </article>
+
+    <!-- ========== S02 ========== -->
+    <article class="scene" id="s02">
+      <div class="scene-head">
+        <span class="beat-tag">Scene 02 · Acquisition</span>
+        <h2>How leads show up</h2>
+      </div>
+      <div class="board">
+        <div class="stage">
+          <div style="position:absolute;left:4%;top:10%;display:grid;grid-template-columns:1fr 1fr;gap:10px;width:46%;">
+            <div class="card" style="padding:12px;"><div style="display:flex;gap:8px;align-items:center;font-weight:800;"><span class="pill-ui" style="padding:6px;color:#e1306c;"><svg class="ico"><use href="#i-ig"/></svg></span> Instagram</div><div class="hint" style="margin-top:6px;font-size:12px;color:var(--ink-soft);font-weight:650;">DM · 3 new</div><div class="bar" style="margin-top:8px;"><i style="width:70%"></i></div></div>
+            <div class="card" style="padding:12px;"><div style="display:flex;gap:8px;align-items:center;font-weight:800;"><span class="pill-ui" style="padding:6px;color:var(--blue);"><svg class="ico"><use href="#i-mail"/></svg></span> Email</div><div style="margin-top:6px;font-size:12px;color:var(--ink-soft);font-weight:650;">hello@ · 1 thread</div><div class="bar" style="margin-top:8px;"><i style="width:40%"></i></div></div>
+            <div class="card" style="padding:12px;"><div style="display:flex;gap:8px;align-items:center;font-weight:800;"><span class="pill-ui" style="padding:6px;"><svg class="ico"><use href="#i-web"/></svg></span> Website</div><div style="margin-top:6px;font-size:12px;color:var(--ink-soft);font-weight:650;">Form · Jack</div><div class="bar" style="margin-top:8px;"><i style="width:88%"></i></div></div>
+            <div class="card" style="padding:12px;"><div style="display:flex;gap:8px;align-items:center;font-weight:800;"><span class="pill-ui" style="padding:6px;color:#0a66c2;"><svg class="ico"><use href="#i-in"/></svg></span> LinkedIn</div><div style="margin-top:6px;font-size:12px;color:var(--ink-soft);font-weight:650;">InMail · open</div><div class="bar" style="margin-top:8px;"><i style="width:55%"></i></div></div>
+          </div>
+          <div class="card" style="position:absolute;right:4%;top:8%;width:44%;padding:12px 14px;border:2px dashed var(--danger);transform:rotate(-1.5deg);display:flex;gap:10px;align-items:center;">
+            <svg class="fig" style="width:86px;" aria-hidden="true"><use href="#c-kabir-pizza"/></svg>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+                <div style="display:flex;gap:6px;align-items:center;font-weight:800;"><svg class="ico" style="color:var(--danger);"><use href="#i-door"/></svg> Walk-in</div>
+                <span class="chip bad">Plot twist</span>
+              </div>
+              <div style="margin-top:6px;font-weight:800;letter-spacing:-0.03em;">Jack, laptop as pizza</div>
+              <div style="margin-top:4px;font-size:12px;font-weight:650;color:var(--ink-soft);">Studio looks up. Coffee, slow-mo.</div>
+            </div>
+          </div>
+          <div class="card" style="position:absolute;left:4%;top:64%;width:22%;padding:10px 12px;">
+            <div class="ui-label">Live desk</div>
+            <div style="font-weight:800;">IG 3 · Mail 1 · Jack</div>
+          </div>
+          <div class="card" style="position:absolute;left:28%;top:64%;width:22%;padding:10px 12px;">
+            <div class="ui-label">Reply speed</div>
+            <div style="font-weight:800;font-size:20px;letter-spacing:-0.03em;line-height:1;">12 min</div>
+          </div>
+          <div class="card" style="position:absolute;right:4%;top:64%;width:42%;padding:10px 12px;">
+            <div class="ui-label">Walk-in gag</div>
+            <div style="display:flex;gap:6px;flex-wrap:nowrap;">
+              <span class="chip">Door</span>
+              <span class="chip">Pizza laptop</span>
+              <span class="chip bad">Coffee</span>
+              <span class="chip">Look up</span>
+            </div>
+          </div>
+        </div>
+        <div class="cap">DM, email, site, LinkedIn… or they just walk in. We allow it.</div>
+      </div>
+      <div class="vo-line">
+        <div class="label">VO · male</div>
+        <div class="line">“Maybe Instagram. Maybe email. Website. LinkedIn. Or — plot twist — they just walk in. We… allow it.”</div>
+        <div class="dir">Channels pop left→right. “In person” card slam with cartoon door creak SFX.</div>
+      </div>
+    </article>
+
+    <!-- ========== S03 ========== -->
+    <article class="scene" id="s03">
+      <div class="scene-head">
+        <span class="beat-tag">Scene 03 · Portfolio</span>
+        <h2>Show the work. Read the room.</h2>
+      </div>
+      <div class="board">
+        <div class="stage">
+          <div class="house">
+            <div class="proscenium">
+              <div class="curtain"></div>
+              <div class="silver">
+                <div class="pic">
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <svg class="ico" style="width:26px;height:26px;"><use href="#i-play"/></svg>
+                    <span style="font-size:11px;font-weight:700;letter-spacing:0.08em;opacity:0.75;">0:18</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;font-size:32px;font-weight:800;letter-spacing:-0.045em;line-height:1;">
+                    <img src="assets/yail-mark-white.png" alt="YAIL" style="height:0.92em;width:auto;display:block;" />
+                    <span>showcase</span>
+                  </div>
+                </div>
+              </div>
+              <div class="curtain"></div>
+            </div>
+            <div class="floor">
+              <div class="row r1"><div class="block"><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span></div><div class="block"><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span></div></div>
+              <div class="row r2"><div class="block"><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span></div><div class="block"><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span></div></div>
+              <div class="row r3"><div class="block"><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span></div><div class="block"><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span></div></div>
+              <div class="row r4">
+                <div class="cast-note">
+                  <div class="brk left"></div>
+                  <div class="brk right"></div>
+                  <div class="team-pin left">YAIL team</div>
+                  <div class="team-pin right">YAIL team</div>
+                  <div class="jack-pin"><span>Jack</span><i></i></div>
+                </div>
+                <div class="block"><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st on"><svg class="who" viewBox="0 0 40 56"><use href="#b-sarah"/></svg></span><span class="st on"><svg class="who" viewBox="0 0 40 56"><use href="#b-maya"/></svg></span></div>
+                <div class="block"><span class="st on is-jack"><svg class="who" viewBox="0 0 40 56"><use href="#b-jack"/></svg></span><span class="st on"><svg class="who" viewBox="0 0 40 56"><use href="#b-sasha"/></svg></span><span class="st on"><svg class="who" viewBox="0 0 40 56"><use href="#b-max"/></svg></span><span class="st on"><svg class="who" viewBox="0 0 40 56"><use href="#b-arjun"/></svg></span><span class="st"></span><span class="st"></span><span class="st"></span></div>
+              </div>
+              <div class="row r5"><div class="block"><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span></div><div class="block"><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span></div></div>
+              <div class="row r6"><div class="block"><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span></div><div class="block"><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span><span class="st"></span></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="cap">Love it? Like it? Hate it? Confused? Be honest.</div>
+      </div>
+      <div class="vo-line">
+        <div class="label">VO · male</div>
+        <div class="line">“We show them the work. Do they love it? Like it? Hate it? Or… are they just confused?”</div>
+        <div class="dir">Camera from the back of the house. Huge silver screen. Jack, navy, centered in the YAIL row. Everyone else is an empty seat. No faces.</div>
+      </div>
+    </article>
+
+    <!-- ========== S04 ========== -->
+    <article class="scene" id="s04">
+      <div class="scene-head">
+        <span class="beat-tag">Scene 04 · Branch · Confused</span>
+        <h2>Nah, we don’t drown you in more videos</h2>
+      </div>
+      <div class="board">
+        <div class="stage">
+          <div class="card" style="position:absolute;left:4%;top:8%;width:36%;padding:12px;display:flex;gap:8px;align-items:center;">
+            <svg class="fig" style="width:72px;" aria-hidden="true"><use href="#c-kabir-ask"/></svg>
+            <div style="flex:1;min-width:0;">
+              <div class="ui-label">Confused</div>
+              <div style="font-weight:800;letter-spacing:-0.03em;">Play next video?</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+                <div class="ui-cta" style="margin:0;flex:1;padding:10px 8px;">Play next</div>
+                <div style="flex:none;transform:rotate(-12deg);color:var(--danger);font-size:13px;font-weight:900;letter-spacing:0.06em;border:2px solid currentColor;background:#fff;padding:3px 6px;border-radius:6px;line-height:1;">SKIP</div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="position:absolute;left:40%;top:8%;width:32%;padding:14px;">
+            <div class="ui-label">Workflow</div>
+            <div class="mini-row"><span>1 Brief</span><svg class="ico" style="color:var(--ok)"><use href="#i-check"/></svg></div>
+            <div class="mini-row" style="margin-top:6px;"><span>2 Brand kit</span><svg class="ico" style="color:var(--ok)"><use href="#i-check"/></svg></div>
+            <div class="mini-row" style="margin-top:6px;"><span>3 Pre-pro</span><svg class="ico" style="color:var(--blue)"><use href="#i-pen"/></svg></div>
+            <div class="mini-row" style="margin-top:6px;"><span>4 Generate</span><svg class="ico" style="color:var(--blue)"><use href="#i-film"/></svg></div>
+            <div class="mini-row" style="margin-top:6px;"><span>5 Post + ship</span><svg class="ico"><use href="#i-play"/></svg></div>
+          </div>
+          <div class="float-card" style="position:absolute;right:4%;top:12%;width:20%;">
+            <div class="kicker">YAIL Slack</div>
+            <div class="body">47 unread</div>
+            <div class="hint">Happens on our team too</div>
+            <div class="mini-row" style="margin-top:8px;font-size:11px;">time saved</div>
+            <div class="bar ok" style="margin-top:6px;"><i style="width:72%"></i></div>
+            <div class="mini-row" style="margin-top:8px;font-size:11px;">fewer pings</div>
+            <div class="bar ok" style="margin-top:6px;"><i style="width:64%"></i></div>
+          </div>
+          <div class="card" style="position:absolute;left:4%;top:50%;width:34%;padding:10px 12px;">
+            <div class="ui-label">What we actually save</div>
+            <div style="font-weight:800;">Days · one desk · fewer pings</div>
+          </div>
+          <div class="card" style="position:absolute;left:40%;top:64%;width:34%;padding:10px 12px;">
+            <div class="ui-label">Stress thread</div>
+            <div style="font-size:12px;font-weight:750;white-space:nowrap;">“v03??” · “Who approved the face?”</div>
+          </div>
+          <div class="card" style="position:absolute;right:4%;top:64%;width:18%;padding:10px 12px;">
+            <div class="ui-label">More videos?</div>
+            <div style="font-weight:800;">Zero.</div>
+          </div>
+        </div>
+        <div class="cap">Confused? We explain the workflow — not another reel marathon.</div>
+      </div>
+      <div class="vo-line">
+        <div class="label">VO · male</div>
+        <div class="line">“If they’re confused — we show them more videos. Nah. Just kidding. We walk the whole workflow. How this saves time, money, and those stressful messages between teams. We know. It happens to us too.”</div>
+        <div class="dir">Fake “Play next” button appears then gets stamped SKIP. Workflow diagram draws on.</div>
+      </div>
+    </article>
+
+    <!-- ========== S05 ========== -->
+    <article class="scene" id="s05">
+      <div class="scene-head">
+        <span class="beat-tag">Scene 05 · Metaphor</span>
+        <h2>A to Z. We handle the messy middle.</h2>
+      </div>
+      <div class="board">
+        <div class="stage">
+          <div class="card" style="position:absolute;left:4%;top:14%;width:22%;padding:14px;text-align:center;">
+            <div class="ui-label">You</div>
+            <div style="font-size:42px;font-weight:800;letter-spacing:-0.04em;color:var(--blue);">A</div>
+            <div style="font-weight:750;">Imagination</div>
+            <div style="font-size:12px;color:var(--ink-soft);margin-top:4px;">Brief in</div>
+          </div>
+          <div style="position:absolute;left:28%;top:10%;width:44%;display:grid;grid-template-columns:repeat(6,1fr);gap:6px;">
+            <div class="pill-ui" style="justify-content:center;">B</div><div class="pill-ui" style="justify-content:center;">C</div><div class="pill-ui" style="justify-content:center;background:var(--blue);color:#fff;">D</div><div class="pill-ui" style="justify-content:center;">E</div><div class="pill-ui" style="justify-content:center;background:var(--blue-soft);">F</div><div class="pill-ui" style="justify-content:center;">G</div>
+            <div class="pill-ui" style="justify-content:center;">H</div><div class="pill-ui" style="justify-content:center;background:var(--navy);color:#fff;">I</div><div class="pill-ui" style="justify-content:center;">J</div><div class="pill-ui" style="justify-content:center;">K</div><div class="pill-ui" style="justify-content:center;background:var(--blue);color:#fff;">L</div>            <div class="pill-ui" style="justify-content:center;">M</div>
+            <div class="pill-ui" style="justify-content:center;">N</div><div class="pill-ui" style="justify-content:center;background:var(--blue-soft);">O</div><div class="pill-ui" style="justify-content:center;">P</div><div class="pill-ui" style="justify-content:center;background:var(--navy);color:#fff;">Q</div><div class="pill-ui" style="justify-content:center;">R</div><div class="pill-ui" style="justify-content:center;">S</div>
+            <div class="pill-ui" style="justify-content:center;">T</div><div class="pill-ui" style="justify-content:center;">U</div><div class="pill-ui" style="justify-content:center;background:var(--blue);color:#fff;">V</div><div class="pill-ui" style="justify-content:center;">W</div><div class="pill-ui" style="justify-content:center;">X</div><div class="pill-ui" style="justify-content:center;background:var(--blue-soft);">Y</div>
+          </div>
+          <div class="card" style="position:absolute;left:4%;top:52%;width:22%;padding:10px;">
+            <div class="ui-label">You hand us</div>
+            <div class="mini-row"><svg class="ico" style="color:var(--blue)"><use href="#i-pen"/></svg><span>Idea</span></div>
+          </div>
+          <div class="card" style="position:absolute;right:4%;top:52%;width:22%;padding:10px;">
+            <div class="ui-label">You receive</div>
+            <div class="mini-row"><svg class="ico" style="color:var(--blue)"><use href="#i-play"/></svg><span>Master</span></div>
+          </div>
+          <div class="float-card" style="position:absolute;left:28%;top:48%;width:44%;">
+            <div class="kicker">YAIL owns the middle</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+              <span class="pill-ui"><svg class="ico"><use href="#i-doc"/></svg> Pieces</span>
+              <span class="pill-ui"><svg class="ico"><use href="#i-film"/></svg> Stitch</span>
+              <span class="pill-ui"><svg class="ico"><use href="#i-user"/></svg> Taste</span>
+            </div>
+          </div>
+          <div class="card" style="position:absolute;left:28%;bottom:16%;width:44%;padding:10px 12px;display:flex;align-items:center;gap:10px;">
+            <svg class="ico" style="color:var(--blue)"><use href="#i-film"/></svg>
+            <div style="flex:1;"><div style="font-size:12px;font-weight:800;">Pieces snap into a player</div><div class="bar" style="margin-top:6px;"><i style="width:78%"></i></div></div>
+            <span class="chip ok">Stitched</span>
+          </div>
+          <div class="card" style="position:absolute;right:4%;top:8%;width:22%;padding:10px;text-align:center;">
+            <svg class="fig" style="width:42px;margin:0 auto 2px;" aria-hidden="true"><use href="#c-sarah"/></svg>
+            <div style="font-size:28px;font-weight:800;letter-spacing:-0.04em;color:var(--navy);line-height:1;">Z</div>
+            <div style="font-weight:750;font-size:13px;">Sarah ships it</div>
+          </div>
+        </div>
+        <div class="cap">A to Z. We take care of every letter in between.</div>
+      </div>
+      <div class="vo-line">
+        <div class="label">VO · male</div>
+        <div class="line">“Point being — we make it simple to go from A to Z. You give us the imagination. We make the puzzle pieces… and stitch them into a proper production video.”</div>
+        <div class="dir">Puzzle pieces fly in from edges, snap with magnetic click. Final piece reveals a mini film frame.</div>
+      </div>
+    </article>
+
+    <!-- ========== S06 ========== -->
+    <article class="scene" id="s06">
+      <div class="scene-head">
+        <span class="beat-tag">Scene 06 · Pricing clarity</span>
+        <h2>Pieces + putting them together</h2>
+      </div>
+      <div class="board">
+        <div class="stage">
+          <div class="card" style="position:absolute;left:5%;top:8%;width:42%;padding:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;"><div style="display:flex;gap:8px;align-items:center;font-weight:800;"><svg class="ico" style="color:var(--blue)"><use href="#i-doc"/></svg> Invoice A</div><span class="chip">Pieces</span></div>
+            <div class="mini-row" style="margin-top:12px;"><span>Shot plates</span><span>line</span></div>
+            <div class="mini-row" style="margin-top:8px;"><span>AI-ready assets</span><span>line</span></div>
+            <div class="mini-row" style="margin-top:8px;"><span>Refs pack</span><span>line</span></div>
+            <div class="ui-cta" style="margin-top:14px;">Charged for pieces</div>
+          </div>
+          <div class="card" style="position:absolute;right:5%;top:8%;width:42%;padding:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;"><div style="display:flex;gap:8px;align-items:center;font-weight:800;"><svg class="ico" style="color:var(--blue)"><use href="#i-film"/></svg> Invoice B</div><span class="chip">Assembly</span></div>
+            <div class="mini-row" style="margin-top:12px;"><span>Edit</span><span>line</span></div>
+            <div class="mini-row" style="margin-top:8px;"><span>Grade + sound</span><span>line</span></div>
+            <div class="mini-row" style="margin-top:8px;"><span>Ship master</span><span>line</span></div>
+            <div class="ui-cta" style="margin-top:14px;background:var(--navy);">Charged to stitch</div>
+          </div>
+          <div class="card" style="position:absolute;left:5%;top:66%;width:28%;padding:10px 12px;">
+            <div class="ui-label">Piece types</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;"><span class="chip">Shots</span><span class="chip">Plates</span><span class="chip">Audio</span></div>
+          </div>
+          <div class="card" style="position:absolute;left:35%;top:66%;width:28%;padding:10px 12px;">
+            <div class="ui-label">Assembly</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;"><span class="chip">Cut</span><span class="chip">Grade</span><span class="chip">Mix</span></div>
+          </div>
+          <div class="card" style="position:absolute;right:5%;top:66%;width:28%;padding:10px 12px;">
+            <div class="ui-label">Two lines, one film</div>
+            <div style="font-weight:800;">Client sees both charges</div>
+          </div>
+        </div>
+        <div class="cap">We charge for the pieces — and for getting them together.</div>
+      </div>
+      <div class="vo-line">
+        <div class="label">VO · male</div>
+        <div class="line">“We charge for the puzzle pieces. And for getting those puzzle pieces together.”</div>
+        <div class="dir">Two price cards slide in. Clean. No apology. Confident.</div>
+      </div>
+    </article>
+
+    <!-- ========== S07 ========== -->
+    <article class="scene" id="s07">
+      <div class="scene-head">
+        <span class="beat-tag">Scene 07 · Branch · Love / Like</span>
+        <h2>Already vibing? Shortcut.</h2>
+      </div>
+      <div class="board">
+        <div class="stage">
+          <div class="card" style="position:absolute;left:4%;top:10%;width:30%;padding:12px;">
+            <div style="display:flex;gap:8px;align-items:center;">
+              <svg class="fig" style="width:56px;" aria-hidden="true"><use href="#c-kabir"/></svg>
+              <div style="font-weight:800;letter-spacing:-0.03em;">Jack already loves it</div>
+            </div>
+            <div class="mini-row" style="margin-top:8px;"><span>Jump to brief</span><svg class="ico" style="color:var(--ok)"><use href="#i-check"/></svg></div>
+          </div>
+          <div class="card" style="position:absolute;left:34%;top:10%;width:34%;padding:14px;">
+            <div class="ui-label">Brief form</div>
+            <div class="mini-row"><span>Product</span><span>Launch film</span></div>
+            <div class="mini-row" style="margin-top:8px;"><span>Tone</span><span>Clean · confident</span></div>
+            <div class="mini-row" style="margin-top:8px;"><span>Length</span><span>45–60s</span></div>
+            <div style="margin-top:10px;height:36px;border-radius:10px;border:1px dashed var(--blue);background:var(--blue-mist);"></div>
+          </div>
+          <div class="card" style="position:absolute;right:4%;top:12%;width:26%;padding:14px;">
+            <div class="ui-label">Brand kit</div>
+            <div class="mini-row"><span>Have one?</span><span class="chip grey">No</span></div>
+            <div class="ui-cta" style="margin-top:12px;">We’ll build it</div>
+            <div style="margin-top:10px;font-size:12px;color:var(--ink-soft);font-weight:650;">Upload dropzone animates open</div>
+          </div>
+          <div class="card" style="position:absolute;left:4%;bottom:16%;width:28%;padding:12px;">
+            <div class="ui-label">Skipped</div>
+            <div class="mini-row" style="opacity:.45;"><span>Mood tour</span><svg class="ico"><use href="#i-x"/></svg></div>
+            <div class="mini-row" style="margin-top:6px;opacity:.45;"><span>Extra reel</span><svg class="ico"><use href="#i-x"/></svg></div>
+          </div>
+          <div class="card" style="position:absolute;left:34%;bottom:16%;width:34%;padding:12px;">
+            <div class="ui-label">Brief asks</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;"><span class="chip">Audience</span><span class="chip">Offer</span><span class="chip">Deadline</span><span class="chip">Do-nots</span></div>
+          </div>
+          <div class="card" style="position:absolute;right:4%;top:62%;width:26%;padding:10px 12px;">
+            <div class="ui-label">Kit contents</div>
+            <div style="font-weight:800;">Logo · type · colors</div>
+          </div>
+        </div>
+        <div class="cap">Like the work already? Brief + brand kit. Let’s go.</div>
+      </div>
+      <div class="vo-line">
+        <div class="label">VO · male</div>
+        <div class="line">“If they already like the videos? Even simpler. We come straight here — brief, and a brand kit if they’ve got one. If not… we make one.”</div>
+        <div class="dir">Green path arrow bypasses the confused branch. Forms slide in.</div>
+      </div>
+    </article>
+
+    <!-- ========== S08 ========== -->
+    <article class="scene" id="s08">
+      <div class="scene-head">
+        <span class="beat-tag">Scene 08 · Lock-in</span>
+        <h2>Brand locked. Paperwork. Then we jump.</h2>
+      </div>
+      <div class="board">
+        <div class="stage">
+          <div class="card" style="position:absolute;left:4%;top:8%;width:38%;padding:14px;">
+            <div class="ui-label">Lock checklist</div>
+            <div class="mini-row"><span style="display:flex;gap:6px;align-items:center;"><svg class="ico"><use href="#i-doc"/></svg> Logo + colors</span><span class="chip ok">Locked</span></div>
+            <div class="mini-row" style="margin-top:8px;"><span style="display:flex;gap:6px;align-items:center;"><svg class="ico"><use href="#i-pen"/></svg> Agreement</span><span class="chip ok">Signed</span></div>
+            <div class="mini-row" style="margin-top:8px;"><span style="display:flex;gap:6px;align-items:center;"><svg class="ico"><use href="#i-card"/></svg> Kickoff</span><span class="chip">Ready</span></div>
+            <div class="bar ok" style="margin-top:14px;"><i style="width:100%"></i></div>
+            <div style="margin-top:6px;font-size:12px;font-weight:700;color:var(--ok);">3 / 3 complete</div>
+          </div>
+          <div class="card" style="position:absolute;right:4%;top:8%;width:52%;padding:14px;display:flex;gap:14px;align-items:center;">
+            <svg class="fig" style="width:88px;" aria-hidden="true"><use href="#c-kabir"/></svg>
+            <div>
+              <div class="ui-label">Lead tag morphs</div>
+              <div style="font-weight:800;font-size:22px;letter-spacing:-0.03em;">Jack</div>
+              <div style="display:inline-block;margin-top:6px;border:3px solid var(--blue);color:var(--blue);font-weight:800;padding:4px 12px;border-radius:10px;transform:rotate(-6deg);">CLIENT</div>
+            </div>
+          </div>
+          <div class="card" style="position:absolute;left:4%;top:66%;width:22%;padding:12px;">
+            <div class="ui-label">Files</div>
+            <div style="display:flex;gap:6px;"><span class="pill-ui"><svg class="ico"><use href="#i-doc"/></svg> MSA</span><span class="pill-ui"><svg class="ico"><use href="#i-pen"/></svg> SOW</span></div>
+          </div>
+          <div class="card" style="position:absolute;left:28%;top:66%;width:22%;padding:12px;">
+            <div class="ui-label">Signature</div>
+            <div style="font-family:Caveat,cursive;font-size:22px;line-height:1;border-bottom:2px solid var(--navy);">Jack</div>
+          </div>
+          <div class="card" style="position:absolute;right:4%;top:66%;width:42%;padding:10px 12px;">
+            <div class="ui-label">Kickoff</div>
+            <div style="font-weight:800;">Arjun · pre-pro next · green light</div>
+          </div>
+        </div>
+        <div class="cap">Resources locked. Agreements done. Lead → client.</div>
+      </div>
+      <div class="vo-line">
+        <div class="label">VO · male</div>
+        <div class="line">“Once we lock the brand resources — and yes, a couple of paperwork and agreements — we jump straight into pre-production.”</div>
+        <div class="dir">Stamp “CLIENT” on Jack’s name tag. Soft paper shuffle SFX.</div>
+      </div>
+    </article>
+
+    <!-- ========== S09 ========== -->
+    <article class="scene" id="s09">
+      <div class="scene-head">
+        <span class="beat-tag">Scene 09 · Gag</span>
+        <h2>Cannonball into pre-production</h2>
+      </div>
+      <div class="board">
+        <div class="stage">
+          <div class="card" style="position:absolute;left:3.5%;top:7%;width:40%;padding:12px 14px;color:var(--navy);display:flex;gap:12px;align-items:center;">
+            <svg class="fig" style="width:96px;" aria-hidden="true"><use href="#c-jack-cans"/></svg>
+            <div>
+              <div class="ui-label">Cannonball</div>
+              <div style="font-size:22px;font-weight:800;letter-spacing:-0.03em;line-height:1;">Jack jumps in</div>
+              <div style="margin-top:6px;font-size:12px;font-weight:650;color:var(--ink-soft);">Headphones on. Then the splash.</div>
+            </div>
+          </div>
+          <div class="card" style="position:absolute;left:3.5%;top:52%;width:40%;padding:12px;color:var(--navy);">
+            <div class="ui-label">Where he lands</div>
+            <div style="font-weight:800;">The outlined JACK block</div>
+            <div class="mini-row" style="margin-top:8px;"><span>Next piece</span><span class="chip">Headphones</span></div>
+          </div>
+          <div style="position:absolute;right:3.5%;top:6%;width:50%;padding:10px 12px 12px;border-radius:22px;background:var(--blue-mist);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <div class="ui-label" style="margin:0;">Well · pieces lock</div>
+              <span class="chip">Hold · splash</span>
+            </div>
+            <div class="tet">
+              <i></i><i></i><i></i><i class="ghost" style="grid-column:span 2">JACK</i><i></i><i></i><i></i>
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+              <i style="background:var(--arjun);grid-column:span 2">SHOT</i><i></i><i style="background:var(--navy)">VO</i><i></i><i></i><i></i><i></i>
+              <i></i><i style="background:var(--sarah);grid-column:span 3">MUSIC</i><i></i><i style="background:var(--sasha);color:var(--navy);grid-column:span 2">EDIT</i><i></i>
+              <i style="background:var(--maya);color:var(--navy);grid-column:span 3">SOUND</i><i></i><i></i><i></i><i style="background:var(--arjun-soft);color:var(--navy)">CAST</i><i></i>
+              <i style="background:var(--max);color:var(--navy);grid-column:span 2">REFS</i><i></i><i></i><i></i><i style="background:var(--blue-soft);color:var(--navy);grid-column:span 3">BOARDS</i>
+              <i style="background:var(--blue);grid-column:span 4">SCRIPT</i><i></i><i></i><i></i><i></i>
+            </div>
+          </div>
+        </div>
+        <div class="cap">What’s pre-production? Glad you asked — after the splash.</div>
+      </div>
+      <div class="vo-line">
+        <div class="label">VO · male</div>
+        <div class="line">“Then we jump straight into pre-production. Literally. What’s pre-production, you ask?”</div>
+        <div class="dir">Jack cannonballs in as the active Tetris piece. Pre-pro blocks are already locked. Splash when he lands.</div>
+      </div>
+    </article>
+
+    <!-- ========== S10 ========== -->
+    <article class="scene" id="s10">
+      <div class="scene-head">
+        <span class="beat-tag">Scene 10 · Pre-pro</span>
+        <h2>Script, refs, sound, music, edit style</h2>
+      </div>
+      <div class="board">
+        <div class="stage">
+          <div style="position:absolute;left:4%;right:4%;top:8%;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+            <div class="card" style="padding:12px;"><div style="display:flex;gap:6px;align-items:center;font-weight:800;"><svg class="ico" style="color:var(--blue)"><use href="#i-pen"/></svg> Script</div><div class="mini-row" style="margin-top:8px;font-size:11px;">beats_v1.md</div><div class="bar" style="margin-top:8px;"><i style="width:80%"></i></div></div>
+            <div class="card" style="padding:12px;"><div style="display:flex;gap:6px;align-items:center;font-weight:800;"><svg class="ico" style="color:var(--blue)"><use href="#i-doc"/></svg> Refs</div><div class="mini-row" style="margin-top:8px;font-size:11px;">look · tone · pace</div><div class="bar" style="margin-top:8px;"><i style="width:62%"></i></div></div>
+            <div class="card" style="padding:12px;"><div style="display:flex;gap:6px;align-items:center;font-weight:800;"><svg class="ico" style="color:var(--blue)"><use href="#i-music"/></svg> Music</div><div class="mini-row" style="margin-top:8px;font-size:11px;">bed + hits</div><div class="bar" style="margin-top:8px;"><i style="width:48%"></i></div></div>
+            <div class="card" style="padding:12px;"><div style="display:flex;gap:6px;align-items:center;font-weight:800;"><svg class="ico" style="color:var(--blue)"><use href="#i-wave"/></svg> Sound</div><div class="mini-row" style="margin-top:8px;font-size:11px;">whoosh / thunk</div><div class="bar" style="margin-top:8px;"><i style="width:36%"></i></div></div>
+            <div class="card" style="padding:12px;grid-column:span 2;"><div style="display:flex;gap:6px;align-items:center;font-weight:800;"><svg class="ico" style="color:var(--blue)"><use href="#i-film"/></svg> Edit style locked early</div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"><span class="chip">Cut on beat</span><span class="chip">Clean grade</span><span class="chip grey">No panic later</span></div></div>
+            <div class="card" style="padding:12px;"><div style="display:flex;gap:6px;align-items:center;font-weight:800;"><svg class="ico"><use href="#i-doc"/></svg> Shot list</div><div class="mini-row" style="margin-top:8px;font-size:11px;">12 setups</div></div>
+            <div class="card" style="padding:12px;"><div style="display:flex;gap:6px;align-items:center;font-weight:800;"><svg class="ico"><use href="#i-user"/></svg> VO notes</div><div class="mini-row" style="margin-top:8px;font-size:11px;">Male · warm</div></div>
+            <div class="card" style="padding:12px;"><div style="display:flex;gap:6px;align-items:center;font-weight:800;"><svg class="ico"><use href="#i-check"/></svg> Client gate</div><div class="mini-row" style="margin-top:8px;font-size:11px;">Review Fri</div></div>
+          </div>
+        </div>
+        <div class="cap">Script. Refs. Sound. Music. And how we’ll edit it later.</div>
+      </div>
+      <div class="vo-line">
+        <div class="label">VO · male</div>
+        <div class="line">“Scripting. Reference sheets. Sounds. Music. And a bit of what we’ll do in post — editing styles, all of that.”</div>
+        <div class="dir">Checklist ticks cascade. Cards settle with soft bounce.</div>
+      </div>
+    </article>
+
+    <!-- ========== S11 ========== -->
+    <article class="scene" id="s11">
+      <div class="scene-head">
+        <span class="beat-tag">Scene 11 · Gate</span>
+        <h2>Show the client. Get the nod.</h2>
+      </div>
+      <div class="board">
+        <div class="stage">
+          <div class="card" style="position:absolute;left:4%;top:8%;width:46%;padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;"><div style="display:flex;gap:8px;align-items:center;"><svg class="fig" style="width:34px;" aria-hidden="true"><use href="#c-kabir"/></svg><div class="ui-label" style="margin:0;">Jack reviews</div></div><span class="chip">Lead → Client</span></div>
+            <div class="mini-row" style="margin-top:10px;"><span style="display:flex;gap:6px;align-items:center;"><svg class="ico"><use href="#i-doc"/></svg> script_pack.pdf</span><span class="chip grey">Review</span></div>
+            <div class="mini-row" style="margin-top:8px;"><span style="display:flex;gap:6px;align-items:center;"><svg class="ico"><use href="#i-film"/></svg> shot_list</span><span class="chip ok">Locked</span></div>
+            <div class="mini-row" style="margin-top:8px;"><span style="display:flex;gap:6px;align-items:center;"><svg class="ico"><use href="#i-music"/></svg> music_bed</span><span class="chip ok">Locked</span></div>
+            <div class="bar" style="margin-top:8px;"><i style="width:90%"></i></div>
+          </div>
+          <div style="position:absolute;right:6%;top:18%;text-align:center;">
+            <div style="border:4px solid var(--danger);color:var(--danger);font-weight:800;font-size:clamp(22px,3vw,36px);padding:14px 22px;border-radius:12px;transform:rotate(-8deg);background:#fff;box-shadow:var(--shadow-md);">APPROVED</div>
+            <div style="margin-top:12px;font-weight:750;color:var(--ink-soft);">Stamp slams · then GENERATE</div>
+          </div>
+          <div class="card" style="position:absolute;right:4%;bottom:16%;width:42%;padding:12px;">
+            <div class="ui-label">Version</div>
+            <div class="mini-row"><span>script_pack</span><span class="chip">v3</span></div>
+            <div class="mini-row" style="margin-top:6px;"><span>Reviewer</span><span>Jack</span></div>
+            <div class="mini-row" style="margin-top:6px;"><span>Next</span><span class="chip">Generate</span></div>
+          </div>
+          <div class="float-card" style="position:absolute;left:4%;bottom:16%;width:46%;">
+            <div class="kicker">Name morph</div>
+            <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
+              <span class="chip grey">Lead</span>
+              <span style="font-weight:800;color:var(--blue);">→</span>
+              <span class="chip ok">Client</span>
+              <span class="pill-ui"><svg class="ico"><use href="#i-check"/></svg> Nod</span>
+            </div>
+          </div>
+        </div>
+        <div class="cap">Approved? Good. Now we press generate.</div>
+      </div>
+      <div class="vo-line">
+        <div class="label">VO · male</div>
+        <div class="line">“Once we’ve got the AI-compatible assets from the script, we show the lead — oh, I mean client at this point — and get it approved. Approved? Then we press generate.”</div>
+        <div class="dir">“Lead” label morphs to “Client”. APPROVED stamp slam (reuse YAIL stamp language).</div>
+      </div>
+    </article>
+
+    <!-- ========== S12 ========== -->
+    <article class="scene" id="s12">
+      <div class="scene-head">
+        <span class="beat-tag">Scene 12 · Casino / Vending</span>
+        <h2>Hit generate. Wait for the machine.</h2>
+      </div>
+      <div class="board">
+        <div class="stage">
+          <div class="card" style="position:absolute;left:4%;top:8%;width:30%;padding:12px;color:var(--navy);display:flex;gap:10px;align-items:center;">
+            <svg class="fig" style="width:64px;" aria-hidden="true"><use href="#c-kabir"/></svg>
+            <div>
+            <div class="ui-label">Jack hits it</div>
+            <div style="font-size:clamp(22px,2.4vw,32px);font-weight:800;letter-spacing:-0.04em;line-height:0.95;">GENERATE</div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <span style="width:10px;height:10px;border-radius:50%;background:#f5d76e;"></span>
+              <span style="width:10px;height:10px;border-radius:50%;background:var(--blue);"></span>
+              <span style="width:10px;height:10px;border-radius:50%;background:var(--maya);"></span>
+            </div>
+            </div>
+          </div>
+          <div class="card" style="position:absolute;left:36%;top:8%;width:22%;padding:14px;color:var(--navy);">
+            <div class="ui-label">Odds</div>
+            <div style="font-weight:800;">Brief in</div>
+            <div style="font-weight:800;color:var(--blue);margin-top:4px;">Frames out</div>
+          </div>
+          <div class="card" style="position:absolute;left:4%;top:52%;width:30%;padding:12px;color:var(--navy);">
+            <div class="ui-label">Queue</div>
+            <div class="mini-row"><span>Job</span><span class="chip">K-014</span></div>
+            <div class="mini-row" style="margin-top:6px;"><span>Wait</span><span class="chip">Spinning</span></div>
+          </div>
+          <div class="card" style="position:absolute;left:36%;top:42%;width:22%;padding:12px;color:var(--navy);">
+            <div class="ui-label">Tray</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">
+              <i style="height:18px;border-radius:4px;background:var(--sarah);"></i>
+              <i style="height:18px;border-radius:4px;background:var(--sasha);"></i>
+              <i style="height:18px;border-radius:4px;background:var(--max);"></i>
+              <i style="height:18px;border-radius:4px;background:var(--maya);"></i>
+              <i style="height:18px;border-radius:4px;background:var(--blue);"></i>
+              <i style="height:18px;border-radius:4px;background:var(--arjun);"></i>
+            </div>
+          </div>
+          <div class="vending" style="position:absolute;right:4%;top:8%;width:34%;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px;">
+              <div style="height:36px;border-radius:8px;background:var(--blue-soft);"></div>
+              <div style="height:36px;border-radius:8px;background:var(--sarah-soft);"></div>
+              <div style="height:36px;border-radius:8px;background:var(--maya-soft);"></div>
+            </div>
+            <div class="slot" style="height:72px;">REELS SPIN</div>
+            <div class="btn-gen">GENERATE</div>
+            <div style="margin-top:8px;background:var(--bg-muted);border-radius:10px;padding:8px;color:var(--navy);font-size:11px;font-weight:800;text-align:center;">TRAY · pieces drop</div>
+          </div>
+        </div>
+        <div class="cap">Voilà — puzzle pieces drop from the vending machine.</div>
+      </div>
+      <div class="vo-line">
+        <div class="label">VO · male</div>
+        <div class="line">“We press generate… and wait for the vending machine to give us what we want. Casino lights optional. Results: mandatory.”</div>
+        <div class="dir">Big GENERATE button, slot-machine spin, pieces clatter into the tray. Fun SFX, not sleazy.</div>
+      </div>
+    </article>
+
+    <!-- ========== S13 ========== -->
+    <article class="scene" id="s13">
+      <div class="scene-head">
+        <span class="beat-tag">Scene 13 · Post</span>
+        <h2>Experts stitch the puzzle</h2>
+      </div>
+      <div class="board">
+        <div class="stage">
+          <div class="card" style="position:absolute;left:4%;top:8%;right:4%;padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="display:flex;gap:8px;align-items:center;font-weight:800;"><svg class="ico" style="color:var(--blue)"><use href="#i-film"/></svg> YAIL timeline</div>
+              <span class="chip">Post</span>
+            </div>
+            <div style="margin-top:12px;display:grid;gap:8px;">
+              <div style="display:grid;grid-template-columns:52px 1fr;gap:8px;align-items:center;"><span style="font-size:11px;font-weight:800;color:var(--ink-faint);">V1</span><div style="height:22px;border-radius:6px;background:linear-gradient(90deg,var(--sarah) 0 18%,transparent 18% 22%,var(--sasha) 22% 48%,transparent 48% 54%,var(--blue) 54% 100%);"></div></div>
+              <div style="display:grid;grid-template-columns:52px 1fr;gap:8px;align-items:center;"><span style="font-size:11px;font-weight:800;color:var(--ink-faint);">V2</span><div style="height:22px;border-radius:6px;background:linear-gradient(90deg,transparent 0 10%,var(--max) 10% 40%,transparent 40% 60%,var(--maya) 60% 90%,transparent 90%);"></div></div>
+              <div style="display:grid;grid-template-columns:52px 1fr;gap:8px;align-items:center;"><span style="font-size:11px;font-weight:800;color:var(--ink-faint);">A1</span><div style="height:16px;border-radius:6px;background:linear-gradient(90deg,#94a3b8 0 100%);opacity:.7;"></div></div>
+              <div style="display:grid;grid-template-columns:52px 1fr;gap:8px;align-items:center;"><span style="font-size:11px;font-weight:800;color:var(--ink-faint);">MX</span><div style="height:16px;border-radius:6px;background:linear-gradient(90deg,var(--blue) 0 100%);opacity:.45;"></div></div>
+            </div>
+            <div style="margin-top:10px;position:relative;height:8px;"><div style="position:absolute;left:62%;top:-6px;width:2px;height:18px;background:var(--danger);"></div></div>
+            <div style="font-size:12px;font-weight:700;color:var(--ink-soft);">Playhead sweeps · clips snap in</div>
+          </div>
+          <div class="card" style="position:absolute;left:4%;top:58%;width:22%;padding:10px 12px;">
+            <div class="ui-label">Editors</div>
+            <div style="display:flex;gap:8px;align-items:flex-end;">
+              <div style="text-align:center;"><svg class="fig" style="width:28px;margin:0 auto;" aria-hidden="true"><use href="#c-max"/></svg><div style="font-size:11px;font-weight:800;">Max</div></div>
+              <div style="text-align:center;"><svg class="fig" style="width:28px;margin:0 auto;" aria-hidden="true"><use href="#c-sasha"/></svg><div style="font-size:11px;font-weight:800;">Sasha</div></div>
+            </div>
+          </div>
+          <div class="card" style="position:absolute;left:28%;top:60%;width:22%;padding:12px;">
+            <div class="ui-label">Mix</div>
+            <div style="display:flex;gap:6px;"><span class="pill-ui"><svg class="ico"><use href="#i-music"/></svg> Bed</span><span class="pill-ui"><svg class="ico"><use href="#i-wave"/></svg> Hits</span></div>
+          </div>
+          <div class="card" style="position:absolute;left:52%;top:60%;width:22%;padding:12px;">
+            <div class="ui-label">Export</div>
+            <div style="display:flex;gap:6px;"><span class="chip">16:9</span><span class="chip grey">9:16</span></div>
+          </div>
+          <div class="float-card" style="position:absolute;right:4%;top:60%;width:20%;">
+            <div class="kicker">Status</div>
+            <div class="body">Stitching</div>
+            <div class="bar" style="margin-top:8px;"><i style="width:76%"></i></div>
+          </div>
+        </div>
+        <div class="cap">Puzzle pieces → expert team → proper production video.</div>
+      </div>
+      <div class="vo-line">
+        <div class="label">VO · male</div>
+        <div class="line">“Once we get the puzzle pieces, our expert team puts them all together. In other words — post-production.”</div>
+        <div class="dir">Time-lapse of pieces snapping into a timeline. Final playhead sweeps.</div>
+      </div>
+    </article>
+
+    <!-- ========== S14 ========== -->
+    <article class="scene" id="s14">
+      <div class="scene-head">
+        <span class="beat-tag">Scene 14 · The annoying part</span>
+        <h2>Changes. Post-post. (Whisper.)</h2>
+      </div>
+      <div class="board">
+        <div class="stage">
+          <div class="card" style="position:absolute;left:4%;top:8%;width:46%;padding:12px;">
+            <div class="ui-label">Comments</div>
+            <div class="mini-row" style="opacity:.35;text-decoration:line-through;"><span style="display:flex;gap:6px;align-items:center;"><svg class="ico"><use href="#i-chat"/></svg> Make the logo bigger</span></div>
+            <div class="mini-row" style="margin-top:8px;opacity:.45;"><span style="display:flex;gap:6px;align-items:center;"><svg class="ico"><use href="#i-chat"/></svg> Try another cut</span></div>
+            <div class="mini-row" style="margin-top:8px;"><span style="display:flex;gap:6px;align-items:center;"><svg class="ico" style="color:var(--ok)"><use href="#i-check"/></svg> One line tweak</span><span class="chip ok">Done</span></div>
+            <div style="margin-top:10px;font-size:12px;font-weight:700;color:var(--ink-faint);">Bubbles shrink / vacuum away</div>
+          </div>
+          <div class="float-card" style="position:absolute;right:5%;top:8%;width:42%;transform:rotate(-2deg);display:flex;gap:8px;align-items:center;">
+            <svg class="fig" style="width:58px;" aria-hidden="true"><use href="#c-arjun"/></svg>
+            <div style="flex:1;min-width:0;">
+            <div class="kicker">Arjun, winking</div>
+            <div class="body" style="font-style:italic;color:var(--ink-faint);font-size:14px;">but not for us</div>
+            <div class="bar ok" style="margin-top:12px;"><i style="width:18%"></i></div>
+            <div style="margin-top:6px;font-size:12px;font-weight:750;">Change load · minimal</div>
+            <div style="margin-top:10px;"><span class="chip ok">Ship</span></div>
+            </div>
+          </div>
+          <div class="card" style="position:absolute;right:5%;top:48%;width:40%;padding:12px;">
+            <div class="ui-label">Vacuum</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;"><span class="chip grey">Logo bigger</span><span class="chip grey">Recut</span><span class="chip ok">One line</span></div>
+          </div>
+          <div class="card" style="position:absolute;left:4%;top:58%;width:22%;padding:12px;">
+            <div class="ui-label">Versions</div>
+            <div style="display:flex;gap:6px;"><span class="chip grey">v01 notes</span><span class="chip ok">v02 ship</span></div>
+          </div>
+          <div class="card" style="position:absolute;left:28%;top:66%;width:28%;padding:12px;">
+            <div class="ui-label">Before / after</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
+              <div style="height:36px;border-radius:8px;background:var(--bg-muted);display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--ink-faint);">Logo big</div>
+              <div style="height:36px;border-radius:8px;background:var(--blue-soft);display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--navy);">Logo right</div>
+            </div>
+          </div>
+          <div class="card" style="position:absolute;right:5%;top:66%;width:36%;padding:12px;">
+            <div class="ui-label">Change count</div>
+            <div style="display:flex;align-items:flex-end;gap:10px;">
+              <div style="font-weight:800;font-size:28px;letter-spacing:-0.04em;line-height:1;">1</div>
+              <div style="flex:1;">
+                <div class="mini-row"><span>Requested</span><span>3</span></div>
+                <div class="bar ok" style="margin-top:6px;"><i style="width:18%"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cap">Changes… (whisper) but not for us. We’re that good.</div>
+      </div>
+      <div class="vo-line">
+        <div class="label">VO · male</div>
+        <div class="line">“And then comes the most annoying part for any agency — the changes.”</div>
+        <div class="whisper">Whisper: “But not for us.”</div>
+        <div class="line" style="margin-top:4px;">“We’re too good. Minimal changes. Wink.”</div>
+        <div class="dir">Comment bubbles rain, then shrink / get vacuumed. Tiny wink from Arjun or editor character.</div>
+      </div>
+    </article>
+
+    <!-- ========== S15 ========== -->
+    <article class="scene" id="s15">
+      <div class="scene-head">
+        <span class="beat-tag">Scene 15 · Payoff</span>
+        <h2>Happy client. Reach. Cheque.</h2>
+      </div>
+      <div class="board">
+        <div class="stage">
+          <div class="card" style="position:absolute;left:4%;top:8%;width:48%;padding:14px;">
+            <div class="ui-label">Reach</div>
+            <div style="display:flex;align-items:flex-end;gap:8px;height:90px;margin-top:8px;">
+              <i style="flex:1;height:30%;background:var(--blue-soft);border-radius:6px 6px 0 0;"></i>
+              <i style="flex:1;height:48%;background:var(--blue-soft);border-radius:6px 6px 0 0;"></i>
+              <i style="flex:1;height:62%;background:#93a8ff;border-radius:6px 6px 0 0;"></i>
+              <i style="flex:1;height:84%;background:var(--blue);border-radius:6px 6px 0 0;"></i>
+              <i style="flex:1;height:100%;background:var(--navy);border-radius:6px 6px 0 0;"></i>
+            </div>
+            <div class="mini-row" style="margin-top:10px;"><span>Jack</span><span class="chip ok">Shipped</span></div>
+          </div>
+          <div class="card" style="position:absolute;right:4%;top:8%;width:42%;padding:12px 14px;border:2px solid var(--ok);display:flex;gap:10px;align-items:center;">
+            <svg class="fig" style="width:64px;" aria-hidden="true"><use href="#c-maya"/></svg>
+            <div style="flex:1;min-width:0;">
+            <div style="display:flex;gap:8px;align-items:center;font-weight:800;"><svg class="ico" style="color:var(--ok)"><use href="#i-card"/></svg> Maya takes the cheque</div>
+            <div style="margin-top:10px;font-size:12px;color:var(--ink-soft);font-weight:650;">Happy client is nice.</div>
+            <div style="margin-top:4px;font-size:12px;color:var(--ink-soft);font-weight:650;">Cleared payment is the point.</div>
+            <div style="margin-top:14px;background:var(--ok-soft);color:var(--ok);font-weight:800;text-align:center;padding:12px;border-radius:12px;">CLEARED</div>
+            </div>
+          </div>
+          <div class="card" style="position:absolute;right:4%;top:48%;width:40%;padding:12px;">
+            <div class="ui-label">After ship</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;"><span class="chip ok">Happy</span><span class="pill-ui"><svg class="ico"><use href="#i-film"/></svg> In use</span><span class="pill-ui"><svg class="ico"><use href="#i-user"/></svg> Team paid</span></div>
+          </div>
+          <div class="card" style="position:absolute;left:4%;top:58%;width:22%;padding:12px;">
+            <div class="ui-label">Where it ran</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;"><span class="chip">IG 48k</span><span class="chip">Site 12k</span></div>
+          </div>
+          <div class="card" style="position:absolute;left:28%;top:58%;width:24%;padding:12px;">
+            <div class="ui-label">Shares</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+              <span class="pill-ui"><svg class="ico"><use href="#i-ig"/></svg> 860</span>
+              <span class="pill-ui"><svg class="ico"><use href="#i-in"/></svg> 140</span>
+              <span class="pill-ui"><svg class="ico"><use href="#i-mail"/></svg> 36</span>
+            </div>
+          </div>
+          <div class="float-card" style="position:absolute;right:4%;top:66%;width:40%;">
+            <div class="kicker">Payday · the team</div>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+              <span class="pill-ui"><svg class="ico"><use href="#i-user"/></svg> 5 desks</span>
+              <span class="chip ok">Cleared</span>
+              <span class="pill-ui"><svg class="ico"><use href="#i-card"/></svg> Payroll</span>
+            </div>
+          </div>
+        </div>
+        <div class="cap">Happy client. Reach. And yes — the cheque.</div>
+      </div>
+      <div class="vo-line">
+        <div class="label">VO · male</div>
+        <div class="line">“That’s mostly it. The client’s happy. They use the creatives. Get lots of reach. And we’re happy when the client’s happy… jk — we need the cheque to actually be happy. ’Cause, you know… we’ve got a team.”</div>
+        <div class="dir">Reach graph climbs. Cheque slides in with satisfying stamp. Keep it charming, not cynical.</div>
+      </div>
+    </article>
+
+    <!-- ========== S16 ========== -->
+    <article class="scene" id="s16">
+      <div class="scene-head">
+        <span class="beat-tag">Scene 16 · Outro</span>
+        <h2>THE YAIL TEAM</h2>
+      </div>
+      <div class="board">
+        <div class="stage" style="display:flex;align-items:center;justify-content:center;padding:5% 6% 15%;text-align:center;">
+          <div>
+            <div style="color:var(--navy);font-size:clamp(2.8rem,5.6vw,5rem);font-weight:800;letter-spacing:-0.055em;line-height:0.92;">Bring the mess.</div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:22px;color:var(--navy);font-size:clamp(1.35rem,2.4vw,2rem);font-weight:800;letter-spacing:-0.04em;line-height:1;">
+              <span>THE</span>
+              <img src="assets/yail-mark-black.png" alt="YAIL" style="height:1.15em;width:auto;display:block;" />
+              <span>TEAM</span>
+            </div>
+            <div style="margin-top:12px;color:var(--ink-soft);font-size:15px;font-weight:650;">AI is the lens. The studio is the taste.</div>
+          </div>
+        </div>
+        <div class="cap">YourAILens Studios, Bangalore</div>
+      </div>
+      <div class="vo-line">
+        <div class="label">VO · male</div>
+        <div class="line">“We call it — THE YAIL TEAM. YourAILens Studios.”</div>
+        <div class="dir">Hold end card ≥2.5s. Soft music button. Logo settle. End.</div>
+      </div>
+    </article>
+
+    <!-- Cast note -->
+    <section class="section jumbo">
+      <div class="section-head">
+        <p class="eyebrow">Cast for this film</p>
+        <h2>Who’s on screen</h2>
+      </div>
+      <div class="grid-3">
+        <div class="card"><strong>Jack</strong><p style="color:var(--ink-soft);font-size:14px;margin:6px 0 0;">Lead → client. Navy hoodie. Laptop pizza gag.</p></div>
+        <div class="card"><strong>Arjun</strong><p style="color:var(--ink-soft);font-size:14px;margin:6px 0 0;">Taste / agreements / wink on changes.</p></div>
+        <div class="card"><strong>Sarah · Maya · Sasha · Max</strong><p style="color:var(--ink-soft);font-size:14px;margin:6px 0 0;">Cameos in portfolio grid + post desk.</p></div>
+        <div class="card"><strong>Pool jumper</strong><p style="color:var(--ink-soft);font-size:14px;margin:6px 0 0;">Jack, headphones on, dropping into the pre-pro well as the active piece.</p></div>
+        <div class="card"><strong>Vending machine</strong><p style="color:var(--ink-soft);font-size:14px;margin:6px 0 0;">Hero prop for generate beat. Treat as character.</p></div>
+        <div class="card"><strong>VO</strong><p style="color:var(--ink-soft);font-size:14px;margin:6px 0 0;">Warm male. Confident. Self-aware humor. Never snarky at the client.</p></div>
+      </div>
+    </section>
+
+    <footer class="kit-foot">
+      <a href="06-frames.html">← Frames</a>
+      <span>Next step when ready: Hyperframes film from these 16 boards + Kokoro male VO</span>
+    </footer>
+  </main>
+</body>
+</html>
